@@ -6,6 +6,7 @@ import testinfra
 # If need to move towards one test per container, remove
 # scope='module' to default back to scope='function'
 # NB: We've pulled the image beforehand, so the docker-run should be almost instant.
+# NB2: If the docker pull is _NOT_ in the tox.ini, make sure your pull the image if you want to run on scope='function'.
 @pytest.fixture(scope='module')
 def host(request):
     image = "ubuntu:bionic"
@@ -16,5 +17,5 @@ def host(request):
 def test_passwd_present(host):
     assert host.file("/etc/passwd").exists
 
-def test_bash_present2(host):
+def test_bash_present(host):
     assert host.file("/bin/bash").exists
