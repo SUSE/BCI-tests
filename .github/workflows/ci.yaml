@@ -1,0 +1,38 @@
+name: Python package
+
+on:
+  - push
+  - pull_request
+env:
+  TOX_PARALLEL_NO_SPINNER: 1
+
+jobs:
+  gentestmatrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.setmatrix.outputs.matrix }}
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v2
+      # jo is used only to generate matrix using json easily
+      - name: Install necessary software
+        run: sudo apt update && sudo apt install jo tox
+      - id: setmatrix
+        run: |
+          stringified_matrix=$(tox -a | jo -a)
+          echo "::set-output name=matrix::$stringified_matrix"
+  test-containers:
+    runs-on: ubuntu-latest
+    needs: gentestmatrix
+    strategy:
+      matrix:
+        toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
+    steps:
+    - name: checkout source code
+      uses: actions/checkout@v2
+    - name: Install tox and docker
+      run: sudo apt update && sudo apt install tox
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Run tox job
+      run: sudo tox -e ${{ matrix.toxenv }}
