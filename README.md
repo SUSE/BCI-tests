@@ -8,7 +8,6 @@
 4. Add your tests there based on [testinfra](https://testinfra.readthedocs.io/en/latest/modules.html)
 5. Ensure the container data is up to date by updating `matryoshka_tester/data.py`.
 
-## Adding containers in 
 ## Running all tests
 
 tox --parallel
