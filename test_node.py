@@ -1,27 +1,19 @@
 import pytest
-import subprocess
 import testinfra
 
+# Container fixture contains the black magic to run command on all the different kind of nodes
+# per language.
+# If you need to run a test for a single version, create your own fixture
+# You should think of reusing the `container` fixture from yours.
 
-@pytest.fixture(scope="module")
-def host(request):
-    image = (
-        "registry.opensuse.org/home/dancermak/nodejs/containers_node15/node15:latest"
+# The container fixture automatically finds the file from the test, guesses the language, and starts all the necessary containers
+# See also conftest.py
+def test_node_version(container):
+    assert "v{}".format(container.version) in container.connection.check_output(
+        "node -v"
     )
-    subprocess.check_call(["docker", "pull", image])
-    docker_id = (
-        subprocess.check_output(["docker", "run", "-d", "-it", image, "/bin/sh"])
-        .decode()
-        .strip()
-    )
-    yield testinfra.get_host("docker://" + docker_id)
-    subprocess.check_call(["docker", "rm", "-f", docker_id])
-
-
-def test_node_version(host):
-    assert "v15" in host.check_output("node -v")
 
 
 # We don't care about the version, just test that the command seem to work
-def test_npm(host):
-    assert host.run_expect([0], "npm version")
+def test_npm(container):
+    assert container.connection.run_expect([0], "npm version")
