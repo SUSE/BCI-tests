@@ -1,4 +1,4 @@
-name: Python package
+name: CI
 
 on:
   - push
@@ -8,6 +8,7 @@ env:
 
 jobs:
   gentestmatrix:
+    name: Generate test matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.setmatrix.outputs.matrix }}
@@ -22,6 +23,7 @@ jobs:
           stringified_matrix=$(tox -a | jo -a)
           echo "::set-output name=matrix::$stringified_matrix"
   test-containers:
+    name: Test containers
     runs-on: ubuntu-latest
     needs: gentestmatrix
     strategy:
