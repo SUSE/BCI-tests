@@ -32,8 +32,8 @@ jobs:
     steps:
     - name: checkout source code
       uses: actions/checkout@v2
-    - name: Install tox and docker
-      run: sudo apt update && sudo apt install tox
+    - name: Install tox and pack
+      run: sudo add-apt-repository ppa:cncf-buildpacks/pack-cli && sudo apt update && sudo apt install tox pack-cli
     - name: Set up Python
       uses: actions/setup-python@v2
     - name: Run tox job

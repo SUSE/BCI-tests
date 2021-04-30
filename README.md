@@ -1,5 +1,10 @@
 # Container testing
 
+## Requirements
+
+You need the following CLIs installed on your machine:
+docker, tox, pack, git
+
 ## Adding new containers and their tests
 
 1. Find container "type" or "language"
