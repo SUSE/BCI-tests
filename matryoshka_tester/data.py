@@ -7,7 +7,6 @@ containers["node"] = {
     "15": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/node15:latest",
     "14": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/node14:latest",
     "12": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/node12:latest",
-    "10": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/node10:latest",
 }
 containers["openjdk"] = {
     "16": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/opensuse/openjdk:16",
