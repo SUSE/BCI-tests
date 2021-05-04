@@ -15,6 +15,7 @@ def test_maven_present(container):
     assert container.connection.run_expect([0], "mvn --version")
 
 
+# TODO: Update the builder image to use SUSE!
 @pytest.mark.git("https://github.com/paketo-buildpacks/samples")
 def test_pack_java_maven(gitclone):
     cmd = subprocess.run(
