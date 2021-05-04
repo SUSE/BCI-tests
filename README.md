@@ -1,5 +1,11 @@
 # Container testing
 
+## Prerequisites
+
+- Python >= 3.6.1
+- [poetry](https://python-poetry.org) >= 0.12
+- docker or podman
+
 ## Adding new containers and their tests
 
 1. Find container "type" or "language"
@@ -25,12 +31,12 @@ def mytest(container):
 
 ## Running all tests
 
-tox --parallel
+poetry run tox --parallel
 
 ## Running specific tests
 
 ```
-tox -e testname
+poetry run tox -e testname
 ```
 
 `testname` equals to `python` for the test file named `test_python.py`
