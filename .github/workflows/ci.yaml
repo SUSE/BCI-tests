@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: gentestmatrix
     strategy:
+      fail-fast: false
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
     steps:
