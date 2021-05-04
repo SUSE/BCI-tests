@@ -15,18 +15,12 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v2
-      - uses: Gr1N/setup-poetry@v4
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
-        run: sudo apt update && sudo apt install jo
+        run: sudo apt update && sudo apt install jo tox
       - id: setmatrix
         run: |
-          poetry install
-          stringified_matrix=$(poetry run tox -a | jo -a)
+          stringified_matrix=$(tox -a | jo -a)
           echo "::set-output name=matrix::$stringified_matrix"
   test-containers:
     name: Test containers
@@ -39,14 +33,9 @@ jobs:
     steps:
     - name: checkout source code
       uses: actions/checkout@v2
+    - name: Install tox and docker
+      run: sudo apt update && sudo apt install tox
     - name: Set up Python
       uses: actions/setup-python@v2
-    - uses: Gr1N/setup-poetry@v4
-    - uses: actions/cache@v2
-      with:
-        path: ~/.cache/pypoetry/virtualenvs
-        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
     - name: Run tox job
-      run: |
-        poetry install
-        poetry run tox -e ${{ matrix.toxenv }}
+      run: sudo tox -e ${{ matrix.toxenv }}
