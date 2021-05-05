@@ -25,22 +25,22 @@ async def pull_container(url):
 
 
 # CLI
-def list_containers():
+def list_containers() -> None:
     pt = PrettyTable()
     pt.field_names = ["Language", "Version", "URL"]
     pt.align = "l"
-    for language, versionsdict in containers.items():
-        for version in versionsdict:
-            pt.add_row([language, version, versionsdict[version]])
+    for language, versions_list in containers.items():
+        for version in versions_list:
+            pt.add_row([language, version.version, version])
     print(pt)
 
 
 async def fetch_containers(all_containers=False, container_type=""):
     containers_urls = []
-    for language, versionsdict in containers.items():
+    for language, versions_list in containers.items():
         if language == container_type or all_containers:
-            for version in versionsdict:
-                containers_urls.append(versionsdict[version])
+            for version in versions_list:
+                containers_urls.append(version.full_url)
     results = await asyncio.gather(*map(pull_container, containers_urls))
     for result in results:
         print(f"[stdout]\n{result[0].decode().strip()}\n[stderr]\n{result[1].decode().strip()}")

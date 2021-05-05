@@ -73,8 +73,11 @@ def container(request, container_runtime):
 
 
 def pytest_generate_tests(metafunc):
-    # Finds container_type.
-    # If necessary, you can override the detection by setting a variable "container_type" in your module.
+    """Finds container_type.
+
+    If necessary, you can override the detection by setting a variable
+    "container_type" in your module.
+    """
     container_type = getattr(metafunc.module, "container_type", "")
     if container_type == "":
         container_type = (
@@ -88,10 +91,10 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize(
             "container",
             [
-                (ver, containers[container_type][ver])
-                for ver in containers[container_type]
+                (versioned_container.version, versioned_container.full_url)
+                for versioned_container in containers[container_type]
             ],
-            ids=[ver for ver in containers[container_type]],
+            ids=[ver.version for ver in containers[container_type]],
             indirect=True,
         )
 
