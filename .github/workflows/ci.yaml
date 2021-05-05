@@ -3,6 +3,8 @@ name: CI
 on:
   - push
   - pull_request
+  - repository_dispatch
+
 env:
   TOX_PARALLEL_NO_SPINNER: 1
 
