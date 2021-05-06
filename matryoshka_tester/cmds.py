@@ -1,9 +1,9 @@
 import argparse
-import subprocess
 import asyncio
 
 
 from matryoshka_tester.data import containers
+from matryoshka_tester.helpers import get_selected_runtime
 
 
 from prettytable import PrettyTable
@@ -12,8 +12,9 @@ from prettytable import PrettyTable
 # Do real stuff
 async def pull_container(url):
     """Pulls the container given in url with docker CLI"""
+    runtime = get_selected_runtime()
     process = await asyncio.create_subprocess_shell(
-        "docker pull {}".format(url),
+        f"{runtime.runner_binary} pull {url}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
