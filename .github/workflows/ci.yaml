@@ -17,13 +17,35 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v2
+
+      - name: change the location of the docker data dir to cache images
+        run: |
+          mkdir -p ./data-dir
+          cat /etc/docker/daemon.json | jq --arg PWD $(pwd) '. + { "data-root": ($PWD + "/data-dir") }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+      - name: cache docker images
+        uses: actions/cache@v2
+        with:
+          path: ./data-dir/
+          key: ${{ runner.os }}-docker-images
+
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
         run: sudo apt update && sudo apt install jo tox
       - id: setmatrix
         run: |
-          stringified_matrix=$(tox -a |grep -v venv| jo -a)
+          stringified_matrix=$(tox -a | sed '/fetch-all/d; /venv/d' | jo -a)
           echo "::set-output name=matrix::$stringified_matrix"
+
+      - name: fetch all images to cache them
+        run: tox -e fetch-all
+
+      - name: change ownership ot data-dir so that we can cache it
+        run: |
+          USERNAME=$(id -un)
+          GROUPNAME=$(id -gn)
+          sudo chown -R ${USERNAME}:${GROUPNAME} ./data-dir
+
   test-containers:
     name: Test containers
     runs-on: ubuntu-latest
@@ -33,11 +55,29 @@ jobs:
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
     steps:
-    - name: checkout source code
-      uses: actions/checkout@v2
-    - name: Install tox and docker
-      run: sudo apt update && sudo apt install tox
-    - name: Set up Python
-      uses: actions/setup-python@v2
-    - name: Run tox job
-      run: sudo tox -e ${{ matrix.toxenv }}
+      - name: checkout source code
+        uses: actions/checkout@v2
+
+      - name: change the location of the docker data dir to cache images
+        run: |
+          mkdir -p ./data-dir
+          cat /etc/docker/daemon.json | jq --arg PWD $(pwd) '. + { "data-root": ($PWD + "/data-dir") }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+      - name: cache docker images
+        uses: actions/cache@v2
+        with:
+          path: ./data-dir/
+          key: ${{ runner.os }}-docker-images
+
+      - name: Install tox
+        run: sudo apt update && sudo apt install tox
+      - name: Set up Python
+        uses: actions/setup-python@v2
+      - name: Run tox job
+        run: sudo tox -e ${{ matrix.toxenv }}
+
+      - name: change ownership ot data-dir so that we can cache it
+        run: |
+          USERNAME=$(id -un)
+          GROUPNAME=$(id -gn)
+          sudo chown -R ${USERNAME}:${GROUPNAME} ./data-dir
