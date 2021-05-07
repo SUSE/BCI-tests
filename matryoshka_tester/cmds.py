@@ -17,9 +17,7 @@ async def pull_container(url):
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await process.communicate()
-    print(f"[stdout]\n{stdout.decode().strip()}")
-    print(f"[stderr]\n{stderr.decode().strip()}")
+    return await process.communicate()
 
 
 # CLI
@@ -34,10 +32,14 @@ def list_containers():
 
 
 async def fetch_containers(all_containers=False, container_type=""):
+    containers_urls = []
     for language, versionsdict in containers.items():
         if language == container_type or all_containers:
             for version in versionsdict:
-                await asyncio.gather(pull_container(versionsdict[version]))
+                containers_urls.append(versionsdict[version])
+    results = await asyncio.gather(*map(pull_container, containers_urls))
+    for result in results:
+        print(f"[stdout]\n{result[0].decode().strip()}\n[stderr]\n{result[1].decode().strip()}")
 
 
 def fetch_all_containers():
