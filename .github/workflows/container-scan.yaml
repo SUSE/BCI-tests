@@ -1,8 +1,6 @@
 ---
 name: container security scan
 on:
-  push:
-  pull_request:
   schedule:
     - cron: '0 0 * * *'
 
@@ -29,7 +27,6 @@ jobs:
       fail-fast: false
       matrix:
         container_url: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
-
     steps:
       - uses: actions/checkout@v2
       - name: generate Dockerfile
@@ -40,7 +37,6 @@ jobs:
           EOF
       - name: Build a Docker image
         run: docker build -t ${{ matrix.container_url }} .
-
       - name: Run Snyk to check Docker image for vulnerabilities
         continue-on-error: true
         uses: snyk/actions/docker@master
@@ -49,7 +45,6 @@ jobs:
         with:
           image: ${{ matrix.container_url }}
           args: --file=Dockerfile
-
       - name: Upload the snyk result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
         with:
@@ -62,7 +57,6 @@ jobs:
       fail-fast: false
       matrix:
         container_url: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
-
     steps:
       - uses: actions/checkout@v2
       - name: generate Dockerfile
@@ -73,7 +67,6 @@ jobs:
           EOF
       - name: Build a Docker image
         run: docker build -t ${{ matrix.container_url }} .
-
       - uses: anchore/scan-action@v2
         id: scan
         with:
@@ -91,7 +84,6 @@ jobs:
       fail-fast: false
       matrix:
         container_url: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
-
     steps:
       - uses: actions/checkout@v2
       - name: Run Trivy vulnerability scanner
@@ -101,7 +93,6 @@ jobs:
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
-
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
         with:
