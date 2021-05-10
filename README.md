@@ -18,7 +18,7 @@ You can use the convenience tools from conftest:
 * If you are using the "container" fixture, your test will auto generate the right tests for _all_ the versions of your language. This is auto loaded, and doesn't need anything from your side except using the keyword "container"
 * If you want to _skip_ some of those tests, use the decorator named `restrict_to_version`. This decorator accepts a list of strings matching the versions from `data.py`. To use it, add first `from conftest import restrict_to_version` and then wrap your code like this (assuming openjdk here):
 ```Python
-@restrict_to_version(['11])
+@restrict_to_version(['11'])
 def mytest(container):
     pass
 ```
