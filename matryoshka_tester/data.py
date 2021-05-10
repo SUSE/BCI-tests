@@ -1,7 +1,8 @@
 containers = dict()
 containers["go"] = {
-    "1.16": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/golang:1.16",
-    "1.15": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/golang:1.15",
+    "1.16": "registry.opensuse.org/devel/bci/images/bci/golang-devel:16",
+    "1.15": "registry.opensuse.org/devel/bci/images/bci/golang-devel:15",
+    "1.14": "registry.opensuse.org/devel/bci/images/bci/golang-devel:14"
 }
 containers["node"] = {
     "15": "registry.opensuse.org/home/fcrozat/matryoshka/containers_node15/node15:latest",
