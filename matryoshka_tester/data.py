@@ -9,16 +9,16 @@ containers["node"] = {
     "12": "registry.opensuse.org/home/fcrozat/matryoshka/containers_node12/node12:latest",
 }
 containers["openjdk-devel"] = {
-    "16": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk-devel:16",
-    "15": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk-devel:15",
-    "14": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk-devel:14",
-    "11": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk-devel:11",
+    "16": "registry.opensuse.org/devel/bci/images/bci/openjdk-devel:16",
+    "15": "registry.opensuse.org/devel/bci/images/bci/openjdk-devel:15",
+    "14": "registry.opensuse.org/devel/bci/images/bci/openjdk-devel:14",
+    "11": "registry.opensuse.org/devel/bci/images/bci/openjdk-devel:11",
 }
 containers["openjdk"] = {
-    "16": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk:16",
-    "15": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk:15",
-    "14": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk:14",
-    "11": "registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk:11",
+    "16": "registry.opensuse.org/devel/bci/images/bci/openjdk:16",
+    "15": "registry.opensuse.org/devel/bci/images/bci/openjdk:15",
+    "14": "registry.opensuse.org/devel/bci/images/bci/openjdk:14",
+    "11": "registry.opensuse.org/devel/bci/images/bci/openjdk:11",
 }
 containers["python"] = {
     "3.9": "registry.opensuse.org/home/fcrozat/matryoshka/containers_python39/python39:latest",
