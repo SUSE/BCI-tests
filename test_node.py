@@ -92,12 +92,6 @@ def test_npm(container):
                 repository_url="https://github.com/caolan/async",
             ),
             NpmPackageTest(
-                build_command="yarn --frozen-lockfile && yarn test",
-                repository_url="https://github.com/facebook/react.git",
-                repository_tag="v17.0.2",
-                marks=pytest.mark.serial,
-            ),
-            NpmPackageTest(
                 build_command="""yarn install &&
                     npm install --no-save "react@~16" "react-dom@~16" &&
                     yarn run pretest &&
