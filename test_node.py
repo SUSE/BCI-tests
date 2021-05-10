@@ -86,7 +86,7 @@ def test_npm(container):
             NpmPackageTest(
                 build_command="yarn --frozen-lockfile && yarn test",
                 repository_url="https://github.com/facebook/react.git",
-                marks=pytest.mark.skip(reason="too fat to run in parallel"),
+                marks=pytest.mark.serial,
             ),
             NpmPackageTest(
                 build_command="""yarn install &&

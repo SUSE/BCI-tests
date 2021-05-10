@@ -43,6 +43,13 @@ To use it:
 def mytest(container):
     pass
 ```
+* If you want to restrict certain tests from running in parallel, add the
+  `serial` mark to the respective function:
+```python
+@pytest.mark.serial
+def test_my_heavy_installation(container):
+    ...
+```
 
 In the example above, the test function `mytest` will only run for the `openjdk:11` container, instead of all the containers for openjdk.
 
