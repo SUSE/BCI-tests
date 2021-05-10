@@ -101,9 +101,6 @@ def test_npm(container):
             NpmPackageTest(
                 repository_url="https://github.com/jprichardson/node-fs-extra",
                 build_command="npm install && npm run unit",
-                marks=pytest.mark.xfail(
-                    reason="https://github.com/jprichardson/node-fs-extra/issues/898"
-                ),
             ),
         )
     ],
