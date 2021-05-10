@@ -24,6 +24,7 @@ jobs:
         run: |
           stringified_matrix=$(tox -a |grep -v venv| jo -a)
           echo "::set-output name=matrix::$stringified_matrix"
+
   test-containers:
     name: Test containers
     runs-on: ubuntu-latest
@@ -32,12 +33,17 @@ jobs:
       fail-fast: false
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
+        container_runtime:
+          - DOCKER
+          - PODMAN
     steps:
     - name: checkout source code
       uses: actions/checkout@v2
-    - name: Install tox and docker
+    - name: Install tox
       run: sudo apt update && sudo apt install tox
     - name: Set up Python
       uses: actions/setup-python@v2
     - name: Run tox job
       run: sudo tox -e ${{ matrix.toxenv }}
+      env:
+        CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
