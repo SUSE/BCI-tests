@@ -23,7 +23,7 @@ class NpmPackageTest:
     def test_command(self) -> str:
         checkout_cmd_parts = ["git clone"]
         if self.repository_tag:
-            checkout_cmd_parts.append(f"-b {self.repository_tag}")
+            checkout_cmd_parts.append(f"--branch {self.repository_tag}")
         checkout_cmd_parts.append(self.repository_url)
 
         return f"""{' '.join(checkout_cmd_parts)} &&
@@ -38,7 +38,9 @@ class NpmPackageTest:
 
 
 def test_node_version(container):
-    assert f"v{container.version}" in container.connection.check_output("node -v")
+    assert f"v{container.version}" in container.connection.check_output(
+        "node -v"
+    )
 
 
 # We don't care about the version, just test that the command seem to work

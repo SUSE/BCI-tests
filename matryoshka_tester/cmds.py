@@ -40,7 +40,9 @@ async def fetch_containers(all_containers=False, container_type=""):
                 containers_urls.append(versionsdict[version])
     results = await asyncio.gather(*map(pull_container, containers_urls))
     for result in results:
-        print(f"[stdout]\n{result[0].decode().strip()}\n[stderr]\n{result[1].decode().strip()}")
+        print(
+            f"[stdout]\n{result[0].decode().strip()}\n[stderr]\n{result[1].decode().strip()}"
+        )
 
 
 def fetch_all_containers():
