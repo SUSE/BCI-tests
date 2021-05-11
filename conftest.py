@@ -8,7 +8,7 @@ from collections import namedtuple
 from tempfile import TemporaryDirectory
 from shutil import copy
 
-from matryoshka_tester.data import containers
+from matryoshka_tester.parse_data import containers, CONTAINER_REGISTRY
 from matryoshka_tester.helpers import get_selected_runtime, ContainerBuild
 
 ContainerData = namedtuple("Container", ["version", "image", "connection"])
@@ -88,10 +88,22 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize(
             "container",
             [
-                (ver, containers[container_type][ver])
-                for ver in containers[container_type]
+                (
+                    container.version,
+                    "/".join(
+                        [CONTAINER_REGISTRY, container.repo, container.image]
+                    )
+                    + ":"
+                    + container.tag,
+                )
+                for container in containers
+                if container.type == container_type
             ],
-            ids=[ver for ver in containers[container_type]],
+            ids=[
+                container.version
+                for container in containers
+                if container.type == container_type
+            ],
             indirect=True,
         )
 
