@@ -5,22 +5,71 @@ import os
 import functools
 
 from collections import namedtuple
+from tempfile import TemporaryDirectory
+from shutil import copy
+
 from matryoshka_tester.data import containers
+from matryoshka_tester.helpers import get_selected_runtime, ContainerBuild
 
 ContainerData = namedtuple("Container", ["version", "image", "connection"])
 
 
+@pytest.fixture(scope="function")
+def dockerfile_build(request, host):
+    """Fixture that creates a temporary directory, copies the appropriate
+    Dockerfile into it and runs the pre_build_steps from the ContainerBuild
+    instance that must be passed as the request parameter to this fixture.
+    """
+    assert isinstance(
+        request.param, ContainerBuild
+    ), f"got an invalid request parameter {type(request.param)}"
+    cwd = os.getcwd()
+    try:
+        with TemporaryDirectory() as tmp_dir:
+            os.chdir(tmp_dir)
+            copy(
+                os.path.join(cwd, "dockerfiles", request.param.name),
+                os.path.join(tmp_dir, "Dockerfile"),
+            )
+            if request.param.pre_build_steps:
+                host.run_expect([0], request.param.pre_build_steps)
+
+            yield tmp_dir
+
+    finally:
+        os.chdir(cwd)
+
+
 @pytest.fixture(scope="module")
-def container(request):
-    docker_id = (
+def container_runtime():
+    return get_selected_runtime()
+
+
+@pytest.fixture(scope="module")
+def container(request, container_runtime):
+    container_id = (
         subprocess.check_output(
-            ["docker", "run", "-d", "-it", request.param[1], "/bin/sh"]
+            [
+                container_runtime.runner_binary,
+                "run",
+                "-d",
+                "-it",
+                request.param[1],
+                "/bin/sh",
+            ]
         )
         .decode()
         .strip()
     )
-    yield ContainerData(*request.param, testinfra.get_host("docker://" + docker_id))
-    subprocess.check_call(["docker", "rm", "-f", docker_id])
+    yield ContainerData(
+        *request.param,
+        testinfra.get_host(
+            f"{container_runtime.runner_binary}://{container_id}"
+        ),
+    )
+    subprocess.check_call(
+        [container_runtime.runner_binary, "rm", "-f", container_id]
+    )
 
 
 def pytest_generate_tests(metafunc):
