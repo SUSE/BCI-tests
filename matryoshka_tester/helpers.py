@@ -49,20 +49,19 @@ class OciRuntimeBase(ABC, ToParamMixin):
 
 LOCALHOST = testinfra.host.get_host("local://")
 
-_DOCKER_WORKS = LOCALHOST.run("docker ps").succeeded
-_PODMAN_WORKS = (
-    LOCALHOST.run("podman ps").succeeded and LOCALHOST.run("buildah").succeeded
-)
-
 
 class PodmanRuntime(OciRuntimeBase):
-    def __init__(self, *args, **kwargs) -> None:
+
+    _runtime_functional = (
+        LOCALHOST.run("podman ps").succeeded
+        and LOCALHOST.run("buildah").succeeded
+    )
+
+    def __init__(self) -> None:
         super().__init__(
-            *args,
             build_command="buildah bud",
             runner_binary="podman",
-            _runtime_functional=_PODMAN_WORKS,
-            **kwargs,
+            _runtime_functional=self._runtime_functional,
         )
 
     def get_image_id_from_stdout(self, stdout: str) -> str:
@@ -73,13 +72,14 @@ class PodmanRuntime(OciRuntimeBase):
 
 
 class DockerRuntime(OciRuntimeBase):
-    def __init__(self, *args, **kwargs) -> None:
+
+    _runtime_functional = LOCALHOST.run("docker ps").succeeded
+
+    def __init__(self) -> None:
         super().__init__(
-            *args,
             build_command="docker build .",
             runner_binary="docker",
-            _runtime_functional=_DOCKER_WORKS,
-            **kwargs,
+            _runtime_functional=self._runtime_functional,
         )
 
     def get_image_id_from_stdout(self, stdout: str) -> str:
