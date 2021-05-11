@@ -1,0 +1,121 @@
+[
+    {
+        "type": "openjdk-devel",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk-devel",
+        "tag": "16",
+        "version": "16"
+    },
+    {
+        "type": "openjdk-devel",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk-devel",
+        "tag": "15",
+        "version": "15"
+    },
+    {
+        "type": "openjdk-devel",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk-devel",
+        "tag": "14",
+        "version": "14"
+    },
+    {
+        "type": "openjdk-devel",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk-devel",
+        "tag": "11",
+        "version": "11"
+    },
+    {
+        "type": "openjdk",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk",
+        "tag": "16",
+        "version": "16"
+    },
+    {
+        "type": "openjdk",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk",
+        "tag": "15",
+        "version": "15"
+    },
+    {
+        "type": "openjdk",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk",
+        "tag": "14",
+        "version": "14"
+    },
+    {
+        "type": "openjdk",
+        "repo": "devel/bci/images",
+        "image": "bci/openjdk",
+        "tag": "11",
+        "version": "11"
+    },
+    {
+        "type": "python",
+        "repo": "home/fcrozat/matryoshka/containers_python39",
+        "image": "python39",
+        "tag": "latest",
+        "version": "3.9"
+    },
+    {
+        "type": "python",
+        "repo": "home/fcrozat/matryoshka/containers_python38",
+        "image": "python38",
+        "tag": "latest",
+        "version": "3.8"
+    },
+    {
+        "type": "python",
+        "repo": "home/fcrozat/matryoshka/containers_python36",
+        "image": "python36",
+        "tag": "latest",
+        "version": "3.6"
+    },
+    {
+        "type": "node",
+        "repo": "home/fcrozat/matryoshka/containers_node15",
+        "image": "node15",
+        "tag": "latest",
+        "version": "15"
+    },
+    {
+        "type": "node",
+        "repo": "home/fcrozat/matryoshka/containers_node14",
+        "image": "node14",
+        "tag": "latest",
+        "version": "14"
+    },
+    {
+        "type": "node",
+        "repo": "home/fcrozat/matryoshka/containers_node11",
+        "image": "node11",
+        "tag": "latest",
+        "version": "11"
+    },
+    {
+        "type": "go",
+        "repo": "devel/bci/images",
+        "image": "bci/golang",
+        "tag": "1.16",
+        "version": "1.16"
+    },
+    {
+        "type": "go",
+        "repo": "devel/bci/images",
+        "image": "bci/golang",
+        "tag": "1.15",
+        "version": "1.15"
+    },
+    {
+        "type": "go",
+        "repo": "devel/bci/images",
+        "image": "bci/golang",
+        "tag": "1.14",
+        "version": "1.14"
+    }
+]
