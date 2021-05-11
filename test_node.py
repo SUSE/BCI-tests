@@ -23,7 +23,7 @@ class NpmPackageTest:
     def test_command(self) -> str:
         checkout_cmd_parts = ["git clone"]
         if self.repository_tag:
-            checkout_cmd_parts.append(f"-b {self.repository_tag}")
+            checkout_cmd_parts.append(f"--branch {self.repository_tag}")
         checkout_cmd_parts.append(self.repository_url)
 
         return f"""{' '.join(checkout_cmd_parts)} &&
