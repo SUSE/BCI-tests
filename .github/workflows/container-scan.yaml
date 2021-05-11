@@ -3,6 +3,7 @@ name: container security scan
 on:
   schedule:
     - cron: '0 0 * * *'
+  repository_dispatch:
 
 jobs:
   gentestmatrix:
