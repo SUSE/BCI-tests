@@ -51,8 +51,7 @@ LOCALHOST = testinfra.host.get_host("local://")
 
 _DOCKER_WORKS = LOCALHOST.run("docker ps").succeeded
 _PODMAN_WORKS = (
-    LOCALHOST.run("podman ps").succeeded
-    and LOCALHOST.run("buildah").succeeded
+    LOCALHOST.run("podman ps").succeeded and LOCALHOST.run("buildah").succeeded
 )
 
 
@@ -102,16 +101,15 @@ def get_selected_runtime() -> OciRuntimeBase:
 
     If neither docker nor podman are available, then a ValueError is raised.
     """
-    podman_exists = LOCALHOST.exists("podman") and LOCALHOST.exists(
-        "buildah"
-    )
+    podman_exists = LOCALHOST.exists("podman") and LOCALHOST.exists("buildah")
     docker_exists = LOCALHOST.exists("docker")
 
     if podman_exists ^ docker_exists:
         return PodmanRuntime() if podman_exists else DockerRuntime()
     elif podman_exists and docker_exists:
         return (
-            DockerRuntime() if getenv("CONTAINER_RUNTIME") == "docker"
+            DockerRuntime()
+            if getenv("CONTAINER_RUNTIME") == "docker"
             else PodmanRuntime()
         )
 
@@ -130,6 +128,7 @@ class ContainerBuild(ToParamMixin):
 
     TODO: post_build_steps are not run at the moment.
     """
+
     name: str = None
     pre_build_steps: Optional[str] = None
     post_build_steps: Optional[str] = None
