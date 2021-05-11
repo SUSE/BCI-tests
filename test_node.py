@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from os.path import basename
 
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 
@@ -10,6 +10,9 @@ import pytest
 class NpmPackageTest:
     build_command: str = ""
     repository_url: str = ""
+    #: an optional tag at which the repository should be checked out instead of
+    #: using the default branch
+    repository_tag: Optional[str] = None
     marks: Any = None
 
     @property
@@ -18,7 +21,12 @@ class NpmPackageTest:
 
     @property
     def test_command(self) -> str:
-        return f"""git clone {self.repository_url} &&
+        checkout_cmd_parts = ["git clone"]
+        if self.repository_tag:
+            checkout_cmd_parts.append(f"-b {self.repository_tag}")
+        checkout_cmd_parts.append(self.repository_url)
+
+        return f"""{' '.join(checkout_cmd_parts)} &&
             cd {self.repo_name} &&
             {self.build_command}"""
 
@@ -84,11 +92,6 @@ def test_npm(container):
                 repository_url="https://github.com/caolan/async",
             ),
             NpmPackageTest(
-                build_command="yarn --frozen-lockfile && yarn test",
-                repository_url="https://github.com/facebook/react.git",
-                marks=pytest.mark.skip(reason="too fat to run in parallel"),
-            ),
-            NpmPackageTest(
                 build_command="""yarn install &&
                     npm install --no-save "react@~16" "react-dom@~16" &&
                     yarn run pretest &&
@@ -101,9 +104,6 @@ def test_npm(container):
             NpmPackageTest(
                 repository_url="https://github.com/jprichardson/node-fs-extra",
                 build_command="npm install && npm run unit",
-                marks=pytest.mark.xfail(
-                    reason="https://github.com/jprichardson/node-fs-extra/issues/898"
-                ),
             ),
         )
     ],
