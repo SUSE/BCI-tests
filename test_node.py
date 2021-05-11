@@ -1,24 +1,18 @@
 from dataclasses import dataclass
 from os.path import basename
 
-from typing import Any
+from typing import Any, Optional
 
 import pytest
-
-
-from conftest import restrict_to_version
-
-
-# Container fixture contains the black magic to run command on all the different kind of nodes
-# per language.
-# If you need to run a test for a single version, create your own fixture
-# You should think of reusing the `container` fixture from yours.
 
 
 @dataclass(frozen=True)
 class NpmPackageTest:
     build_command: str = ""
     repository_url: str = ""
+    #: an optional tag at which the repository should be checked out instead of
+    #: using the default branch
+    repository_tag: Optional[str] = None
     marks: Any = None
 
     @property
@@ -27,10 +21,14 @@ class NpmPackageTest:
 
     @property
     def test_command(self) -> str:
-        return f"""git clone {self.repository_url} &&
-cd {self.repo_name} &&
-{self.build_command}
-"""
+        checkout_cmd_parts = ["git clone"]
+        if self.repository_tag:
+            checkout_cmd_parts.append(f"--branch {self.repository_tag}")
+        checkout_cmd_parts.append(self.repository_url)
+
+        return f"""{' '.join(checkout_cmd_parts)} &&
+            cd {self.repo_name} &&
+            {self.build_command}"""
 
     def __str__(self) -> str:
         return self.repo_name
@@ -39,8 +37,6 @@ cd {self.repo_name} &&
         return pytest.param(self, id=self.__str__(), marks=self.marks or ())
 
 
-# The container fixture automatically finds the file from the test, guesses the language, and starts all the necessary containers
-# See also conftest.py
 def test_node_version(container):
     assert f"v{container.version}" in container.connection.check_output(
         "node -v"
@@ -72,24 +68,25 @@ def test_npm(container):
             ),
             NpmPackageTest(
                 repository_url="https://github.com/visionmedia/debug.git",
-                build_command="""npm install &&
-                npm run lint &&
-                npm run test:node
-""",
+                build_command="""
+                    npm install &&
+                    npm run lint &&
+                    npm run test:node
+                    """,
             ),
             NpmPackageTest(
                 repository_url="https://github.com/expressjs/express.git",
                 build_command="""npm config set shrinkwrap false &&
-                npm rm --silent --save-dev connect-redis &&
-                npm run test-ci &&
-                npm run lint
-""",
+                    npm rm --silent --save-dev connect-redis &&
+                    npm run test-ci &&
+                    npm run lint
+                    """,
             ),
             NpmPackageTest(
                 build_command="""npm install -g grunt-cli &&
-                npm install &&
-                grunt test
-""",
+                    npm install &&
+                    grunt test
+                    """,
                 repository_url="https://github.com/moment/moment",
             ),
             NpmPackageTest(
@@ -97,26 +94,18 @@ def test_npm(container):
                 repository_url="https://github.com/caolan/async",
             ),
             NpmPackageTest(
-                build_command="yarn --frozen-lockfile && yarn test",
-                repository_url="https://github.com/facebook/react.git",
-                marks=pytest.mark.skip(reason="too fat to run in parallel")
-            ),
-            NpmPackageTest(
                 build_command="""yarn install &&
-                npm install --no-save "react@~16" "react-dom@~16" &&
-                yarn run pretest &&
-                yarn run tests-only &&
-                yarn run build
-""",
+                    npm install --no-save "react@~16" "react-dom@~16" &&
+                    yarn run pretest &&
+                    yarn run tests-only &&
+                    yarn run build
+                    """,
                 repository_url="https://github.com/facebook/prop-types",
                 marks=pytest.mark.skip(reason="Broken for some reason"),
             ),
             NpmPackageTest(
                 repository_url="https://github.com/jprichardson/node-fs-extra",
                 build_command="npm install && npm run unit",
-                marks=pytest.mark.xfail(
-                    reason="https://github.com/jprichardson/node-fs-extra/issues/898"
-                ),
             ),
         )
     ],

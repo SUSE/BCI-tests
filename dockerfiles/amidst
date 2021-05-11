@@ -1,0 +1,9 @@
+FROM registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk-devel:16 as builder
+WORKDIR /amidst
+COPY ./amidst .
+RUN mvn package -DskipTests=True
+
+FROM registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk:16
+WORKDIR /amidst/
+COPY --from=builder /amidst/target .
+CMD ["java", "-jar", "amidst-v4-6.jar"]
