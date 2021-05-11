@@ -133,7 +133,7 @@ class ContainerBuild(ToParamMixin):
     TODO: post_build_steps are not run at the moment.
     """
 
-    name: str = None
+    name: str = ""
     pre_build_steps: Optional[str] = None
     post_build_steps: Optional[str] = None
 
