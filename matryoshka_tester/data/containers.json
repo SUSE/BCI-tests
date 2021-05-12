@@ -1,5 +1,11 @@
 [
     {
+        "type": "base",
+        "repo": "devel/bci/images",
+        "image": "bci/base",
+        "tag": "latest"
+    },
+    {
         "type": "openjdk-devel",
         "repo": "devel/bci/images",
         "image": "bci/openjdk-devel",
