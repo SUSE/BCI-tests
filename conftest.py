@@ -11,7 +11,7 @@ from matryoshka_tester.helpers import (
     get_selected_runtime,
     GitRepositoryBuild,
 )
-
+from matryoshka_tester.fips import host_fips_enabled, host_fips_supported
 
 ContainerData = namedtuple("Container", ["version", "image", "connection"])
 
@@ -136,3 +136,11 @@ def restrict_to_version(versions):
         return wrapper
 
     return inner
+
+
+with_fips = pytest.mark.skipif(
+    not host_fips_enabled(), reason="host not running in FIPS 140 mode"
+)
+without_fips = pytest.mark.skipif(
+    host_fips_enabled(), reason="host running in FIPS 140 mode"
+)
