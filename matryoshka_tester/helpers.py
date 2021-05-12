@@ -92,10 +92,6 @@ class DockerRuntime(OciRuntimeBase):
         return last_line.split()[-1]
 
 
-DOCKER_RUNTIME = DockerRuntime()
-PODMAN_RUNTIME = PodmanRuntime()
-
-
 def get_selected_runtime() -> OciRuntimeBase:
     """Returns the container runtime that the user selected.
 
@@ -109,12 +105,12 @@ def get_selected_runtime() -> OciRuntimeBase:
     docker_exists = LOCALHOST.exists("docker")
 
     if podman_exists ^ docker_exists:
-        return PODMAN_RUNTIME if podman_exists else DOCKER_RUNTIME
+        return PodmanRuntime() if podman_exists else DockerRuntime()
     elif podman_exists and docker_exists:
         return (
-            DOCKER_RUNTIME
+            DockerRuntime()
             if getenv("CONTAINER_RUNTIME") == "docker"
-            else PODMAN_RUNTIME
+            else PodmanRuntime()
         )
 
     raise ValueError("No suitable container runtime is present on the host")
