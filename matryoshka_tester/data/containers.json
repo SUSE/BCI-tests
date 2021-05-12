@@ -92,10 +92,10 @@
     },
     {
         "type": "node",
-        "repo": "home/fcrozat/matryoshka/containers_node11",
-        "image": "node11",
+        "repo": "home/fcrozat/matryoshka/containers_node12",
+        "image": "node12",
         "tag": "latest",
-        "version": "11"
+        "version": "12"
     },
     {
         "type": "go",
