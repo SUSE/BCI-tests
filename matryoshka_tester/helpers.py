@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from os import getenv
+from os import getenv, path
 from typing import Any, Optional
 import pytest
 
@@ -117,25 +117,52 @@ def get_selected_runtime() -> OciRuntimeBase:
 
 
 @dataclass(frozen=True)
-class ContainerBuild(ToParamMixin):
-    """Test information storage for running docker builds from a Dockerfile in
-    the dockerfiles/ subfolder. This fixture is to be used in conjunction with
-    the dockerfile_build fixture.
-
-    Each build corresponds to a file with the filename from the `name` field,
-    that is copied by the `dockerfile_build` into a temporary working directory
-    as `Dockerfile`. Afterwards, the pre_build_steps are run.
-
-    TODO: post_build_steps are not run at the moment.
+class GitRepositoryBuild(ToParamMixin):
+    """Test information storage for running builds using an external git
+    repository. It is a required parameter for the `container_git_clone` and
+    `host_git_clone` fixtures.
     """
 
-    name: str = ""
-    pre_build_steps: Optional[str] = None
-    post_build_steps: Optional[str] = None
+    #: url of the git repository, can end with .git
+    repository_url: str = ""
+    #: an optional tag at which the repository should be checked out instead of
+    #: using the default branch
+    repository_tag: Optional[str] = None
 
-    def __str__(self) -> str:
-        return self.name
+    #: The command to run a "build" of the git repository inside a working
+    #: copy.
+    #: It can be left empty on purpose.
+    build_command: str = ""
 
     def __post_init__(self) -> None:
-        if not self.name:
-            raise ValueError("A ContainerBuild must have a name")
+        if not self.repository_url:
+            raise ValueError("A repository url must be provided")
+
+    def __str__(self) -> str:
+        return self.repo_name
+
+    @property
+    def repo_name(self) -> str:
+        """Name of the directory to which the repository will be checked out"""
+        return path.basename(self.repository_url.replace(".git", ""))
+
+    @property
+    def clone_command(self) -> str:
+        """Command to clone the repository at the appropriate tag"""
+        clone_cmd_parts = ["git clone"]
+        if self.repository_tag:
+            clone_cmd_parts.append(f"--branch {self.repository_tag}")
+        clone_cmd_parts.append(self.repository_url)
+
+        return " ".join(clone_cmd_parts)
+
+    @property
+    def test_command(self) -> str:
+        """The full test command, including build_command and a cd into the
+        correct folder.
+        """
+        cd_cmd = f"cd {self.repo_name}"
+        if self.build_command:
+            return f"""{cd_cmd} &&
+                {self.build_command}"""
+        return cd_cmd

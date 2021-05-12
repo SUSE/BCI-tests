@@ -1,47 +1,50 @@
+from os import path
+from shutil import copy
+
 import pytest
 
-from matryoshka_tester.helpers import ContainerBuild
+from matryoshka_tester.helpers import GitRepositoryBuild
 
 
 @pytest.mark.parametrize(
-    "dockerfile_build",
+    "host_git_clone",
     (
         build.to_pytest_param()
         for build in (
-            ContainerBuild(
-                name="amidst",
-                pre_build_steps=(
-                    "git clone -b v4.6 "
-                    "https://github.com/toolbox4minecraft/amidst"
-                ),
+            GitRepositoryBuild(
+                repository_url="https://github.com/toolbox4minecraft/amidst",
+                repository_tag="v4.6",
             ),
-            ContainerBuild(
-                name="maven",
-                pre_build_steps=(
-                    "git clone -b maven-3.8.1 https://github.com/apache/maven"
-                ),
+            GitRepositoryBuild(
+                repository_url="https://github.com/apache/maven",
+                repository_tag="maven-3.8.1",
                 marks=pytest.mark.xfail(
                     reason="environment variables are not set correctly"
                 ),
             ),
-            ContainerBuild(
-                name="pdftk",
-                pre_build_steps=(
-                    "git clone -b v3.2.2 "
-                    "https://gitlab.com/pdftk-java/pdftk.git"
-                ),
+            GitRepositoryBuild(
+                repository_tag="v3.2.2",
+                repository_url="https://gitlab.com/pdftk-java/pdftk.git",
             ),
-            ContainerBuild(
-                name="k3sup",
-                pre_build_steps=(
-                    "git clone -b 0.10.2 https://github.com/alexellis/k3sup"
-                ),
+            GitRepositoryBuild(
+                repository_tag="0.10.2",
+                repository_url="https://github.com/alexellis/k3sup",
             ),
         )
     ),
-    indirect=["dockerfile_build"],
+    indirect=["host_git_clone"],
 )
-def test_dockerfile_build(host, container_runtime, dockerfile_build):
+def test_dockerfile_build(host, container_runtime, host_git_clone):
+    tmp_path, build = host_git_clone
+    copy(
+        path.join(
+            path.dirname(__file__),
+            "dockerfiles",
+            build.repo_name,
+        ),
+        path.join(tmp_path, "Dockerfile"),
+    )
+
     cmd = host.run_expect([0], container_runtime.build_command)
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
