@@ -1,12 +1,28 @@
 import json
 import os
-from types import SimpleNamespace
+
+DEFAULT_REGISTRY = "registry.opensuse.org"
+
+
+class Container:
+    def __init__(self, **kwargs):
+        # TODO (maybe?) add type validation?
+        self.type = kwargs["type"]
+        self.repo = kwargs["repo"]
+        self.image = kwargs["image"]
+        self.tag = kwargs["tag"]
+        self.version = kwargs.get("version", kwargs["tag"])
+        self.name = kwargs.get("name", f"{self.type}-{self.version}")
+        self.registry = kwargs.get("registry", DEFAULT_REGISTRY)
+        self.url = kwargs.get(
+            "url", f"{self.registry}/{self.repo}/{self.image}:{self.tag}"
+        )
+
+    def __repr__(self):
+        return f"Container: {self.name} URL: {self.url}"
+
 
 with open(
     os.path.join(os.path.dirname(__file__), "data", "containers.json"), "r"
 ) as dataf:
-    # Might need another decoder to have convenience functions
-    containers = json.load(dataf, object_hook=lambda d: SimpleNamespace(**d))
-
-# TODO: With another decoder, make sure that if someone gives registry, it's using it, else it's using the default one from CONTAINER_REGISTRY
-CONTAINER_REGISTRY = "registry.opensuse.org"
+    containers = json.load(dataf, object_hook=lambda d: Container(**d))
