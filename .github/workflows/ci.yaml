@@ -9,6 +9,17 @@ env:
   TOX_PARALLEL_NO_SPINNER: 1
 
 jobs:
+  format:
+    name: Ensure code is black formatted
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v2
+      - name: Install necessary software
+        run: sudo apt update && sudo apt install jo tox
+      - name: Test formatting with black
+        run: tox -e format -- --check
+
   gentestmatrix:
     name: Generate test matrix
     runs-on: ubuntu-latest
@@ -22,7 +33,7 @@ jobs:
         run: sudo apt update && sudo apt install jo tox
       - id: setmatrix
         run: |
-          stringified_matrix=$(tox -a |grep -v venv| jo -a)
+          stringified_matrix=$(tox -a |grep -v -e venv -e format| jo -a)
           echo "::set-output name=matrix::$stringified_matrix"
 
   test-containers:
