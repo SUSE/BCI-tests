@@ -1,9 +1,23 @@
-from matryoshka_tester.fips import NONFIPS_DIGESTS, FIPS_DIGESTS, ALL_DIGESTS
-from conftest import with_fips, without_fips
+import pytest
+from matryoshka_tester.fips import (
+    host_fips_enabled,
+    host_fips_supported,
+    NONFIPS_DIGESTS,
+    FIPS_DIGESTS,
+    ALL_DIGESTS,
+)
 
 
 def test_passwd_present(container):
-    assert container.file("/etc/passwd").exists
+    assert container.connection.file("/etc/passwd").exists
+
+
+with_fips = pytest.mark.skipif(
+    not host_fips_enabled(), reason="host not running in FIPS 140 mode"
+)
+without_fips = pytest.mark.skipif(
+    host_fips_enabled(), reason="host running in FIPS 140 mode"
+)
 
 
 @with_fips

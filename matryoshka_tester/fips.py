@@ -32,8 +32,6 @@ ALL_DIGESTS = NONFIPS_DIGESTS + FIPS_DIGESTS
 
 
 def host_fips_supported():
-    import os.path
-
     return os.path.exists("/proc/sys/crypto/fips_enabled")
 
 
