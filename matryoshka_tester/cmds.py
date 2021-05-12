@@ -2,7 +2,7 @@ import argparse
 import asyncio
 
 
-from matryoshka_tester.parse_data import containers, CONTAINER_REGISTRY
+from matryoshka_tester.parse_data import containers
 from matryoshka_tester.helpers import get_selected_runtime
 
 
@@ -24,17 +24,16 @@ async def pull_container(url):
 # CLI
 def list_containers():
     pt = PrettyTable()
-    pt.field_names = ["Language", "Version", "URL"]
+    pt.field_names = ["Name", "Language", "Version", "URL"]
     pt.align = "l"
     for container in containers:
         # TODO: Make url easier
         pt.add_row(
             [
+                container.name,
                 container.type,
                 container.version,
-                "/".join([CONTAINER_REGISTRY, container.repo, container.image])
-                + ":"
-                + container.tag,
+                container.url,
             ]
         )
     print(pt)
@@ -43,9 +42,7 @@ def list_containers():
 async def fetch_containers(all_containers=False, container_type=""):
     # TODO: Change json decoder to have a container type, for which we can have a method to produce the url.
     containers_urls = [
-        "/".join([CONTAINER_REGISTRY, container.repo, container.image])
-        + ":"
-        + container.tag
+        container.url
         for container in containers
         if container.type == container_type or all_containers
     ]
