@@ -47,7 +47,6 @@ jobs:
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
         container_runtime:
-          - DOCKER
           - PODMAN
     steps:
     - name: checkout source code
