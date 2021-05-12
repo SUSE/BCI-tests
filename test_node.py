@@ -90,10 +90,6 @@ def test_npm(container):
                 repository_url="https://github.com/moment/moment",
             ),
             NpmPackageTest(
-                build_command="npm ci && npm test",
-                repository_url="https://github.com/caolan/async",
-            ),
-            NpmPackageTest(
                 build_command="""yarn install &&
                     npm install --no-save "react@~16" "react-dom@~16" &&
                     yarn run pretest &&
