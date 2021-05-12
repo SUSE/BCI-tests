@@ -7,11 +7,12 @@ from matryoshka_tester.fips import (
     ALL_DIGESTS,
 )
 
-
+# Generic tests
 def test_passwd_present(container):
     assert container.connection.file("/etc/passwd").exists
 
 
+# FIPS tests
 with_fips = pytest.mark.skipif(
     not host_fips_enabled(), reason="host not running in FIPS 140 mode"
 )

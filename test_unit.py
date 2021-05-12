@@ -3,6 +3,7 @@ import tempfile
 import os
 
 from matryoshka_tester.parse_data import build_containerlist
+from matryoshka_tester.fips import host_fips_enabled, host_fips_supported
 
 
 def test_default_containerlist():
@@ -17,3 +18,21 @@ def test_buildcontainerlist(tmp_path):
         fw.write("{}")
     with pytest.raises(TypeError):
         build_containerlist(tmpfile)
+
+
+def test_host_fips_supported(tmp_path):
+    fipsfile = tmp_path / "fips"
+    fipsfile.write_text("")
+    assert host_fips_supported(f"{fipsfile}")
+
+
+def test_host_fips_enabled(tmp_path):
+    fipsfile = tmp_path / "fips"
+    fipsfile.write_text("1")
+    assert host_fips_enabled(f"{fipsfile}")
+
+
+def test_host_fips_disabled(tmp_path):
+    fipsfile = tmp_path / "fips"
+    fipsfile.write_text("")
+    assert not host_fips_enabled(f"{fipsfile}")
