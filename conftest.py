@@ -45,6 +45,12 @@ def container_runtime():
     return get_selected_runtime()
 
 
+# All the tests using this fixture in a single testfile will use single container,
+# unless the parallelization effort forces them to create another one.
+# If we need to move towards one test per container, remove
+# scope='module' to default back to scope='function'
+# NB: We've pulled the image beforehand, so the docker-run should be almost instant, and it shouldn't be a problem
+# to switch scope. If the docker pull is _NOT_ in the tox.ini, make sure your pull the image if you want to run on scope='function'.
 @pytest.fixture(scope="module")
 def container(request, container_runtime):
     container_id = (

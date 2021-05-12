@@ -4,6 +4,9 @@ from dataclasses import dataclass
 
 
 DEFAULT_REGISTRY = "registry.opensuse.org"
+DEFAULT_CONTAINERS = os.path.join(
+    os.path.dirname(__file__), "data", "containers.json"
+)
 
 
 @dataclass
@@ -26,7 +29,9 @@ class Container:
             self.url = f"{self.registry}/{self.repo}/{self.image}:{self.tag}"
 
 
-with open(
-    os.path.join(os.path.dirname(__file__), "data", "containers.json"), "r"
-) as dataf:
-    containers = json.load(dataf, object_hook=lambda d: Container(**d))
+def build_containerlist(filename: str = DEFAULT_CONTAINERS):
+    with open(filename, "r") as dataf:
+        return json.load(dataf, object_hook=lambda d: Container(**d))
+
+
+containers = build_containerlist()
