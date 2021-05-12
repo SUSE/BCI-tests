@@ -1,25 +1,29 @@
 import json
 import os
+from dataclasses import dataclass
+
 
 DEFAULT_REGISTRY = "registry.opensuse.org"
 
 
+@dataclass
 class Container:
-    def __init__(self, **kwargs):
-        # TODO (maybe?) add type validation?
-        self.type = kwargs["type"]
-        self.repo = kwargs["repo"]
-        self.image = kwargs["image"]
-        self.tag = kwargs["tag"]
-        self.version = kwargs.get("version", kwargs["tag"])
-        self.name = kwargs.get("name", f"{self.type}-{self.version}")
-        self.registry = kwargs.get("registry", DEFAULT_REGISTRY)
-        self.url = kwargs.get(
-            "url", f"{self.registry}/{self.repo}/{self.image}:{self.tag}"
-        )
+    type: str
+    repo: str
+    image: str
+    tag: str
+    version: str = ""
+    name: str = ""
+    registry: str = DEFAULT_REGISTRY
+    url: str = ""
 
-    def __repr__(self):
-        return f"Container: {self.name} URL: {self.url}"
+    def __post_init__(self):
+        if not self.version:
+            self.version = self.tag
+        if not self.name:
+            self.name = f"{self.type}-{self.version}"
+        if not self.url:
+            self.url = f"{self.registry}/{self.repo}/{self.image}:{self.tag}"
 
 
 with open(
