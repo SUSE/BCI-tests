@@ -39,6 +39,9 @@ def test_npm(container):
                     npm run lint &&
                     npm run test:node
                     """,
+                marks=pytest.mark.xfail(
+                    reason="Unexpected use of file extension 'js' for './browser.js' when building src/index.js"
+                ),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/expressjs/express.git",
