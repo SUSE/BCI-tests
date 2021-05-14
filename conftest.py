@@ -5,37 +5,47 @@ import os
 import functools
 
 from collections import namedtuple
-from tempfile import TemporaryDirectory
-from shutil import copy
 
 from matryoshka_tester.parse_data import containers
-from matryoshka_tester.helpers import get_selected_runtime, ContainerBuild
+from matryoshka_tester.helpers import (
+    get_selected_runtime,
+    GitRepositoryBuild,
+)
+
 
 ContainerData = namedtuple("Container", ["version", "image", "connection"])
 
 
 @pytest.fixture(scope="function")
-def dockerfile_build(request, host):
-    """Fixture that creates a temporary directory, copies the appropriate
-    Dockerfile into it and runs the pre_build_steps from the ContainerBuild
-    instance that must be passed as the request parameter to this fixture.
+def container_git_clone(request, container):
+    """This fixture clones the `GitRepositoryBuild` passed as an indirect
+    parameter to it into the currently selected container.
+
+    It returns the GitRepositoryBuild to the requesting test function.
     """
-    assert isinstance(
-        request.param, ContainerBuild
-    ), f"got an invalid request parameter {type(request.param)}"
+    assert isinstance(request.param, GitRepositoryBuild), (
+        f"got an invalid request parameter {type(request.param)}, "
+        "expected GitRepository"
+    )
+    container.connection.run_expect([0], request.param.clone_command)
+    yield request.param
+
+
+@pytest.fixture(scope="function")
+def host_git_clone(request, host, tmp_path):
+    """This fixture clones the `GitRepositoryBuild` into a temporary directory
+    on the host system, `cd`'s into it and returns the path and the
+    `GitRepositoryBuild` as a tuple to the test function requesting this it.
+    """
+    assert isinstance(request.param, GitRepositoryBuild), (
+        f"got an invalid request parameter {type(request.param)}, "
+        "expected GitRepository"
+    )
     cwd = os.getcwd()
     try:
-        with TemporaryDirectory() as tmp_dir:
-            os.chdir(tmp_dir)
-            copy(
-                os.path.join(cwd, "dockerfiles", request.param.name),
-                os.path.join(tmp_dir, "Dockerfile"),
-            )
-            if request.param.pre_build_steps:
-                host.run_expect([0], request.param.pre_build_steps)
-
-            yield tmp_dir
-
+        os.chdir(tmp_path)
+        host.run_expect([0], request.param.clone_command)
+        yield tmp_path, request.param
     finally:
         os.chdir(cwd)
 
