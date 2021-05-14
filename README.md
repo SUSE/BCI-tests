@@ -1,6 +1,30 @@
 # Container testing
 
-## Adding new containers and their tests
+## What is this?
+
+This is our tooling to test the BCI containers, ensuring they are matching what our ISVs are expecting, e.g.:
+
+* ensure that they don't exceed a certain size,
+* working with multi-stage dockerfiles,
+* able to build common software for the languages stacks that we provide,
+* test how they behave in FIPS enabled environments,
+* ...
+
+## How can I contribute?
+
+* Create a PR to increase test coverage (See below for further information).
+* Create an issue, stating your use case.
+* Improve our documentation.
+
+## What do I need to contribute?
+
+* A host with python 3.8+
+* tox
+* docker or podman+buildah
+
+## Technical contributions
+
+### Adding new containers and their tests
 
 1. Find container "type" or "language"
 2. Add it into `tox.ini` in envlist, if not present.
@@ -8,7 +32,7 @@
 4. Add your tests there based on [testinfra](https://testinfra.readthedocs.io/en/latest/modules.html)
 5. Ensure the container data is up to date by updating `matryoshka_tester/data.py`.
 
-## Extending coverage/Writing tests for existing containers
+### Extending coverage/Writing tests for existing containers
 
 Just use testinfra documentation (linked above). It should be
 easy.
