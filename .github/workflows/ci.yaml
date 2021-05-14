@@ -10,6 +10,9 @@ on:
 env:
   TOX_PARALLEL_NO_SPINNER: 1
 
+# Maybe writing something here will do something?
+# Look at me, stabbing in the dark with a harmless shiv
+
 jobs:
   format:
     name: Ensure code is black formatted
