@@ -26,7 +26,7 @@ def test_openssl_fips_hashes(container):
     for md in NONFIPS_DIGESTS:
         cmd = container.connection.run(f"openssl {md} /dev/null")
         assert cmd.rc != 0
-        assert "not a known digest" in cmd.stdout
+        assert "not a known digest" in cmd.stderr
 
     for md in FIPS_DIGESTS:
         container.connection.run_expect([0], f"openssl {md} /dev/null")
