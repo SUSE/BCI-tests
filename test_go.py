@@ -11,13 +11,13 @@ def test_go_version(container):
     "container_git_clone",
     [
         GitRepositoryBuild(
-            repository_url="https://github.com/weaveworks/kured.git",
-            build_command="make cmd/kured/kured",
+            repository_url="https://github.com/rancher/fleet.git",
+            build_command="make",
         ).to_pytest_param()
     ],
     indirect=["container_git_clone"],
 )
-def test_kured(container, container_git_clone):
+def test_fleet(container, container_git_clone):
     cmd = container.connection.run(container_git_clone.test_command)
     print(cmd.stdout)
     assert cmd.rc == 0
