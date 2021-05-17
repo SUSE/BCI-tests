@@ -50,13 +50,13 @@ jobs:
           - DOCKER
           - PODMAN
     steps:
-    - name: checkout source code
-      uses: actions/checkout@v2
-    - name: Install tox
-      run: sudo apt update && sudo apt install tox
-    - name: Set up Python
-      uses: actions/setup-python@v2
-    - name: Run tox job
-      run: sudo tox -e ${{ matrix.toxenv }}
-      env:
-        CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
+      - name: checkout source code
+        uses: actions/checkout@v2
+      - name: Install tox
+        run: sudo apt update && sudo apt install tox
+      - name: Set up Python
+        uses: actions/setup-python@v2
+      - name: Run tox job
+        run: sudo tox -e ${{ matrix.toxenv }}
+        env:
+          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
