@@ -56,6 +56,41 @@ jobs:
         run: sudo apt update && sudo apt install tox
       - name: Set up Python
         uses: actions/setup-python@v2
+      - name: configure podman to verify gpg signatures
+        if: ${{ matrix.container_runtime == 'PODMAN' }}
+        run: |
+          cat << EOF | sudo tee /etc/containers/registries.d/opensuse.yaml
+          docker:
+            registry.opensuse.org:
+              sigstore: https://registry.opensuse.org/sigstore
+          EOF
+
+          policy_json=$(cat /etc/containers/policy.json)
+          echo $policy_json | jq '.transports += { "docker": {"registry.opensuse.org": [{ "type": "signedBy", "keyType": "GPGKeys", "keyPath": "/tmp/devel_bci.key"}]}}' | sudo tee /etc/containers/policy.json
+
+          cat << EOF > /tmp/devel_bci.key
+          -----BEGIN PGP PUBLIC KEY BLOCK-----
+          Version: GnuPG v2.0.15 (GNU/Linux)
+
+          mQENBGCJZzgBCADHMlE3qg9CVEtykdTkLk+/rntTMIcLnouu5rSMaIykEb35H4lL
+          gieN2wBzDa5lQlh4a2fq5IHpDDCPORUUmmEbUL1zqO8eOqOYfYWQGEY/l+vFmg5r
+          75nCgKLSD1ufp1bdPGNKJioS8XWI/SUsuaoiIDrCidCWx1GjAIjKDLgW8o6jaZ+8
+          Sp9LmQfCuOu629ydmDGnxAiwmJPM0ECSYjmsUL4639CI93WrgaWSp030iDSod55u
+          IW2MxaBVzDUmauKBpdHbc/xfM7f5Dh1HYKry1KO3c5hTNYODM6FgaREJazgafNCe
+          M4ZbMlkFHhMLl3nnrAhhHL2/KPyJs1QfHYGXABEBAAG0NGRldmVsOkJDSSBPQlMg
+          UHJvamVjdCA8ZGV2ZWw6QkNJQGJ1aWxkLm9wZW5zdXNlLm9yZz6JAT4EEwEIACgF
+          AmCJZzgCGwMFCQQesAAGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEJpjxEY1
+          byhESq0H/AlUlJGp2nlFHdgwi6hL0N7DXYAarw2lHs3+pFvArveR/0b/u6Arz8YS
+          6Z2oWhne57ou0+DzmtyHHpZvLbNQV0455Jzjc28K9lt3fSyGyU/e0fCaL+oUCNFi
+          dBVbE6XkK1SQCVWqLmj5ZxaLhiyRDwBgOerxvTeH3OnBgadi5ApMJZ5p3qryfZ2j
+          /FumjZPKU9HolI3l0wogBfPOHvEwzKoLiiT+YS3+gWTWdR81vTTYJZMQJUtuLvfA
+          kmMDrWbvpYdrUO1rXdGYjbhFtFRsFLiEY82AGtzS1rVMuyvPUhWOaV/oZ+MEJRmL
+          re/RHy1/vnXyfW5pB635hKGt30zBjeSIRgQTEQIABgUCYIlnOQAKCRA7MBG3a51l
+          I934AJ91pSfBUERzkO8fHiz6Bw0nr01BHgCgkYx950ZzbyPpzi5rM5Cw7gzj0JY=
+          =vSvO
+          -----END PGP PUBLIC KEY BLOCK-----
+          EOF
+
       - name: Run tox job
         run: sudo tox -e ${{ matrix.toxenv }}
         env:
