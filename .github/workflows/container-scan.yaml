@@ -18,7 +18,7 @@ jobs:
         run: sudo apt update && sudo apt install jo tox
       - id: setmatrix
         run: |
-          stringified_matrix=$(tox -q -e list-all | sed '/^|/!d; /Language/d' | awk -F"|" '{print $4}'| sed 's/^[ \t]*//;s/[ \t]*$//' | jo -a)
+          stringified_matrix=$(tox -q -e list-all | awk  '/\|.*\|.*\|.*\|(.*)/ {print $8;}' | grep -v 'URL' | jo -a)
           echo "::set-output name=matrix::$stringified_matrix"
 
   snyk:
