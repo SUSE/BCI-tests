@@ -3,8 +3,11 @@ import testinfra
 import subprocess
 import os
 import functools
+import tempfile
 
 from collections import namedtuple
+
+from requests import get
 
 from matryoshka_tester.parse_data import containers
 from matryoshka_tester.helpers import (
@@ -85,6 +88,40 @@ def container(request, container_runtime):
     subprocess.check_call(
         [container_runtime.runner_binary, "rm", "-f", container_id]
     )
+
+
+@pytest.fixture(scope="module")
+def dapper(host):
+    """Fixture that ensures that dapper is installed on the host system and
+    yields the path to the dapper binary.
+
+    If dapper is already installed on the host, then its location is
+    returned. Otherwise, dapper is either build from source inside a temporary
+    directory or downloaded from rancher.com (if no go toolchain can be found).
+
+    """
+    if host.exists("dapper"):
+        yield host.find_command("dapper")
+        return
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        if host.exists("go"):
+            gopath = os.path.join(tmpdir, "gopath")
+            host.run_expect(
+                [0], f"GOPATH={gopath} go get github.com/rancher/dapper"
+            )
+            yield os.path.join(gopath, "bin", "dapper")
+        else:
+            resp = get(
+                "https://releases.rancher.com/dapper/latest/dapper-"
+                + host.system_info.type.capitalize()
+                + "-"
+                + host.system_info.arch
+            )
+            dest = os.path.join(tmpdir, "dapper")
+            with open(dest, "wb") as dapper_file:
+                dapper_file.write(resp.content)
+            yield dest
 
 
 def pytest_generate_tests(metafunc):
