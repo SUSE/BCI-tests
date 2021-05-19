@@ -14,6 +14,30 @@ KAFKA_ADDRESS = "localhost:19092"
 KAFKA_SOCKET = "tcp://127.0.0.1:{KAFKA_ADDRESS.split(':')[-1]}"
 
 
+@pytest.fixture(scope="function")
+def zookeeper(host, container_runtime):
+    """Fixture to launch zookeeper based on the docker compose file from
+    confluent.
+
+    See:
+    https://github.com/confluentinc/kafka-images/blob/master/examples/confluent-server/docker-compose.yml
+    """
+    cmd = host.run_expect(
+        [0],
+        dedent(
+            f"""{container_runtime.runner_binary} run --network=host -d \
+                -e ZOOKEEPER_CLIENT_PORT=22181 \
+                --add-host=moby:127.0.0.1 \
+                confluentinc/cp-zookeeper:latest
+            """
+        ),
+    )
+    img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
+    yield img_id
+
+    host.run_expect([0], f"{container_runtime.runner_binary} rm -f {img_id}")
+
+
 @pytest.mark.serial
 @pytest.mark.parametrize(
     "container_version", ["UBI8-Standard"]  # ["BCI", "SLE15", "UBI8-Standard"]
