@@ -22,6 +22,10 @@ def test_base_size(container, container_runtime):
     )
 
 
+def test_grep_absent(container):
+    assert not container.connection.exists("grep")
+
+
 # FIPS tests
 with_fips = pytest.mark.skipif(
     not host_fips_enabled(), reason="host not running in FIPS 140 mode"
