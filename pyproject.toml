@@ -13,6 +13,7 @@ build-backend = 'setuptools.build_meta'
 markers = [
     "serial: heavy tests that can overload the worker and are not run in parallel",
 ]
+xfail_strict = true
 
 [tool.black]
 line-length = 79
