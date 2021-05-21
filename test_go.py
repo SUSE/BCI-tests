@@ -5,6 +5,16 @@ import pytest
 from matryoshka_tester.helpers import GitRepositoryBuild
 
 
+GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
+
+
+def test_go_size(host, container, container_runtime):
+    assert (
+        container_runtime.get_image_size(container.image)
+        < GOLANG_MAX_CONTAINER_SIZE_ON_DISK
+    )
+
+
 def test_go_version(container):
     assert container.version in container.connection.check_output("go version")
 
