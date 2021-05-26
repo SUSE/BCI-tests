@@ -86,21 +86,21 @@
         "type": "node",
         "repo": "devel/bci/images",
         "image": "bci/node",
-        "tag": "latest",
+        "tag": "15",
         "version": "15"
     },
     {
         "type": "node",
         "repo": "devel/bci/images",
         "image": "bci/node",
-        "tag": "latest",
+        "tag": "14",
         "version": "14"
     },
     {
         "type": "node",
         "repo": "devel/bci/images",
         "image": "bci/node",
-        "tag": "latest",
+        "tag": "12",
         "version": "12"
     },
     {
