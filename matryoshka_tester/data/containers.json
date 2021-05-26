@@ -84,22 +84,22 @@
     },
     {
         "type": "node",
-        "repo": "home/fcrozat/matryoshka/containers_node15",
-        "image": "node15",
+        "repo": "devel/bci/images",
+        "image": "bci/node15",
         "tag": "latest",
         "version": "15"
     },
     {
         "type": "node",
-        "repo": "home/fcrozat/matryoshka/containers_node14",
-        "image": "node14",
+        "repo": "devel/bci/images",
+        "image": "bci/node14",
         "tag": "latest",
         "version": "14"
     },
     {
         "type": "node",
-        "repo": "home/fcrozat/matryoshka/containers_node12",
-        "image": "node12",
+        "repo": "devel/bci/images",
+        "image": "bci/node12",
         "tag": "latest",
         "version": "12"
     },
