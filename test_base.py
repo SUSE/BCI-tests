@@ -1,15 +1,25 @@
 import pytest
 from matryoshka_tester.fips import (
     host_fips_enabled,
-    host_fips_supported,
     NONFIPS_DIGESTS,
     FIPS_DIGESTS,
     ALL_DIGESTS,
 )
 
+#: 100MB limit for the base container
+BASE_CONTAINER_MAX_SIZE = 100 * 1024 * 1024
+
+
 # Generic tests
 def test_passwd_present(container):
     assert container.connection.file("/etc/passwd").exists
+
+
+def test_base_size(container, container_runtime):
+    assert (
+        container_runtime.get_image_size(container.image)
+        < BASE_CONTAINER_MAX_SIZE
+    )
 
 
 # FIPS tests

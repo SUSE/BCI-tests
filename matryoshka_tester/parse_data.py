@@ -1,6 +1,7 @@
 import json
 import os
 from dataclasses import dataclass
+from typing import List
 
 
 DEFAULT_REGISTRY = "registry.opensuse.org"
@@ -29,7 +30,7 @@ class Container:
             self.url = f"{self.registry}/{self.repo}/{self.image}:{self.tag}"
 
 
-def build_containerlist(filename: str = DEFAULT_CONTAINERS):
+def build_containerlist(filename: str = DEFAULT_CONTAINERS) -> List[Container]:
     with open(filename, "r") as dataf:
         return json.load(dataf, object_hook=lambda d: Container(**d))
 
