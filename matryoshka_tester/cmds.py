@@ -11,14 +11,24 @@ from prettytable import PrettyTable
 
 # Do real stuff
 async def pull_container(url):
-    """Pulls the container given in url with docker CLI"""
+    """Pulls the container with the given url using the currently selected
+    container runtime"""
     runtime = get_selected_runtime()
     process = await asyncio.create_subprocess_shell(
         f"{runtime.runner_binary} pull {url}",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    return await process.communicate()
+    res = await process.communicate()
+    if process.returncode != 0:
+        raise ValueError(
+            f"Could not pull container {url}, got: "
+            f"returncode='{process.returncode}', "
+            f"stderr='{res[1].decode().strip()}', "
+            f"stdout='{res[0].decode().strip()}'"
+        )
+
+    return res
 
 
 # CLI
