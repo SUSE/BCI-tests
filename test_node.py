@@ -8,12 +8,29 @@ def test_node_version(auto_container):
         f"v{auto_container.version}"
         in auto_container.connection.check_output("node -v")
     )
+    node_version_from_env = auto_container.connection.run_expect(
+        [0], "echo ${NODE_VERSION}"
+    ).stdout.strip()
+    assert node_version_from_env == auto_container.version, (
+        f"mismatch between container version {auto_container.version}) and the"
+        f" node version from the environment variable NODE_VERSION "
+        f" ({node_version_from_env})"
+    )
 
 
-# We don't care about the version, just test that the command seem to work
-def test_npm(auto_container):
+def test_npm_and_yarn(auto_container):
     assert auto_container.connection.run_expect([0], "npm version")
-    assert auto_container.connection.run_expect([0], "yarn --version")
+    installed_yarn_version = auto_container.connection.run_expect(
+        [0], "yarn --version"
+    ).stdout.strip()
+    yarn_version_from_env = auto_container.connection.run_expect(
+        [0], "echo ${YARN_VERSION}"
+    ).stdout.strip()
+    assert installed_yarn_version == yarn_version_from_env, (
+        f"Mismatch between installed yarn version {installed_yarn_version} "
+        "and the yarn version advertised via "
+        f"YARN_VERSION ({yarn_version_from_env})"
+    )
 
 
 @pytest.mark.parametrize(
