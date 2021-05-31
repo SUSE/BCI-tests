@@ -91,24 +91,24 @@
     },
     {
         "type": "node",
-        "repo": "home/fcrozat/matryoshka/containers_node15",
-        "image": "node15",
-        "tag": "latest",
-        "version": "15"
-    },
-    {
-        "type": "node",
-        "repo": "home/fcrozat/matryoshka/containers_node14",
-        "image": "node14",
-        "tag": "latest",
+        "repo": "devel/bci/images/bci",
+        "image": "node",
+        "tag": "14",
         "version": "14"
     },
     {
         "type": "node",
-        "repo": "home/fcrozat/matryoshka/containers_node12",
-        "image": "node12",
-        "tag": "latest",
+        "repo": "devel/bci/images/bci",
+        "image": "node",
+        "tag": "12",
         "version": "12"
+    },
+    {
+        "type": "node",
+        "repo": "devel/bci/images/bci",
+        "image": "node",
+        "tag": "16",
+        "version": "16"
     },
     {
         "type": "go",
