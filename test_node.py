@@ -3,16 +3,17 @@ import pytest
 from matryoshka_tester.helpers import GitRepositoryBuild
 
 
-def test_node_version(container):
-    assert f"v{container.version}" in container.connection.check_output(
-        "node -v"
+def test_node_version(auto_container):
+    assert (
+        f"v{auto_container.version}"
+        in auto_container.connection.check_output("node -v")
     )
 
 
 # We don't care about the version, just test that the command seem to work
-def test_npm(container):
-    assert container.connection.run_expect([0], "npm version")
-    assert container.connection.run_expect([0], "yarn --version")
+def test_npm(auto_container):
+    assert auto_container.connection.run_expect([0], "npm version")
+    assert auto_container.connection.run_expect([0], "yarn --version")
 
 
 @pytest.mark.parametrize(
@@ -76,8 +77,8 @@ def test_npm(container):
     ],
     indirect=["container_git_clone"],
 )
-def test_popular_npm_repos(container, container_git_clone):
-    cmd = container.connection.run(container_git_clone.test_command)
+def test_popular_npm_repos(auto_container, container_git_clone):
+    cmd = auto_container.connection.run(container_git_clone.test_command)
     print(cmd.stdout)
     print(cmd.stderr)
     assert cmd.rc == 0

@@ -8,15 +8,17 @@ from matryoshka_tester.helpers import GitRepositoryBuild
 GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 
 
-def test_go_size(host, container, container_runtime):
+def test_go_size(host, auto_container, container_runtime):
     assert (
-        container_runtime.get_image_size(container.image)
+        container_runtime.get_image_size(auto_container.image)
         < GOLANG_MAX_CONTAINER_SIZE_ON_DISK
     )
 
 
-def test_go_version(container):
-    assert container.version in container.connection.check_output("go version")
+def test_go_version(auto_container):
+    assert auto_container.version in auto_container.connection.check_output(
+        "go version"
+    )
 
 
 @pytest.mark.parametrize(
@@ -29,8 +31,8 @@ def test_go_version(container):
     ],
     indirect=["container_git_clone"],
 )
-def test_kured(container, container_git_clone):
-    cmd = container.connection.run(container_git_clone.test_command)
+def test_kured(auto_container, container_git_clone):
+    cmd = auto_container.connection.run(container_git_clone.test_command)
     assert cmd.rc == 0
 
 

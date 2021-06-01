@@ -1,4 +1,4 @@
-def test_jdk_version(container):
+def test_jdk_version(auto_container):
     assert "openjdk {}".format(
-        container.version
-    ) in container.connection.check_output("java --version")
+        auto_container.version
+    ) in auto_container.connection.check_output("java --version")

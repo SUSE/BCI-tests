@@ -39,21 +39,22 @@ easy.
 
 You can use the convenience tools from conftest:
 
-* If you are using the "container" fixture, your test will auto generate the right tests for _all_ the versions of your language. This is auto loaded, and doesn't need anything from your side except using the keyword "container". See below for more details.
+* If you are using the `auto_container` fixture, your test will auto generate the right tests for _all_ the versions of your language. This is auto loaded, and doesn't need anything from your side except using the keyword `auto_container`. See below for more details.
 * If you want to _skip_ some of those tests, use the decorator named `restrict_to_version`, which accepts a list of strings of the versions for which to run the test. See below for more details.
 
 ### The container fixture
 
-The `container` fixture contains the black magic to run commands for all versions of a language container.
+The `auto_container` fixture contains the black magic to run commands for all versions of a language container.
 If you need to run a test only for certain versions of a language stack, you have the following three options (by order of preference):
 
 1. Use the [`restrict_to_version`](#the-restrict_to_version-decorator) decorator to limit which containers your test applies to.
 2. Create your own fixture
-3. Modify the `container` fixture.
-The container fixture automatically finds the testfile filename, uses it to infer the language of the container under test,
+3. Use the `container` fixture and parametrize it yourself.
+
+The `auto_container` fixture automatically finds the testfile filename, uses it to infer the language of the container under test,
 and starts all the necessary containers. See also `conftest.py`.
 
-### The restrict_to_version decorator
+### The `restrict_to_version` decorator
 
 This decorator accepts a list of strings matching the versions from `data.py`.
 
