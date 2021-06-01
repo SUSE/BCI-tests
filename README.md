@@ -101,28 +101,6 @@ system. Currently, the CI does not run on such a system, so these must be
 executed manually. If you do not have access to such a system, you can use a
 prebuild vagrant box from the Open Build Service for this.
 
-Install [vagrant](https://www.vagrantup.com/downloads) and create the following
-`Vagrantfile`:
-
-```ruby
-Vagrant.configure("2") do |config|
-  config.vm.box = "SLES15-SP3-Vagrant.x86_64"
-  config.vm.box_url = "https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP3/images/boxes/SLES15-SP3-Vagrant.x86_64.json"
-  config.vm.provider :libvirt do |libvirt|
-    libvirt.cpus = 4
-    libvirt.memory = 4096
-  end
-end
-```
-
-Then execute the following commands:
-```ShellSession
-$ vagrant up
-$ vagrant ssh
-# you're now in the VM
-vagrant@localhost:~> cat /proc/sys/crypto/fips_enabled
-1
-vagrant@localhost:~> git clone https://github.com/SUSE/m8a-tests && cd m8a-tests
-vagrant@localhost:~/m8a-tests> python3 -m venv .env3 && . .env3/bin/activate && pip install tox
-(.env3) vagrant@localhost:~/m8a-tests> tox -e base
-```
+Install [vagrant](https://www.vagrantup.com/downloads) and run `vagrant up` in
+the root directory of this repository. The provisioning script defined in the
+`Vagrantfile` will automatically run the base container tests.
