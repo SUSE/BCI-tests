@@ -10,7 +10,7 @@ GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 
 def test_go_size(host, auto_container, container_runtime):
     assert (
-        container_runtime.get_image_size(auto_container.image)
+        container_runtime.get_image_size(auto_container.image_url)
         < GOLANG_MAX_CONTAINER_SIZE_ON_DISK
     )
 

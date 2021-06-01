@@ -5,11 +5,11 @@ import os
 import functools
 import tempfile
 
-from typing import Any, List, Optional, NamedTuple
+from typing import Any, NamedTuple
 
 from requests import get
 
-from matryoshka_tester.parse_data import containers
+from matryoshka_tester.parse_data import containers, Container
 from matryoshka_tester.helpers import (
     get_selected_runtime,
     GitRepositoryBuild,
@@ -18,7 +18,7 @@ from matryoshka_tester.helpers import (
 
 class ContainerData(NamedTuple):
     version: str
-    image: str
+    image_url: str
     connection: Any
 
 
@@ -69,23 +69,19 @@ def container_runtime():
 # to switch scope. If the docker pull is _NOT_ in the tox.ini, make sure your pull the image if you want to run on scope='function'.
 @pytest.fixture(scope="module")
 def auto_container(request, container_runtime):
+    launch_data: Container = request.param
+
     container_id = (
         subprocess.check_output(
-            [
-                container_runtime.runner_binary,
-                "run",
-                "-d",
-                "-it",
-                request.param[1],
-                "/bin/sh",
-            ]
+            [container_runtime.runner_binary] + launch_data.launch_cmd
         )
         .decode()
         .strip()
     )
     yield ContainerData(
-        *request.param,
-        testinfra.get_host(
+        version=launch_data.version,
+        image_url=launch_data.url,
+        connection=testinfra.get_host(
             f"{container_runtime.runner_binary}://{container_id}"
         ),
     )
@@ -144,7 +140,7 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize(
             "auto_container",
             [
-                (container.version, container.url)
+                container
                 for container in containers
                 if container.type == container_type
             ],
