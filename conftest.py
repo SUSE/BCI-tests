@@ -23,7 +23,7 @@ class ContainerData(NamedTuple):
 
 
 @pytest.fixture(scope="function")
-def container_git_clone(request, container):
+def container_git_clone(request, auto_container):
     """This fixture clones the `GitRepositoryBuild` passed as an indirect
     parameter to it into the currently selected container.
 
@@ -33,7 +33,7 @@ def container_git_clone(request, container):
         f"got an invalid request parameter {type(request.param)}, "
         "expected GitRepository"
     )
-    container.connection.run_expect([0], request.param.clone_command)
+    auto_container.connection.run_expect([0], request.param.clone_command)
     yield request.param
 
 
@@ -68,7 +68,7 @@ def container_runtime():
 # NB: We've pulled the image beforehand, so the docker-run should be almost instant, and it shouldn't be a problem
 # to switch scope. If the docker pull is _NOT_ in the tox.ini, make sure your pull the image if you want to run on scope='function'.
 @pytest.fixture(scope="module")
-def container(request, container_runtime):
+def auto_container(request, container_runtime):
     container_id = (
         subprocess.check_output(
             [
@@ -140,9 +140,9 @@ def pytest_generate_tests(metafunc):
             .replace(".py", "")
         )
 
-    if "container" in metafunc.fixturenames:
+    if "auto_container" in metafunc.fixturenames:
         metafunc.parametrize(
-            "container",
+            "auto_container",
             [
                 (container.version, container.url)
                 for container in containers
@@ -162,9 +162,12 @@ def restrict_to_version(versions):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:
-                c = kwargs.get("container")
+                c = kwargs.get("auto_container")
             except KeyError:
-                print("Unexpected structure, did you use container fixture?")
+                print(
+                    "Unexpected structure, did you use the auto_container "
+                    "fixture?"
+                )
             else:
                 if c.version in versions:
                     return func(*args, **kwargs)
