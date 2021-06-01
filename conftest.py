@@ -90,6 +90,9 @@ def auto_container(request, container_runtime):
     )
 
 
+container = auto_container
+
+
 @pytest.fixture(scope="module")
 def dapper(host):
     """Fixture that ensures that dapper is installed on the host system and

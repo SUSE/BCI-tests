@@ -6,6 +6,13 @@
         "tag": "latest"
     },
     {
+        "type": "init",
+        "repo": "devel/bci/images",
+        "image": "bci/init",
+        "tag": "latest",
+        "default_entry_point": true
+    },
+    {
         "type": "openjdk-devel",
         "repo": "devel/bci/images",
         "image": "bci/openjdk-devel",
