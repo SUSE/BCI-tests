@@ -5,7 +5,7 @@ import os
 import functools
 import tempfile
 
-from collections import namedtuple
+from typing import Any, List, Optional, NamedTuple
 
 from requests import get
 
@@ -15,7 +15,11 @@ from matryoshka_tester.helpers import (
     GitRepositoryBuild,
 )
 
-ContainerData = namedtuple("Container", ["version", "image", "connection"])
+
+class ContainerData(NamedTuple):
+    version: str
+    image: str
+    connection: Any
 
 
 @pytest.fixture(scope="function")
