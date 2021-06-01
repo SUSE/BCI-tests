@@ -1,6 +1,8 @@
 matryoshka_tester/version.py
 junit*.xml
 
+.vagrant
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
