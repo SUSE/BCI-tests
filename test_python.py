@@ -1,7 +1,3 @@
-import pytest
-import testinfra
-
-
 def test_python_version(container):
     assert container.version in container.connection.check_output(
         "python --version"
