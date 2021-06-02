@@ -70,23 +70,23 @@
     },
     {
         "type": "python",
-        "repo": "home/fcrozat/matryoshka/containers_python39",
-        "image": "python39",
-        "tag": "latest",
+        "repo": "devel/bci/images",
+        "image": "bci/python",
+        "tag": "3.9",
         "version": "3.9"
     },
     {
         "type": "python",
-        "repo": "home/fcrozat/matryoshka/containers_python38",
-        "image": "python38",
-        "tag": "latest",
+        "repo": "devel/bci/images",
+        "image": "bci/python",
+        "tag": "3.8",
         "version": "3.8"
     },
     {
         "type": "python",
-        "repo": "home/fcrozat/matryoshka/containers_python36",
-        "image": "python36",
-        "tag": "latest",
+        "repo": "devel/bci/images",
+        "image": "bci/python",
+        "tag": "3.6",
         "version": "3.6"
     },
     {
