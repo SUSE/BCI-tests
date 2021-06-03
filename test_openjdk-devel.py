@@ -3,6 +3,9 @@ def test_jdk_version(auto_container):
         f"javac {auto_container.version}"
         in auto_container.connection.check_output("javac -version")
     )
+    assert auto_container.version == auto_container.connection.check_output(
+        "echo $JAVA_VERSION"
+    )
 
 
 def test_maven_present(auto_container):

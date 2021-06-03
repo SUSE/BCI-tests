@@ -19,6 +19,9 @@ def test_go_version(auto_container):
     assert auto_container.version in auto_container.connection.check_output(
         "go version"
     )
+    assert auto_container.version == auto_container.connection.check_output(
+        "echo $GOLANG_VERSION"
+    )
 
 
 @pytest.mark.parametrize(
