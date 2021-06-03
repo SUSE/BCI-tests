@@ -40,3 +40,10 @@ def test_docker_in_docker(container):
         "docker run --rm registry.opensuse.org/opensuse/tumbleweed:latest "
         "/usr/bin/ls",
     )
+
+
+@pytest.mark.parametrize(
+    "container", [c for c in containers if c.type != "init"], indirect=True
+)
+def test_systemd_not_installed_elsewhere(container):
+    assert not container.connection.package("systemd").is_installed
