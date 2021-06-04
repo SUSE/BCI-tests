@@ -2,7 +2,7 @@ import os.path
 
 import pytest
 
-from matryoshka_tester.helpers import GitRepositoryBuild
+from bci_tester.helpers import GitRepositoryBuild
 
 
 GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed

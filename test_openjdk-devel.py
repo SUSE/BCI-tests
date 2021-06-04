@@ -1,6 +1,6 @@
 import pytest
 
-from matryoshka_tester.parse_data import containers
+from bci_tester.parse_data import containers
 
 
 def test_jdk_version(auto_container):

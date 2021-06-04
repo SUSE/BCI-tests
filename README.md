@@ -30,7 +30,7 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 2. Add it into `tox.ini` in envlist, if not present.
 3. Create or update a file named `test_<container_type>.py` (for example, `test_python.py`)
 4. Add your tests there based on [testinfra](https://testinfra.readthedocs.io/en/latest/modules.html)
-5. Ensure the container data is up to date by updating `matryoshka_tester/data.py`.
+5. Ensure the container data is up to date by updating `bci_tester/data/containers.json`.
 
 ### Extending coverage/Writing tests for existing containers
 

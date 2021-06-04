@@ -1,8 +1,8 @@
 import pytest
 
-from matryoshka_tester.parse_data import build_containerlist, Container
-from matryoshka_tester.fips import host_fips_enabled, host_fips_supported
-from matryoshka_tester.trigger_test import RabbitMQConnection
+from bci_tester.parse_data import build_containerlist, Container
+from bci_tester.fips import host_fips_enabled, host_fips_supported
+from bci_tester.trigger_test import RabbitMQConnection
 
 
 def test_default_containerlist():

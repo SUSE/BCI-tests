@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from matryoshka_tester.parse_data import containers
+from bci_tester.parse_data import containers
 
 
 OS_PRETTY_NAME = "BCI 15.3"

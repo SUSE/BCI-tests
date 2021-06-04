@@ -15,7 +15,7 @@ class Container:
     """This class stores information about the BCI images under test.
 
     Instances of this class are constructed from the contents of
-    data/data.json
+    data/containers.json
     """
 
     type: str

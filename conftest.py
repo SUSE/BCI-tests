@@ -9,8 +9,8 @@ from typing import Any, NamedTuple
 
 from requests import get
 
-from matryoshka_tester.parse_data import containers, Container
-from matryoshka_tester.helpers import (
+from bci_tester.parse_data import containers, Container
+from bci_tester.helpers import (
     get_selected_runtime,
     GitRepositoryBuild,
 )
