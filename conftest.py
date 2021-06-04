@@ -43,15 +43,25 @@ def host_git_clone(request, host, tmp_path):
     on the host system, `cd`'s into it and returns the path and the
     `GitRepositoryBuild` as a tuple to the test function requesting this it.
     """
-    assert isinstance(request.param, GitRepositoryBuild), (
-        f"got an invalid request parameter {type(request.param)}, "
-        "expected GitRepository"
-    )
+
+    if isinstance(request.param, GitRepositoryBuild):
+        git_repo_build = request.param
+    elif (
+        hasattr(request.param, "values")
+        and len(request.param.values) == 1
+        and isinstance(request.param.values[0], GitRepositoryBuild)
+    ):
+        git_repo_build = request.param.values[0]
+    else:
+        raise ValueError(
+            f"got an invalid request parameter {type(request.param)}, "
+            "expected GitRepositoryBuild or SubRequest with a GitRepositoryBuild"
+        )
     cwd = os.getcwd()
     try:
         os.chdir(tmp_path)
-        host.run_expect([0], request.param.clone_command)
-        yield tmp_path, request.param
+        host.run_expect([0], git_repo_build.clone_command)
+        yield tmp_path, git_repo_build
     finally:
         os.chdir(cwd)
 
