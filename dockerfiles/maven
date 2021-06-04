@@ -1,4 +1,4 @@
-FROM registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk-devel:16 as builder
+FROM registry.opensuse.org/devel/bci/images/bci/openjdk-devel:16 as builder
 WORKDIR /maven
 COPY ./maven .
 RUN mvn package && \
@@ -7,7 +7,7 @@ RUN mvn package && \
     zypper --non-interactive in unzip && \
     unzip /maven/apache-maven/target/apache-maven-3.8.1-bin.zip
 
-FROM registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk:16
+FROM registry.opensuse.org/devel/bci/images/bci/openjdk:16
 WORKDIR /maven/
 COPY --from=builder /maven/apache-maven-3.8.1/ .
 CMD ["/maven/bin/mvn"]

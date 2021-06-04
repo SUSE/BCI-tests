@@ -1,4 +1,4 @@
-FROM registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk-devel:16 as builder
+FROM registry.opensuse.org/devel/bci/images/bci/openjdk-devel:16 as builder
 WORKDIR /pdftk
 COPY ./pdftk .
 RUN zypper --non-interactive addrepo https://download.opensuse.org/repositories/Java:/packages/openSUSE_Leap_15.3/Java:packages.repo && \
@@ -6,7 +6,7 @@ RUN zypper --non-interactive addrepo https://download.opensuse.org/repositories/
     zypper --non-interactive in apache-ant apache-ivy && \
     ant test-resolve && ant compile && ant jar
 
-FROM registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/openjdk:16
+FROM registry.opensuse.org/devel/bci/images/bci/openjdk:16
 WORKDIR /pdftk/
 COPY --from=builder /pdftk/build/jar/pdftk.jar .
 CMD ["java", "-jar", "pdftk.jar"]

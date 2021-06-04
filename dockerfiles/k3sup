@@ -1,4 +1,4 @@
-FROM registry.opensuse.org/home/fcrozat/matryoshka/containerfile/bci/golang:1.15 as builder
+FROM registry.opensuse.org/devel/bci/images/bci/golang:1.15 as builder
 WORKDIR /k3sup
 COPY ./k3sup .
 RUN echo > ./hack/hashgen.sh && make all
