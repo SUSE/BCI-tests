@@ -1,5 +1,5 @@
 import pytest
-from matryoshka_tester.fips import (
+from bci_tester.fips import (
     host_fips_enabled,
     NONFIPS_DIGESTS,
     FIPS_DIGESTS,

@@ -2,8 +2,8 @@ import argparse
 import asyncio
 
 
-from matryoshka_tester.parse_data import containers
-from matryoshka_tester.helpers import get_selected_runtime
+from bci_tester.parse_data import containers
+from bci_tester.helpers import get_selected_runtime
 
 
 from prettytable import PrettyTable

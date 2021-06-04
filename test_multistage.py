@@ -5,8 +5,8 @@ from typing import Union
 
 import pytest
 
-from matryoshka_tester.helpers import GitRepositoryBuild
-from matryoshka_tester.parse_data import containers, Container
+from bci_tester.helpers import GitRepositoryBuild
+from bci_tester.parse_data import containers, Container
 
 
 @dataclass

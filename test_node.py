@@ -1,6 +1,6 @@
 import pytest
 
-from matryoshka_tester.helpers import GitRepositoryBuild
+from bci_tester.helpers import GitRepositoryBuild
 
 
 def test_node_version(auto_container):

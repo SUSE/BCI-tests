@@ -16,7 +16,7 @@ from typing import (
 import pika
 import requests
 
-from matryoshka_tester.parse_data import containers, Container
+from bci_tester.parse_data import containers, Container
 
 
 LOGGER = getLogger(__name__)
@@ -58,7 +58,7 @@ class PublishedBody(PublishBodyBase):
 def trigger_workflow(
     event_type: str = "containers_published",
     owner: str = "SUSE",
-    repo: str = "m8a-tests",
+    repo: str = "BCI-tests",
 ):
     headers = {
         "Accept": "application/vnd.github.v3+json",
