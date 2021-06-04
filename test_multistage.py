@@ -75,7 +75,7 @@ CMD ["java", "-jar", "amidst-v4-6.jar"]
             ),
             MultiStageBuild(
                 OPENJDK_DEVEL_16,
-                OPENJDK_16,
+                OPENJDK_DEVEL_16,
                 """
 FROM $builder as builder
 WORKDIR /maven
@@ -91,9 +91,6 @@ WORKDIR /maven/
 COPY --from=builder /maven/apache-maven-3.8.1/ .
 CMD ["/maven/bin/mvn"]
 """,
-            ),
-            marks=pytest.mark.xfail(
-                reason="environment variables are not set correctly"
             ),
         ),
         pytest.param(
