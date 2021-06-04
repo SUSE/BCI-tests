@@ -45,7 +45,7 @@ GOLANG_1_15 = get_container_by_type_tag("go", "1.15")
 
 
 @pytest.mark.parametrize(
-    "host_git_clone,multi_stage_build",
+    "host_git_clone,multi_stage_build,retval,cmd_stdout",
     [
         pytest.param(
             GitRepositoryBuild(
@@ -67,6 +67,8 @@ COPY --from=builder /amidst/target .
 CMD ["java", "-jar", "amidst-v4-6.jar"]
 """,
             ),
+            0,
+            "[info] Amidst v4.6",
         ),
         pytest.param(
             GitRepositoryBuild(
@@ -92,6 +94,8 @@ COPY --from=builder /maven/apache-maven-3.8.1/ .
 CMD ["/maven/bin/mvn"]
 """,
             ),
+            1,
+            "[ERROR] No goals have been specified for this build.",
         ),
         pytest.param(
             GitRepositoryBuild(
@@ -116,6 +120,10 @@ COPY --from=builder /pdftk/build/jar/pdftk.jar .
 CMD ["java", "-jar", "pdftk.jar"]
 """,
             ),
+            0,
+            """SYNOPSIS
+       pdftk <input PDF files | - | PROMPT>
+""",
         ),
         pytest.param(
             GitRepositoryBuild(
@@ -137,12 +145,19 @@ COPY --from=builder /k3sup/bin/k3sup .
 CMD ["/k3sup/k3sup"]
 """,
             ),
+            0,
+            'Use "k3sup [command] --help" for more information about a command.',
         ),
     ],
     indirect=["host_git_clone"],
 )
 def test_dockerfile_build(
-    host, container_runtime, host_git_clone, multi_stage_build
+    host,
+    container_runtime,
+    host_git_clone,
+    multi_stage_build,
+    retval,
+    cmd_stdout,
 ):
     print(host_git_clone, multi_stage_build)
     tmp_path, build = host_git_clone
@@ -153,6 +168,9 @@ def test_dockerfile_build(
     cmd = host.run_expect([0], container_runtime.build_command)
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
-    host.run_expect(
-        [0], f"{container_runtime.runner_binary} run --rm {img_id}"
+    assert (
+        cmd_stdout
+        in host.run_expect(
+            [retval], f"{container_runtime.runner_binary} run --rm {img_id}"
+        ).stdout
     )
