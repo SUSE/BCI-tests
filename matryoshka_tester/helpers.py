@@ -66,7 +66,7 @@ class PodmanRuntime(OciRuntimeBase):
 
     def __init__(self) -> None:
         super().__init__(
-            build_command="buildah bud",
+            build_command="buildah bud --layers",
             runner_binary="podman",
             _runtime_functional=self._runtime_functional,
         )
