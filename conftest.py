@@ -1,5 +1,3 @@
-import pytest
-import testinfra
 import subprocess
 import os
 import functools
@@ -7,6 +5,8 @@ import tempfile
 
 from typing import Any, NamedTuple
 
+import pytest
+import testinfra
 from requests import get
 
 from bci_tester.parse_data import containers, Container
