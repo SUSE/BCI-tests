@@ -2,14 +2,13 @@ import pytest
 import testinfra
 import subprocess
 import os
-import functools
 import tempfile
 
 from typing import Any, NamedTuple
 
 from requests import get
 
-from bci_tester.parse_data import containers, Container
+from bci_tester.parse_data import Container
 from bci_tester.helpers import (
     get_selected_runtime,
     GitRepositoryBuild,
@@ -135,32 +134,3 @@ def dapper(host):
             with open(dest, "wb") as dapper_file:
                 dapper_file.write(resp.content)
             yield dest
-
-
-def pytest_generate_tests(metafunc):
-    # Finds container_type.
-    # If necessary, you can override the detection by setting a variable "container_type" in your module.
-    container_type = getattr(metafunc.module, "container_type", "")
-    if container_type == "":
-        container_type = (
-            os.path.basename(metafunc.module.__file__)
-            .strip()
-            .replace("test_", "")
-            .replace(".py", "")
-        )
-
-    if "auto_container" in metafunc.fixturenames:
-        metafunc.parametrize(
-            "auto_container",
-            [
-                container
-                for container in containers
-                if container.type == container_type
-            ],
-            ids=[
-                container.version
-                for container in containers
-                if container.type == container_type
-            ],
-            indirect=True,
-        )
