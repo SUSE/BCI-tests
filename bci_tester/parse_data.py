@@ -83,3 +83,14 @@ def build_containerlist(filename: str = DEFAULT_CONTAINERS) -> List[Container]:
 
 
 containers: List[Container] = build_containerlist()
+
+
+def get_container_by_type_tag(type: str, tag: str) -> Container:
+    matching_containers = [
+        c for c in containers if c.type == type and c.tag == tag
+    ]
+    assert len(matching_containers) == 1, (
+        f"expected to find 1 container with the type {type} and tag {tag}, "
+        f"but got {len(matching_containers)} matches"
+    )
+    return matching_containers[0]

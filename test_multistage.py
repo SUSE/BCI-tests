@@ -6,7 +6,7 @@ from typing import Union
 import pytest
 
 from bci_tester.helpers import GitRepositoryBuild
-from bci_tester.parse_data import containers, Container
+from bci_tester.parse_data import get_container_by_type_tag, Container
 
 
 @dataclass
@@ -26,17 +26,6 @@ class MultiStageBuild:
         return Template(self.dockerfile_template).substitute(
             builder=builder, runner=runner
         )
-
-
-def get_container_by_type_tag(type: str, tag: str) -> Container:
-    matching_containers = [
-        c for c in containers if c.type == type and c.tag == tag
-    ]
-    assert len(matching_containers) == 1, (
-        f"expected to find 1 container with the type {type} and tag {tag}, "
-        f"but got {len(matching_containers)}"
-    )
-    return matching_containers[0]
 
 
 OPENJDK_DEVEL_16 = get_container_by_type_tag("openjdk-devel", "16")
@@ -159,13 +148,12 @@ def test_dockerfile_build(
     retval,
     cmd_stdout,
 ):
-    print(host_git_clone, multi_stage_build)
-    tmp_path, build = host_git_clone
+    tmp_path, _ = host_git_clone
 
     with open(path.join(tmp_path, "Dockerfile"), "w") as dockerfile:
         dockerfile.write(multi_stage_build.dockerfile)
 
-    cmd = host.run_expect([0], container_runtime.build_command)
+    cmd = host.run_expect([0], f"{container_runtime.build_command} {tmp_path}")
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     assert (
