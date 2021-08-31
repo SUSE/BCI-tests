@@ -7,7 +7,7 @@ from bci_tester.fips import (
 )
 
 #: 100MB limit for the base container
-BASE_CONTAINER_MAX_SIZE = 100 * 1024 * 1024
+BASE_CONTAINER_MAX_SIZE = 120 * 1024 * 1024
 
 
 # Generic tests
@@ -20,10 +20,6 @@ def test_base_size(auto_container, container_runtime):
         container_runtime.get_image_size(auto_container.image_url)
         < BASE_CONTAINER_MAX_SIZE
     )
-
-
-def test_grep_absent(auto_container):
-    assert not auto_container.connection.exists("grep")
 
 
 # FIPS tests
