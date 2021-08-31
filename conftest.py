@@ -164,27 +164,3 @@ def pytest_generate_tests(metafunc):
             ],
             indirect=True,
         )
-
-
-def restrict_to_version(versions):
-    def inner(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                c = kwargs.get("auto_container")
-            except KeyError:
-                print(
-                    "Unexpected structure, did you use the auto_container "
-                    "fixture?"
-                )
-            else:
-                if c.version in versions:
-                    return func(*args, **kwargs)
-                else:
-                    return pytest.skip(
-                        "Version restrict used and current version doesn't match"
-                    )
-
-        return wrapper
-
-    return inner
