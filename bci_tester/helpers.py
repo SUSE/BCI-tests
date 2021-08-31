@@ -36,8 +36,14 @@ class OciRuntimeBase(ABC, ToParamMixin):
             )
         if not self._runtime_functional:
             raise RuntimeError(
-                f"The runtime {self.__class__.__name__} is not functional!"
+                f"The runtime {self.__class__.__name__} is not functional: "
+                + self._runtime_error_message()
             )
+
+    @staticmethod
+    @abstractmethod
+    def _runtime_error_message() -> str:
+        pass
 
     @abstractmethod
     def get_image_id_from_stdout(self, stdout: str) -> str:
@@ -64,6 +70,19 @@ class PodmanRuntime(OciRuntimeBase):
         and LOCALHOST.run("buildah").succeeded
     )
 
+    @staticmethod
+    def _runtime_error_message() -> Optional[str]:
+        if PodmanRuntime._runtime_functional:
+            return None
+        podman_ps = LOCALHOST.run("podman ps")
+        if not podman_ps.succeeded:
+            return podman_ps.stderr
+        buildah = LOCALHOST.run("buildah")
+        assert (
+            not buildah.succeeded
+        ), "buildah command must not succeed as PodmanRuntime is not functional"
+        return buildah.stderr
+
     def __init__(self) -> None:
         super().__init__(
             build_command="buildah bud --layers",
@@ -81,6 +100,16 @@ class PodmanRuntime(OciRuntimeBase):
 class DockerRuntime(OciRuntimeBase):
 
     _runtime_functional = LOCALHOST.run("docker ps").succeeded
+
+    @staticmethod
+    def _runtime_error_message() -> Optional[str]:
+        if DockerRuntime._runtime_functional:
+            return None
+        docker_ps = LOCALHOST.run("docker ps")
+        assert (
+            not docker_ps.succeeded
+        ), "docker runtime is not functional, but 'docker ps' succeeded"
+        return docker_ps.stderr
 
     def __init__(self) -> None:
         super().__init__(
