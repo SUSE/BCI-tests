@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 
-DEFAULT_REGISTRY = "registry.opensuse.org"
+DEFAULT_REGISTRY = "registry.suse.de"
 DEFAULT_CONTAINERS = os.path.join(
     os.path.dirname(__file__), "data", "containers.json"
 )
