@@ -1,10 +1,15 @@
-from abc import ABC, abstractmethod
 import asyncio
+from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
-from os import getenv, path
-from typing import Any, List, Optional
-import pytest
+from os import getenv
+from os import path
+from subprocess import check_output
+from typing import Any
+from typing import List
+from typing import Optional
 
+import pytest
 import testinfra
 
 

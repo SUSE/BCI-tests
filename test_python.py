@@ -1,4 +1,5 @@
-from bci_tester.data import PYTHON36_CONTAINER, PYTHON39_CONTAINER
+from bci_tester.data import PYTHON36_CONTAINER
+from bci_tester.data import PYTHON39_CONTAINER
 
 
 CONTAINER_IMAGES = [PYTHON36_CONTAINER, PYTHON39_CONTAINER]

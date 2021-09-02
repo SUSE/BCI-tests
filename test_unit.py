@@ -1,4 +1,5 @@
-from bci_tester.fips import host_fips_enabled, host_fips_supported
+from bci_tester.fips import host_fips_enabled
+from bci_tester.fips import host_fips_supported
 
 
 def test_host_fips_supported(tmp_path):

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-import os
 import os.path
 import tempfile
-from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from dataclasses import dataclass
+from dataclasses import field
+from typing import List
+from typing import Optional
+from typing import Union
 
-from bci_tester.helpers import check_output, get_selected_runtime
+from bci_tester.helpers import check_output
+from bci_tester.helpers import get_selected_runtime
 
 
 DEFAULT_REGISTRY = "registry.suse.de"

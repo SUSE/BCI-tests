@@ -4,9 +4,10 @@ from string import Template
 from typing import Union
 
 import pytest
-
+from bci_tester.data import Container
+from bci_tester.data import DerivedContainer
+from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.helpers import GitRepositoryBuild
-from bci_tester.data import Container, DerivedContainer, GO_1_16_CONTAINER
 
 
 @dataclass

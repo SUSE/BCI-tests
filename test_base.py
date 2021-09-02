@@ -1,15 +1,13 @@
 import re
 
 import pytest
-
-from bci_tester.helpers import GitRepositoryBuild, get_selected_runtime
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.fips import (
-    host_fips_enabled,
-    NONFIPS_DIGESTS,
-    FIPS_DIGESTS,
-    ALL_DIGESTS,
-)
+from bci_tester.fips import ALL_DIGESTS
+from bci_tester.fips import FIPS_DIGESTS
+from bci_tester.fips import host_fips_enabled
+from bci_tester.fips import NONFIPS_DIGESTS
+from bci_tester.helpers import get_selected_runtime
+from bci_tester.helpers import GitRepositoryBuild
 
 #: 100MB limit for the base container
 BASE_CONTAINER_MAX_SIZE = 120 * 1024 * 1024
