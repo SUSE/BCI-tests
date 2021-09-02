@@ -134,6 +134,14 @@ GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
 )
 
 
+#
+# !! IMPORTANT !!
+# ===============
+#
+# All "base" containers which get pre-configured with the SLE_BCI repository
+# should be put into this if branch so that their repository gets replaced on
+# setting the `BCI_DEVEL_REPO` environment variable.
+#
 if (repo := os.getenv("BCI_DEVEL_REPO")) is not None:
     REPLACE_REPO_CONTAINERFILE = f"""RUN sed -i 's|baseurl.*|baseurl={repo}|' /etc/zypp/repos.d/SLE_BCI.repo
 RUN zypper -n ref"""
