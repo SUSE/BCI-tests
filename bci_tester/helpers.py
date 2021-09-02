@@ -208,12 +208,13 @@ class GitRepositoryBuild(ToParamMixin):
         return cd_cmd
 
 
-async def check_output(cmd: List[str]) -> str:
+async def check_output(cmd: List[str], cwd: Optional[str] = None) -> str:
     shell_cmd = " ".join(cmd)
     proc = await asyncio.create_subprocess_shell(
         shell_cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
+        cwd=cwd,
     )
     res = await proc.communicate()
     if proc.returncode != 0:
