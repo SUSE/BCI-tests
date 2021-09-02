@@ -1,6 +1,7 @@
-from bci_tester.helpers import get_selected_runtime
-from bci_tester.data import INIT_CONTAINER, ALL_CONTAINERS
 import pytest
+from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import INIT_CONTAINER
+from bci_tester.helpers import get_selected_runtime
 
 
 @pytest.mark.parametrize("container", [INIT_CONTAINER], indirect=True)

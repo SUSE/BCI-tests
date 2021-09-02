@@ -1,20 +1,21 @@
 import asyncio
 import functools
+import os
+import shlex
+import tempfile
+from typing import Any
+from typing import NamedTuple
+from typing import Optional
+from typing import Union
+
 import pytest
 import testinfra
-import os
-import tempfile
-
-from typing import Any, NamedTuple, Optional, Union
-
+from bci_tester.data import Container
+from bci_tester.data import DerivedContainer
+from bci_tester.helpers import check_output
+from bci_tester.helpers import get_selected_runtime
+from bci_tester.helpers import GitRepositoryBuild
 from requests import get
-
-from bci_tester.data import Container, DerivedContainer
-from bci_tester.helpers import (
-    check_output,
-    get_selected_runtime,
-    GitRepositoryBuild,
-)
 
 
 class ContainerData(NamedTuple):

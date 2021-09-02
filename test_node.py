@@ -1,6 +1,5 @@
-from bci_tester.data import NODE_CONTAINER
 import pytest
-
+from bci_tester.data import NODE_CONTAINER
 from bci_tester.helpers import GitRepositoryBuild
 
 
