@@ -1,0 +1,14 @@
+---
+image: python:latest
+
+cache:
+  paths:
+    - .tox
+
+before_script:
+  - pip install tox
+
+test:
+  script:
+    - tox -e format -- --check
+    - tox -e unit
