@@ -190,7 +190,7 @@ class GitRepositoryBuild(ToParamMixin):
     @property
     def clone_command(self) -> str:
         """Command to clone the repository at the appropriate tag"""
-        clone_cmd_parts = ["git clone"]
+        clone_cmd_parts = ["git clone --depth 1"]
         if self.repository_tag:
             clone_cmd_parts.append(f"--branch {self.repository_tag}")
         clone_cmd_parts.append(self.repository_url)
