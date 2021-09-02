@@ -22,6 +22,14 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 * tox
 * docker or podman+buildah
 
+## How can I run the tests?
+
+1. Ensure that you have the dependencies installed
+2. Optionally set the `BCI_DEVEL_REPO` environment variable (see next section).
+3. Run `tox -e build` (this is not strictly necessary to run beforehands, but it
+   will reduce the danger of race conditions when building containers)
+4. Run `tox -e $language_stack`
+
 ## Technical contributions
 
 ### The base container
