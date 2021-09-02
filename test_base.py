@@ -20,9 +20,10 @@ def test_passwd_present(auto_container):
     assert auto_container.connection.file("/etc/passwd").exists
 
 
-def test_base_size(auto_container, container_runtime):
+@pytest.mark.asyncio
+async def test_base_size(auto_container, container_runtime):
     assert (
-        container_runtime.get_image_size(auto_container.image_url)
+        await container_runtime.get_image_size(auto_container.image_url)
         < BASE_CONTAINER_MAX_SIZE
     )
 
