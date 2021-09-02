@@ -163,7 +163,7 @@ BASE_CONTAINERS = [BASE_CONTAINER, GO_1_16_BASE_CONTAINER]
 
 
 GO_1_16_CONTAINER = DerivedContainer(
-    base=GO_1_16_BASE_CONTAINER, containerfile="""RUN zypper -n in git make"""
+    base=GO_1_16_BASE_CONTAINER, containerfile="""RUN zypper -n in make"""
 )
 
 PYTHON36_CONTAINER = DerivedContainer(

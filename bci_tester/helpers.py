@@ -190,7 +190,7 @@ class GitRepositoryBuild(ToParamMixin):
     @property
     def clone_command(self) -> str:
         """Command to clone the repository at the appropriate tag"""
-        clone_cmd_parts = ["git clone"]
+        clone_cmd_parts = ["git clone --depth 1"]
         if self.repository_tag:
             clone_cmd_parts.append(f"--branch {self.repository_tag}")
         clone_cmd_parts.append(self.repository_url)
@@ -208,12 +208,13 @@ class GitRepositoryBuild(ToParamMixin):
         return cd_cmd
 
 
-async def check_output(cmd: List[str]) -> str:
+async def check_output(cmd: List[str], cwd: Optional[str] = None) -> str:
     shell_cmd = " ".join(cmd)
     proc = await asyncio.create_subprocess_shell(
         shell_cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
+        cwd=cwd,
     )
     res = await proc.communicate()
     if proc.returncode != 0:
