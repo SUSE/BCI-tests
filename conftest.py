@@ -24,7 +24,7 @@ class ContainerData(NamedTuple):
 
 
 @pytest.fixture(scope="function")
-def container_git_clone(request):
+async def container_git_clone(request, tmp_path):
     """This fixture clones the `GitRepositoryBuild` passed as an indirect
     parameter to it into the currently selected container.
 
@@ -44,11 +44,21 @@ def container_git_clone(request):
             "expected GitRepositoryBuild or SubRequest with a GitRepositoryBuild"
         )
 
+    await check_output(shlex.split(git_repo_build.clone_command), cwd=tmp_path)
+
     if "container" in request.fixturenames:
         cont = request.getfixturevalue("container")
     else:
         cont = request.getfixturevalue("auto_container")
-    cont.connection.run_expect([0], git_repo_build.clone_command)
+    runtime = get_selected_runtime()
+    await check_output(
+        [
+            runtime.runner_binary,
+            "cp",
+            str(tmp_path / git_repo_build.repo_name),
+            f"{cont.container_id}:/{git_repo_build.repo_name}",
+        ]
+    )
     yield git_repo_build
 
 
