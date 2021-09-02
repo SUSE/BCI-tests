@@ -1,4 +1,5 @@
 import pytest
+from bci_tester.data import BASE_CONTAINER
 from bci_tester.fips import (
     host_fips_enabled,
     NONFIPS_DIGESTS,
@@ -8,6 +9,8 @@ from bci_tester.fips import (
 
 #: 100MB limit for the base container
 BASE_CONTAINER_MAX_SIZE = 120 * 1024 * 1024
+
+CONTAINER_IMAGE = BASE_CONTAINER
 
 
 # Generic tests
