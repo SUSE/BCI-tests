@@ -74,9 +74,9 @@ class PodmanRuntime(OciRuntimeBase):
     )
 
     @staticmethod
-    def _runtime_error_message() -> Optional[str]:
+    def _runtime_error_message() -> str:
         if PodmanRuntime._runtime_functional:
-            return None
+            return ""
         podman_ps = LOCALHOST.run("podman ps")
         if not podman_ps.succeeded:
             return podman_ps.stderr
@@ -105,9 +105,9 @@ class DockerRuntime(OciRuntimeBase):
     _runtime_functional = LOCALHOST.run("docker ps").succeeded
 
     @staticmethod
-    def _runtime_error_message() -> Optional[str]:
+    def _runtime_error_message() -> str:
         if DockerRuntime._runtime_functional:
-            return None
+            return ""
         docker_ps = LOCALHOST.run("docker ps")
         assert (
             not docker_ps.succeeded
