@@ -85,7 +85,7 @@ class PodmanRuntime(OciRuntimeBase):
 
     def __init__(self) -> None:
         super().__init__(
-            build_command="buildah bud --layers",
+            build_command="buildah bud --layers --force-rm",
             runner_binary="podman",
             _runtime_functional=self._runtime_functional,
         )
@@ -113,7 +113,7 @@ class DockerRuntime(OciRuntimeBase):
 
     def __init__(self) -> None:
         super().__init__(
-            build_command="docker build",
+            build_command="docker build --force-rm",
             runner_binary="docker",
             _runtime_functional=self._runtime_functional,
         )
