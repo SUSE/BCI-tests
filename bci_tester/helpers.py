@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+import asyncio
 from dataclasses import dataclass
 from os import getenv, path
-from typing import Any, Optional
+from typing import Any, List, Optional
 import pytest
 
 import testinfra
@@ -206,3 +207,21 @@ class GitRepositoryBuild(ToParamMixin):
             return f"""{cd_cmd} &&
                 {self.build_command}"""
         return cd_cmd
+
+
+async def check_output(cmd: List[str]) -> str:
+    shell_cmd = " ".join(cmd)
+    proc = await asyncio.create_subprocess_shell(
+        shell_cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    res = await proc.communicate()
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"Failed to execute '{shell_cmd}', "
+            f"returncode='{proc.returncode}'\n"
+            f"stderr='{res[1].decode().strip()}'\n"
+            f"stdout='{res[0].decode().strip()}'"
+        )
+    return res[0].decode().strip()
