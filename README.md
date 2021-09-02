@@ -22,15 +22,46 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 * tox
 * docker or podman+buildah
 
+## How can I run the tests?
+
+1. Ensure that you have the dependencies installed
+2. Optionally set the `BCI_DEVEL_REPO` environment variable (see next section).
+3. Run `tox -e build` (this is not strictly necessary to run beforehands, but it
+   will reduce the danger of race conditions when building containers)
+4. Run `tox -e $language_stack`
+
 ## Technical contributions
+
+### The base container
+
+We are basing most of our tests on _the_ base container (available via the
+`BASE_CONTAINER` variable in `bci_tester/data.py`). This container is pulled
+directly from `registry.suse.de` and is being build from the
+[SUSE:SLE-15-SP3:Update/sles15-image](https://build.suse.de/package/show/SUSE:SLE-15-SP3:Update/sles15-image)
+package.
+
+That container is automatically configured at build time to contain the
+`SLE_BCI` repository from `update.suse.com` (i.e. the repository **after** QA
+tested it). We also want to be able to test the current development state of the
+`SLE_BCI` repository. This can be achieved by setting the environment variable
+`BCI_DEVEL_REPO` to the url of the development/snapshot state. It is published
+on `dist.nue.suse.com` in one of the subfolders of
+http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP3:/Update:/BCI/images/repo/. Unfortunately,
+you have to hand pick the correct folder (use the one ending with `-Media1` and
+for the correct arch) because the build number is put into the folder name.
+
+The `BASE_CONTAINER` and the `GO_1_16_BASE_CONTAINER` will then be rebuild with
+the `SLE_BCI` repository replaced with the one from the `BCI_DEVEL_REPO` and all
+tests will thus use the new repository.
 
 ### Adding new containers and their tests
 
-1. Find container "type" or "language"
+1. Find container "type" or "language". When adding a new container, be sure to
+   add it to `bci_tester/data.py`, optionally also include it in the if branch
+   to replace the `SLE_BCI` repository.
 2. Add it into `tox.ini` in envlist, if not present.
 3. Create or update a file named `test_<container_type>.py` (for example, `test_python.py`)
 4. Add your tests there based on [testinfra](https://testinfra.readthedocs.io/en/latest/modules.html)
-5. Ensure the container data is up to date by updating `bci_tester/data/containers.json`.
 
 ### Extending coverage/Writing tests for existing containers
 
@@ -39,44 +70,26 @@ easy.
 
 You can use the convenience tools from conftest:
 
-* If you are using the `auto_container` fixture, your test will auto generate the right tests for _all_ the versions of your language. This is auto loaded, and doesn't need anything from your side except using the keyword `auto_container`. See below for more details.
-* If you want to _skip_ some of those tests, use the decorator named `restrict_to_version`, which accepts a list of strings of the versions for which to run the test. See below for more details.
+* If you are using the `auto_container` fixture, your test will automatically be run for all containers defined in the module variables  `CONTAINER_IMAGES` or just for the container defined as `CONTAINER_IMAGE`.
 
 ### The container fixture
 
-The `auto_container` fixture contains the black magic to run commands for all versions of a language container.
+The `auto_container` fixture contains the black magic to run tests for all container images without having to parametrize everything yourself.
 If you need to run a test only for certain versions of a language stack, you have the following three options (by order of preference):
 
-1. Use the [`restrict_to_version`](#the-restrict_to_version-decorator) decorator to limit which containers your test applies to.
+1. Use the `container` fixture and parametrize it yourself.
 2. Create your own fixture
-3. Use the `container` fixture and parametrize it yourself.
 
-The `auto_container` fixture automatically finds the testfile filename, uses it to infer the language of the container under test,
-and starts all the necessary containers. See also `conftest.py`.
 
-### The `restrict_to_version` decorator
+### Restricting test to run in serial
 
-This decorator accepts a list of strings matching the versions from `data.py`.
-
-To use it:
-
-1. add `from conftest import restrict_to_version` to your imports.
-2. wrap your test function as follow (assuming openjdk here):
-
-```Python
-@restrict_to_version(['11'])
-def mytest(container):
-    pass
-```
-* If you want to restrict certain tests from running in parallel, add the
-  `serial` mark to the respective function:
+If you want to restrict certain tests from running in parallel, add the
+`serial` mark to the respective function:
 ```python
 @pytest.mark.serial
 def test_my_heavy_installation(container):
     ...
 ```
-
-In the example above, the test function `mytest` will only run for the `openjdk:11` container, instead of all the containers for openjdk.
 
 ## Running all tests
 

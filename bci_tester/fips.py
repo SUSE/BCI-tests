@@ -32,11 +32,13 @@ FIPS_DIGESTS = (
 ALL_DIGESTS = NONFIPS_DIGESTS + FIPS_DIGESTS
 
 
-def host_fips_supported(fipsfile: str = "/proc/sys/crypto/fips_enabled"):
+def host_fips_supported(
+    fipsfile: str = "/proc/sys/crypto/fips_enabled",
+) -> bool:
     return os.path.exists(fipsfile)
 
 
-def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled"):
+def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled") -> bool:
     if not host_fips_supported(fipsfile):
         return False
 

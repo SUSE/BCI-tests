@@ -1,36 +1,25 @@
+from bci_tester.data import NODE_CONTAINER
 import pytest
 
 from bci_tester.helpers import GitRepositoryBuild
 
 
+CONTAINER_IMAGE = NODE_CONTAINER
+
+
 def test_node_version(auto_container):
     assert (
-        f"v{auto_container.version}"
-        in auto_container.connection.check_output("node -v")
-    )
-    node_version_from_env = auto_container.connection.run_expect(
-        [0], "echo ${NODE_VERSION}"
-    ).stdout.strip()
-    assert node_version_from_env == auto_container.version, (
-        f"mismatch between container version {auto_container.version}) and the"
-        f" node version from the environment variable NODE_VERSION "
-        f" ({node_version_from_env})"
+        auto_container.connection.run_expect([0], "node -v")
+        .stdout.strip()
+        .replace("v", "")
+        .split(".")[0]
+        == "14"
     )
 
 
 def test_npm_and_yarn(auto_container):
     assert auto_container.connection.run_expect([0], "npm version")
-    installed_yarn_version = auto_container.connection.run_expect(
-        [0], "yarn --version"
-    ).stdout.strip()
-    yarn_version_from_env = auto_container.connection.run_expect(
-        [0], "echo ${YARN_VERSION}"
-    ).stdout.strip()
-    assert installed_yarn_version == yarn_version_from_env, (
-        f"Mismatch between installed yarn version {installed_yarn_version} "
-        "and the yarn version advertised via "
-        f"YARN_VERSION ({yarn_version_from_env})"
-    )
+    assert auto_container.connection.run_expect([0], "yarn --version")
 
 
 @pytest.mark.parametrize(
@@ -96,6 +85,4 @@ def test_npm_and_yarn(auto_container):
 )
 def test_popular_npm_repos(auto_container, container_git_clone):
     cmd = auto_container.connection.run(container_git_clone.test_command)
-    print(cmd.stdout)
-    print(cmd.stderr)
     assert cmd.rc == 0

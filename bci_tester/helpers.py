@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+import asyncio
 from dataclasses import dataclass
 from os import getenv, path
-from typing import Any, Optional
+from typing import Any, List, Optional
 import pytest
 
 import testinfra
@@ -36,17 +37,25 @@ class OciRuntimeBase(ABC, ToParamMixin):
             )
         if not self._runtime_functional:
             raise RuntimeError(
-                f"The runtime {self.__class__.__name__} is not functional!"
+                f"The runtime {self.__class__.__name__} is not functional: "
+                + self._runtime_error_message()
             )
+
+    @staticmethod
+    @abstractmethod
+    def _runtime_error_message() -> str:
+        pass
 
     @abstractmethod
     def get_image_id_from_stdout(self, stdout: str) -> str:
         pass
 
-    def get_image_size(self, image: str) -> float:
+    def get_image_size(self, image_or_id: str) -> float:
         cmd = LOCALHOST.run_expect(
             [0],
-            f"{self.runner_binary} inspect -f " + '"{{ .Size }}" ' + image,
+            f"{self.runner_binary} inspect -f "
+            + '"{{ .Size }}" '
+            + image_or_id,
         )
         return float(cmd.stdout)
 
@@ -64,9 +73,22 @@ class PodmanRuntime(OciRuntimeBase):
         and LOCALHOST.run("buildah").succeeded
     )
 
+    @staticmethod
+    def _runtime_error_message() -> str:
+        if PodmanRuntime._runtime_functional:
+            return ""
+        podman_ps = LOCALHOST.run("podman ps")
+        if not podman_ps.succeeded:
+            return podman_ps.stderr
+        buildah = LOCALHOST.run("buildah")
+        assert (
+            not buildah.succeeded
+        ), "buildah command must not succeed as PodmanRuntime is not functional"
+        return buildah.stderr
+
     def __init__(self) -> None:
         super().__init__(
-            build_command="buildah bud --layers",
+            build_command="buildah bud --layers --force-rm",
             runner_binary="podman",
             _runtime_functional=self._runtime_functional,
         )
@@ -82,9 +104,19 @@ class DockerRuntime(OciRuntimeBase):
 
     _runtime_functional = LOCALHOST.run("docker ps").succeeded
 
+    @staticmethod
+    def _runtime_error_message() -> str:
+        if DockerRuntime._runtime_functional:
+            return ""
+        docker_ps = LOCALHOST.run("docker ps")
+        assert (
+            not docker_ps.succeeded
+        ), "docker runtime is not functional, but 'docker ps' succeeded"
+        return docker_ps.stderr
+
     def __init__(self) -> None:
         super().__init__(
-            build_command="docker build .",
+            build_command="docker build --force-rm",
             runner_binary="docker",
             _runtime_functional=self._runtime_functional,
         )
@@ -117,14 +149,12 @@ def get_selected_runtime() -> OciRuntimeBase:
 
     if runtime_choice == "podman" and podman_exists:
         return PodmanRuntime()
-    elif runtime_choice == "docker" and docker_exists:
+    if runtime_choice == "docker" and docker_exists:
         return DockerRuntime()
-    else:
-        raise ValueError(
-            "Selected runtime "
-            + runtime_choice
-            + " does not exist on the system"
-        )
+
+    raise ValueError(
+        "Selected runtime " + runtime_choice + " does not exist on the system"
+    )
 
 
 @dataclass(frozen=True)
@@ -174,6 +204,23 @@ class GitRepositoryBuild(ToParamMixin):
         """
         cd_cmd = f"cd {self.repo_name}"
         if self.build_command:
-            return f"""{cd_cmd} &&
-                {self.build_command}"""
+            return f"{cd_cmd} && {self.build_command}"
         return cd_cmd
+
+
+async def check_output(cmd: List[str]) -> str:
+    shell_cmd = " ".join(cmd)
+    proc = await asyncio.create_subprocess_shell(
+        shell_cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    res = await proc.communicate()
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"Failed to execute '{shell_cmd}', "
+            f"returncode='{proc.returncode}'\n"
+            f"stderr='{res[1].decode().strip()}'\n"
+            f"stdout='{res[0].decode().strip()}'"
+        )
+    return res[0].decode().strip()

@@ -1,27 +1,6 @@
+from bci_tester.helpers import get_selected_runtime
+from bci_tester.data import INIT_CONTAINER, ALL_CONTAINERS
 import pytest
-
-from bci_tester.parse_data import containers
-
-
-def get_init_container():
-    init_type_containers = [c for c in containers if c.type == "init"]
-    assert len(init_type_containers) == 1, (
-        f"found {len(init_type_containers)} containers with the "
-        "type 'init', but expected 1"
-    )
-    return init_type_containers[0]
-
-
-INIT_CONTAINER = get_init_container()
-INIT_CONTAINER.extra_launch_args = [
-    "--privileged",
-    # need to give the container access to dbus when invoking tox via sudo,
-    # because then things get weird...
-    # see:
-    # https://askubuntu.com/questions/1297226/how-to-run-systemctl-command-inside-docker-container
-    "-v",
-    "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket",
-]
 
 
 @pytest.mark.parametrize("container", [INIT_CONTAINER], indirect=True)
@@ -31,6 +10,10 @@ def test_systemd_present(container):
 
 
 @pytest.mark.parametrize("container", [INIT_CONTAINER], indirect=True)
+@pytest.mark.skipif(
+    get_selected_runtime().runner_binary != "docker",
+    reason="Docker in docker can only be tested when using the docker runtime",
+)
 def test_docker_in_docker(container):
     assert container.connection.run_expect([0], "zypper -n in docker")
     assert container.connection.run_expect([0], "systemctl start docker")
@@ -43,7 +26,9 @@ def test_docker_in_docker(container):
 
 
 @pytest.mark.parametrize(
-    "container", [c for c in containers if c.type != "init"], indirect=True
+    "container",
+    [c for c in ALL_CONTAINERS if c != INIT_CONTAINER],
+    indirect=True,
 )
 def test_systemd_not_installed_elsewhere(container):
     assert not container.connection.package("systemd").is_installed
