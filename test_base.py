@@ -1,4 +1,8 @@
+import re
+
 import pytest
+
+from bci_tester.helpers import GitRepositoryBuild, get_selected_runtime
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.fips import (
     host_fips_enabled,
@@ -49,3 +53,34 @@ def test_openssl_fips_hashes(auto_container):
 def test_openssl_hashes(auto_container):
     for md in ALL_DIGESTS:
         auto_container.connection.run_expect([0], f"openssl {md} /dev/null")
+
+
+@pytest.mark.parametrize(
+    "host_git_clone",
+    [
+        GitRepositoryBuild(
+            repository_url="https://github.com/rancher/rancher",
+        ).to_pytest_param()
+    ],
+    indirect=["host_git_clone"],
+)
+@pytest.mark.skipif(
+    get_selected_runtime().runner_binary != "docker",
+    reason="Dapper only works with docker",
+)
+def test_rancher_build(host, host_git_clone, dapper):
+    dest, git_repo = host_git_clone
+    rancher_dir = dest / git_repo.repo_name
+    with open(rancher_dir / "Dockerfile.dapper", "r") as dapperfile:
+        contents = dapperfile.read(-1)
+
+    with open(rancher_dir / "Dockerfile.dapper", "w") as dapperfile:
+        dapperfile.write(
+            re.sub(
+                r"FROM .*",
+                f"FROM {BASE_CONTAINER.container_id or BASE_CONTAINER.url}",
+                contents,
+            )
+        )
+
+    host.run_expect([0], f"cd {rancher_dir} && {dapper} ci")
