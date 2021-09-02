@@ -55,14 +55,18 @@ class OciRuntimeBase(ABC, ToParamMixin):
     def get_image_id_from_stdout(self, stdout: str) -> str:
         pass
 
-    def get_image_size(self, image_or_id: str) -> float:
-        cmd = LOCALHOST.run_expect(
-            [0],
-            f"{self.runner_binary} inspect -f "
-            + '"{{ .Size }}" '
-            + image_or_id,
+    async def get_image_size(self, image_or_id: str) -> float:
+        return float(
+            await check_output(
+                [
+                    self.runner_binary,
+                    "inspect",
+                    "-f",
+                    '"{{ .Size }}"',
+                    image_or_id,
+                ]
+            )
         )
-        return float(cmd.stdout)
 
     def __str__(self) -> str:
         return self.__class__.__name__

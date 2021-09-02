@@ -9,11 +9,13 @@ GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 CONTAINER_IMAGES = [GO_1_16_BASE_CONTAINER, GO_1_16_CONTAINER]
 
 
-def test_go_size(auto_container, container_runtime):
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "container", [GO_1_16_BASE_CONTAINER], indirect=["container"]
+)
+async def test_go_size(container, container_runtime):
     assert (
-        container_runtime.get_image_size(
-            auto_container.container_id or auto_container.image_url
-        )
+        await container_runtime.get_image_size(container.image_url)
         < GOLANG_MAX_CONTAINER_SIZE_ON_DISK
     )
 
@@ -38,5 +40,4 @@ def test_go_version(auto_container):
     indirect=["container", "container_git_clone"],
 )
 def test_kured(container, container_git_clone):
-    cmd = container.connection.run(container_git_clone.test_command)
-    assert cmd.rc == 0
+    container.connection.run_expect([0], container_git_clone.test_command)
