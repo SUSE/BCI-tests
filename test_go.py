@@ -40,5 +40,4 @@ def test_go_version(auto_container):
     indirect=["container", "container_git_clone"],
 )
 def test_kured(container, container_git_clone):
-    cmd = container.connection.run(container_git_clone.test_command)
-    assert cmd.rc == 0
+    container.connection.run_expect([0], container_git_clone.test_command)
