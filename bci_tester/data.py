@@ -42,10 +42,9 @@ class ContainerBase:
         """
         if self.custom_entry_point:
             return self.custom_entry_point
-        elif self.default_entry_point:
+        if self.default_entry_point:
             return None
-        else:
-            return "/bin/bash"
+        return "/bin/bash"
 
     @property
     def launch_cmd(self) -> List[str]:

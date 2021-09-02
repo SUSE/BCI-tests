@@ -149,14 +149,12 @@ def get_selected_runtime() -> OciRuntimeBase:
 
     if runtime_choice == "podman" and podman_exists:
         return PodmanRuntime()
-    elif runtime_choice == "docker" and docker_exists:
+    if runtime_choice == "docker" and docker_exists:
         return DockerRuntime()
-    else:
-        raise ValueError(
-            "Selected runtime "
-            + runtime_choice
-            + " does not exist on the system"
-        )
+
+    raise ValueError(
+        "Selected runtime " + runtime_choice + " does not exist on the system"
+    )
 
 
 @dataclass(frozen=True)
