@@ -206,8 +206,7 @@ class GitRepositoryBuild(ToParamMixin):
         """
         cd_cmd = f"cd {self.repo_name}"
         if self.build_command:
-            return f"""{cd_cmd} &&
-                {self.build_command}"""
+            return f"{cd_cmd} && {self.build_command}"
         return cd_cmd
 
 
