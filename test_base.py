@@ -14,7 +14,7 @@ from bci_tester.fips import (
 #: 100MB limit for the base container
 BASE_CONTAINER_MAX_SIZE = 120 * 1024 * 1024
 
-CONTAINER_IMAGE = BASE_CONTAINER
+CONTAINER_IMAGES = [BASE_CONTAINER]
 
 
 # Generic tests

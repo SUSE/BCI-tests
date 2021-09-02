@@ -4,7 +4,7 @@ import pytest
 from bci_tester.helpers import GitRepositoryBuild
 
 
-CONTAINER_IMAGE = NODE_CONTAINER
+CONTAINER_IMAGES = [NODE_CONTAINER]
 
 
 def test_node_version(auto_container):

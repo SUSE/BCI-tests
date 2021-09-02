@@ -70,7 +70,7 @@ easy.
 
 You can use the convenience tools from conftest:
 
-* If you are using the `auto_container` fixture, your test will automatically be run for all containers defined in the module variables  `CONTAINER_IMAGES` or just for the container defined as `CONTAINER_IMAGE`.
+* If you are using the `auto_container` fixture, your test will automatically be run for all containers defined in the module variables  `CONTAINER_IMAGES`.
 
 ### The container fixture
 
