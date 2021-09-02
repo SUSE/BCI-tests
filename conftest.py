@@ -118,7 +118,7 @@ async def auto_container(request, container_runtime):
         )
         yield ContainerData(
             image_url=launch_data.url,
-            container_id=launch_data.container_id,
+            container_id=container_id,
             connection=testinfra.get_host(
                 f"{container_runtime.runner_binary}://{container_id}"
             ),
