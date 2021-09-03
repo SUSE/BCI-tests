@@ -59,6 +59,7 @@ def test_openssl_hashes(auto_container):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/rancher/rancher",
+            marks=pytest.mark.xfail(reason="dapper ci is broken"),
         ).to_pytest_param()
     ],
     indirect=["host_git_clone"],
