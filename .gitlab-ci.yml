@@ -1,14 +1,38 @@
 ---
-image: python:latest
+.integration: &integration
+  stage: integration
+  tags:
+    - dcermak-bci-tester
+  script:
+    - tox -e build
+    - tox -e base,init,dotnet,python,node,go,multistage
+  artifacts:
+    when: always
+    reports:
+      junit: junit_*.xml
+
+stages:
+  - test
+  - integration
 
 cache:
   paths:
     - .tox
 
-before_script:
-  - pip install tox
-
 test:
+  stage: test
+  tags:
+    - dcermak-bci-tester
   script:
     - tox -e format -- --check
     - tox -e unit
+
+integration_tests_docker:
+  <<: *integration
+  variables:
+    CONTAINER_RUNTIME: docker
+
+integration_tests_podman:
+  <<: *integration
+  variables:
+    CONTAINER_RUNTIME: podman
