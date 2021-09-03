@@ -68,7 +68,7 @@ jobs:
           EOF
       - name: Build a Docker image
         run: docker build -t ${{ matrix.container_url }} .
-      - uses: anchore/scan-action@v2
+      - uses: anchore/scan-action@v3
         id: scan
         with:
           image: ${{ matrix.container_url }}
