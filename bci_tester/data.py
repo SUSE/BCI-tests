@@ -131,8 +131,31 @@ class DerivedContainer(ContainerBase):
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/standard", image="suse/sle15", tag="15.3"
 )
+
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/golang", tag="1.16"
+)
+
+DOTNET_SDK_3_1_BASE_CONTAINER = Container(
+    repo="suse/sle-15-sp3/update/bci/containerfile",
+    image="suse/dotnet-sdk",
+    tag="3.1",
+)
+DOTNET_SDK_5_0_BASE_CONTAINER = Container(
+    repo="suse/sle-15-sp3/update/bci/containerfile",
+    image="suse/dotnet-sdk",
+    tag="5.0",
+)
+
+DOTNET_ASPNET_3_1_BASE_CONTAINER = Container(
+    repo="suse/sle-15-sp3/update/bci/containerfile",
+    image="suse/dotnet-aspnet",
+    tag="3.1",
+)
+DOTNET_ASPNET_5_0_BASE_CONTAINER = Container(
+    repo="suse/sle-15-sp3/update/bci/containerfile",
+    image="suse/dotnet-aspnet",
+    tag="5.0",
 )
 
 
@@ -156,13 +179,48 @@ RUN zypper -n ref"""
         base=GO_1_16_BASE_CONTAINER,
         containerfile=REPLACE_REPO_CONTAINERFILE,
     )
+    DOTNET_SDK_3_1_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=DOTNET_SDK_3_1_BASE_CONTAINER,
+        containerfile=REPLACE_REPO_CONTAINERFILE,
+    )
+    DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=DOTNET_SDK_5_0_BASE_CONTAINER,
+        containerfile=REPLACE_REPO_CONTAINERFILE,
+    )
+    DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=DOTNET_ASPNET_3_1_BASE_CONTAINER,
+        containerfile=REPLACE_REPO_CONTAINERFILE,
+    )
+    DOTNET_ASPNET_5_0_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=DOTNET_ASPNET_5_0_BASE_CONTAINER,
+        containerfile=REPLACE_REPO_CONTAINERFILE,
+    )
 
     BASE_CONTAINER = BASE_WITH_DEVEL_REPO
     GO_1_16_BASE_CONTAINER = GO_1_16_BASE_CONTAINER_WITH_DEVEL_REPO
+    DOTNET_SDK_5_0_BASE_CONTAINER = (
+        DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO
+    )
+    DOTNET_SDK_3_1_BASE_CONTAINER = (
+        DOTNET_SDK_3_1_BASE_CONTAINER_WITH_DEVEL_REPO
+    )
+    DOTNET_ASPNET_3_1_BASE_CONTAINER = (
+        DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO
+    )
+    DOTNET_ASPNET_5_0_BASE_CONTAINER = (
+        DOTNET_ASPNET_5_0_BASE_CONTAINER_WITH_DEVEL_REPO
+    )
 
 
 #: Containers that are directly pulled from registry.suse.de
-BASE_CONTAINERS = [BASE_CONTAINER, GO_1_16_BASE_CONTAINER]
+BASE_CONTAINERS = [
+    BASE_CONTAINER,
+    GO_1_16_BASE_CONTAINER,
+    DOTNET_SDK_3_1_BASE_CONTAINER,
+    DOTNET_SDK_5_0_BASE_CONTAINER,
+    DOTNET_ASPNET_3_1_BASE_CONTAINER,
+    DOTNET_ASPNET_5_0_BASE_CONTAINER,
+]
 
 
 GO_1_16_CONTAINER = DerivedContainer(
