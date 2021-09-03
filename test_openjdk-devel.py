@@ -1,5 +1,4 @@
 import pytest
-
 from bci_tester.parse_data import containers
 
 
