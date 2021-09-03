@@ -137,25 +137,14 @@ container = auto_container
 
 def pytest_generate_tests(metafunc):
     if "auto_container" in metafunc.fixturenames and (
-        (container_img := getattr(metafunc.module, "CONTAINER_IMAGE", None))
-        is not None
-        or (
+        (
             container_images := getattr(
                 metafunc.module, "CONTAINER_IMAGES", None
             )
         )
         is not None
     ):
-
-        if container_img is not None:
-            metafunc.parametrize(
-                "auto_container", [container_img], indirect=True
-            )
-        else:
-            assert container_images is not None
-            metafunc.parametrize(
-                "auto_container", container_images, indirect=True
-            )
+        metafunc.parametrize("auto_container", container_images, indirect=True)
 
 
 @pytest.fixture(scope="module")
