@@ -48,12 +48,7 @@ def test_dotnet_aspnet_version(container, sdk_version):
 @pytest.mark.parametrize(
     "container",
     [
-        pytest.param(
-            DOTNET_SDK_3_1_BASE_CONTAINER,
-            marks=pytest.mark.xfail(
-                reason="NETCore version mismatch, expected 3.1.16, got 3.1.9"
-            ),
-        ),
+        DOTNET_SDK_3_1_BASE_CONTAINER,
         DOTNET_SDK_5_0_BASE_CONTAINER,
     ],
     indirect=["container"],
