@@ -238,7 +238,7 @@ RUN ln -s /usr/bin/pip3.9 /usr/bin/pip""",
 
 NODE_CONTAINER = DerivedContainer(
     base=BASE_CONTAINER,
-    containerfile="""RUN zypper -n in nodejs14 npm14 git curl
+    containerfile="""RUN zypper -n in nodejs14 npm14 curl
 RUN npm -g install yarn""",
 )
 
