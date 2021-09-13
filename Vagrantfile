@@ -53,9 +53,14 @@ for runtime in docker podman; do
 done
 SCRIPT
 
-Vagrant.configure("2") do |config|
-  config.vm.box = "SLES15-SP3-Vagrant.x86_64"
-  config.vm.box_url = "https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP3/images/boxes/SLES15-SP3-Vagrant.x86_64.json"
+Vagrant.configure('2') do |config|
+  config.vm.box = 'SLES15-SP3-Vagrant.x86_64'
+  config.vm.box_url = 'https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP3/images/boxes/SLES15-SP3-Vagrant.x86_64.json'
 
-  config.vm.provision "shell", inline: $test_script
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.cpus = 2
+    libvirt.memory = 2048
+  end
+
+  config.vm.provision 'shell', inline: $test_script
 end
