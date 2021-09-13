@@ -47,9 +47,10 @@ EOF
 update-ca-certificates
 systemctl start docker
 cd /vagrant/
-CONTAINER_RUNTIME=docker tox -e base
-CONTAINER_RUNTIME=podman tox -e base
 pip3.9 install --upgrade tox
+for runtime in docker podman; do
+    CONTAINER_RUNTIME=${runtime} tox -e base -- -k fips
+done
 SCRIPT
 
 Vagrant.configure("2") do |config|
