@@ -37,7 +37,7 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 We are basing most of our tests on _the_ base container (available via the
 `BASE_CONTAINER` variable in `bci_tester/data.py`). This container is pulled
 directly from `registry.suse.de` and is being build from the
-[SUSE:SLE-15-SP3:Update/sles15-image](https://build.suse.de/package/show/SUSE:SLE-15-SP3:Update/sles15-image)
+[SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image](https://build.suse.de/package/show/SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image)
 package.
 
 That container is automatically configured at build time to contain the

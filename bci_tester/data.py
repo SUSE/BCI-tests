@@ -129,7 +129,9 @@ class DerivedContainer(ContainerBase):
 
 
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/standard", image="suse/sle15", tag="15.3"
+    repo="suse/sle-15-sp3/update/cr/totest/images",
+    image="suse/sle15",
+    tag="15.3",
 )
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
@@ -137,23 +139,23 @@ GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
 )
 
 DOTNET_SDK_3_1_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-sdk",
     tag="3.1",
 )
 DOTNET_SDK_5_0_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-sdk",
     tag="5.0",
 )
 
 DOTNET_ASPNET_3_1_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-aspnet",
     tag="3.1",
 )
 DOTNET_ASPNET_5_0_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-aspnet",
     tag="5.0",
 )
