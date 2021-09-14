@@ -23,7 +23,7 @@ def test_passwd_present(auto_container):
 @pytest.mark.asyncio
 async def test_base_size(auto_container, container_runtime):
     assert (
-        await container_runtime.get_image_size(auto_container.image_url)
+        await container_runtime.get_image_size(auto_container.image_url_or_id)
         < BASE_CONTAINER_MAX_SIZE
     )
 
