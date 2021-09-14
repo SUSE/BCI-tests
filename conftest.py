@@ -136,13 +136,10 @@ container = auto_container
 
 
 def pytest_generate_tests(metafunc):
-    if "auto_container" in metafunc.fixturenames and (
-        (
-            container_images := getattr(
-                metafunc.module, "CONTAINER_IMAGES", None
-            )
-        )
-        is not None
+    container_images = getattr(metafunc.module, "CONTAINER_IMAGES", None)
+    if (
+        "auto_container" in metafunc.fixturenames
+        and container_images is not None
     ):
         metafunc.parametrize("auto_container", container_images, indirect=True)
 
