@@ -79,7 +79,6 @@ class Container(ContainerBase):
     image: str = ""
     tag: str = "latest"
     version: str = ""
-    name: str = ""
     registry: str = DEFAULT_REGISTRY
 
     def __post_init__(self):
