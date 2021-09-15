@@ -114,7 +114,7 @@ MAVEN_VERSION = "3.8.2"
         ),
         pytest.param(
             GitRepositoryBuild(
-                repository_tag="0.10.2",
+                repository_tag="0.11.1",
                 repository_url="https://github.com/alexellis/k3sup",
             ),
             MultiStageBuild(
