@@ -145,7 +145,14 @@ def pytest_generate_tests(metafunc):
         "auto_container" in metafunc.fixturenames
         and container_images is not None
     ):
-        metafunc.parametrize("auto_container", container_images, indirect=True)
+        metafunc.parametrize(
+            "auto_container",
+            [
+                pytest.param(cont_img, id=str(cont_img))
+                for cont_img in container_images
+            ],
+            indirect=True,
+        )
 
 
 @pytest.fixture(scope="module")
