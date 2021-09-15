@@ -39,6 +39,9 @@ class ContainerBase:
     #: created by `shlex.split`
     extra_launch_args: List[str] = field(default_factory=list)
 
+    def __str__(self) -> str:
+        return self.url or self.container_id
+
     @property
     def entry_point(self) -> Optional[str]:
         """The entry point of this container, either its default, bash or a
@@ -106,6 +109,12 @@ class Container(ContainerBase):
 class DerivedContainer(ContainerBase):
     base: Union[Container, DerivedContainer] = None
     containerfile: str = ""
+
+    def __str__(self) -> str:
+        return (
+            self.container_id
+            or f"container derived from {self.base.__str__()}"
+        )
 
     async def prepare_container(self) -> None:
         await self.base.prepare_container()
