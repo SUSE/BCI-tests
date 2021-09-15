@@ -167,8 +167,9 @@ DOTNET_ASPNET_5_0_BASE_CONTAINER = Container(
 # should be put into this if branch so that their repository gets replaced on
 # setting the `BCI_DEVEL_REPO` environment variable.
 #
-if (repo := os.getenv("BCI_DEVEL_REPO")) is not None:
-    REPLACE_REPO_CONTAINERFILE = f"""RUN sed -i 's|baseurl.*|baseurl={repo}|' /etc/zypp/repos.d/SLE_BCI.repo
+BCI_DEVEL_REPO = os.getenv("BCI_DEVEL_REPO")
+if BCI_DEVEL_REPO is not None:
+    REPLACE_REPO_CONTAINERFILE = f"""RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo
 RUN zypper -n ref"""
 
     BASE_WITH_DEVEL_REPO = DerivedContainer(
