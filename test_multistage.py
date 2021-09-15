@@ -6,6 +6,7 @@ from typing import Union
 import pytest
 from bci_tester.data import Container
 from bci_tester.data import DerivedContainer
+from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.helpers import GitRepositoryBuild
 
@@ -151,7 +152,10 @@ async def test_dockerfile_build(
     with open(path.join(tmp_path / "Dockerfile"), "w") as dockerfile:
         dockerfile.write(multi_stage_build.dockerfile)
 
-    cmd = host.run_expect([0], f"{container_runtime.build_command} {tmp_path}")
+    cmd = host.run_expect(
+        [0],
+        f"{container_runtime.build_command} {' '.join(EXTRA_BUILD_ARGS)} {tmp_path}",
+    )
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     assert (

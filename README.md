@@ -81,6 +81,17 @@ If you need to run a test only for certain versions of a language stack, you hav
 2. Create your own fixture
 
 
+### Adding additional container run and build parameters
+
+It is sometimes necessary to add additional parameters to the `docker build` or
+`docker run` invocation, for it to succeed. E.g. when the docker network needs
+access to a VPN connection to access dist.nue.suse.de, then one has to run
+docker with `--network=host`.
+
+This can be achieved by setting the environment variables `EXTRA_RUN_ARGS` and
+`EXTRA_BUILD_ARGS` to whatever should be added to the calls to `docker
+run`/`podman run` and `docker build`/`buildah bud`, respectively.
+
 ### Restricting test to run in serial
 
 If you want to restrict certain tests from running in parallel, add the
