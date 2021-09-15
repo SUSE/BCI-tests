@@ -37,7 +37,7 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 We are basing most of our tests on _the_ base container (available via the
 `BASE_CONTAINER` variable in `bci_tester/data.py`). This container is pulled
 directly from `registry.suse.de` and is being build from the
-[SUSE:SLE-15-SP3:Update/sles15-image](https://build.suse.de/package/show/SUSE:SLE-15-SP3:Update/sles15-image)
+[SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image](https://build.suse.de/package/show/SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image)
 package.
 
 That container is automatically configured at build time to contain the
@@ -80,6 +80,17 @@ If you need to run a test only for certain versions of a language stack, you hav
 1. Use the `container` fixture and parametrize it yourself.
 2. Create your own fixture
 
+
+### Adding additional container run and build parameters
+
+It is sometimes necessary to add additional parameters to the `docker build` or
+`docker run` invocation, for it to succeed. E.g. when the docker network needs
+access to a VPN connection to access dist.nue.suse.de, then one has to run
+docker with `--network=host`.
+
+This can be achieved by setting the environment variables `EXTRA_RUN_ARGS` and
+`EXTRA_BUILD_ARGS` to whatever should be added to the calls to `docker
+run`/`podman run` and `docker build`/`buildah bud`, respectively.
 
 ### Restricting test to run in serial
 

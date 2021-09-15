@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import os.path
+import os
+import shlex
 import tempfile
 from dataclasses import dataclass
 from dataclasses import field
@@ -13,6 +14,8 @@ from bci_tester.helpers import get_selected_runtime
 
 
 DEFAULT_REGISTRY = "registry.suse.de"
+EXTRA_RUN_ARGS = shlex.split(os.getenv("EXTRA_RUN_ARGS", ""))
+EXTRA_BUILD_ARGS = shlex.split(os.getenv("EXTRA_BUILD_ARGS", ""))
 
 
 @dataclass
@@ -54,7 +57,7 @@ class ContainerBase:
         """Returns the command to launch this container image (excluding the
         leading podman or docker binary name).
         """
-        cmd = ["run", "-d"] + self.extra_launch_args
+        cmd = ["run", "-d"] + EXTRA_RUN_ARGS + self.extra_launch_args
 
         if self.entry_point is None:
             cmd.append(self.container_id or self.url)
@@ -124,12 +127,16 @@ class DerivedContainer(ContainerBase):
                 )
 
             self.container_id = runtime.get_image_id_from_stdout(
-                await check_output([runtime.build_command, tmpdirname])
+                await check_output(
+                    [runtime.build_command] + EXTRA_BUILD_ARGS + [tmpdirname]
+                )
             )
 
 
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/standard", image="suse/sle15", tag="15.3"
+    repo="suse/sle-15-sp3/update/cr/totest/images",
+    image="suse/sle15",
+    tag="15.3",
 )
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
@@ -137,23 +144,23 @@ GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
 )
 
 DOTNET_SDK_3_1_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-sdk",
     tag="3.1",
 )
 DOTNET_SDK_5_0_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-sdk",
     tag="5.0",
 )
 
 DOTNET_ASPNET_3_1_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-aspnet",
     tag="3.1",
 )
 DOTNET_ASPNET_5_0_BASE_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/containerfile",
+    repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-aspnet",
     tag="5.0",
 )

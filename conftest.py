@@ -19,8 +19,12 @@ from requests import get
 
 
 class ContainerData(NamedTuple):
-    image_url: str
+    #: url to the container image on the registry or the id of the local image
+    #: if the container has been build locally
+    image_url_or_id: str
+    #: ID of the started container
     container_id: str
+    #: the testinfra connection to the running container
     connection: Any
 
 
@@ -117,7 +121,7 @@ async def auto_container(request, container_runtime):
             [container_runtime.runner_binary] + launch_data.launch_cmd
         )
         yield ContainerData(
-            image_url=launch_data.url,
+            image_url_or_id=launch_data.url or launch_data.container_id,
             container_id=container_id,
             connection=testinfra.get_host(
                 f"{container_runtime.runner_binary}://{container_id}"
