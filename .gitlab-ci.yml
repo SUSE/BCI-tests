@@ -39,3 +39,13 @@ integration_tests_podman:
   <<: *integration
   variables:
     CONTAINER_RUNTIME: podman
+
+fips:
+  stage: integration
+  tags:
+    - dcermak-bci-tester
+  script:
+    - vagrant up
+  after_script:
+    - "vagrant destroy -f || :"
+    - "vagrant box remove SLES15-SP3-Vagrant.x86_64 --force --all || :"
