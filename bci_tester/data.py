@@ -158,6 +158,12 @@ OPENJDK_DEVEL_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     image="bci/openjdk-devel",
     tag="11",
 )
+NODEJS_12_CONTAINER: Union[Container, DerivedContainer] = Container(
+    repo="suse/sle-15-sp3/update/bci/images", image="bci/nodejs", tag="12"
+)
+NODEJS_14_CONTAINER: Union[Container, DerivedContainer] = Container(
+    repo="suse/sle-15-sp3/update/bci/images", image="bci/nodejs", tag="14"
+)
 
 DOTNET_SDK_3_1_BASE_CONTAINER = Container(
     repo="suse/sle-15-sp3/update/cr/totest/images",
@@ -210,6 +216,12 @@ RUN zypper -n ref"""
         base=OPENJDK_DEVEL_BASE_CONTAINER,
         containerfile=REPLACE_REPO_CONTAINERFILE,
     )
+    NODEJS_12_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=NODEJS_12_CONTAINER, containerfile=REPLACE_REPO_CONTAINERFILE
+    )
+    NODEJS_14_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=NODEJS_14_CONTAINER, containerfile=REPLACE_REPO_CONTAINERFILE
+    )
 
     DOTNET_SDK_3_1_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
         base=DOTNET_SDK_3_1_BASE_CONTAINER,
@@ -232,6 +244,8 @@ RUN zypper -n ref"""
     GO_1_16_BASE_CONTAINER = GO_1_16_BASE_CONTAINER_WITH_DEVEL_REPO
     OPENJDK_BASE_CONTAINER = OPENJDK_BASE_CONTAINER_WITH_DEVEL_REPO
     OPENJDK_DEVEL_BASE_CONTAINER = OPENJDK_DEVEL_BASE_CONTAINER_WITH_DEVEL_REPO
+    NODEJS_12_CONTAINER = NODEJS_12_CONTAINER_WITH_DEVEL_REPO
+    NODEJS_14_CONTAINER = NODEJS_14_CONTAINER_WITH_DEVEL_REPO
     DOTNET_SDK_5_0_BASE_CONTAINER = (
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO
     )
@@ -252,6 +266,8 @@ BASE_CONTAINERS = [
     GO_1_16_BASE_CONTAINER,
     OPENJDK_BASE_CONTAINER,
     OPENJDK_DEVEL_BASE_CONTAINER,
+    NODEJS_12_CONTAINER,
+    NODEJS_14_CONTAINER,
     DOTNET_SDK_3_1_BASE_CONTAINER,
     DOTNET_SDK_5_0_BASE_CONTAINER,
     DOTNET_ASPNET_3_1_BASE_CONTAINER,
@@ -270,12 +286,6 @@ PYTHON39_CONTAINER = DerivedContainer(
     base=BASE_CONTAINER,
     containerfile="""RUN zypper -n in python39 python39-pip
 RUN ln -s /usr/bin/pip3.9 /usr/bin/pip""",
-)
-
-NODE_CONTAINER = DerivedContainer(
-    base=BASE_CONTAINER,
-    containerfile="""RUN zypper -n in nodejs14 npm14 curl
-RUN npm -g install yarn""",
 )
 
 INIT_CONTAINER = DerivedContainer(
@@ -297,6 +307,5 @@ ALL_CONTAINERS = BASE_CONTAINERS + [
     GO_1_16_CONTAINER,
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
-    NODE_CONTAINER,
     INIT_CONTAINER,
 ]

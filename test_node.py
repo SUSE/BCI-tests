@@ -1,9 +1,10 @@
 import pytest
-from bci_tester.data import NODE_CONTAINER
+from bci_tester.data import NODEJS_12_CONTAINER
+from bci_tester.data import NODEJS_14_CONTAINER
 from bci_tester.helpers import GitRepositoryBuild
 
 
-CONTAINER_IMAGES = [NODE_CONTAINER]
+CONTAINER_IMAGES = [NODEJS_12_CONTAINER, NODEJS_14_CONTAINER]
 
 
 def test_node_version(auto_container):
@@ -12,13 +13,21 @@ def test_node_version(auto_container):
         .stdout.strip()
         .replace("v", "")
         .split(".")[0]
-        == "14"
+        == auto_container.connection.run_expect(
+            [0], "echo $NODE_VERSION"
+        ).stdout.strip()
     )
 
 
-def test_npm_and_yarn(auto_container):
-    assert auto_container.connection.run_expect([0], "npm version")
-    assert auto_container.connection.run_expect([0], "yarn --version")
+def test_npm_version(auto_container):
+    npm_version = auto_container.connection.run_expect(
+        [0], "npm --version"
+    ).stdout.strip()
+    npm_version_from_env = auto_container.connection.run_expect(
+        [0], "echo $NPM_VERSION"
+    ).stdout.strip()
+
+    assert npm_version == npm_version_from_env
 
 
 @pytest.mark.parametrize(
@@ -39,17 +48,6 @@ def test_npm_and_yarn(auto_container):
                 build_command="npm ci && npm test && npm run lint",
             ),
             GitRepositoryBuild(
-                repository_url="https://github.com/visionmedia/debug.git",
-                build_command="""
-                    npm install &&
-                    npm run lint &&
-                    npm run test:node
-                    """,
-                marks=pytest.mark.xfail(
-                    reason="Unexpected use of file extension 'js' for './browser.js' when building src/index.js"
-                ),
-            ),
-            GitRepositoryBuild(
                 repository_url="https://github.com/expressjs/express.git",
                 build_command="""npm config set shrinkwrap false &&
                     npm rm --silent --save-dev connect-redis &&
@@ -65,14 +63,13 @@ def test_npm_and_yarn(auto_container):
                 repository_url="https://github.com/moment/moment",
             ),
             GitRepositoryBuild(
-                build_command="""yarn install &&
-                    npm install --no-save "react@~16" "react-dom@~16" &&
+                build_command="""npm -g install yarn &&
+                    yarn --frozen-lockfile &&
+                    yarn run build &&
                     yarn run pretest &&
-                    yarn run tests-only &&
-                    yarn run build
+                    yarn run tests-only
                     """,
                 repository_url="https://github.com/facebook/prop-types",
-                marks=pytest.mark.skip(reason="Broken for some reason"),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/jprichardson/node-fs-extra",
