@@ -39,6 +39,9 @@ class ContainerBase:
     #: created by `shlex.split`
     extra_launch_args: List[str] = field(default_factory=list)
 
+    def __str__(self) -> str:
+        return self.url or self.container_id
+
     @property
     def entry_point(self) -> Optional[str]:
         """The entry point of this container, either its default, bash or a
@@ -79,7 +82,6 @@ class Container(ContainerBase):
     image: str = ""
     tag: str = "latest"
     version: str = ""
-    name: str = ""
     registry: str = DEFAULT_REGISTRY
 
     def __post_init__(self):
@@ -107,6 +109,12 @@ class Container(ContainerBase):
 class DerivedContainer(ContainerBase):
     base: Union[Container, DerivedContainer] = None
     containerfile: str = ""
+
+    def __str__(self) -> str:
+        return (
+            self.container_id
+            or f"container derived from {self.base.__str__()}"
+        )
 
     async def prepare_container(self) -> None:
         await self.base.prepare_container()
@@ -141,6 +149,14 @@ BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/golang", tag="1.16"
+)
+OPENJDK_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
+    repo="suse/sle-15-sp3/update/bci/images", image="bci/openjdk", tag="11"
+)
+OPENJDK_DEVEL_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
+    repo="suse/sle-15-sp3/update/bci/images",
+    image="bci/openjdk-devel",
+    tag="11",
 )
 
 DOTNET_SDK_3_1_BASE_CONTAINER = Container(
@@ -187,6 +203,14 @@ RUN zypper -n ref"""
         base=GO_1_16_BASE_CONTAINER,
         containerfile=REPLACE_REPO_CONTAINERFILE,
     )
+    OPENJDK_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=OPENJDK_BASE_CONTAINER, containerfile=REPLACE_REPO_CONTAINERFILE
+    )
+    OPENJDK_DEVEL_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
+        base=OPENJDK_DEVEL_BASE_CONTAINER,
+        containerfile=REPLACE_REPO_CONTAINERFILE,
+    )
+
     DOTNET_SDK_3_1_BASE_CONTAINER_WITH_DEVEL_REPO = DerivedContainer(
         base=DOTNET_SDK_3_1_BASE_CONTAINER,
         containerfile=REPLACE_REPO_CONTAINERFILE,
@@ -206,6 +230,8 @@ RUN zypper -n ref"""
 
     BASE_CONTAINER = BASE_WITH_DEVEL_REPO
     GO_1_16_BASE_CONTAINER = GO_1_16_BASE_CONTAINER_WITH_DEVEL_REPO
+    OPENJDK_BASE_CONTAINER = OPENJDK_BASE_CONTAINER_WITH_DEVEL_REPO
+    OPENJDK_DEVEL_BASE_CONTAINER = OPENJDK_DEVEL_BASE_CONTAINER_WITH_DEVEL_REPO
     DOTNET_SDK_5_0_BASE_CONTAINER = (
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO
     )
@@ -224,6 +250,8 @@ RUN zypper -n ref"""
 BASE_CONTAINERS = [
     BASE_CONTAINER,
     GO_1_16_BASE_CONTAINER,
+    OPENJDK_BASE_CONTAINER,
+    OPENJDK_DEVEL_BASE_CONTAINER,
     DOTNET_SDK_3_1_BASE_CONTAINER,
     DOTNET_SDK_5_0_BASE_CONTAINER,
     DOTNET_ASPNET_3_1_BASE_CONTAINER,
@@ -265,9 +293,7 @@ ENTRYPOINT usr/lib/systemd/systemd""",
     ],
 )
 
-ALL_CONTAINERS = [
-    BASE_CONTAINER,
-    GO_1_16_BASE_CONTAINER,
+ALL_CONTAINERS = BASE_CONTAINERS + [
     GO_1_16_CONTAINER,
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
