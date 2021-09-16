@@ -48,17 +48,6 @@ def test_npm_version(auto_container):
                 build_command="npm ci && npm test && npm run lint",
             ),
             GitRepositoryBuild(
-                repository_url="https://github.com/visionmedia/debug.git",
-                build_command="""
-                    npm install &&
-                    npm run lint &&
-                    npm run test:node
-                    """,
-                marks=pytest.mark.xfail(
-                    reason="Unexpected use of file extension 'js' for './browser.js' when building src/index.js"
-                ),
-            ),
-            GitRepositoryBuild(
                 repository_url="https://github.com/expressjs/express.git",
                 build_command="""npm config set shrinkwrap false &&
                     npm rm --silent --save-dev connect-redis &&
