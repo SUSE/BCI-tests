@@ -13,13 +13,21 @@ def test_node_version(auto_container):
         .stdout.strip()
         .replace("v", "")
         .split(".")[0]
-        == "14"
+        == auto_container.connection.run_expect(
+            [0], "echo $NODE_VERSION"
+        ).stdout.strip()
     )
 
 
-def test_npm_and_yarn(auto_container):
-    assert auto_container.connection.run_expect([0], "npm version")
-    assert auto_container.connection.run_expect([0], "yarn --version")
+def test_npm_version(auto_container):
+    npm_version = auto_container.connection.run_expect(
+        [0], "npm --version"
+    ).stdout.strip()
+    npm_version_from_env = auto_container.connection.run_expect(
+        [0], "echo $NPM_VERSION"
+    ).stdout.strip()
+
+    assert npm_version == npm_version_from_env
 
 
 @pytest.mark.parametrize(
