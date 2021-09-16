@@ -144,6 +144,11 @@ BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     image="suse/sle15",
     tag="15.3",
 )
+MINIMAL_CONTAINER: Union[Container, DerivedContainer] = Container(
+    repo="suse/sle-15-sp3/update/bci/images",
+    image="bci/minimal",
+    tag="15.3",
+)
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/golang", tag="1.16"
@@ -265,6 +270,7 @@ BCI_DEVEL_REPO = (
 #: Containers that are directly pulled from registry.suse.de
 BASE_CONTAINERS = [
     BASE_CONTAINER,
+    MINIMAL_CONTAINER,
     GO_1_16_BASE_CONTAINER,
     OPENJDK_BASE_CONTAINER,
     OPENJDK_DEVEL_BASE_CONTAINER,

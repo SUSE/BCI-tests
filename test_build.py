@@ -1,14 +1,18 @@
+import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BCI_DEVEL_REPO
+from bci_tester.data import MINIMAL_CONTAINER
 from lxml import etree
 
 
-CONTAINER_IMAGES = ALL_CONTAINERS
-
-
-def test_container_build_and_repo(auto_container):
+@pytest.mark.parametrize(
+    "container",
+    [cont for cont in ALL_CONTAINERS if cont != MINIMAL_CONTAINER],
+    indirect=["container"],
+)
+def test_container_build_and_repo(container):
     repos = etree.fromstring(
-        auto_container.connection.run_expect([0], "zypper -x repos -u").stdout
+        container.connection.run_expect([0], "zypper -x repos -u").stdout
     )
 
     repos_list = repos.xpath("//repo-list")
@@ -22,3 +26,10 @@ def test_container_build_and_repo(auto_container):
 
     repo_url = sle_bci_repo.getchildren()[0]
     assert repo_url.text == BCI_DEVEL_REPO
+
+
+@pytest.mark.parametrize(
+    "container", [MINIMAL_CONTAINER], indirect=["container"]
+)
+def test_container_build(container):
+    container.connection.run_expect([0], "true")
