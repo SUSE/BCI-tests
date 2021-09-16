@@ -257,6 +257,10 @@ RUN zypper -n ref"""
         DOTNET_ASPNET_5_0_BASE_CONTAINER_WITH_DEVEL_REPO
     )
 
+BCI_DEVEL_REPO = (
+    BCI_DEVEL_REPO
+    or "https://updates.suse.com/SUSE/Products/SLE-BCI/15-SP3/x86_64/product/"
+)
 
 #: Containers that are directly pulled from registry.suse.de
 BASE_CONTAINERS = [
