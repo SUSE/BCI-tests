@@ -63,14 +63,13 @@ def test_npm_version(auto_container):
                 repository_url="https://github.com/moment/moment",
             ),
             GitRepositoryBuild(
-                build_command="""yarn install &&
-                    npm install --no-save "react@~16" "react-dom@~16" &&
+                build_command="""npm -g install yarn &&
+                    yarn --frozen-lockfile &&
+                    yarn run build &&
                     yarn run pretest &&
-                    yarn run tests-only &&
-                    yarn run build
+                    yarn run tests-only
                     """,
                 repository_url="https://github.com/facebook/prop-types",
-                marks=pytest.mark.skip(reason="Broken for some reason"),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/jprichardson/node-fs-extra",
