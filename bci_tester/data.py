@@ -153,6 +153,7 @@ MINIMAL_CONTAINER: Union[Container, DerivedContainer] = Container(
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/golang", tag="1.16"
 )
+
 OPENJDK_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/openjdk", tag="11"
 )
@@ -166,6 +167,13 @@ NODEJS_12_CONTAINER: Union[Container, DerivedContainer] = Container(
 )
 NODEJS_14_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/nodejs", tag="14"
+)
+
+PYTHON36_CONTAINER = Container(
+    repo="suse/sle-15-sp3/update/bci/images", image="bci/python", tag="3.6"
+)
+PYTHON39_CONTAINER = Container(
+    repo="suse/sle-15-sp3/update/bci/images", image="bci/python", tag="3.9"
 )
 
 DOTNET_SDK_3_1_BASE_CONTAINER = Container(
@@ -211,6 +219,8 @@ RUN zypper -n ref"""
         OPENJDK_DEVEL_BASE_CONTAINER_WITH_DEVEL_REPO,
         NODEJS_12_CONTAINER_WITH_DEVEL_REPO,
         NODEJS_14_CONTAINER_WITH_DEVEL_REPO,
+        PYTHON36_CONTAINER_WITH_DEVEL_REPO,
+        PYTHON39_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_SDK_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
@@ -224,6 +234,8 @@ RUN zypper -n ref"""
             OPENJDK_DEVEL_BASE_CONTAINER,
             NODEJS_12_CONTAINER,
             NODEJS_14_CONTAINER,
+            PYTHON36_CONTAINER,
+            PYTHON39_CONTAINER,
             DOTNET_SDK_3_1_BASE_CONTAINER,
             DOTNET_SDK_5_0_BASE_CONTAINER,
             DOTNET_ASPNET_3_1_BASE_CONTAINER,
@@ -238,6 +250,8 @@ RUN zypper -n ref"""
         OPENJDK_DEVEL_BASE_CONTAINER,
         NODEJS_12_CONTAINER,
         NODEJS_14_CONTAINER,
+        PYTHON36_CONTAINER,
+        PYTHON39_CONTAINER,
         DOTNET_SDK_3_1_BASE_CONTAINER,
         DOTNET_SDK_5_0_BASE_CONTAINER,
         DOTNET_ASPNET_3_1_BASE_CONTAINER,
@@ -249,6 +263,8 @@ RUN zypper -n ref"""
         OPENJDK_DEVEL_BASE_CONTAINER_WITH_DEVEL_REPO,
         NODEJS_12_CONTAINER_WITH_DEVEL_REPO,
         NODEJS_14_CONTAINER_WITH_DEVEL_REPO,
+        PYTHON36_CONTAINER_WITH_DEVEL_REPO,
+        PYTHON39_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_SDK_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
@@ -269,6 +285,8 @@ BASE_CONTAINERS = [
     OPENJDK_DEVEL_BASE_CONTAINER,
     NODEJS_12_CONTAINER,
     NODEJS_14_CONTAINER,
+    PYTHON36_CONTAINER,
+    PYTHON39_CONTAINER,
     DOTNET_SDK_3_1_BASE_CONTAINER,
     DOTNET_SDK_5_0_BASE_CONTAINER,
     DOTNET_ASPNET_3_1_BASE_CONTAINER,
@@ -280,14 +298,6 @@ GO_1_16_CONTAINER = DerivedContainer(
     base=GO_1_16_BASE_CONTAINER, containerfile="""RUN zypper -n in make"""
 )
 
-PYTHON36_CONTAINER = DerivedContainer(
-    base=BASE_CONTAINER, containerfile="RUN zypper -n in python3 python3-pip"
-)
-PYTHON39_CONTAINER = DerivedContainer(
-    base=BASE_CONTAINER,
-    containerfile="""RUN zypper -n in python39 python39-pip
-RUN ln -s /usr/bin/pip3.9 /usr/bin/pip""",
-)
 
 INIT_CONTAINER = DerivedContainer(
     base=BASE_CONTAINER,
@@ -306,7 +316,5 @@ ENTRYPOINT usr/lib/systemd/systemd""",
 
 ALL_CONTAINERS = BASE_CONTAINERS + [
     GO_1_16_CONTAINER,
-    PYTHON36_CONTAINER,
-    PYTHON39_CONTAINER,
     INIT_CONTAINER,
 ]
