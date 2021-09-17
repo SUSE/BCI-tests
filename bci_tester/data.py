@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import shlex
 import tempfile
@@ -107,7 +105,7 @@ class Container(ContainerBase):
 
 @dataclass
 class DerivedContainer(ContainerBase):
-    base: Union[Container, DerivedContainer] = None
+    base: Union[Container, "DerivedContainer"] = None
     containerfile: str = ""
 
     def __str__(self) -> str:
