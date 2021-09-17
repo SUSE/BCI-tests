@@ -37,8 +37,8 @@ class OciRuntimeBase(ABC, ToParamMixin):
     def __post_init__(self) -> None:
         if not self.build_command or not self.runner_binary:
             raise ValueError(
-                f"build_command ({self.build_command=}) or runner_binary "
-                f"({self.runner_binary=}) were not specified"
+                f"build_command ({self.build_command}) or runner_binary "
+                f"({self.runner_binary}) were not specified"
             )
         if not self._runtime_functional:
             raise RuntimeError(
