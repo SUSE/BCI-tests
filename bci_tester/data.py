@@ -275,6 +275,25 @@ BCI_DEVEL_REPO = (
     BCI_DEVEL_REPO
     or "https://updates.suse.com/SUSE/Products/SLE-BCI/15-SP3/x86_64/product/"
 )
+REPOCLOSURE_CONTAINER = DerivedContainer(
+    base=Container(
+        url="registry.fedoraproject.org/fedora:latest",
+        registry="registry.fedoraproject.org",
+        repo="unused",
+        image="fedora",
+    ),
+    containerfile=r"""RUN dnf -y install 'dnf-command(repoclosure)'
+RUN rm -f /etc/yum.repos.d/*repo
+RUN echo $'[SLE_BCI] \n\
+enabled=1 \n\
+name="SLE BCI" \n\
+autorefresh=0 \n\
+baseurl="""
+    + BCI_DEVEL_REPO
+    + r""" \n\
+priority=100' > /etc/yum.repos.d/SLE_BCI.repo
+""",
+)
 
 #: Containers that are directly pulled from registry.suse.de
 BASE_CONTAINERS = [
