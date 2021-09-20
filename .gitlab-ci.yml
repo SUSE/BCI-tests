@@ -5,7 +5,7 @@
     - dcermak-bci-tester
   script:
     - tox -e build
-    - tox -e base,init,dotnet,python,node,go,openjdk,openjdk-devel,minimal,repository
+    - tox -e all,base,init,dotnet,python,node,go,openjdk,openjdk-devel,minimal,repository
     - tox -e multistage -- -n0
   before_script: []
   after_script:
