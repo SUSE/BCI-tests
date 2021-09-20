@@ -198,6 +198,19 @@ DOTNET_ASPNET_5_0_BASE_CONTAINER = Container(
     tag="5.0",
 )
 
+INIT_CONTAINER = Container(
+    repo="suse/sle-15-sp3/update/bci/images",
+    image="bci/init",
+    extra_launch_args=[
+        "--privileged",
+        # need to give the container access to dbus when invoking tox via sudo,
+        # because then things get weird...
+        # see:
+        # https://askubuntu.com/questions/1297226/how-to-run-systemctl-command-inside-docker-container
+        "-v",
+        "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket",
+    ],
+)
 
 #
 # !! IMPORTANT !!
@@ -225,6 +238,7 @@ RUN zypper -n ref"""
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
+        INIT_CONTAINER_WITH_DEVEL_REPO,
     ) = (
         DerivedContainer(base=cont, containerfile=REPLACE_REPO_CONTAINERFILE)
         for cont in (
@@ -240,6 +254,7 @@ RUN zypper -n ref"""
             DOTNET_SDK_5_0_BASE_CONTAINER,
             DOTNET_ASPNET_3_1_BASE_CONTAINER,
             DOTNET_ASPNET_5_0_BASE_CONTAINER,
+            INIT_CONTAINER,
         )
     )
 
@@ -256,6 +271,7 @@ RUN zypper -n ref"""
         DOTNET_SDK_5_0_BASE_CONTAINER,
         DOTNET_ASPNET_3_1_BASE_CONTAINER,
         DOTNET_ASPNET_5_0_BASE_CONTAINER,
+        INIT_CONTAINER,
     ) = (
         BASE_CONTAINER_WITH_DEVEL_REPO,
         GO_1_16_BASE_CONTAINER_WITH_DEVEL_REPO,
@@ -269,6 +285,7 @@ RUN zypper -n ref"""
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
+        INIT_CONTAINER_WITH_DEVEL_REPO,
     )
 
 BCI_DEVEL_REPO = (
@@ -310,6 +327,7 @@ BASE_CONTAINERS = [
     DOTNET_SDK_5_0_BASE_CONTAINER,
     DOTNET_ASPNET_3_1_BASE_CONTAINER,
     DOTNET_ASPNET_5_0_BASE_CONTAINER,
+    INIT_CONTAINER,
 ]
 
 
@@ -318,22 +336,4 @@ GO_1_16_CONTAINER = DerivedContainer(
 )
 
 
-INIT_CONTAINER = DerivedContainer(
-    base=BASE_CONTAINER,
-    containerfile="""RUN zypper -n in systemd
-ENTRYPOINT usr/lib/systemd/systemd""",
-    extra_launch_args=[
-        "--privileged",
-        # need to give the container access to dbus when invoking tox via sudo,
-        # because then things get weird...
-        # see:
-        # https://askubuntu.com/questions/1297226/how-to-run-systemctl-command-inside-docker-container
-        "-v",
-        "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket",
-    ],
-)
-
-ALL_CONTAINERS = BASE_CONTAINERS + [
-    GO_1_16_CONTAINER,
-    INIT_CONTAINER,
-]
+ALL_CONTAINERS = BASE_CONTAINERS + [GO_1_16_CONTAINER]
