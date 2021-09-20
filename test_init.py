@@ -34,4 +34,8 @@ def test_docker_in_docker(container):
     indirect=True,
 )
 def test_systemd_not_installed_elsewhere(container):
-    assert not container.connection.package("systemd").is_installed
+    assert not container.connection.exists("systemctl")
+
+    # we cannot check for an existing package if rpm is not installed
+    if container.connection.exists("rpm"):
+        assert not container.connection.package("systemd").is_installed
