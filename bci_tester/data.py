@@ -149,6 +149,11 @@ MINIMAL_CONTAINER: Union[Container, DerivedContainer] = Container(
     image="bci/minimal",
     tag="15.3",
 )
+MICRO_CONTAINER: Union[Container, DerivedContainer] = Container(
+    repo="suse/sle-15-sp3/update/bci/images",
+    image="bci/micro",
+    tag="15.3",
+)
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/golang", tag="1.16"
@@ -316,6 +321,7 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 BASE_CONTAINERS = [
     BASE_CONTAINER,
     MINIMAL_CONTAINER,
+    MICRO_CONTAINER,
     GO_1_16_BASE_CONTAINER,
     OPENJDK_BASE_CONTAINER,
     OPENJDK_DEVEL_BASE_CONTAINER,

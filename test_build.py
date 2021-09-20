@@ -1,13 +1,18 @@
 import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BCI_DEVEL_REPO
+from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from lxml import etree
 
 
 @pytest.mark.parametrize(
     "container",
-    [cont for cont in ALL_CONTAINERS if cont != MINIMAL_CONTAINER],
+    [
+        cont
+        for cont in ALL_CONTAINERS
+        if cont not in (MINIMAL_CONTAINER, MICRO_CONTAINER)
+    ],
     indirect=["container"],
 )
 def test_container_build_and_repo(container):
@@ -29,7 +34,7 @@ def test_container_build_and_repo(container):
 
 
 @pytest.mark.parametrize(
-    "container", [MINIMAL_CONTAINER], indirect=["container"]
+    "container", [MINIMAL_CONTAINER, MICRO_CONTAINER], indirect=["container"]
 )
 def test_container_build(container):
     container.connection.run_expect([0], "true")
