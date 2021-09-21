@@ -107,6 +107,9 @@ class Container(ContainerBase):
         """Prepares the container so that it can be launched."""
         await self.pull_container()
 
+    def get_base_url(self) -> str:
+        return self.url
+
 
 @dataclass
 class DerivedContainer(ContainerBase):
@@ -118,6 +121,9 @@ class DerivedContainer(ContainerBase):
             self.container_id
             or f"container derived from {self.base.__str__()}"
         )
+
+    def get_base_url(self) -> str:
+        return self.base.get_base_url()
 
     async def prepare_container(self) -> None:
         await self.base.prepare_container()
