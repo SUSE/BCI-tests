@@ -15,6 +15,9 @@ DEFAULT_REGISTRY = "registry.suse.de"
 EXTRA_RUN_ARGS = shlex.split(os.getenv("EXTRA_RUN_ARGS", ""))
 EXTRA_BUILD_ARGS = shlex.split(os.getenv("EXTRA_BUILD_ARGS", ""))
 
+OS_VERSION = "15.3"
+OS_PRETTY_NAME = "SUSE Linux Enterprise Server 15 SP3"
+
 
 @dataclass
 class ContainerBase:
@@ -142,17 +145,17 @@ class DerivedContainer(ContainerBase):
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/sle15",
-    tag="15.3",
+    tag=OS_VERSION,
 )
 MINIMAL_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images",
     image="bci/minimal",
-    tag="15.3",
+    tag=OS_VERSION,
 )
 MICRO_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images",
     image="bci/micro",
-    tag="15.3",
+    tag=OS_VERSION,
 )
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
