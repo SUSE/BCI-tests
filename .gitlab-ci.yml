@@ -65,7 +65,16 @@ fips:
     - dcermak-bci-tester
   before_script: []
   script:
-    - vagrant up
+    - vagrant up fips
   after_script:
-    - "vagrant destroy -f || :"
-    - "vagrant box remove SLES15-SP3-Vagrant.x86_64 --force --all || :"
+    - "vagrant destroy -f fips || :"
+
+build_on_registered_system:
+  stage: integration
+  tags:
+    - dcermak-bci-tester
+  before_script: []
+  script:
+    - vagrant up registered
+  after_script:
+    - "vagrant destroy -f registered || :"
