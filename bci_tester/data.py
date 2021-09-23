@@ -9,7 +9,9 @@ from typing import List
 from typing import Optional
 from typing import Union
 
+import pytest
 from bci_tester.helpers import get_selected_runtime
+from bci_tester.helpers import LOCALHOST
 
 
 DEFAULT_REGISTRY = "registry.suse.de"
@@ -18,6 +20,11 @@ EXTRA_BUILD_ARGS = shlex.split(os.getenv("EXTRA_BUILD_ARGS", ""))
 
 OS_VERSION = "15.3"
 OS_PRETTY_NAME = "SUSE Linux Enterprise Server 15 SP3"
+
+DOTNET_ARCH_SKIP_MARK = pytest.mark.skipif(
+    LOCALHOST.system_info.arch != "x86_64",
+    reason="The .Net containers are only available on x86_64",
+)
 
 
 @dataclass
@@ -376,12 +383,17 @@ BASE_CONTAINERS = [
     NODEJS_14_CONTAINER,
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
-    DOTNET_SDK_3_1_BASE_CONTAINER,
-    DOTNET_SDK_5_0_BASE_CONTAINER,
-    DOTNET_ASPNET_3_1_BASE_CONTAINER,
-    DOTNET_ASPNET_5_0_BASE_CONTAINER,
     INIT_CONTAINER,
-]
+] + (
+    [
+        DOTNET_SDK_3_1_BASE_CONTAINER,
+        DOTNET_SDK_5_0_BASE_CONTAINER,
+        DOTNET_ASPNET_3_1_BASE_CONTAINER,
+        DOTNET_ASPNET_5_0_BASE_CONTAINER,
+    ]
+    if LOCALHOST.system_info.arch == "x86_64"
+    else []
+)
 
 
 GO_1_16_CONTAINER = DerivedContainer(

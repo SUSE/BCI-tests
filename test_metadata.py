@@ -44,12 +44,17 @@ IMAGES_AND_NAMES = [
     (NODEJS_14_CONTAINER, "nodejs"),
     (PYTHON36_CONTAINER, "python"),
     (PYTHON39_CONTAINER, "python"),
-    (DOTNET_SDK_3_1_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_SDK_5_0_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_ASPNET_3_1_BASE_CONTAINER, "dotnet.aspnet"),
-    (DOTNET_ASPNET_5_0_BASE_CONTAINER, "dotnet.aspnet"),
     (INIT_CONTAINER, "init"),
-]
+] + (
+    [
+        (DOTNET_SDK_3_1_BASE_CONTAINER, "dotnet.sdk"),
+        (DOTNET_SDK_5_0_BASE_CONTAINER, "dotnet.sdk"),
+        (DOTNET_ASPNET_3_1_BASE_CONTAINER, "dotnet.aspnet"),
+        (DOTNET_ASPNET_5_0_BASE_CONTAINER, "dotnet.aspnet"),
+    ]
+    if LOCALHOST.system_info.arch == "x86_64"
+    else []
+)
 
 assert len(BASE_CONTAINERS) == len(
     IMAGES_AND_NAMES

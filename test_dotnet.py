@@ -1,18 +1,20 @@
 import re
 
 import pytest
+from bci_tester.data import DOTNET_ARCH_SKIP_MARK
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
 from bci_tester.helpers import GitRepositoryBuild
-from bci_tester.helpers import LOCALHOST
 
 
 CONTAINER_IMAGES = [
     DOTNET_SDK_3_1_BASE_CONTAINER,
     DOTNET_SDK_5_0_BASE_CONTAINER,
 ]
+
+pytestmark = DOTNET_ARCH_SKIP_MARK
 
 
 @pytest.mark.parametrize(
@@ -83,10 +85,6 @@ def test_popular_web_apps(container, container_git_clone):
     container.connection.run_expect([0], container_git_clone.test_command)
 
 
-@pytest.mark.skipif(
-    LOCALHOST.system_info.arch != "x86_64",
-    reason="The .Net containers are only available on x86_64",
-)
 @pytest.mark.parametrize(
     "container",
     [
