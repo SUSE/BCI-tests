@@ -120,8 +120,7 @@ MAVEN_VERSION = "3.8.2"
             MultiStageBuild(
                 GO_1_16_CONTAINER,
                 "scratch",
-                """
-FROM $builder as builder
+                """FROM $builder as builder
 WORKDIR /k3sup
 COPY ./k3sup .
 RUN echo > ./hack/hashgen.sh && make all
