@@ -1,9 +1,12 @@
+import re
+
 import pytest
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
 from bci_tester.helpers import GitRepositoryBuild
+from bci_tester.helpers import LOCALHOST
 
 
 CONTAINER_IMAGES = [
@@ -78,3 +81,23 @@ dotnet test ./src/Tests/Nop.Tests/Nop.Tests.csproj""",
 )
 def test_popular_web_apps(container, container_git_clone):
     container.connection.run_expect([0], container_git_clone.test_command)
+
+
+@pytest.mark.skipif(
+    LOCALHOST.system_info.arch != "x86_64",
+    reason="The .Net containers are only available on x86_64",
+)
+@pytest.mark.parametrize(
+    "container",
+    [
+        DOTNET_SDK_3_1_BASE_CONTAINER,
+        DOTNET_SDK_5_0_BASE_CONTAINER,
+    ],
+    indirect=["container"],
+)
+@pytest.mark.xfail(reason="Telemetry has not yet been deactivated")
+def test_dotnet_sdk_telemetry_deactivated(container):
+    dotnet_new_stdout = container.connection.run_expect(
+        [0], "dotnet help"
+    ).stdout.strip()
+    assert not re.search(r"telemetry", dotnet_new_stdout, re.IGNORECASE)
