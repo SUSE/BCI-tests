@@ -63,7 +63,8 @@ fips:
   stage: integration
   tags:
     - dcermak-bci-tester
-  before_script: []
+  before_script:
+    - vagrant box update
   script:
     - vagrant up fips
   after_script:
@@ -73,7 +74,8 @@ build_on_registered_system:
   stage: integration
   tags:
     - dcermak-bci-tester
-  before_script: []
+  before_script:
+    - vagrant box update
   script:
     - vagrant up registered
   after_script:

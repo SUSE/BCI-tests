@@ -49,7 +49,7 @@ $setup_system = <<~SCRIPT
   update-ca-certificates
 
   systemctl start docker
-  pip3.9 install --upgrade tox
+  pip install tox
 SCRIPT
 
 $fips_test_script = <<~SCRIPT
