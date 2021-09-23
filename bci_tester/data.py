@@ -281,7 +281,9 @@ INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
 # registered systems)
 #
 BCI_DEVEL_REPO = os.getenv("BCI_DEVEL_REPO")
-if BCI_DEVEL_REPO is not None:
+if BCI_DEVEL_REPO is None:
+    BCI_DEVEL_REPO = f"https://updates.suse.com/SUSE/Products/SLE-BCI/15-SP3/{LOCALHOST.system_info.arch}/product/"
+else:
     REPLACE_REPO_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo"
 
     (
@@ -347,10 +349,6 @@ if BCI_DEVEL_REPO is not None:
         INIT_CONTAINER_WITH_DEVEL_REPO,
     )
 
-BCI_DEVEL_REPO = (
-    BCI_DEVEL_REPO
-    or "https://updates.suse.com/SUSE/Products/SLE-BCI/15-SP3/x86_64/product/"
-)
 REPOCLOSURE_CONTAINER = DerivedContainer(
     base=Container(
         url="registry.fedoraproject.org/fedora:latest",
