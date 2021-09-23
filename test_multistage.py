@@ -41,7 +41,7 @@ MAVEN_VERSION = "3.8.2"
 @pytest.mark.parametrize(
     "host_git_clone,multi_stage_build,retval,cmd_stdout",
     [
-        pytest.param(
+        (
             GitRepositoryBuild(
                 repository_url="https://github.com/toolbox4minecraft/amidst",
                 repository_tag="v4.7",
@@ -63,7 +63,7 @@ MAVEN_VERSION = "3.8.2"
             0,
             "[info] Amidst v4.7",
         ),
-        pytest.param(
+        (
             GitRepositoryBuild(
                 repository_url="https://github.com/apache/maven",
                 repository_tag=f"maven-{MAVEN_VERSION}",
@@ -86,7 +86,7 @@ MAVEN_VERSION = "3.8.2"
             1,
             "[ERROR] No goals have been specified for this build.",
         ),
-        pytest.param(
+        (
             GitRepositoryBuild(
                 repository_tag="v3.3.1",
                 repository_url="https://gitlab.com/pdftk-java/pdftk.git",
@@ -112,7 +112,7 @@ MAVEN_VERSION = "3.8.2"
        pdftk <input PDF files | - | PROMPT>
         """,
         ),
-        pytest.param(
+        (
             GitRepositoryBuild(
                 repository_tag="0.11.1",
                 repository_url="https://github.com/alexellis/k3sup",
