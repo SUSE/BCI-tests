@@ -87,7 +87,7 @@ MAVEN_VERSION = "3.8.2"
        pdftk <input PDF files | - | PROMPT>
         """,
         ),
-        (
+        pytest.param(
             GitRepositoryBuild(
                 repository_tag="0.11.1",
                 repository_url="https://github.com/alexellis/k3sup",
@@ -108,6 +108,10 @@ CMD ["/k3sup/k3sup"]
             ),
             0,
             'Use "k3sup [command] --help" for more information about a command.',
+            marks=pytest.mark.xfail(
+                condition=LOCALHOST.system_info.arch != "x86_64",
+                reason="Currently broken on arch != x86_64, see https://github.com/alexellis/k3sup/pull/345",
+            ),
         ),
         pytest.param(
             GitRepositoryBuild(
