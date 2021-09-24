@@ -185,12 +185,12 @@ BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     image="suse/sle15",
     tag=OS_VERSION,
 )
-MINIMAL_CONTAINER: Union[Container, DerivedContainer] = Container(
+MINIMAL_CONTAINER = Container(
     repo="suse/sle-15-sp3/update/bci/images",
     image="bci/minimal",
     tag=OS_VERSION,
 )
-MICRO_CONTAINER: Union[Container, DerivedContainer] = Container(
+MICRO_CONTAINER = Container(
     repo="suse/sle-15-sp3/update/bci/images",
     image="bci/micro",
     tag=OS_VERSION,
