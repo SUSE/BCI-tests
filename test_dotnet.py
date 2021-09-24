@@ -95,7 +95,6 @@ def test_popular_web_apps(container, container_git_clone):
     ],
     indirect=["container"],
 )
-@pytest.mark.xfail(reason="Telemetry has not yet been deactivated")
 def test_dotnet_sdk_telemetry_deactivated(container):
     dotnet_new_stdout = container.connection.run_expect(
         [0], "dotnet help"
