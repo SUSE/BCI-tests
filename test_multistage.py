@@ -1,41 +1,16 @@
 import asyncio
-from dataclasses import dataclass
 from os import path
-from string import Template
-from typing import Union
 
 import pytest
-from bci_tester.data import Container
-from bci_tester.data import DerivedContainer
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
 from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_CONTAINER
+from bci_tester.data import MultiStageBuild
 from bci_tester.data import OPENJDK_BASE_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_BASE_CONTAINER
 from bci_tester.helpers import GitRepositoryBuild
 from bci_tester.helpers import LOCALHOST
-
-
-@dataclass
-class MultiStageBuild:
-    builder: Union[Container, DerivedContainer]
-    runner: Union[Container, DerivedContainer, str]
-
-    dockerfile_template: str
-
-    @property
-    def dockerfile(self) -> str:
-        builder = self.builder.container_id or self.builder.url
-        runner = (
-            self.runner
-            if isinstance(self.runner, str)
-            else self.runner.container_id or self.runner.url
-        )
-
-        return Template(self.dockerfile_template).substitute(
-            builder=builder, runner=runner
-        )
 
 
 MAVEN_VERSION = "3.8.2"
@@ -209,13 +184,7 @@ async def test_dockerfile_build(
 ):
     tmp_path, _ = host_git_clone
 
-    prepare_coros = [multi_stage_build.builder.prepare_container()]
-    if not isinstance(multi_stage_build.runner, str):
-        prepare_coros.append(multi_stage_build.runner.prepare_container())
-    await asyncio.wait(prepare_coros)
-
-    with open(path.join(tmp_path / "Dockerfile"), "w") as dockerfile:
-        dockerfile.write(multi_stage_build.dockerfile)
+    await multi_stage_build.prepare_build(tmp_path)
 
     cmd = host.run_expect(
         [0],
