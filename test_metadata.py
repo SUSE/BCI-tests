@@ -1,7 +1,6 @@
 import json
 from subprocess import check_output
 from typing import Any
-from typing import Container
 from typing import Union
 
 import pytest
