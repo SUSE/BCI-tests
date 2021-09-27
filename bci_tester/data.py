@@ -266,10 +266,13 @@ INIT_CONTAINER = Container(
 # should be put into this if branch so that their repository gets replaced on
 # setting the `BCI_DEVEL_REPO` environment variable.
 #
+# We must not run any zypper commands here, as otherwise container-suseconnect
+# will keep a ton of metadata of the fetched repositories (which is a lot on
+# registered systems)
+#
 BCI_DEVEL_REPO = os.getenv("BCI_DEVEL_REPO")
 if BCI_DEVEL_REPO is not None:
-    REPLACE_REPO_CONTAINERFILE = f"""RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo
-RUN zypper -n ref"""
+    REPLACE_REPO_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo"
 
     (
         BASE_CONTAINER_WITH_DEVEL_REPO,

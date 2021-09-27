@@ -52,6 +52,8 @@ def test_container_build_and_repo(container, host):
     repo_url = sle_bci_repo.getchildren()[0]
     assert repo_url.text == BCI_DEVEL_REPO
 
+    container.connection.run_expect([0], "zypper -n ref")
+
 
 @pytest.mark.parametrize(
     "container", [MINIMAL_CONTAINER, MICRO_CONTAINER], indirect=["container"]
