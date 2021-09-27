@@ -215,36 +215,40 @@ NODEJS_14_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/nodejs", tag="14"
 )
 
-PYTHON36_CONTAINER = Container(
+PYTHON36_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/python", tag="3.6"
 )
-PYTHON39_CONTAINER = Container(
+PYTHON39_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images", image="bci/python", tag="3.9"
 )
 
-DOTNET_SDK_3_1_BASE_CONTAINER = Container(
+DOTNET_SDK_3_1_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-sdk",
     tag="3.1",
 )
-DOTNET_SDK_5_0_BASE_CONTAINER = Container(
+DOTNET_SDK_5_0_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-sdk",
     tag="5.0",
 )
 
-DOTNET_ASPNET_3_1_BASE_CONTAINER = Container(
+DOTNET_ASPNET_3_1_BASE_CONTAINER: Union[
+    Container, DerivedContainer
+] = Container(
     repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-aspnet",
     tag="3.1",
 )
-DOTNET_ASPNET_5_0_BASE_CONTAINER = Container(
+DOTNET_ASPNET_5_0_BASE_CONTAINER: Union[
+    Container, DerivedContainer
+] = Container(
     repo="suse/sle-15-sp3/update/cr/totest/images",
     image="suse/dotnet-aspnet",
     tag="5.0",
 )
 
-INIT_CONTAINER = Container(
+INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
     repo="suse/sle-15-sp3/update/bci/images",
     image="bci/init",
     extra_launch_args=[
