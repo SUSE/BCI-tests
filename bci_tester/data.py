@@ -1,8 +1,10 @@
+import asyncio
 import os
 import shlex
 import tempfile
 from dataclasses import dataclass
 from dataclasses import field
+from string import Template
 from typing import List
 from typing import Optional
 from typing import Union
@@ -140,6 +142,36 @@ class DerivedContainer(ContainerBase):
                     [runtime.build_command] + EXTRA_BUILD_ARGS + [tmpdirname]
                 )
             )
+
+
+@dataclass
+class MultiStageBuild:
+    builder: Union[Container, DerivedContainer]
+    runner: Union[Container, DerivedContainer, str]
+
+    dockerfile_template: str
+
+    @property
+    def dockerfile(self) -> str:
+        builder = self.builder.container_id or self.builder.url
+        runner = (
+            self.runner
+            if isinstance(self.runner, str)
+            else self.runner.container_id or self.runner.url
+        )
+
+        return Template(self.dockerfile_template).substitute(
+            builder=builder, runner=runner
+        )
+
+    async def prepare_build(self, tmp_dir):
+        prepare_coros = [self.builder.prepare_container()]
+        if not isinstance(self.runner, str):
+            prepare_coros.append(self.runner.prepare_container())
+        await asyncio.wait(prepare_coros)
+
+        with open(tmp_dir / "Dockerfile", "w") as dockerfile:
+            dockerfile.write(self.dockerfile)
 
 
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
