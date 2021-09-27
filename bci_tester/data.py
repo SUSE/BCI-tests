@@ -1,15 +1,14 @@
-import asyncio
 import os
 import shlex
 import tempfile
 from dataclasses import dataclass
 from dataclasses import field
 from string import Template
+from subprocess import check_output
 from typing import List
 from typing import Optional
 from typing import Union
 
-from bci_tester.helpers import check_output
 from bci_tester.helpers import get_selected_runtime
 
 
@@ -96,16 +95,15 @@ class Container(ContainerBase):
         if not self.url:
             self.url = f"{self.registry}/{self.repo}/{self.image}:{self.tag}"
 
-    async def pull_container(self) -> str:
+    def pull_container(self) -> None:
         """Pulls the container with the given url using the currently selected
         container runtime"""
         runtime = get_selected_runtime()
-        res = await check_output([runtime.runner_binary, "pull", self.url])
-        return res
+        check_output([runtime.runner_binary, "pull", self.url])
 
-    async def prepare_container(self) -> None:
+    def prepare_container(self) -> None:
         """Prepares the container so that it can be launched."""
-        await self.pull_container()
+        self.pull_container()
 
     def get_base_url(self) -> str:
         return self.url
@@ -125,8 +123,8 @@ class DerivedContainer(ContainerBase):
     def get_base_url(self) -> str:
         return self.base.get_base_url()
 
-    async def prepare_container(self) -> None:
-        await self.base.prepare_container()
+    def prepare_container(self) -> None:
+        self.base.prepare_container()
 
         runtime = get_selected_runtime()
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -144,9 +142,11 @@ class DerivedContainer(ContainerBase):
                 )
 
             self.container_id = runtime.get_image_id_from_stdout(
-                await check_output(
-                    [runtime.build_command] + EXTRA_BUILD_ARGS + [tmpdirname]
+                check_output(
+                    runtime.build_command + EXTRA_BUILD_ARGS + [tmpdirname]
                 )
+                .decode()
+                .strip()
             )
 
 
@@ -170,11 +170,10 @@ class MultiStageBuild:
             builder=builder, runner=runner
         )
 
-    async def prepare_build(self, tmp_dir):
-        prepare_coros = [self.builder.prepare_container()]
+    def prepare_build(self, tmp_dir):
+        self.builder.prepare_container()
         if not isinstance(self.runner, str):
-            prepare_coros.append(self.runner.prepare_container())
-        await asyncio.wait(prepare_coros)
+            self.runner.prepare_container()
 
         with open(tmp_dir / "Dockerfile", "w") as dockerfile:
             dockerfile.write(self.dockerfile)

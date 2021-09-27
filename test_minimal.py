@@ -9,7 +9,6 @@ MINIMAL_IMAGE_MAX_SIZE = 40 * 1024 * 1024
 MICRO_IMAGE_MAX_SIZE = 25 * 1024 * 1024
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "container,size",
     [
@@ -18,11 +17,8 @@ MICRO_IMAGE_MAX_SIZE = 25 * 1024 * 1024
     ],
     indirect=["container"],
 )
-async def test_minimal_image_size(container, size, container_runtime):
-    assert (
-        await container_runtime.get_image_size(container.image_url_or_id)
-        < size
-    )
+def test_minimal_image_size(container, size, container_runtime):
+    assert container_runtime.get_image_size(container.image_url_or_id) < size
 
 
 def test_fat_packages_absent(auto_container):

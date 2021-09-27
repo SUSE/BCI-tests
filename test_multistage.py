@@ -1,6 +1,3 @@
-import asyncio
-from os import path
-
 import pytest
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
@@ -173,8 +170,7 @@ ENTRYPOINT ["/app/entrypoint.sh"]
     ],
     indirect=["host_git_clone"],
 )
-@pytest.mark.asyncio
-async def test_dockerfile_build(
+def test_dockerfile_build(
     host,
     container_runtime,
     host_git_clone,
@@ -184,11 +180,11 @@ async def test_dockerfile_build(
 ):
     tmp_path, _ = host_git_clone
 
-    await multi_stage_build.prepare_build(tmp_path)
+    multi_stage_build.prepare_build(tmp_path)
 
     cmd = host.run_expect(
         [0],
-        f"{container_runtime.build_command} {' '.join(EXTRA_BUILD_ARGS)} {tmp_path}",
+        f"{' '.join(container_runtime.build_command + EXTRA_BUILD_ARGS)} {tmp_path}",
     )
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 

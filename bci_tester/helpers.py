@@ -1,7 +1,7 @@
-import asyncio
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
+from dataclasses import field
 from os import getenv
 from os import path
 from subprocess import check_output
@@ -29,7 +29,7 @@ class ToParamMixin:
 @dataclass(frozen=True)
 class OciRuntimeBase(ABC, ToParamMixin):
     #: command that builds the Dockerfile in the current working directory
-    build_command: str = ""
+    build_command: List[str] = field(default_factory=list)
     #: the "main" binary of this runtime, e.g. podman or docker
     runner_binary: str = ""
     _runtime_functional: bool = False
@@ -55,9 +55,9 @@ class OciRuntimeBase(ABC, ToParamMixin):
     def get_image_id_from_stdout(self, stdout: str) -> str:
         pass
 
-    async def get_image_size(self, image_or_id: str) -> float:
+    def get_image_size(self, image_or_id: str) -> float:
         return float(
-            await check_output(
+            check_output(
                 [
                     self.runner_binary,
                     "inspect",
@@ -66,6 +66,9 @@ class OciRuntimeBase(ABC, ToParamMixin):
                     image_or_id,
                 ]
             )
+            .decode()
+            .strip()
+            .replace('"', "")
         )
 
     def __str__(self) -> str:
@@ -97,7 +100,7 @@ class PodmanRuntime(OciRuntimeBase):
 
     def __init__(self) -> None:
         super().__init__(
-            build_command="buildah bud --layers --force-rm",
+            build_command=["buildah", "bud", "--layers", "--force-rm"],
             runner_binary="podman",
             _runtime_functional=self._runtime_functional,
         )
@@ -125,7 +128,7 @@ class DockerRuntime(OciRuntimeBase):
 
     def __init__(self) -> None:
         super().__init__(
-            build_command="docker build --force-rm",
+            build_command=["docker", "build", "--force-rm"],
             runner_binary="docker",
             _runtime_functional=self._runtime_functional,
         )
@@ -215,22 +218,3 @@ class GitRepositoryBuild(ToParamMixin):
         if self.build_command:
             return f"{cd_cmd} && {self.build_command}"
         return cd_cmd
-
-
-async def check_output(cmd: List[str], cwd: Optional[str] = None) -> str:
-    shell_cmd = " ".join(cmd)
-    proc = await asyncio.create_subprocess_shell(
-        shell_cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-        cwd=cwd,
-    )
-    res = await proc.communicate()
-    if proc.returncode != 0:
-        raise RuntimeError(
-            f"Failed to execute '{shell_cmd}', "
-            f"returncode='{proc.returncode}'\n"
-            f"stderr='{res[1].decode().strip()}'\n"
-            f"stdout='{res[0].decode().strip()}'"
-        )
-    return res[0].decode().strip()
