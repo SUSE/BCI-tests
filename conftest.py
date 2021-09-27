@@ -1,8 +1,8 @@
-import asyncio
 import functools
 import os
 import shlex
 import tempfile
+from subprocess import check_output
 from typing import Any
 from typing import NamedTuple
 from typing import Optional
@@ -12,7 +12,6 @@ import pytest
 import testinfra
 from bci_tester.data import Container
 from bci_tester.data import DerivedContainer
-from bci_tester.helpers import check_output
 from bci_tester.helpers import get_selected_runtime
 from bci_tester.helpers import GitRepositoryBuild
 from requests import get
@@ -29,7 +28,7 @@ class ContainerData(NamedTuple):
 
 
 @pytest.fixture(scope="function")
-async def container_git_clone(request, tmp_path):
+def container_git_clone(request, tmp_path):
     """This fixture clones the `GitRepositoryBuild` passed as an indirect
     parameter to it into the currently selected container.
 
@@ -49,14 +48,14 @@ async def container_git_clone(request, tmp_path):
             "expected GitRepositoryBuild or SubRequest with a GitRepositoryBuild"
         )
 
-    await check_output(shlex.split(git_repo_build.clone_command), cwd=tmp_path)
+    check_output(shlex.split(git_repo_build.clone_command), cwd=tmp_path)
 
     if "container" in request.fixturenames:
         cont = request.getfixturevalue("container")
     else:
         cont = request.getfixturevalue("auto_container")
     runtime = get_selected_runtime()
-    await check_output(
+    check_output(
         [
             runtime.runner_binary,
             "cp",
@@ -102,12 +101,7 @@ def container_runtime():
 
 
 @pytest.fixture(scope="module")
-def event_loop():
-    return asyncio.get_event_loop()
-
-
-@pytest.fixture(scope="module")
-async def auto_container(request, container_runtime):
+def auto_container(request, container_runtime):
     """Fixture that will build & launch a container that is either passed as a
     request parameter or it will be automatically parametrized via
     pytest_generate_tests.
@@ -116,9 +110,13 @@ async def auto_container(request, container_runtime):
 
     container_id: Optional[str] = None
     try:
-        await launch_data.prepare_container()
-        container_id = await check_output(
-            [container_runtime.runner_binary] + launch_data.launch_cmd
+        launch_data.prepare_container()
+        container_id = (
+            check_output(
+                [container_runtime.runner_binary] + launch_data.launch_cmd
+            )
+            .decode()
+            .strip()
         )
         yield ContainerData(
             image_url_or_id=launch_data.url or launch_data.container_id,
@@ -131,7 +129,7 @@ async def auto_container(request, container_runtime):
         raise exc
     finally:
         if container_id is not None:
-            await check_output(
+            check_output(
                 [container_runtime.runner_binary, "rm", "-f", container_id]
             )
 

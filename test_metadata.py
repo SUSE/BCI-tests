@@ -1,6 +1,6 @@
 import json
+from subprocess import check_output
 from typing import Any
-from typing import Container
 from typing import Union
 
 import pytest
@@ -24,7 +24,6 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
-from bci_tester.helpers import check_output
 from bci_tester.helpers import LOCALHOST
 from bci_tester.helpers import OciRuntimeBase
 
@@ -57,17 +56,22 @@ assert len(BASE_CONTAINERS) == len(
 ), "IMAGES_AND_NAMES must have all containers from BASE_CONTAINERS"
 
 
-async def get_container_metadata(
+def get_container_metadata(
     container_data: Union[Container, DerivedContainer]
 ) -> Any:
     return json.loads(
-        await check_output(
-            ["skopeo", "inspect", f"docker://{container_data.get_base_url()}"],
+        check_output(
+            [
+                "skopeo",
+                "inspect",
+                f"docker://{container_data.get_base_url()}",
+            ],
         )
+        .decode()
+        .strip()
     )
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "container_data,container_name",
     [(img, name) for (img, name) in IMAGES_AND_NAMES if img != BASE_CONTAINER]
@@ -81,11 +85,11 @@ async def get_container_metadata(
         )
     ],
 )
-async def test_general_labels(
+def test_general_labels(
     container_data: Union[Container, DerivedContainer],
     container_name: str,
 ):
-    metadata = await get_container_metadata(container_data)
+    metadata = get_container_metadata(container_data)
 
     assert metadata["Name"] == container_data.get_base_url().split(":")[0]
 
@@ -106,7 +110,6 @@ async def test_general_labels(
         assert labels[f"{prefix}.vendor"] == VENDOR
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "container_data,container_name",
     [(img, name) for (img, name) in IMAGES_AND_NAMES if img != BASE_CONTAINER]
@@ -120,10 +123,10 @@ async def test_general_labels(
         )
     ],
 )
-async def test_disturl(
+def test_disturl(
     container_data: Union[Container, DerivedContainer], container_name: str
 ):
-    labels = (await get_container_metadata(container_data))["Labels"]
+    labels = get_container_metadata(container_data)["Labels"]
 
     disturl = labels["org.openbuildservice.disturl"]
 
@@ -135,33 +138,28 @@ async def test_disturl(
     not LOCALHOST.exists("osc"),
     reason="osc needs to be installed for this test",
 )
-@pytest.mark.asyncio
 @pytest.mark.parametrize("container_data", BASE_CONTAINERS)
-async def test_disturl_can_be_checked_out(
+def test_disturl_can_be_checked_out(
     container_data: Union[Container, DerivedContainer],
     tmp_path,
 ):
-    labels = (await get_container_metadata(container_data))["Labels"]
+    labels = get_container_metadata(container_data)["Labels"]
 
     disturl = labels["org.openbuildservice.disturl"]
-    await check_output(["osc", "co", disturl], cwd=tmp_path)
+    check_output(["osc", "co", disturl], cwd=tmp_path)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "container_data",
     [cont for cont in BASE_CONTAINERS if cont != BASE_CONTAINER],
 )
-async def test_techpreview_label(
-    container_data: Union[Container, DerivedContainer]
-):
-    metadata = await get_container_metadata(container_data)
+def test_techpreview_label(container_data: Union[Container, DerivedContainer]):
+    metadata = get_container_metadata(container_data)
     assert (
         metadata["Labels"]["com.suse.techpreview"] == "1"
     ), "images must be marked as techpreview"
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "container_data,container_name",
     [(img, name) for (img, name) in IMAGES_AND_NAMES if img != BASE_CONTAINER]
@@ -175,18 +173,16 @@ async def test_techpreview_label(
         )
     ],
 )
-async def test_reference(
+def test_reference(
     container_data: Union[Container, DerivedContainer],
     container_name: str,
     container_runtime: OciRuntimeBase,
 ):
-    labels = (await get_container_metadata(container_data))["Labels"]
+    labels = get_container_metadata(container_data)["Labels"]
 
     reference = labels["org.opensuse.reference"]
     assert labels[f"com.suse.bci.{container_name}.reference"] == reference
     assert container_name.replace(".", "-") in reference
 
     if "registry.suse.com/suse/" in reference:
-        await check_output(
-            [container_runtime.runner_binary, "pull", reference]
-        )
+        check_output([container_runtime.runner_binary, "pull", reference])

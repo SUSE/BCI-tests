@@ -9,13 +9,12 @@ GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 CONTAINER_IMAGES = [GO_1_16_BASE_CONTAINER, GO_1_16_CONTAINER]
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "container", [GO_1_16_BASE_CONTAINER], indirect=["container"]
 )
-async def test_go_size(container, container_runtime):
+def test_go_size(container, container_runtime):
     assert (
-        await container_runtime.get_image_size(container.image_url_or_id)
+        container_runtime.get_image_size(container.image_url_or_id)
         < GOLANG_MAX_CONTAINER_SIZE_ON_DISK
     )
 

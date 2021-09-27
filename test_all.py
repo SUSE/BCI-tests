@@ -78,13 +78,12 @@ CERT_ERROR_MARK = pytest.mark.xfail(
 TINY_CONTAINERS = [MINIMAL_CONTAINER, MICRO_CONTAINER]
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "runner",
     [cont for cont in ALL_CONTAINERS if cont not in TINY_CONTAINERS]
     + [pytest.param(cont, marks=CERT_ERROR_MARK) for cont in TINY_CONTAINERS],
 )
-async def test_certificates_are_present(
+def test_certificates_are_present(
     host, tmp_path, container_runtime, runner: Container
 ):
     multi_stage_build = MultiStageBuild(
@@ -92,14 +91,14 @@ async def test_certificates_are_present(
         runner=runner,
         dockerfile_template=MULTISTAGE_DOCKERFILE,
     )
-    await multi_stage_build.prepare_build(tmp_path)
+    multi_stage_build.prepare_build(tmp_path)
 
     with open(tmp_path / "main.go", "w") as main_go:
         main_go.write(FETCH_SUSE_DOT_COM)
 
     cmd = host.run_expect(
         [0],
-        f"{container_runtime.build_command} {' '.join(EXTRA_BUILD_ARGS)} {tmp_path}",
+        f"{' '.join(container_runtime.build_command + EXTRA_BUILD_ARGS)} {tmp_path}",
     )
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
