@@ -18,9 +18,11 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 
 ## What do I need to contribute?
 
-* A host with python 3.8+
+* A host with python 3.6+, gcc and the python development header files
 * tox
-* docker or podman+buildah
+* docker and/or podman+buildah
+* skopeo (only required for the metadata tests)
+* vagrant (optional, can be used to test FIPS mode and registered hosts)
 
 ## How can I run the tests?
 
