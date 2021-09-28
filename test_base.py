@@ -1,4 +1,5 @@
 import re
+from typing import Dict
 
 import pytest
 from bci_tester.data import BASE_CONTAINER
@@ -8,9 +9,15 @@ from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
 from bci_tester.helpers import get_selected_runtime
 from bci_tester.helpers import GitRepositoryBuild
+from bci_tester.helpers import LOCALHOST
 
-#: 100MB limit for the base container
-BASE_CONTAINER_MAX_SIZE = 120 * 1024 * 1024
+#: size limits of the base container per arch
+BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
+    "x86_64": 120,
+    "aarch64": 130,
+    "ppc64le": 150,
+    "s390x": 120,
+}
 
 CONTAINER_IMAGES = [BASE_CONTAINER]
 
@@ -23,7 +30,7 @@ def test_passwd_present(auto_container):
 def test_base_size(auto_container, container_runtime):
     assert (
         container_runtime.get_image_size(auto_container.image_url_or_id)
-        < BASE_CONTAINER_MAX_SIZE
+        < BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch] * 1024 * 1024
     )
 
 

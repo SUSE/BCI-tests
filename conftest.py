@@ -14,7 +14,6 @@ from bci_tester.data import Container
 from bci_tester.data import DerivedContainer
 from bci_tester.helpers import get_selected_runtime
 from bci_tester.helpers import GitRepositoryBuild
-from requests import get
 
 
 class ContainerData(NamedTuple):
@@ -168,23 +167,11 @@ def dapper(host):
         return
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        if host.exists("go"):
-            gopath = os.path.join(tmpdir, "gopath")
-            host.run_expect(
-                [0], f"GOPATH={gopath} go get github.com/rancher/dapper"
-            )
-            yield os.path.join(gopath, "bin", "dapper")
-        else:
-            resp = get(
-                "https://releases.rancher.com/dapper/latest/dapper-"
-                + host.system_info.type.capitalize()
-                + "-"
-                + host.system_info.arch
-            )
-            dest = os.path.join(tmpdir, "dapper")
-            with open(dest, "wb") as dapper_file:
-                dapper_file.write(resp.content)
-            yield dest
+        gopath = os.path.join(tmpdir, "gopath")
+        host.run_expect(
+            [0], f"GOPATH={gopath} go get github.com/rancher/dapper"
+        )
+        yield os.path.join(gopath, "bin", "dapper")
 
 
 def restrict_to_containers(containers):

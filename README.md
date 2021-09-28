@@ -20,6 +20,7 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 
 * A host with python 3.6+, gcc and the python development header files
 * tox
+* go
 * docker and/or podman+buildah
 * skopeo (only required for the metadata tests)
 * vagrant (optional, can be used to test FIPS mode and registered hosts)
