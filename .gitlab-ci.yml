@@ -4,6 +4,7 @@
   tags:
     - dcermak-bci-tester
   script:
+    - '[[ -z "$XDG_RUNTIME_DIR" ]] || mkdir -p $XDG_RUNTIME_DIR'
     - tox -e build
     - tox -e all,base,init,dotnet,python,node,go,openjdk,openjdk-devel,minimal,repository,metadata
     - tox -e multistage -- -n0
@@ -53,11 +54,13 @@ integration_tests_docker:
   <<: *integration
   variables:
     CONTAINER_RUNTIME: docker
+    XDG_RUNTIME_DIR: /tmp/bci_tests_docker
 
 integration_tests_podman:
   <<: *integration
   variables:
     CONTAINER_RUNTIME: podman
+    XDG_RUNTIME_DIR: /tmp/bci_tests_docker
 
 fips:
   stage: integration
