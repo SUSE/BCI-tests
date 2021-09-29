@@ -69,7 +69,7 @@ def get_container_metadata(
             [
                 "skopeo",
                 "inspect",
-                f"docker://{container_data.get_base_url()}",
+                f"docker://{container_data.get_base().url}",
             ],
         )
         .decode()
@@ -96,10 +96,12 @@ def test_general_labels(
 ):
     metadata = get_container_metadata(container_data)
 
-    assert metadata["Name"] == container_data.get_base_url().split(":")[0]
+    assert metadata["Name"] == container_data.get_base().url.split(":")[0]
 
     labels = metadata["Labels"]
-    version = getattr(container_data, "tag") or container_data.base.tag
+    version = (
+        getattr(container_data, "tag", None) or container_data.get_base().tag
+    )
 
     for prefix in (
         f"com.suse.bci.{container_name}",

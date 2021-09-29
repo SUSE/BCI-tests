@@ -112,8 +112,8 @@ class Container(ContainerBase):
         """Prepares the container so that it can be launched."""
         self.pull_container()
 
-    def get_base_url(self) -> str:
-        return self.url
+    def get_base(self) -> "Container":
+        return self
 
 
 @dataclass
@@ -127,8 +127,8 @@ class DerivedContainer(ContainerBase):
             or f"container derived from {self.base.__str__()}"
         )
 
-    def get_base_url(self) -> str:
-        return self.base.get_base_url()
+    def get_base(self) -> "Container":
+        return self.base.get_base()
 
     def prepare_container(self) -> None:
         self.base.prepare_container()
