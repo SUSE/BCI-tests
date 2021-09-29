@@ -12,6 +12,7 @@
   after_script:
     - "($CONTAINER_RUNTIME ps -aq|xargs $CONTAINER_RUNTIME rm -f) || :"
     - "($CONTAINER_RUNTIME images -aq|xargs $CONTAINER_RUNTIME rmi -f) || :"
+    - '[[ -z "$XDG_RUNTIME_DIR" ]] || rm -rf $XDG_RUNTIME_DIR'
   artifacts:
     when: always
     reports:
