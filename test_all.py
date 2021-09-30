@@ -72,16 +72,17 @@ def test_glibc_present(auto_container):
         assert auto_container.connection.exists(binary)
 
 
-CERT_ERROR_MARK = pytest.mark.xfail(
-    reason="Certificates are missing in minimal and micro containers"
-)
-TINY_CONTAINERS = [MINIMAL_CONTAINER, MICRO_CONTAINER]
-
-
 @pytest.mark.parametrize(
     "runner",
-    [cont for cont in ALL_CONTAINERS if cont not in TINY_CONTAINERS]
-    + [pytest.param(cont, marks=CERT_ERROR_MARK) for cont in TINY_CONTAINERS],
+    [cont for cont in ALL_CONTAINERS if cont != MICRO_CONTAINER]
+    + [
+        pytest.param(
+            MICRO_CONTAINER,
+            marks=pytest.mark.xfail(
+                reason="Certificates are missing in the micro container"
+            ),
+        )
+    ],
 )
 def test_certificates_are_present(
     host, tmp_path, container_runtime, runner: Container
