@@ -57,7 +57,16 @@ def test_openssl_fips_hashes(auto_container):
 @without_fips
 def test_openssl_hashes(auto_container):
     for md in ALL_DIGESTS:
+        if md == "gost":
+            continue
         auto_container.connection.run_expect([0], f"openssl {md} /dev/null")
+
+    assert (
+        auto_container.connection.run_expect(
+            [1], f"openssl gost /dev/null"
+        ).stderr.strip()
+        == "gost is not a known digest"
+    )
 
 
 @pytest.mark.parametrize(
