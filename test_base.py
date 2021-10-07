@@ -7,9 +7,9 @@ from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
-from bci_tester.helpers import get_selected_runtime
-from bci_tester.helpers import GitRepositoryBuild
-from bci_tester.helpers import LOCALHOST
+from pytest_container import get_selected_runtime
+from pytest_container import GitRepositoryBuild
+from pytest_container.runtime import LOCALHOST
 
 #: size limits of the base container per arch
 BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {

@@ -1,13 +1,12 @@
 import pytest
 from bci_tester.data import ALL_CONTAINERS
-from bci_tester.data import Container
 from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_BASE_CONTAINER
 from bci_tester.data import MICRO_CONTAINER
-from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import MultiStageBuild
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
+from pytest_container import Container
+from pytest_container import MultiStageBuild
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -85,14 +84,13 @@ def test_glibc_present(auto_container):
     ],
 )
 def test_certificates_are_present(
-    host, tmp_path, container_runtime, runner: Container
+    host, tmp_path, container_runtime, runner: Container, pytestconfig
 ):
     multi_stage_build = MultiStageBuild(
-        builder=GO_1_16_BASE_CONTAINER,
-        runner=runner,
+        containers={"builder": GO_1_16_BASE_CONTAINER, "runner": runner},
         dockerfile_template=MULTISTAGE_DOCKERFILE,
     )
-    multi_stage_build.prepare_build(tmp_path)
+    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
 
     with open(tmp_path / "main.go", "w") as main_go:
         main_go.write(FETCH_SUSE_DOT_COM)

@@ -6,7 +6,7 @@ from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
-from bci_tester.helpers import GitRepositoryBuild
+from pytest_container import GitRepositoryBuild
 
 
 CONTAINER_IMAGES = [

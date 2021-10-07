@@ -6,8 +6,6 @@ from typing import Union
 import pytest
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BASE_CONTAINERS
-from bci_tester.data import Container
-from bci_tester.data import DerivedContainer
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
@@ -24,8 +22,10 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
-from bci_tester.helpers import LOCALHOST
-from bci_tester.helpers import OciRuntimeBase
+from pytest_container import Container
+from pytest_container import DerivedContainer
+from pytest_container import OciRuntimeBase
+from pytest_container.runtime import LOCALHOST
 
 
 TITLE = "SUSE Linux Enterprise Server 15 SP3"
@@ -99,9 +99,7 @@ def test_general_labels(
     assert metadata["Name"] == container_data.get_base().url.split(":")[0]
 
     labels = metadata["Labels"]
-    version = (
-        getattr(container_data, "tag", None) or container_data.get_base().tag
-    )
+    version = container_data.get_base().url.split(":")[-1]
 
     for prefix in (
         f"com.suse.bci.{container_name}",
