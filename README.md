@@ -95,15 +95,6 @@ This can be achieved by setting the environment variables `EXTRA_RUN_ARGS` and
 `EXTRA_BUILD_ARGS` to whatever should be added to the calls to `docker
 run`/`podman run` and `docker build`/`buildah bud`, respectively.
 
-### Restricting test to run in serial
-
-If you want to restrict certain tests from running in parallel, add the
-`serial` mark to the respective function:
-```python
-@pytest.mark.serial
-def test_my_heavy_installation(container):
-    ...
-```
 
 ## Running all tests
 
