@@ -69,6 +69,19 @@ def test_openssl_hashes(auto_container):
     )
 
 
+def test_all_openssl_hashes_known(auto_container):
+    """Sanity test that all openssl digests are saved in ALL_DIGESTS"""
+    hashes = (
+        auto_container.connection.run_expect(
+            [0], f"openssl list --digest-commands"
+        )
+        .stdout.strip()
+        .split()
+    )
+    assert len(hashes) == len(ALL_DIGESTS)
+    assert set(hashes) == set(ALL_DIGESTS)
+
+
 @pytest.mark.parametrize(
     "host_git_clone",
     [
