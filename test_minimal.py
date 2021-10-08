@@ -25,7 +25,13 @@ MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
 @pytest.mark.parametrize(
     "container,size",
     [
-        (MINIMAL_CONTAINER, MINIMAL_IMAGE_MAX_SIZE),
+        pytest.param(
+            MINIMAL_CONTAINER,
+            MINIMAL_IMAGE_MAX_SIZE,
+            marks=pytest.mark.xfail(
+                reason="Temporary size increase due to mozilla cert bundle hack"
+            ),
+        ),
         (MICRO_CONTAINER, MICRO_IMAGE_MAX_SIZE),
     ],
     indirect=["container"],
