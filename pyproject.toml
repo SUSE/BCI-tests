@@ -9,9 +9,6 @@ build-backend = 'setuptools.build_meta'
 [tool.setuptools_scm]
 
 [tool.pytest.ini_options]
-markers = [
-    "serial: heavy tests that can overload the worker and are not run in parallel",
-]
 xfail_strict = true
 
 [tool.black]

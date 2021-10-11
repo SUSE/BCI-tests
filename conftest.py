@@ -1,29 +1,12 @@
-import functools
 import os
 import shlex
 import tempfile
 from subprocess import check_output
-from typing import Any
-from typing import NamedTuple
-from typing import Optional
-from typing import Union
 
 import pytest
-import testinfra
-from bci_tester.data import Container
-from bci_tester.data import DerivedContainer
-from bci_tester.helpers import get_selected_runtime
-from bci_tester.helpers import GitRepositoryBuild
-
-
-class ContainerData(NamedTuple):
-    #: url to the container image on the registry or the id of the local image
-    #: if the container has been build locally
-    image_url_or_id: str
-    #: ID of the started container
-    container_id: str
-    #: the testinfra connection to the running container
-    connection: Any
+from pytest_container import auto_container_parametrize
+from pytest_container import get_selected_runtime
+from pytest_container import GitRepositoryBuild
 
 
 @pytest.fixture(scope="function")
@@ -94,62 +77,8 @@ def host_git_clone(request, host, tmp_path):
         os.chdir(cwd)
 
 
-@pytest.fixture(scope="module")
-def container_runtime():
-    return get_selected_runtime()
-
-
-@pytest.fixture(scope="module")
-def auto_container(request, container_runtime):
-    """Fixture that will build & launch a container that is either passed as a
-    request parameter or it will be automatically parametrized via
-    pytest_generate_tests.
-    """
-    launch_data: Union[Container, DerivedContainer] = request.param
-
-    container_id: Optional[str] = None
-    try:
-        launch_data.prepare_container()
-        container_id = (
-            check_output(
-                [container_runtime.runner_binary] + launch_data.launch_cmd
-            )
-            .decode()
-            .strip()
-        )
-        yield ContainerData(
-            image_url_or_id=launch_data.url or launch_data.container_id,
-            container_id=container_id,
-            connection=testinfra.get_host(
-                f"{container_runtime.runner_binary}://{container_id}"
-            ),
-        )
-    except RuntimeError as exc:
-        raise exc
-    finally:
-        if container_id is not None:
-            check_output(
-                [container_runtime.runner_binary, "rm", "-f", container_id]
-            )
-
-
-container = auto_container
-
-
 def pytest_generate_tests(metafunc):
-    container_images = getattr(metafunc.module, "CONTAINER_IMAGES", None)
-    if (
-        "auto_container" in metafunc.fixturenames
-        and container_images is not None
-    ):
-        metafunc.parametrize(
-            "auto_container",
-            [
-                pytest.param(cont_img, id=str(cont_img))
-                for cont_img in container_images
-            ],
-            indirect=True,
-        )
+    auto_container_parametrize(metafunc)
 
 
 @pytest.fixture(scope="module")
@@ -172,28 +101,3 @@ def dapper(host):
             [0], f"GOPATH={gopath} go get github.com/rancher/dapper"
         )
         yield os.path.join(gopath, "bin", "dapper")
-
-
-def restrict_to_containers(containers):
-    def inner(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            c = kwargs.get("auto_container")
-            try:
-                len(containers)
-            except TypeError:
-                urls = [containers.url]
-            else:
-                urls = [cont.url for cont in containers]
-
-            # raise Exception(c.image_url, urls)
-            if c is not None and c.image_url in urls:
-                return func(*args, **kwargs)
-
-            return pytest.skip(
-                "Test is being restricted to the containers " + ", ".join(urls)
-            )
-
-        return wrapper
-
-    return inner

@@ -3,11 +3,11 @@ from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
 from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_CONTAINER
-from bci_tester.data import MultiStageBuild
 from bci_tester.data import OPENJDK_BASE_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_BASE_CONTAINER
-from bci_tester.helpers import GitRepositoryBuild
-from bci_tester.helpers import LOCALHOST
+from pytest_container import GitRepositoryBuild
+from pytest_container import MultiStageBuild
+from pytest_container.runtime import LOCALHOST
 
 
 MAVEN_VERSION = "3.8.2"
@@ -22,8 +22,10 @@ MAVEN_VERSION = "3.8.2"
                 repository_tag="v4.7",
             ),
             MultiStageBuild(
-                OPENJDK_DEVEL_BASE_CONTAINER,
-                OPENJDK_BASE_CONTAINER,
+                {
+                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
+                    "runner": OPENJDK_BASE_CONTAINER,
+                },
                 """
         FROM $builder as builder
         WORKDIR /amidst
@@ -44,8 +46,10 @@ MAVEN_VERSION = "3.8.2"
                 repository_tag=f"maven-{MAVEN_VERSION}",
             ),
             MultiStageBuild(
-                OPENJDK_DEVEL_BASE_CONTAINER,
-                OPENJDK_DEVEL_BASE_CONTAINER,
+                {
+                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
+                    "runner": OPENJDK_DEVEL_BASE_CONTAINER,
+                },
                 f"""
         FROM $builder as builder
         WORKDIR /maven
@@ -67,8 +71,10 @@ MAVEN_VERSION = "3.8.2"
                 repository_url="https://gitlab.com/pdftk-java/pdftk.git",
             ),
             MultiStageBuild(
-                OPENJDK_DEVEL_BASE_CONTAINER,
-                OPENJDK_BASE_CONTAINER,
+                {
+                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
+                    "runner": OPENJDK_BASE_CONTAINER,
+                },
                 """FROM $builder as builder
         WORKDIR /pdftk
         COPY ./pdftk .
@@ -93,8 +99,7 @@ MAVEN_VERSION = "3.8.2"
                 repository_url="https://github.com/alexellis/k3sup",
             ),
             MultiStageBuild(
-                GO_1_16_CONTAINER,
-                "scratch",
+                {"builder": GO_1_16_CONTAINER, "runner": "scratch"},
                 """FROM $builder as builder
 WORKDIR /k3sup
 COPY ./k3sup .
@@ -118,8 +123,10 @@ CMD ["/k3sup/k3sup"]
                 repository_url="https://github.com/phillipsj/adventureworks-k8s-sample.git"
             ),
             MultiStageBuild(
-                builder=DOTNET_SDK_5_0_BASE_CONTAINER,
-                runner=DOTNET_ASPNET_5_0_BASE_CONTAINER,
+                {
+                    "builder": DOTNET_SDK_5_0_BASE_CONTAINER,
+                    "runner": DOTNET_ASPNET_5_0_BASE_CONTAINER,
+                },
                 # modified version of upstream's Dockerfile:
                 # - the entrypoint.sh is custom, so that the application
                 #   terminates
@@ -181,10 +188,11 @@ def test_dockerfile_build(
     multi_stage_build: MultiStageBuild,
     retval: int,
     cmd_stdout: str,
+    pytestconfig,
 ):
     tmp_path, _ = host_git_clone
 
-    multi_stage_build.prepare_build(tmp_path)
+    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
 
     cmd = host.run_expect(
         [0],

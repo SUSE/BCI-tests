@@ -1,17 +1,11 @@
 import os
 import shlex
-import tempfile
-from dataclasses import dataclass
-from dataclasses import field
-from string import Template
-from subprocess import check_output
-from typing import List
-from typing import Optional
 from typing import Union
 
 import pytest
-from bci_tester.helpers import get_selected_runtime
-from bci_tester.helpers import LOCALHOST
+from pytest_container import Container
+from pytest_container import DerivedContainer
+from pytest_container.runtime import LOCALHOST
 
 
 DEFAULT_REGISTRY = "registry.suse.de"
@@ -27,236 +21,60 @@ DOTNET_ARCH_SKIP_MARK = pytest.mark.skipif(
 )
 
 
-@dataclass
-class ContainerBase:
-    #: full url to this container via which it can be pulled
-    url: str = ""
-
-    #: id of the container if it is not available via a registry URL
-    container_id: str = ""
-
-    #: flag whether the image should be launched using its own defined entry
-    #: point. If False, then ``/bin/bash`` is used.
-    default_entry_point: bool = False
-
-    #: custom entry point for this container (i.e. neither its default, nor
-    #: `/bin/bash`)
-    custom_entry_point: Optional[str] = None
-
-    #: List of additional flags that will be inserted after
-    #: `docker/podman run -d`. The list must be properly escaped, e.g. as
-    #: created by `shlex.split`
-    extra_launch_args: List[str] = field(default_factory=list)
-
-    def __str__(self) -> str:
-        return self.url or self.container_id
-
-    @property
-    def entry_point(self) -> Optional[str]:
-        """The entry point of this container, either its default, bash or a
-        custom one depending on the set values. A custom entry point is
-        preferred, otherwise bash is used unles `self.default_entry_point` is
-        `True`.
-        """
-        if self.custom_entry_point:
-            return self.custom_entry_point
-        if self.default_entry_point:
-            return None
-        return "/bin/bash"
-
-    @property
-    def launch_cmd(self) -> List[str]:
-        """Returns the command to launch this container image (excluding the
-        leading podman or docker binary name).
-        """
-        cmd = ["run", "-d"] + EXTRA_RUN_ARGS + self.extra_launch_args
-
-        if self.entry_point is None:
-            cmd.append(self.container_id or self.url)
-        else:
-            cmd += ["-it", self.container_id or self.url, self.entry_point]
-
-        return cmd
-
-
-@dataclass
-class Container(ContainerBase):
-    """This class stores information about the BCI images under test.
-
-    Instances of this class are constructed from the contents of
-    data/containers.json
-    """
-
-    repo: str = ""
-    image: str = ""
-    tag: str = "latest"
-    version: str = ""
-    registry: str = DEFAULT_REGISTRY
-
-    def __post_init__(self):
-        for val, name in ((self.repo, "repo"), (self.image, "image")):
-            if not val:
-                raise ValueError(f"property {name} must be set")
-        if not self.version:
-            self.version = self.tag
-        if not self.url:
-            self.url = f"{self.registry}/{self.repo}/{self.image}:{self.tag}"
-
-    def pull_container(self) -> None:
-        """Pulls the container with the given url using the currently selected
-        container runtime"""
-        runtime = get_selected_runtime()
-        check_output([runtime.runner_binary, "pull", self.url])
-
-    def prepare_container(self) -> None:
-        """Prepares the container so that it can be launched."""
-        self.pull_container()
-
-    def get_base(self) -> "Container":
-        return self
-
-
-@dataclass
-class DerivedContainer(ContainerBase):
-    base: Union[Container, "DerivedContainer"] = None
-    containerfile: str = ""
-
-    def __str__(self) -> str:
-        return (
-            self.container_id
-            or f"container derived from {self.base.__str__()}"
-        )
-
-    def get_base(self) -> "Container":
-        return self.base.get_base()
-
-    def prepare_container(self) -> None:
-        self.base.prepare_container()
-
-        runtime = get_selected_runtime()
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            containerfile_path = os.path.join(tmpdirname, "Dockerfile")
-            with open(containerfile_path, "w") as containerfile:
-                from_id = (
-                    getattr(self.base, "url", self.base.container_id)
-                    or self.base.container_id
-                )
-                assert from_id
-                containerfile.write(
-                    f"""FROM {from_id}
-{self.containerfile}
-"""
-                )
-
-            self.container_id = runtime.get_image_id_from_stdout(
-                check_output(
-                    runtime.build_command + EXTRA_BUILD_ARGS + [tmpdirname]
-                )
-                .decode()
-                .strip()
-            )
-
-
-@dataclass
-class MultiStageBuild:
-    builder: Union[Container, DerivedContainer]
-    runner: Union[Container, DerivedContainer, str]
-
-    dockerfile_template: str
-
-    @property
-    def dockerfile(self) -> str:
-        builder = self.builder.container_id or self.builder.url
-        runner = (
-            self.runner
-            if isinstance(self.runner, str)
-            else self.runner.container_id or self.runner.url
-        )
-
-        return Template(self.dockerfile_template).substitute(
-            builder=builder, runner=runner
-        )
-
-    def prepare_build(self, tmp_dir):
-        self.builder.prepare_container()
-        if not isinstance(self.runner, str):
-            self.runner.prepare_container()
-
-        with open(tmp_dir / "Dockerfile", "w") as dockerfile:
-            dockerfile.write(self.dockerfile)
-
-
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/cr/totest/images",
-    image="suse/sle15",
-    tag=OS_VERSION,
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/sle15:{OS_VERSION}",
 )
 MINIMAL_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/images",
-    image="bci/minimal",
-    tag=OS_VERSION,
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/minimal:{OS_VERSION}",
 )
 MICRO_CONTAINER = Container(
-    repo="suse/sle-15-sp3/update/bci/images",
-    image="bci/micro",
-    tag=OS_VERSION,
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/micro:{OS_VERSION}",
 )
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images", image="bci/golang", tag="1.16"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/golang:{1.16}"
 )
 
 OPENJDK_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images", image="bci/openjdk", tag="11"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/openjdk:11"
 )
 OPENJDK_DEVEL_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images",
-    image="bci/openjdk-devel",
-    tag="11",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/openjdk-devel:11"
 )
 NODEJS_12_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images", image="bci/nodejs", tag="12"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/nodejs:12"
 )
 NODEJS_14_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images", image="bci/nodejs", tag="14"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/nodejs:14"
 )
 
 PYTHON36_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images", image="bci/python", tag="3.6"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/python:3.6"
 )
 PYTHON39_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images", image="bci/python", tag="3.9"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/python:3.9"
 )
 
 DOTNET_SDK_3_1_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/cr/totest/images",
-    image="suse/dotnet-sdk",
-    tag="3.1",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-sdk:3.1",
 )
 DOTNET_SDK_5_0_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/cr/totest/images",
-    image="suse/dotnet-sdk",
-    tag="5.0",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-sdk:5.0",
 )
 
 DOTNET_ASPNET_3_1_BASE_CONTAINER: Union[
     Container, DerivedContainer
 ] = Container(
-    repo="suse/sle-15-sp3/update/cr/totest/images",
-    image="suse/dotnet-aspnet",
-    tag="3.1",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-aspnet:3.1",
 )
 DOTNET_ASPNET_5_0_BASE_CONTAINER: Union[
     Container, DerivedContainer
 ] = Container(
-    repo="suse/sle-15-sp3/update/cr/totest/images",
-    image="suse/dotnet-aspnet",
-    tag="5.0",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-aspnet:5.0",
 )
 
 INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
-    repo="suse/sle-15-sp3/update/bci/images",
-    image="bci/init",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/init",
     extra_launch_args=[
         "--privileged",
         # need to give the container access to dbus when invoking tox via sudo,
@@ -350,12 +168,7 @@ else:
     )
 
 REPOCLOSURE_CONTAINER = DerivedContainer(
-    base=Container(
-        url="registry.fedoraproject.org/fedora:latest",
-        registry="registry.fedoraproject.org",
-        repo="unused",
-        image="fedora",
-    ),
+    base="registry.fedoraproject.org/fedora:latest",
     containerfile=r"""RUN dnf -y install 'dnf-command(repoclosure)'
 RUN rm -f /etc/yum.repos.d/*repo
 RUN echo $'[SLE_BCI] \n\

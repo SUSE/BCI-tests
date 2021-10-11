@@ -31,7 +31,7 @@ This is our tooling to test the BCI containers, ensuring they are matching what 
 2. Optionally set the `BCI_DEVEL_REPO` environment variable (see next section).
 3. Run `tox -e build` (this is not strictly necessary to run beforehands, but it
    will reduce the danger of race conditions when building containers)
-4. Run `tox -e $language_stack`
+4. Run `tox -e $language_stack -- -n auto`
 
 ## Technical contributions
 
@@ -95,21 +95,15 @@ This can be achieved by setting the environment variables `EXTRA_RUN_ARGS` and
 `EXTRA_BUILD_ARGS` to whatever should be added to the calls to `docker
 run`/`podman run` and `docker build`/`buildah bud`, respectively.
 
-### Restricting test to run in serial
-
-If you want to restrict certain tests from running in parallel, add the
-`serial` mark to the respective function:
-```python
-@pytest.mark.serial
-def test_my_heavy_installation(container):
-    ...
-```
 
 ## Running all tests
 
 ```ShellSession
 $ tox --parallel
 ```
+
+For CI environments it is recommended to set the environment variable
+`TOX_PARALLEL_NO_SPINNER` to `1` so that the output from tox is not mangled.
 
 ## Running specific tests
 
@@ -119,7 +113,13 @@ $ tox -e testname
 
 `testname` equals to `python` for the test file named `test_python.py`
 
-This will run _all_ the tests for a language, which could mean multiple stacks.
+This will run _all_ the tests for a language, which could mean multiple
+stacks. If you have Python 3.6 or later available and have the python
+development headers installed, then `pytest-xdist` will be installed as well and
+can be used to launch the tests of a single test suite in parallel via:
+```ShellSession
+$ tox -e testname -- -n auto
+```
 
 
 ## Testing on FIPS enabled systems

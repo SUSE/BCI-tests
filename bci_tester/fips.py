@@ -1,11 +1,10 @@
 import os
 
-# Gost doesn't seem to work.
 
 NONFIPS_DIGESTS = (
     "blake2b512",
     "blake2s256",
-    # "gost",
+    "gost",
     "md4",
     "md5",
     "mdc2",

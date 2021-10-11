@@ -1,7 +1,7 @@
 import pytest
 from bci_tester.data import GO_1_16_BASE_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
-from bci_tester.helpers import GitRepositoryBuild
+from pytest_container import GitRepositoryBuild
 
 
 GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed

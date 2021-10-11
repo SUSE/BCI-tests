@@ -1,7 +1,7 @@
 import pytest
 from bci_tester.data import NODEJS_12_CONTAINER
 from bci_tester.data import NODEJS_14_CONTAINER
-from bci_tester.helpers import GitRepositoryBuild
+from pytest_container import GitRepositoryBuild
 
 
 CONTAINER_IMAGES = [NODEJS_12_CONTAINER, NODEJS_14_CONTAINER]
