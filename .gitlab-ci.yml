@@ -53,6 +53,14 @@ test_310:
   script:
     - tox -e py310-unit
 
+pages:
+  image: python
+  script:
+    - tox -e doc
+  artifacts:
+    paths:
+      - build/html/
+
 integration_tests_docker:
   <<: *integration
   variables:

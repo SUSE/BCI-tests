@@ -7,8 +7,8 @@ from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
+from bci_tester.runtime_choice import DOCKER_SELECTED
 from pytest_container import Container
-from pytest_container import get_selected_runtime
 from pytest_container import GitRepositoryBuild
 from pytest_container.runtime import LOCALHOST
 
@@ -93,8 +93,7 @@ def test_all_openssl_hashes_known(auto_container):
     indirect=["host_git_clone"],
 )
 @pytest.mark.skipif(
-    get_selected_runtime().runner_binary != "docker",
-    reason="Dapper only works with docker",
+    not DOCKER_SELECTED, reason="Dapper only works with docker"
 )
 def test_rancher_build(host, host_git_clone, dapper):
     dest, git_repo = host_git_clone
@@ -138,7 +137,7 @@ DIND_CONTAINER = Container(
 
 @pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
 @pytest.mark.skipif(
-    get_selected_runtime().runner_binary != "docker",
+    not DOCKER_SELECTED,
     reason="Docker in docker can only be tested when using the docker runtime",
 )
 def test_dind(container_per_test):

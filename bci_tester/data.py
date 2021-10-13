@@ -3,10 +3,9 @@ import shlex
 from typing import Union
 
 import pytest
+from bci_tester.runtime_choice import DOCKER_SELECTED
 from pytest_container import Container
 from pytest_container import DerivedContainer
-from pytest_container import DockerRuntime
-from pytest_container import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
 
 
@@ -88,10 +87,11 @@ INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
         "-e",
         "container=docker",
     ]
-    if get_selected_runtime() == DockerRuntime()
+    if DOCKER_SELECTED
     else [],
     default_entry_point=True,
 )
+
 
 #
 # !! IMPORTANT !!
