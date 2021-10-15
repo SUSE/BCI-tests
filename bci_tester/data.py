@@ -5,6 +5,8 @@ from typing import Union
 import pytest
 from pytest_container import Container
 from pytest_container import DerivedContainer
+from pytest_container import DockerRuntime
+from pytest_container import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
 
 
@@ -77,13 +79,18 @@ INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/init",
     extra_launch_args=[
         "--privileged",
-        # need to give the container access to dbus when invoking tox via sudo,
-        # because then things get weird...
-        # see:
-        # https://askubuntu.com/questions/1297226/how-to-run-systemctl-command-inside-docker-container
+        "--tmpfs",
+        "/tmp",
+        "--tmpfs",
+        "/run",
         "-v",
-        "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket",
-    ],
+        "/sys/fs/cgroup:/sys/fs/cgroup:ro,z",
+        "-e",
+        "container=docker",
+    ]
+    if get_selected_runtime() == DockerRuntime()
+    else [],
+    default_entry_point=True,
 )
 
 #

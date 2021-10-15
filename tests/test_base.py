@@ -7,6 +7,7 @@ from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
+from pytest_container import Container
 from pytest_container import get_selected_runtime
 from pytest_container import GitRepositoryBuild
 from pytest_container.runtime import LOCALHOST
@@ -112,3 +113,42 @@ def test_rancher_build(host, host_git_clone, dapper):
         )
 
     host.run_expect([0], f"cd {rancher_dir} && {dapper} ci")
+
+
+#: This is the base container with additional launch arguments applied to it so
+#: that docker can be launched inside the container
+DIND_CONTAINER = Container(
+    **{
+        x: getattr(BASE_CONTAINER, x)
+        for x in BASE_CONTAINER.__dict__
+        if x != "extra_launch_args"
+    },
+    extra_launch_args=[
+        "--privileged=true",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+    ],
+)
+
+
+@pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
+@pytest.mark.skipif(
+    get_selected_runtime().runner_binary != "docker",
+    reason="Docker in docker can only be tested when using the docker runtime",
+)
+def test_dind(container_per_test):
+    """Check that we can install :command:`docker` in the container and launch the
+    latest Tumbleweed container inside it.
+
+    This requires additional settings for the docker command line (see
+    :py:const:`DIND_CONTAINER`).
+
+    """
+    container_per_test.connection.run_expect([0], "zypper -n in docker")
+    container_per_test.connection.run_expect([0], "docker ps")
+    res = container_per_test.connection.run_expect(
+        [0],
+        "docker run --rm registry.opensuse.org/opensuse/tumbleweed:latest "
+        "/usr/bin/ls",
+    )
+    assert "etc" in res.stdout
