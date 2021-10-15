@@ -71,7 +71,7 @@ $registered_test_script = <<~SCRIPT
       export CONTAINER_RUNTIME=${runtime}
       # retry the build stage a few times as sometimes it fails due to
       # networking issues
-      tox -e build -- -k container_build_and_repo || tox -e build -- -k container_build_and_repo || tox -e build -- -k container_build_and_repo
+      tox -e build -- -k container_build_and_repo -n auto
   done
 SCRIPT
 
