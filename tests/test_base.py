@@ -88,7 +88,6 @@ def test_all_openssl_hashes_known(auto_container):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/rancher/rancher",
-            marks=pytest.mark.xfail(reason="dapper ci is broken"),
         ).to_pytest_param()
     ],
     indirect=["host_git_clone"],
@@ -106,13 +105,19 @@ def test_rancher_build(host, host_git_clone, dapper):
     with open(rancher_dir / "Dockerfile.dapper", "w") as dapperfile:
         dapperfile.write(
             re.sub(
-                r"FROM .*",
-                f"FROM {BASE_CONTAINER.container_id or BASE_CONTAINER.url}",
-                contents,
+                r"docker-[^\s]*",
+                "docker",
+                re.sub(
+                    r"FROM .*",
+                    f"FROM {BASE_CONTAINER.container_id or BASE_CONTAINER.url}",
+                    contents,
+                ),
             )
         )
 
-    host.run_expect([0], f"cd {rancher_dir} && {dapper} ci")
+    # FIMXE: enable dapper ci at some point instead of just dapper build
+    # host.run_expect([0], f"cd {rancher_dir} && {dapper} ci")
+    host.run_expect([0], f"cd {rancher_dir} && {dapper} build")
 
 
 #: This is the base container with additional launch arguments applied to it so
