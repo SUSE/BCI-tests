@@ -27,10 +27,10 @@ BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/sle15:{OS_VERSION}",
 )
 MINIMAL_CONTAINER = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/minimal:{OS_VERSION}",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/minimal:{OS_VERSION}",
 )
 MICRO_CONTAINER = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/micro:{OS_VERSION}",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/micro:{OS_VERSION}"
 )
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
