@@ -50,6 +50,11 @@ test_39:
     - tox -e format -- --check
     - tox -e py39-unit
 
+test_310:
+  image: python:3.10
+  script:
+    - tox -e py310-unit
+
 integration_tests_docker:
   <<: *integration
   variables:
