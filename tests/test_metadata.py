@@ -1,6 +1,24 @@
+"""Verification of the container metadata that are available via the registry
+leveraging mostly :command:`skopeo`.
+
+These tests are host OS independent and it is thus not necessary to run them on
+a non-x86_64 host.
+
+**CAUTION:** The tests should be run on x86_64, as the .Net images are only
+available on that platform.
+
+The tests in this module are mostly testing the image labels. We follow the
+conventions outlined in
+`<https://confluence.suse.com/display/ENGCTNRSTORY/BCI+image+labels>`_. But have
+to skip some of the tests for the SLE 15 SP3 base container, as it does not
+offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
+
+"""
 import json
 from subprocess import check_output
 from typing import Any
+from typing import List
+from typing import Tuple
 from typing import Union
 
 import pytest
@@ -28,12 +46,18 @@ from pytest_container import OciRuntimeBase
 from pytest_container.runtime import LOCALHOST
 
 
+#: The full title of SLES (also present in :file:`/etc/os-release`)
 TITLE = "SUSE Linux Enterprise Server 15 SP3"
+
+#: The official vendor name
 VENDOR = "SUSE LLC"
+
+#: URL to the product's home page
 URL = "https://www.suse.com/products/server/"
 
-
-IMAGES_AND_NAMES = [
+#: List of all containers and their respective names which are used in the image
+#: labels ``com.suse.bci.$name``.
+IMAGES_AND_NAMES: List[Tuple[Union[Container, DerivedContainer], str]] = [
     (BASE_CONTAINER, "base"),
     (MINIMAL_CONTAINER, "minimal"),
     (MICRO_CONTAINER, "micro"),
@@ -64,6 +88,10 @@ assert len(BASE_CONTAINERS) == len(
 def get_container_metadata(
     container_data: Union[Container, DerivedContainer]
 ) -> Any:
+    """Helper function that fetches the container metadata via :command:`skopeo
+    inspect` of the container's base image.
+
+    """
     return json.loads(
         check_output(
             [
@@ -94,6 +122,15 @@ def test_general_labels(
     container_data: Union[Container, DerivedContainer],
     container_name: str,
 ):
+    """Base check of the labels ``com.suse.bci.$name.$label`` and
+    ``org.opencontainers.image.$label``:
+
+    - ensure that :py:const:`TITLE` is in ``$label=title``
+    - check that :py:const:`OS_PRETTY_NAME` is in ``$label=description``
+    - ``$label=version`` is either ``latest`` or :py:const:`OS_VERSION`
+    - ``$label=url`` equals :py:const:`URL`
+    - ``$label=vendor`` equals :py:const:`VENDOR`
+    """
     metadata = get_container_metadata(container_data)
 
     assert metadata["Name"] == container_data.get_base().url.split(":")[0]
@@ -131,6 +168,13 @@ def test_general_labels(
 def test_disturl(
     container_data: Union[Container, DerivedContainer], container_name: str
 ):
+    """General check of the ``org.openbuildservice.disturl`` label:
+
+    verify that it exists, that it includes
+    ``obs://build.suse.de/SUSE:SLE-15-SP3:Update`` and equals
+    ``com.suse.bci.$name.disturl``.
+
+    """
     labels = get_container_metadata(container_data)["Labels"]
 
     disturl = labels["org.openbuildservice.disturl"]
@@ -148,6 +192,16 @@ def test_disturl_can_be_checked_out(
     container_data: Union[Container, DerivedContainer],
     tmp_path,
 ):
+    """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
+    label that can be checked out using :command:`osc` to get the sources at
+    exactly the version from which the container was build. This test verifies
+    that it is possible to checkout this url. No further verification is run
+    though, i.e. it could be potentially a completely different package.
+
+    This test is skipped if :command:`osc` not installed. The test will fail
+    when `<https://build.suse.de>`_ is unreachable.
+
+    """
     labels = get_container_metadata(container_data)["Labels"]
 
     disturl = labels["org.openbuildservice.disturl"]
@@ -159,6 +213,10 @@ def test_disturl_can_be_checked_out(
     [cont for cont in BASE_CONTAINERS if cont != BASE_CONTAINER],
 )
 def test_techpreview_label(container_data: Union[Container, DerivedContainer]):
+    """Check that all containers (except for the base container) have the label
+    ``com.suse.techpreview`` set to ``1``.
+
+    """
     metadata = get_container_metadata(container_data)
     assert (
         metadata["Labels"]["com.suse.techpreview"] == "1"
@@ -183,6 +241,14 @@ def test_reference(
     container_name: str,
     container_runtime: OciRuntimeBase,
 ):
+    """The ``reference`` label (available via ``org.opensuse.reference`` and
+    ``com.suse.bci.$name.reference``) is a url that can be pulled via
+    :command:`podman` or :command:`docker`.
+
+    If the reference points to ``registry.suse.com``, then we try to pull that
+    image via the current container runtime.
+
+    """
     labels = get_container_metadata(container_data)["Labels"]
 
     reference = labels["org.opensuse.reference"]

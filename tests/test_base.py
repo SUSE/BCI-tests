@@ -1,3 +1,7 @@
+"""Tests for the base container itself (the one that is already present on
+registry.suse.com)
+
+"""
 import re
 from typing import Dict
 
@@ -12,7 +16,7 @@ from pytest_container import Container
 from pytest_container import GitRepositoryBuild
 from pytest_container.runtime import LOCALHOST
 
-#: size limits of the base container per arch
+#: size limits of the base container per arch in MiB
 BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
     "x86_64": 120,
     "aarch64": 130,
@@ -23,19 +27,22 @@ BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
 CONTAINER_IMAGES = [BASE_CONTAINER]
 
 
-# Generic tests
 def test_passwd_present(auto_container):
+    """Generic test that :file:`/etc/passwd` exists"""
     assert auto_container.connection.file("/etc/passwd").exists
 
 
 def test_base_size(auto_container, container_runtime):
+    """Ensure that the container's size is below the limits specified in
+    :py:const:`BASE_CONTAINER_MAX_SIZE`
+
+    """
     assert (
         container_runtime.get_image_size(auto_container.image_url_or_id)
         < BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch] * 1024 * 1024
     )
 
 
-# FIPS tests
 with_fips = pytest.mark.skipif(
     not host_fips_enabled(), reason="host not running in FIPS 140 mode"
 )
@@ -46,6 +53,11 @@ without_fips = pytest.mark.skipif(
 
 @with_fips
 def test_openssl_fips_hashes(auto_container):
+    """If the host is running in FIPS mode, then we check that all fips certified
+    hash algorithms can be invoked via :command:`openssl $digest /dev/null` and
+    all non-fips hash algorithms fail.
+
+    """
     for md in NONFIPS_DIGESTS:
         cmd = auto_container.connection.run(f"openssl {md} /dev/null")
         assert cmd.rc != 0
@@ -57,6 +69,11 @@ def test_openssl_fips_hashes(auto_container):
 
 @without_fips
 def test_openssl_hashes(auto_container):
+    """If the host is not running in fips mode, then we check that all hash
+    algorithms work (except for ``gost``, which has been disabled) via
+    :command:`openssl $digest /dev/null`.
+
+    """
     for md in ALL_DIGESTS:
         if md == "gost":
             continue
@@ -71,7 +88,10 @@ def test_openssl_hashes(auto_container):
 
 
 def test_all_openssl_hashes_known(auto_container):
-    """Sanity test that all openssl digests are saved in ALL_DIGESTS"""
+    """Sanity test that all openssl digests are saved in
+    :py:const:`bci_tester.fips.ALL_DIGESTS`.
+
+    """
     hashes = (
         auto_container.connection.run_expect(
             [0], f"openssl list --digest-commands"
@@ -96,6 +116,17 @@ def test_all_openssl_hashes_known(auto_container):
     not DOCKER_SELECTED, reason="Dapper only works with docker"
 )
 def test_rancher_build(host, host_git_clone, dapper):
+    """Regression test that we can build Rancher in the base container:
+
+    - clone the `rancher/rancher <https://github.com/rancher/rancher>`_ repository
+    - monkey patch their :file:`Dockerfile.dapper` replacing their container
+      image with the url or id of the base container
+    - monkey patch their :file:`Dockerfile.dapper` further removing their
+      version pin of the docker version
+    - run :command:`dapper build`
+
+    This test is only enabled for docker (dapper does not support podman).
+    """
     dest, git_repo = host_git_clone
     rancher_dir = dest / git_repo.repo_name
     with open(rancher_dir / "Dockerfile.dapper", "r") as dapperfile:

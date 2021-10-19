@@ -1,3 +1,6 @@
+"""
+This module contains tests that are run for **all** containers.
+"""
 import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import EXTRA_BUILD_ARGS
@@ -9,6 +12,8 @@ from pytest_container import MultiStageBuild
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
+#: go file to perform a GET request to suse.com and that panics if the request
+#: fails
 FETCH_SUSE_DOT_COM = """package main
 
 import "net/http"
@@ -34,6 +39,11 @@ CMD ["/fetcher/main"]
 
 
 def test_os_release(auto_container):
+    """
+    :file:`/etc/os-release` is present and the values of ``OS_VERSION`` and
+    ``OS_PRETTY_NAME`` equal :py:const:`bci_tester.data.OS_VERSION` and
+    :py:const:`bci_tester.data.OS_PRETTY_NAME` respectively
+    """
     assert auto_container.connection.file("/etc/os-release").exists
 
     for (var_name, value) in (
@@ -49,6 +59,10 @@ def test_os_release(auto_container):
 
 
 def test_product(auto_container):
+    """
+    check that :file:`/etc/products.d/SLES.prod` exists and
+    :file:`/etc/products.d/baseproduct` is a link to it
+    """
     assert auto_container.connection.file("/etc/products.d").is_directory
     assert auto_container.connection.file("/etc/products.d/SLES.prod").is_file
     assert auto_container.connection.file(
@@ -61,11 +75,16 @@ def test_product(auto_container):
 
 
 def test_coreutils_present(auto_container):
+    """
+    Check that some core utilities (:command:`cat`, :command:`sh`, etc.) exist
+    in the container.
+    """
     for binary in ("cat", "sh", "bash", "ls", "rm"):
         assert auto_container.connection.exists(binary)
 
 
 def test_glibc_present(auto_container):
+    """ensure that the glibc linker is present"""
     for binary in ("ldconfig", "ldd"):
         assert auto_container.connection.exists(binary)
 
@@ -74,6 +93,16 @@ def test_glibc_present(auto_container):
 def test_certificates_are_present(
     host, tmp_path, container_runtime, runner: Container, pytestconfig
 ):
+    """This is a multistage container build, verifying that the certificates are
+    correctly set up in the containers.
+
+    In the first step, we build a very simple go binary from
+    :py:const:`FETCH_SUSE_DOT_COM` in the golang container. We copy the
+    resulting binary into the container under test and execute it in that
+    container.
+
+    If the certificates are incorrectly set up, then the GET request will fail.
+    """
     multi_stage_build = MultiStageBuild(
         containers={"builder": GO_1_16_BASE_CONTAINER, "runner": runner},
         dockerfile_template=MULTISTAGE_DOCKERFILE,

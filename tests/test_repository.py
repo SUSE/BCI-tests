@@ -24,6 +24,10 @@ REPOCLOSURE_FALSE_POSITIVES = [
 
 
 def get_package_list(con) -> List[str]:
+    """This function returns all packages available from the ``SLE_BCI`` repository
+    given a container connection.
+
+    """
     package_list = (
         con.run_expect(
             [0],
@@ -76,6 +80,25 @@ def test_repoclosure(container_per_test):
     "container_per_test", [REPOCLOSURE_CONTAINER], indirect=True
 )
 def test_forbidden_packages(container_per_test):
+    """Regression test that no packages containing the following strings are in the
+    ``SLE_BCI`` repository:
+
+    - ``kernel``
+    - ``yast``
+    - ``kvm``
+    - ``xen``
+
+    The following packages contain the above strings, but are ok to be shipped:
+
+    - ``system-group-kvm.noarch``
+    - ``jaxen.noarch``
+    - ``kernelshark``
+    - ``librfxencode0``
+    - ``nfs-kernel-server``
+    - ``texlive-l3kernel.noarch``
+    - ``purge-kernels-service.noarch``
+
+    """
     package_list = get_package_list(container_per_test.connection)
 
     ALLOWED_PACKAGES = [
@@ -112,4 +135,10 @@ def test_forbidden_packages(container_per_test):
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
 def test_package_installation(container_per_test, pkg):
+    """Check that some basic packages (:command:`wget`, :command:`git`,
+    :command:`curl` and :command:`unzip`) can be installed. Additionally, try to
+    install all packages from :py:const:`REPOCLOSURE_FALSE_POSITIVES`, ensuring
+    that they are not accidentally not installable.
+
+    """
     container_per_test.connection.run_expect([0], f"zypper -n in {pkg}")

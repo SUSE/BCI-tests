@@ -1,3 +1,7 @@
+"""Tests for the .Net container based on SLE with the rpms build from
+Microsoft's binaries.
+
+"""
 import re
 
 import pytest
@@ -26,6 +30,7 @@ pytestmark = DOTNET_ARCH_SKIP_MARK
     indirect=["container"],
 )
 def test_dotnet_sdk_version(container, sdk_version):
+    """Ensure that the .Net SDKs and runtimes have the expected version."""
     assert (
         container.connection.check_output("dotnet --list-sdks")[:3]
         == sdk_version
@@ -44,6 +49,11 @@ def test_dotnet_sdk_version(container, sdk_version):
     indirect=["container"],
 )
 def test_dotnet_aspnet_version(container, sdk_version):
+    """Checks for the ASP.Net containers:
+
+    - Ensure that no .Net SDKs are present in the container
+    - Ensure that the runtimes have the expected version
+    """
     assert container.connection.check_output("dotnet --list-sdks") == ""
     runtimes = container.connection.check_output("dotnet --list-runtimes")
     assert ("Microsoft.AspNetCore.App " + sdk_version) in runtimes

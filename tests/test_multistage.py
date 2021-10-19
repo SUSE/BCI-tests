@@ -1,3 +1,4 @@
+"""Integration tests via multistage container builds."""
 import pytest
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
@@ -10,97 +11,51 @@ from pytest_container import MultiStageBuild
 from pytest_container.runtime import LOCALHOST
 
 
-MAVEN_VERSION = "3.8.2"
+#: maven version that is being build in the multistage test build
+MAVEN_VERSION = "3.8.3"
+
+#: Dockerfile template to build `amidst
+#: <https://github.com/toolbox4minecraft/amidst>`_
+AMIDST_DOCKERFILE = """FROM $builder as builder
+WORKDIR /amidst
+COPY ./amidst .
+RUN mvn package -DskipTests=True
+FROM $runner
+WORKDIR /amidst/
+COPY --from=builder /amidst/target .
+CMD ["java", "-jar", "amidst-v4-7.jar"]
+"""
+
+#: template of a Dockerfile to build maven in the OpenJDK devel container and
+#: copy it into the OpenJDK base container
+MAVEN_BUILD_DOCKERFILE = f"""FROM $builder as builder
+WORKDIR /maven
+COPY ./maven .
+RUN mvn package && zypper -n in unzip && \
+    unzip /maven/apache-maven/target/apache-maven-{MAVEN_VERSION}-bin.zip
+FROM $runner
+WORKDIR /maven/
+COPY --from=builder /maven/apache-maven-{MAVEN_VERSION}/ .
+CMD ["/maven/bin/mvn"]
+"""
+
+#: Dockerfile to build pdftk in the openjdk devel container and transfer it into
+#: the openjdk container.
+PDFTK_BUILD_DOCKERFILE = """FROM $builder as builder
+WORKDIR /pdftk
+COPY ./pdftk .
+RUN zypper -n in apache-ant apache-ivy && ant test-resolve && ant compile && ant jar
+
+FROM $runner
+WORKDIR /pdftk/
+COPY --from=builder /pdftk/build/jar/pdftk.jar .
+CMD ["java", "-jar", "pdftk.jar"]
+"""
 
 
-@pytest.mark.parametrize(
-    "host_git_clone,multi_stage_build,retval,cmd_stdout",
-    [
-        (
-            GitRepositoryBuild(
-                repository_url="https://github.com/toolbox4minecraft/amidst",
-                repository_tag="v4.7",
-            ),
-            MultiStageBuild(
-                {
-                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
-                    "runner": OPENJDK_BASE_CONTAINER,
-                },
-                """
-        FROM $builder as builder
-        WORKDIR /amidst
-        COPY ./amidst .
-        RUN mvn package -DskipTests=True
-        FROM $runner
-        WORKDIR /amidst/
-        COPY --from=builder /amidst/target .
-        CMD ["java", "-jar", "amidst-v4-7.jar"]
-        """,
-            ),
-            0,
-            "[info] Amidst v4.7",
-        ),
-        (
-            GitRepositoryBuild(
-                repository_url="https://github.com/apache/maven",
-                repository_tag=f"maven-{MAVEN_VERSION}",
-            ),
-            MultiStageBuild(
-                {
-                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
-                    "runner": OPENJDK_DEVEL_BASE_CONTAINER,
-                },
-                f"""
-        FROM $builder as builder
-        WORKDIR /maven
-        COPY ./maven .
-        RUN mvn package && zypper -n in unzip && \
-            unzip /maven/apache-maven/target/apache-maven-{MAVEN_VERSION}-bin.zip
-        FROM $runner
-        WORKDIR /maven/
-        COPY --from=builder /maven/apache-maven-{MAVEN_VERSION}/ .
-        CMD ["/maven/bin/mvn"]
-        """,
-            ),
-            1,
-            "[ERROR] No goals have been specified for this build.",
-        ),
-        (
-            GitRepositoryBuild(
-                repository_tag="v3.3.1",
-                repository_url="https://gitlab.com/pdftk-java/pdftk.git",
-            ),
-            MultiStageBuild(
-                {
-                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
-                    "runner": OPENJDK_BASE_CONTAINER,
-                },
-                """FROM $builder as builder
-        WORKDIR /pdftk
-        COPY ./pdftk .
-        RUN zypper --non-interactive addrepo https://download.opensuse.org/repositories/Java:/packages/openSUSE_Leap_15.3/Java:packages.repo && \
-            zypper --non-interactive --gpg-auto-import-keys ref && \
-            zypper --non-interactive in apache-ant apache-ivy && \
-            ant test-resolve && ant compile && ant jar
-        FROM $runner
-        WORKDIR /pdftk/
-        COPY --from=builder /pdftk/build/jar/pdftk.jar .
-        CMD ["java", "-jar", "pdftk.jar"]
-        """,
-            ),
-            0,
-            """SYNOPSIS
-       pdftk <input PDF files | - | PROMPT>
-        """,
-        ),
-        pytest.param(
-            GitRepositoryBuild(
-                repository_tag="0.11.1",
-                repository_url="https://github.com/alexellis/k3sup",
-            ),
-            MultiStageBuild(
-                {"builder": GO_1_16_CONTAINER, "runner": "scratch"},
-                """FROM $builder as builder
+#: dockerfile template to build k3sup in the go
+#: container and transfer it into a scratch container
+K3SUP_DOCKERFILE = """FROM $builder as builder
 WORKDIR /k3sup
 COPY ./k3sup .
 RUN echo > ./hack/hashgen.sh && make all
@@ -109,30 +64,15 @@ FROM $runner
 WORKDIR /k3sup
 COPY --from=builder /k3sup/bin/k3sup .
 CMD ["/k3sup/k3sup"]
-""",
-            ),
-            0,
-            'Use "k3sup [command] --help" for more information about a command.',
-            marks=pytest.mark.xfail(
-                condition=LOCALHOST.system_info.arch != "x86_64",
-                reason="Currently broken on arch != x86_64, see https://github.com/alexellis/k3sup/pull/345",
-            ),
-        ),
-        pytest.param(
-            GitRepositoryBuild(
-                repository_url="https://github.com/phillipsj/adventureworks-k8s-sample.git"
-            ),
-            MultiStageBuild(
-                {
-                    "builder": DOTNET_SDK_5_0_BASE_CONTAINER,
-                    "runner": DOTNET_ASPNET_5_0_BASE_CONTAINER,
-                },
-                # modified version of upstream's Dockerfile:
-                # - the entrypoint.sh is custom, so that the application
-                #   terminates
-                # - the docker build is not run from the repos top level dir,
-                #   but one directory "above"
-                dockerfile_template=r"""FROM $builder AS build
+"""
+
+#: modified version of upstream's `Dockerfile
+#: <https://github.com/phillipsj/adventureworks-k8s-sample/blob/main/Dockerfile>`_:
+#:
+#: - the ``entrypoint.sh`` is custom, so that the application terminates
+#: - the docker build is not run from the repos top level dir, but one directory
+#:   "above"
+DOTNET_K8S_SAMPLE_DOCKERFILE = r"""FROM $builder AS build
 WORKDIR /src
 
 COPY ./adventureworks-k8s-sample/AdventureWorks.sln AdventureWorks.sln
@@ -162,7 +102,85 @@ done \n\
 pkill dotnet \n\
 ' > entrypoint.sh && chmod +x entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
-""",
+"""
+
+
+@pytest.mark.parametrize(
+    "host_git_clone,multi_stage_build,retval,cmd_stdout",
+    [
+        (
+            GitRepositoryBuild(
+                repository_url="https://github.com/toolbox4minecraft/amidst",
+                repository_tag="v4.7",
+            ),
+            MultiStageBuild(
+                {
+                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
+                    "runner": OPENJDK_BASE_CONTAINER,
+                },
+                AMIDST_DOCKERFILE,
+            ),
+            0,
+            "[info] Amidst v4.7",
+        ),
+        (
+            GitRepositoryBuild(
+                repository_url="https://github.com/apache/maven",
+                repository_tag=f"maven-{MAVEN_VERSION}",
+            ),
+            MultiStageBuild(
+                {
+                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
+                    "runner": OPENJDK_DEVEL_BASE_CONTAINER,
+                },
+                MAVEN_BUILD_DOCKERFILE,
+            ),
+            1,
+            "[ERROR] No goals have been specified for this build.",
+        ),
+        (
+            GitRepositoryBuild(
+                repository_tag="v3.3.1",
+                repository_url="https://gitlab.com/pdftk-java/pdftk.git",
+            ),
+            MultiStageBuild(
+                {
+                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
+                    "runner": OPENJDK_BASE_CONTAINER,
+                },
+                PDFTK_BUILD_DOCKERFILE,
+            ),
+            0,
+            """SYNOPSIS
+       pdftk <input PDF files | - | PROMPT>
+        """,
+        ),
+        pytest.param(
+            GitRepositoryBuild(
+                repository_tag="0.11.1",
+                repository_url="https://github.com/alexellis/k3sup",
+            ),
+            MultiStageBuild(
+                {"builder": GO_1_16_CONTAINER, "runner": "scratch"},
+                K3SUP_DOCKERFILE,
+            ),
+            0,
+            'Use "k3sup [command] --help" for more information about a command.',
+            marks=pytest.mark.xfail(
+                condition=LOCALHOST.system_info.arch != "x86_64",
+                reason="Currently broken on arch != x86_64, see https://github.com/alexellis/k3sup/pull/345",
+            ),
+        ),
+        pytest.param(
+            GitRepositoryBuild(
+                repository_url="https://github.com/phillipsj/adventureworks-k8s-sample.git"
+            ),
+            MultiStageBuild(
+                {
+                    "builder": DOTNET_SDK_5_0_BASE_CONTAINER,
+                    "runner": DOTNET_ASPNET_5_0_BASE_CONTAINER,
+                },
+                dockerfile_template=DOTNET_K8S_SAMPLE_DOCKERFILE,
             ),
             0,
             """Microsoft.Hosting.Lifetime[0]\n      Now listening on: http://localhost:5000
@@ -190,6 +208,58 @@ def test_dockerfile_build(
     cmd_stdout: str,
     pytestconfig,
 ):
+    """Integration test of multistage container builds. We fetch a project
+    (optionally checking out a specific tag), run a two stage build using a
+    dockerfile template where we substitute the ``$runner`` and ``$builder``
+    containers for the supplied images. Finally we run the ``$runner`` and
+    verify the return value and standard output.
+
+    .. list-table::
+       :header-rows: 1
+
+       * - project and tag
+         - :file:`Dockerfile`
+         - ``builder``
+         - ``runner``
+         - return value
+         - standard output
+
+       * - `<https://github.com/toolbox4minecraft/amidst>`_ at ``v4.7``
+         - :py:const:`AMIDST_DOCKERFILE`
+         - OpenJDK devel
+         - OpenJDK
+         - ``0``
+         - ``[info] Amidst v4.7``
+
+       * - `<https://github.com/apache/maven>`_ at ``maven-`` +
+           :py:const:`MAVEN_VERSION`
+         - :py:const:`MAVEN_BUILD_DOCKERFILE`
+         - OpenJDK devel
+         - OpenJDK
+         - ``1``
+         - ``[ERROR] No goals have been specified for this build.``
+
+       * - `<https://gitlab.com/pdftk-java/pdftk.git>`_ at ``v3.3.1``
+         - :py:const:`PDFTK_BUILD_DOCKERFILE`
+         - OpenJDK devel
+         - OpenJDK
+         - ``0``
+         - ``SYNOPSIS       pdftk <input PDF files | - | PROMPT>``
+
+       * - `<https://github.com/alexellis/k3sup>`_ at ``0.11.1``
+         - :py:const:`K3SUP_DOCKERFILE`
+         - Go
+         - scratch
+         - ``0``
+         - ``Use "k3sup [command] --help" for more information about a command.``
+
+       * - `<https://github.com/phillipsj/adventureworks-k8s-sample.git>`_
+         - :py:const:`DOTNET_K8S_SAMPLE_DOCKERFILE`
+         - .Net 5.0
+         - ASP.Net 5.0
+         - ``0``
+         - `omitted`
+    """
     tmp_path, _ = host_git_clone
 
     multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
