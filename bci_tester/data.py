@@ -34,27 +34,27 @@ MICRO_CONTAINER = Container(
 )
 
 GO_1_16_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/golang:{1.16}"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/golang:1.16"
 )
 
 OPENJDK_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/openjdk:11"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/openjdk:11"
 )
 OPENJDK_DEVEL_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/openjdk-devel:11"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/openjdk-devel:11"
 )
 NODEJS_12_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/nodejs:12"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/nodejs:12"
 )
 NODEJS_14_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/nodejs:14"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/nodejs:14"
 )
 
 PYTHON36_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/python:3.6"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/python:3.6"
 )
 PYTHON39_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/python:3.9"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/python:3.9"
 )
 
 DOTNET_SDK_3_1_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
