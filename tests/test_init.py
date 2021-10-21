@@ -17,8 +17,8 @@ from pytest_container.runtime import LOCALHOST
     reason="Running systemd in docker is broken as of systemd 248, see https://github.com/moby/moby/issues/42275",
 )
 def test_systemd_present(container):
-    """Check that :command:`systemctl` is in ``$PATH`` and that :command:`systemctl
-    status` works.
+    """Check that :command:`systemctl` is in ``$PATH``, that :command:`systemctl
+    status` works and that :file:`/etc/machine-id` exists.
 
     This test is currently broken due to `moby/moby#42275
     <https://github.com/moby/moby/issues/42275>`_ with :command:`docker` and
@@ -26,6 +26,7 @@ def test_systemd_present(container):
 
     """
     assert container.connection.exists("systemctl")
+    assert container.connection.file("/etc/machine-id").exists
     assert container.connection.run_expect([0], "systemctl status")
 
 
