@@ -112,3 +112,10 @@ def dapper(host):
             [0], f"GOPATH={gopath} go get github.com/rancher/dapper"
         )
         yield os.path.join(gopath, "bin", "dapper")
+
+        # fix file permissions so that we can unlink them all
+        for root, dirs, files in os.walk(gopath):
+            for filename in files + dirs:
+                full_path = os.path.join(root, filename)
+                if not os.access(full_path, os.W_OK):
+                    os.chmod(full_path, 0o755)
