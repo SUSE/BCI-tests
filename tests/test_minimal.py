@@ -50,11 +50,6 @@ def test_fat_packages_absent(auto_container):
         assert not auto_container.connection.exists(pkg)
 
 
-def test_base_packages_present(auto_container):
-    for pkg in ("cat", "sh", "bash"):
-        assert auto_container.connection.exists(pkg)
-
-
 @pytest.mark.parametrize(
     "container", [MICRO_CONTAINER], indirect=["container"]
 )

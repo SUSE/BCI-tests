@@ -2,7 +2,6 @@ import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_BASE_CONTAINER
-from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from pytest_container import Container
@@ -71,18 +70,7 @@ def test_glibc_present(auto_container):
         assert auto_container.connection.exists(binary)
 
 
-@pytest.mark.parametrize(
-    "runner",
-    [cont for cont in ALL_CONTAINERS if cont != MICRO_CONTAINER]
-    + [
-        pytest.param(
-            MICRO_CONTAINER,
-            marks=pytest.mark.xfail(
-                reason="Certificates are missing in the micro container"
-            ),
-        )
-    ],
-)
+@pytest.mark.parametrize("runner", ALL_CONTAINERS)
 def test_certificates_are_present(
     host, tmp_path, container_runtime, runner: Container, pytestconfig
 ):

@@ -26,7 +26,7 @@ def test_go_version(auto_container):
 
 
 @pytest.mark.parametrize(
-    "container,container_git_clone",
+    "container_per_test,container_git_clone",
     [
         (
             GO_1_16_CONTAINER,
@@ -36,7 +36,13 @@ def test_go_version(auto_container):
             ).to_pytest_param(),
         ),
     ],
-    indirect=["container", "container_git_clone"],
+    indirect=["container_per_test", "container_git_clone"],
 )
-def test_kured(container, container_git_clone):
-    container.connection.run_expect([0], container_git_clone.test_command)
+def test_build_kured(container_per_test, container_git_clone):
+    """Try to build `kured <https://github.com/weaveworks/kured.git>`_ inside the
+    container with :command:`make` pre-installed.
+
+    """
+    container_per_test.connection.run_expect(
+        [0], container_git_clone.test_command
+    )

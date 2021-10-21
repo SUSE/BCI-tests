@@ -4,13 +4,14 @@ import tempfile
 from subprocess import check_output
 
 import pytest
+from _pytest.fixtures import SubRequest
 from pytest_container import auto_container_parametrize
 from pytest_container import get_selected_runtime
 from pytest_container import GitRepositoryBuild
 
 
 @pytest.fixture(scope="function")
-def container_git_clone(request, tmp_path):
+def container_git_clone(request: SubRequest, tmp_path):
     """This fixture clones the `GitRepositoryBuild` passed as an indirect
     parameter to it into the currently selected container.
 
@@ -30,19 +31,29 @@ def container_git_clone(request, tmp_path):
             "expected GitRepositoryBuild or SubRequest with a GitRepositoryBuild"
         )
 
+    container_fixture = None
+    for fixture_name in (
+        "container",
+        "auto_container",
+        "container_per_test",
+        "auto_container_per_test",
+    ):
+        if fixture_name in request.fixturenames:
+            container_fixture = request.getfixturevalue(fixture_name)
+
+    assert (
+        container_fixture is not None
+    ), "No container fixture was passed to the test function, cannot execute `container_git_clone`"
+
     check_output(shlex.split(git_repo_build.clone_command), cwd=tmp_path)
 
-    if "container" in request.fixturenames:
-        cont = request.getfixturevalue("container")
-    else:
-        cont = request.getfixturevalue("auto_container")
     runtime = get_selected_runtime()
     check_output(
         [
             runtime.runner_binary,
             "cp",
             str(tmp_path / git_repo_build.repo_name),
-            f"{cont.container_id}:/{git_repo_build.repo_name}",
+            f"{container_fixture.container_id}:/{git_repo_build.repo_name}",
         ]
     )
     yield git_repo_build
@@ -101,3 +112,10 @@ def dapper(host):
             [0], f"GOPATH={gopath} go get github.com/rancher/dapper"
         )
         yield os.path.join(gopath, "bin", "dapper")
+
+        # fix file permissions so that we can unlink them all
+        for root, dirs, files in os.walk(gopath):
+            for filename in files + dirs:
+                full_path = os.path.join(root, filename)
+                if not os.access(full_path, os.W_OK):
+                    os.chmod(full_path, 0o755)

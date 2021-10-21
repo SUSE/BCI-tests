@@ -1,31 +1,33 @@
+"""This module contains the tests for the init container, the image with
+systemd pre-installed.
+
+"""
 import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import INIT_CONTAINER
+from pytest_container import DockerRuntime
 from pytest_container import get_selected_runtime
-
-
-@pytest.mark.parametrize("container", [INIT_CONTAINER], indirect=True)
-@pytest.mark.skip(reason="Needs to get fixed properly")
-def test_systemd_present(container):
-    assert container.connection.exists("systemctl")
-    assert container.connection.run_expect([0], "systemctl status")
+from pytest_container.runtime import LOCALHOST
 
 
 @pytest.mark.parametrize("container", [INIT_CONTAINER], indirect=True)
 @pytest.mark.skipif(
-    get_selected_runtime().runner_binary != "docker",
-    reason="Docker in docker can only be tested when using the docker runtime",
+    (get_selected_runtime() == DockerRuntime())
+    and (int(LOCALHOST.package("systemd").version.split(".")[0]) >= 248),
+    reason="Running systemd in docker is broken as of systemd 248, see https://github.com/moby/moby/issues/42275",
 )
-@pytest.mark.skip(reason="Needs to get fixed properly")
-def test_docker_in_docker(container):
-    assert container.connection.run_expect([0], "zypper -n in docker")
-    assert container.connection.run_expect([0], "systemctl start docker")
-    assert container.connection.run_expect([0], "docker ps")
-    assert container.connection.run_expect(
-        [0],
-        "docker run --rm registry.opensuse.org/opensuse/tumbleweed:latest "
-        "/usr/bin/ls",
-    )
+def test_systemd_present(container):
+    """Check that :command:`systemctl` is in ``$PATH``, that :command:`systemctl
+    status` works and that :file:`/etc/machine-id` exists.
+
+    This test is currently broken due to `moby/moby#42275
+    <https://github.com/moby/moby/issues/42275>`_ with :command:`docker` and
+    :command:`systemd` >= 248.
+
+    """
+    assert container.connection.exists("systemctl")
+    assert container.connection.file("/etc/machine-id").exists
+    assert container.connection.run_expect([0], "systemctl status")
 
 
 @pytest.mark.parametrize(
@@ -34,6 +36,10 @@ def test_docker_in_docker(container):
     indirect=True,
 )
 def test_systemd_not_installed_elsewhere(container):
+    """Ensure that systemd is not present in all containers besides the init
+    container.
+
+    """
     assert not container.connection.exists("systemctl")
 
     # we cannot check for an existing package if rpm is not installed

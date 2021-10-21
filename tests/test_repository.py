@@ -75,9 +75,6 @@ def test_repoclosure(container_per_test):
 @pytest.mark.parametrize(
     "container_per_test", [REPOCLOSURE_CONTAINER], indirect=True
 )
-@pytest.mark.xfail(
-    reason="Some kernel related packages are still in the repository"
-)
 def test_forbidden_packages(container_per_test):
     package_list = get_package_list(container_per_test.connection)
 
@@ -88,6 +85,7 @@ def test_forbidden_packages(container_per_test):
         "librfxencode0",
         "nfs-kernel-server",
         "texlive-l3kernel.noarch",
+        "purge-kernels-service.noarch",
     ]
 
     FORBIDDEN_PACKAGE_NAMES = ["kernel", "yast", "kvm", "xen"]

@@ -51,23 +51,35 @@ def test_dotnet_aspnet_version(container, sdk_version):
 
 
 @pytest.mark.parametrize(
-    "container",
+    "container_per_test",
     [
         DOTNET_SDK_3_1_BASE_CONTAINER,
         DOTNET_SDK_5_0_BASE_CONTAINER,
     ],
-    indirect=["container"],
+    indirect=True,
 )
-def test_dotnet_hello_world(container):
-    container.connection.run_expect([0], "dotnet new console -o MyApp")
+def test_dotnet_hello_world(container_per_test):
+    """Test the build of a hello world .Net console application by running:
+
+    - :command:`dotnet new console -o MyApp`
+    - :command:`cd MyApp && dotnet run` and checking that it outputs ``Hello
+      World!``
+    """
+    container_per_test.connection.run_expect(
+        [0], "dotnet new console -o MyApp"
+    )
     assert (
-        container.connection.check_output("cd MyApp && dotnet run")
+        container_per_test.connection.run_expect(
+            [0], "cd MyApp && dotnet run"
+        ).stdout.strip()
         == "Hello World!"
     )
 
 
 @pytest.mark.parametrize(
-    "container", [DOTNET_SDK_5_0_BASE_CONTAINER], indirect=["container"]
+    "container_per_test",
+    [DOTNET_SDK_5_0_BASE_CONTAINER],
+    indirect=["container_per_test"],
 )
 @pytest.mark.parametrize(
     "container_git_clone",
@@ -81,20 +93,37 @@ dotnet test ./src/Tests/Nop.Tests/Nop.Tests.csproj""",
     ],
     indirect=["container_git_clone"],
 )
-def test_popular_web_apps(container, container_git_clone):
-    container.connection.run_expect([0], container_git_clone.test_command)
+def test_popular_web_apps(container_per_test, container_git_clone):
+    """Test the build of a popular web application:
+
+    - Build `nopCommerce <https://github.com/nopSolutions/nopCommerce.git>`_
+      release ``4.40.4`` via :command:`dotnet build ./src/NopCommerce.sln &&
+      dotnet test ./src/Tests/Nop.Tests/Nop.Tests.csproj`
+
+    """
+    container_per_test.connection.run_expect(
+        [0], container_git_clone.test_command
+    )
 
 
 @pytest.mark.parametrize(
-    "container",
+    "container_per_test",
     [
         DOTNET_SDK_3_1_BASE_CONTAINER,
         DOTNET_SDK_5_0_BASE_CONTAINER,
     ],
-    indirect=["container"],
+    indirect=True,
 )
-def test_dotnet_sdk_telemetry_deactivated(container):
-    dotnet_new_stdout = container.connection.run_expect(
+def test_dotnet_sdk_telemetry_deactivated(container_per_test):
+    """Test that telemetry of the .Net SDK is turned off by default.
+
+    The .Net SDK will by default have `telemetry
+    <https://docs.microsoft.com/en-us/dotnet/core/tools/telemetry>`_ enabled. We
+    disable it via an environment variable and check that the no telemetry
+    notice is present in the output of :command:`dotnet help`.
+
+    """
+    dotnet_new_stdout = container_per_test.connection.run_expect(
         [0], "dotnet help"
     ).stdout.strip()
     assert not re.search(r"telemetry", dotnet_new_stdout, re.IGNORECASE)
