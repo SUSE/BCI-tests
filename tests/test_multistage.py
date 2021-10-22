@@ -114,11 +114,11 @@ ENTRYPOINT ["/app/entrypoint.sh"]
                 repository_tag="v4.7",
             ),
             MultiStageBuild(
-                {
+                containers={
                     "builder": OPENJDK_DEVEL_BASE_CONTAINER,
                     "runner": OPENJDK_BASE_CONTAINER,
                 },
-                AMIDST_DOCKERFILE,
+                containerfile_template=AMIDST_DOCKERFILE,
             ),
             0,
             "[info] Amidst v4.7",
@@ -129,11 +129,11 @@ ENTRYPOINT ["/app/entrypoint.sh"]
                 repository_tag=f"maven-{MAVEN_VERSION}",
             ),
             MultiStageBuild(
-                {
+                containers={
                     "builder": OPENJDK_DEVEL_BASE_CONTAINER,
                     "runner": OPENJDK_DEVEL_BASE_CONTAINER,
                 },
-                MAVEN_BUILD_DOCKERFILE,
+                containerfile_template=MAVEN_BUILD_DOCKERFILE,
             ),
             1,
             "[ERROR] No goals have been specified for this build.",
@@ -144,11 +144,11 @@ ENTRYPOINT ["/app/entrypoint.sh"]
                 repository_url="https://gitlab.com/pdftk-java/pdftk.git",
             ),
             MultiStageBuild(
-                {
+                containers={
                     "builder": OPENJDK_DEVEL_BASE_CONTAINER,
                     "runner": OPENJDK_BASE_CONTAINER,
                 },
-                PDFTK_BUILD_DOCKERFILE,
+                containerfile_template=PDFTK_BUILD_DOCKERFILE,
             ),
             0,
             """SYNOPSIS
@@ -161,8 +161,8 @@ ENTRYPOINT ["/app/entrypoint.sh"]
                 repository_url="https://github.com/alexellis/k3sup",
             ),
             MultiStageBuild(
-                {"builder": GO_1_16_CONTAINER, "runner": "scratch"},
-                K3SUP_DOCKERFILE,
+                containers={"builder": GO_1_16_CONTAINER, "runner": "scratch"},
+                containerfile_template=K3SUP_DOCKERFILE,
             ),
             0,
             'Use "k3sup [command] --help" for more information about a command.',
@@ -176,11 +176,11 @@ ENTRYPOINT ["/app/entrypoint.sh"]
                 repository_url="https://github.com/phillipsj/adventureworks-k8s-sample.git"
             ),
             MultiStageBuild(
-                {
+                containers={
                     "builder": DOTNET_SDK_5_0_BASE_CONTAINER,
                     "runner": DOTNET_ASPNET_5_0_BASE_CONTAINER,
                 },
-                dockerfile_template=DOTNET_K8S_SAMPLE_DOCKERFILE,
+                containerfile_template=DOTNET_K8S_SAMPLE_DOCKERFILE,
             ),
             0,
             """Microsoft.Hosting.Lifetime[0]\n      Now listening on: http://localhost:5000

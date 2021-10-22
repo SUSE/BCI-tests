@@ -105,7 +105,7 @@ def test_certificates_are_present(
     """
     multi_stage_build = MultiStageBuild(
         containers={"builder": GO_1_16_BASE_CONTAINER, "runner": runner},
-        dockerfile_template=MULTISTAGE_DOCKERFILE,
+        containerfile_template=MULTISTAGE_DOCKERFILE,
     )
     multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
 
