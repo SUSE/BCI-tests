@@ -5,14 +5,13 @@ systemd pre-installed.
 import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import INIT_CONTAINER
-from pytest_container import DockerRuntime
-from pytest_container import get_selected_runtime
+from bci_tester.runtime_choice import DOCKER_SELECTED
 from pytest_container.runtime import LOCALHOST
 
 
 @pytest.mark.parametrize("container", [INIT_CONTAINER], indirect=True)
 @pytest.mark.skipif(
-    (get_selected_runtime() == DockerRuntime())
+    DOCKER_SELECTED
     and (int(LOCALHOST.package("systemd").version.split(".")[0]) >= 248),
     reason="Running systemd in docker is broken as of systemd 248, see https://github.com/moby/moby/issues/42275",
 )

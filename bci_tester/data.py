@@ -3,10 +3,9 @@ import shlex
 from typing import Union
 
 import pytest
+from bci_tester.runtime_choice import DOCKER_SELECTED
 from pytest_container import Container
 from pytest_container import DerivedContainer
-from pytest_container import DockerRuntime
-from pytest_container import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
 
 
@@ -14,9 +13,14 @@ DEFAULT_REGISTRY = "registry.suse.de"
 EXTRA_RUN_ARGS = shlex.split(os.getenv("EXTRA_RUN_ARGS", ""))
 EXTRA_BUILD_ARGS = shlex.split(os.getenv("EXTRA_BUILD_ARGS", ""))
 
+#: The operating system version as present in /etc/os-release & various other
+#: places
 OS_VERSION = "15.3"
+#: The SLES 15 pretty name (from /etc/os-release)
 OS_PRETTY_NAME = "SUSE Linux Enterprise Server 15 SP3"
 
+#: pytest mark to not run on non-x86_64 architectures because .Net is not
+#: supported on these architectures
 DOTNET_ARCH_SKIP_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
     reason="The .Net containers are only available on x86_64",
@@ -88,10 +92,11 @@ INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
         "-e",
         "container=docker",
     ]
-    if get_selected_runtime() == DockerRuntime()
+    if DOCKER_SELECTED
     else [],
     default_entry_point=True,
 )
+
 
 #
 # !! IMPORTANT !!

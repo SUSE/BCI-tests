@@ -8,6 +8,10 @@ CONTAINER_IMAGES = [NODEJS_12_CONTAINER, NODEJS_14_CONTAINER]
 
 
 def test_node_version(auto_container):
+    """Verify that the environment variable ``NODE_VERSION`` matches the major
+    version of the installed :command:`node` binary.
+
+    """
     assert (
         auto_container.connection.run_expect([0], "node -v")
         .stdout.strip()
@@ -20,6 +24,10 @@ def test_node_version(auto_container):
 
 
 def test_npm_version(auto_container):
+    """Check that the environment variable ``NPM_VERSION`` matches the output of
+    :command:`npm --version`.
+
+    """
     npm_version = auto_container.connection.run_expect(
         [0], "npm --version"
     ).stdout.strip()

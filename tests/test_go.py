@@ -1,9 +1,11 @@
+"""Tests for the Go language container."""
 import pytest
 from bci_tester.data import GO_1_16_BASE_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from pytest_container import GitRepositoryBuild
 
 
+#: Maximum go container size in Bytes
 GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 
 CONTAINER_IMAGES = [GO_1_16_BASE_CONTAINER, GO_1_16_CONTAINER]
@@ -13,6 +15,10 @@ CONTAINER_IMAGES = [GO_1_16_BASE_CONTAINER, GO_1_16_CONTAINER]
     "container", [GO_1_16_BASE_CONTAINER], indirect=["container"]
 )
 def test_go_size(container, container_runtime):
+    """Ensure that the go base container is below the size specified in
+    :py:const:`GOLANG_MAX_CONTAINER_SIZE_ON_DISK`.
+
+    """
     assert (
         container_runtime.get_image_size(container.image_url_or_id)
         < GOLANG_MAX_CONTAINER_SIZE_ON_DISK
@@ -20,6 +26,10 @@ def test_go_size(container, container_runtime):
 
 
 def test_go_version(auto_container):
+    """Check that the environment variable ``GOLANG_VERSION`` matches the output of
+    :command:`go version`
+
+    """
     assert auto_container.connection.check_output(
         "echo $GOLANG_VERSION"
     ) in auto_container.connection.check_output("go version")
