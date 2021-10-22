@@ -18,6 +18,7 @@
 stages:
   - test
   - integration
+  - deploy
 
 cache:
   paths:
@@ -53,13 +54,24 @@ test_310:
   script:
     - tox -e py310-unit
 
-pages:
+doc:
   image: python
   script:
     - tox -e doc
   artifacts:
     paths:
       - build/html/
+
+pages:
+  stage: deploy
+  dependencies:
+    - doc
+  script:
+    - mkdir public
+    - mv build/html/* public/
+  artifacts:
+    paths:
+      - public
 
 integration_tests_docker:
   <<: *integration
