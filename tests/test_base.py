@@ -135,14 +135,10 @@ def test_rancher_build(host, host_git_clone, dapper):
     with open(rancher_dir / "Dockerfile.dapper", "w") as dapperfile:
         dapperfile.write(
             re.sub(
-                r"docker-[^\s]*",
-                "docker",
-                re.sub(
-                    r"FROM .*",
-                    f"FROM {BASE_CONTAINER.container_id or BASE_CONTAINER.url}",
-                    contents,
-                ),
-            )
+                r"FROM .*",
+                f"FROM {BASE_CONTAINER.container_id or BASE_CONTAINER.url}",
+                contents,
+            ),
         )
 
     # FIMXE: enable dapper ci at some point instead of just dapper build
