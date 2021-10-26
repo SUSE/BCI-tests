@@ -26,6 +26,8 @@ from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_3_1_BASE_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
@@ -77,6 +79,8 @@ IMAGES_AND_NAMES: List[Tuple[Union[Container, DerivedContainer], str]] = [
         (DOTNET_SDK_5_0_BASE_CONTAINER, "dotnet.sdk"),
         (DOTNET_ASPNET_3_1_BASE_CONTAINER, "dotnet.aspnet"),
         (DOTNET_ASPNET_5_0_BASE_CONTAINER, "dotnet.aspnet"),
+        (DOTNET_RUNTIME_3_1_BASE_CONTAINER, "dotnet.runtime"),
+        (DOTNET_RUNTIME_5_0_BASE_CONTAINER, "dotnet.runtime"),
     ]
     if LOCALHOST.system_info.arch == "x86_64"
     else []

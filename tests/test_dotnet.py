@@ -8,6 +8,8 @@ import pytest
 from bci_tester.data import DOTNET_ARCH_SKIP_MARK
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_3_1_BASE_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
 from pytest_container import GitRepositoryBuild
@@ -41,23 +43,43 @@ def test_dotnet_sdk_version(container, sdk_version):
 
 
 @pytest.mark.parametrize(
-    "container,sdk_version",
+    "container,runtime_version",
     [
         (DOTNET_ASPNET_3_1_BASE_CONTAINER, "3.1"),
         (DOTNET_ASPNET_5_0_BASE_CONTAINER, "5.0"),
     ],
     indirect=["container"],
 )
-def test_dotnet_aspnet_version(container, sdk_version):
+def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     """Checks for the ASP.Net containers:
 
     - Ensure that no .Net SDKs are present in the container
     - Ensure that the runtimes have the expected version
+    - Ensure that the .Net and ASP.Net runtimes are present
     """
     assert container.connection.check_output("dotnet --list-sdks") == ""
     runtimes = container.connection.check_output("dotnet --list-runtimes")
-    assert ("Microsoft.AspNetCore.App " + sdk_version) in runtimes
-    assert ("Microsoft.NETCore.App " + sdk_version) in runtimes
+    assert ("Microsoft.AspNetCore.App " + runtime_version) in runtimes
+    assert ("Microsoft.NETCore.App " + runtime_version) in runtimes
+
+
+@pytest.mark.parametrize(
+    "container,runtime_version",
+    [
+        (DOTNET_RUNTIME_3_1_BASE_CONTAINER, "3.1"),
+        (DOTNET_RUNTIME_5_0_BASE_CONTAINER, "5.0"),
+    ],
+    indirect=["container"],
+)
+def test_dotnet_runtime_present(container, runtime_version):
+    """Verify that there is one .Net runtime present in the .Net runtime only container."""
+    runtimes = (
+        container.connection.run_expect([0], "dotnet --list-runtimes")
+        .stdout.strip()
+        .split("\n")
+    )
+    assert len(runtimes) == 1
+    assert "Microsoft.NETCore.App " + runtime_version in runtimes[0]
 
 
 @pytest.mark.parametrize(

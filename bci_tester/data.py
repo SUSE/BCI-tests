@@ -82,6 +82,17 @@ DOTNET_ASPNET_5_0_BASE_CONTAINER: Union[
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-aspnet:5.0",
 )
 
+DOTNET_RUNTIME_3_1_BASE_CONTAINER: Union[
+    Container, DerivedContainer
+] = Container(
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-runtime:3.1"
+)
+DOTNET_RUNTIME_5_0_BASE_CONTAINER: Union[
+    Container, DerivedContainer
+] = Container(
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-runtime:5.0"
+)
+
 INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/init:15.3",
     extra_launch_args=[
@@ -133,6 +144,8 @@ else:
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
+        DOTNET_RUNTIME_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
+        DOTNET_RUNTIME_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         INIT_CONTAINER_WITH_DEVEL_REPO,
     ) = (
         DerivedContainer(base=cont, containerfile=REPLACE_REPO_CONTAINERFILE)
@@ -150,6 +163,8 @@ else:
             DOTNET_SDK_5_0_BASE_CONTAINER,
             DOTNET_ASPNET_3_1_BASE_CONTAINER,
             DOTNET_ASPNET_5_0_BASE_CONTAINER,
+            DOTNET_RUNTIME_3_1_BASE_CONTAINER,
+            DOTNET_RUNTIME_5_0_BASE_CONTAINER,
             INIT_CONTAINER,
         )
     )
@@ -168,6 +183,8 @@ else:
         DOTNET_SDK_5_0_BASE_CONTAINER,
         DOTNET_ASPNET_3_1_BASE_CONTAINER,
         DOTNET_ASPNET_5_0_BASE_CONTAINER,
+        DOTNET_RUNTIME_3_1_BASE_CONTAINER,
+        DOTNET_RUNTIME_5_0_BASE_CONTAINER,
         INIT_CONTAINER,
     ) = (
         BASE_CONTAINER_WITH_DEVEL_REPO,
@@ -183,6 +200,8 @@ else:
         DOTNET_SDK_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
         DOTNET_ASPNET_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
+        DOTNET_RUNTIME_3_1_BASE_CONTAINER_WITH_DEVEL_REPO,
+        DOTNET_RUNTIME_5_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         INIT_CONTAINER_WITH_DEVEL_REPO,
     )
 
@@ -220,6 +239,8 @@ ALL_CONTAINERS = [
         DOTNET_SDK_3_1_BASE_CONTAINER,
         DOTNET_SDK_5_0_BASE_CONTAINER,
         DOTNET_ASPNET_3_1_BASE_CONTAINER,
+        DOTNET_ASPNET_5_0_BASE_CONTAINER,
+        DOTNET_RUNTIME_3_1_BASE_CONTAINER,
         DOTNET_ASPNET_5_0_BASE_CONTAINER,
     ]
     if LOCALHOST.system_info.arch == "x86_64"
