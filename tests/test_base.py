@@ -7,12 +7,14 @@ from typing import Dict
 
 import pytest
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import INIT_CONTAINER
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
 from bci_tester.runtime_choice import DOCKER_SELECTED
 from pytest_container import Container
+from pytest_container import DerivedContainer
 from pytest_container import GitRepositoryBuild
 from pytest_container.runtime import LOCALHOST
 
@@ -148,7 +150,9 @@ def test_rancher_build(host, host_git_clone, dapper):
 
 #: This is the base container with additional launch arguments applied to it so
 #: that docker can be launched inside the container
-DIND_CONTAINER = Container(
+DIND_CONTAINER = (
+    Container if isinstance(INIT_CONTAINER, Container) else DerivedContainer
+)(
     **{
         x: getattr(BASE_CONTAINER, x)
         for x in BASE_CONTAINER.__dict__
