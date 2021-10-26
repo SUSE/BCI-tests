@@ -17,8 +17,8 @@
 
 stages:
   - test
-  - integration
   - deploy
+  - integration
 
 cache:
   paths:
