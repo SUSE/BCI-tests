@@ -17,8 +17,8 @@
 
 stages:
   - test
-  - integration
   - deploy
+  - integration
 
 cache:
   paths:
@@ -64,6 +64,7 @@ doc:
 
 pages:
   stage: deploy
+  before_script: []
   dependencies:
     - doc
   script:
