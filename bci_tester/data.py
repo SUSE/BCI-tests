@@ -83,7 +83,7 @@ DOTNET_ASPNET_5_0_BASE_CONTAINER: Union[
 )
 
 INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/bci/images/bci/init",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/init:15.3",
     extra_launch_args=[
         "--privileged",
         "--tmpfs",
