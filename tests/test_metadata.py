@@ -22,13 +22,14 @@ from typing import Tuple
 from typing import Union
 
 import pytest
+from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import BASE_CONTAINERS
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
-from bci_tester.data import GO_1_16_BASE_CONTAINER
+from bci_tester.data import GO_1_16_CONTAINER
+from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
@@ -61,7 +62,8 @@ IMAGES_AND_NAMES: List[Tuple[Union[Container, DerivedContainer], str]] = [
     (BASE_CONTAINER, "base"),
     (MINIMAL_CONTAINER, "minimal"),
     (MICRO_CONTAINER, "micro"),
-    (GO_1_16_BASE_CONTAINER, "golang"),
+    (GO_1_16_CONTAINER, "golang"),
+    (GO_1_17_CONTAINER, "golang"),
     (OPENJDK_11_CONTAINER, "openjdk"),
     (OPENJDK_DEVEL_11_CONTAINER, "openjdk.devel"),
     (NODEJS_12_CONTAINER, "nodejs"),
@@ -80,7 +82,7 @@ IMAGES_AND_NAMES: List[Tuple[Union[Container, DerivedContainer], str]] = [
     else []
 )
 
-assert len(BASE_CONTAINERS) == len(
+assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES
 ), "IMAGES_AND_NAMES must have all containers from BASE_CONTAINERS"
 
@@ -187,7 +189,7 @@ def test_disturl(
     not LOCALHOST.exists("osc"),
     reason="osc needs to be installed for this test",
 )
-@pytest.mark.parametrize("container_data", BASE_CONTAINERS)
+@pytest.mark.parametrize("container_data", ALL_CONTAINERS)
 def test_disturl_can_be_checked_out(
     container_data: Union[Container, DerivedContainer],
     tmp_path,
@@ -210,7 +212,7 @@ def test_disturl_can_be_checked_out(
 
 @pytest.mark.parametrize(
     "container_data",
-    [cont for cont in BASE_CONTAINERS if cont != BASE_CONTAINER],
+    [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
 )
 def test_techpreview_label(container_data: Union[Container, DerivedContainer]):
     """Check that all containers (except for the base container) have the label

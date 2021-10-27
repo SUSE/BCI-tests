@@ -58,7 +58,7 @@ CMD ["java", "-jar", "pdftk.jar"]
 K3SUP_DOCKERFILE = """FROM $builder as builder
 WORKDIR /k3sup
 COPY ./k3sup .
-RUN echo > ./hack/hashgen.sh && make all
+RUN zypper -n in make && echo > ./hack/hashgen.sh && make all
 
 FROM $runner
 WORKDIR /k3sup
