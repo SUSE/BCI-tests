@@ -1,11 +1,11 @@
 """Tests of the OpenJDK base container."""
 import pytest
-from bci_tester.data import OPENJDK_BASE_CONTAINER
+from bci_tester.data import OPENJDK_11_CONTAINER
 
 
 @pytest.mark.parametrize(
     "container,java_version",
-    [(OPENJDK_BASE_CONTAINER, "11")],
+    [(OPENJDK_11_CONTAINER, "11")],
     indirect=["container"],
 )
 def test_jdk_version(container, java_version):

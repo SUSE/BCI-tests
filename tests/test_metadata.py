@@ -34,8 +34,8 @@ from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NODEJS_12_CONTAINER
 from bci_tester.data import NODEJS_14_CONTAINER
-from bci_tester.data import OPENJDK_BASE_CONTAINER
-from bci_tester.data import OPENJDK_DEVEL_BASE_CONTAINER
+from bci_tester.data import OPENJDK_11_CONTAINER
+from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON36_CONTAINER
@@ -62,8 +62,8 @@ IMAGES_AND_NAMES: List[Tuple[Union[Container, DerivedContainer], str]] = [
     (MINIMAL_CONTAINER, "minimal"),
     (MICRO_CONTAINER, "micro"),
     (GO_1_16_BASE_CONTAINER, "golang"),
-    (OPENJDK_BASE_CONTAINER, "openjdk"),
-    (OPENJDK_DEVEL_BASE_CONTAINER, "openjdk.devel"),
+    (OPENJDK_11_CONTAINER, "openjdk"),
+    (OPENJDK_DEVEL_11_CONTAINER, "openjdk.devel"),
     (NODEJS_12_CONTAINER, "nodejs"),
     (NODEJS_14_CONTAINER, "nodejs"),
     (PYTHON36_CONTAINER, "python"),
