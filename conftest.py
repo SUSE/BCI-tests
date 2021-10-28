@@ -1,6 +1,7 @@
 import os
 import shlex
 import tempfile
+import urllib.request
 from subprocess import check_output
 
 import pytest
@@ -102,10 +103,26 @@ def dapper(host):
     directory or downloaded from rancher.com (if no go toolchain can be found).
 
     """
+    # dapper has been installed => use that one
     if host.exists("dapper"):
         yield host.find_command("dapper")
         return
 
+    # go is not available on the host => fetch
+    if not host.exists("go"):
+        with urllib.request.urlopen(
+            "https://releases.rancher.com/dapper/latest/dapper-Linux-"
+            + host.system_info.arch
+        ) as f:
+            with tempfile.TemporaryDirectory() as tempdir:
+                dapper_path = os.path.join(tempdir, "dapper")
+                with open(dapper_path, "wb") as dapper_file:
+                    dapper_file.write(f.read())
+                os.chmod(dapper_path, 0o755)
+                yield dapper_path
+                return
+
+    # build dapper from source if we have go
     with tempfile.TemporaryDirectory() as tmpdir:
         gopath = os.path.join(tmpdir, "gopath")
         host.run_expect(
