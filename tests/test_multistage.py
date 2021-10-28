@@ -4,8 +4,8 @@ from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
 from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_CONTAINER
-from bci_tester.data import OPENJDK_BASE_CONTAINER
-from bci_tester.data import OPENJDK_DEVEL_BASE_CONTAINER
+from bci_tester.data import OPENJDK_11_CONTAINER
+from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from pytest_container import GitRepositoryBuild
 from pytest_container import MultiStageBuild
 from pytest_container.runtime import LOCALHOST
@@ -58,7 +58,7 @@ CMD ["java", "-jar", "pdftk.jar"]
 K3SUP_DOCKERFILE = """FROM $builder as builder
 WORKDIR /k3sup
 COPY ./k3sup .
-RUN echo > ./hack/hashgen.sh && make all
+RUN zypper -n in make && echo > ./hack/hashgen.sh && make all
 
 FROM $runner
 WORKDIR /k3sup
@@ -115,8 +115,8 @@ ENTRYPOINT ["/app/entrypoint.sh"]
             ),
             MultiStageBuild(
                 containers={
-                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
-                    "runner": OPENJDK_BASE_CONTAINER,
+                    "builder": OPENJDK_DEVEL_11_CONTAINER,
+                    "runner": OPENJDK_11_CONTAINER,
                 },
                 containerfile_template=AMIDST_DOCKERFILE,
             ),
@@ -130,8 +130,8 @@ ENTRYPOINT ["/app/entrypoint.sh"]
             ),
             MultiStageBuild(
                 containers={
-                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
-                    "runner": OPENJDK_DEVEL_BASE_CONTAINER,
+                    "builder": OPENJDK_DEVEL_11_CONTAINER,
+                    "runner": OPENJDK_DEVEL_11_CONTAINER,
                 },
                 containerfile_template=MAVEN_BUILD_DOCKERFILE,
             ),
@@ -145,8 +145,8 @@ ENTRYPOINT ["/app/entrypoint.sh"]
             ),
             MultiStageBuild(
                 containers={
-                    "builder": OPENJDK_DEVEL_BASE_CONTAINER,
-                    "runner": OPENJDK_BASE_CONTAINER,
+                    "builder": OPENJDK_DEVEL_11_CONTAINER,
+                    "runner": OPENJDK_11_CONTAINER,
                 },
                 containerfile_template=PDFTK_BUILD_DOCKERFILE,
             ),

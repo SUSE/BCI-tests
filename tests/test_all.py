@@ -4,7 +4,7 @@ This module contains tests that are run for **all** containers.
 import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import EXTRA_BUILD_ARGS
-from bci_tester.data import GO_1_16_BASE_CONTAINER
+from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from pytest_container import Container
@@ -104,7 +104,7 @@ def test_certificates_are_present(
     If the certificates are incorrectly set up, then the GET request will fail.
     """
     multi_stage_build = MultiStageBuild(
-        containers={"builder": GO_1_16_BASE_CONTAINER, "runner": runner},
+        containers={"builder": GO_1_16_CONTAINER, "runner": runner},
         containerfile_template=MULTISTAGE_DOCKERFILE,
     )
     multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
