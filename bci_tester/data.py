@@ -1,5 +1,6 @@
 import os
 import shlex
+from typing import List
 from typing import Union
 
 import pytest
@@ -220,11 +221,16 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 """,
 )
 
-#: Containers that are directly pulled from registry.suse.de
-ALL_CONTAINERS = [
+DOTNET_CONTAINERS = [
+    DOTNET_SDK_3_1_BASE_CONTAINER,
+    DOTNET_SDK_5_0_BASE_CONTAINER,
+    DOTNET_ASPNET_3_1_BASE_CONTAINER,
+    DOTNET_ASPNET_5_0_BASE_CONTAINER,
+    DOTNET_RUNTIME_3_1_BASE_CONTAINER,
+    DOTNET_ASPNET_5_0_BASE_CONTAINER,
+]
+CONTAINERS_WITH_ZYPPER = [
     BASE_CONTAINER,
-    MINIMAL_CONTAINER,
-    MICRO_CONTAINER,
     GO_1_16_CONTAINER,
     GO_1_17_CONTAINER,
     OPENJDK_11_CONTAINER,
@@ -234,15 +240,14 @@ ALL_CONTAINERS = [
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
     INIT_CONTAINER,
-] + (
-    [
-        DOTNET_SDK_3_1_BASE_CONTAINER,
-        DOTNET_SDK_5_0_BASE_CONTAINER,
-        DOTNET_ASPNET_3_1_BASE_CONTAINER,
-        DOTNET_ASPNET_5_0_BASE_CONTAINER,
-        DOTNET_RUNTIME_3_1_BASE_CONTAINER,
-        DOTNET_ASPNET_5_0_BASE_CONTAINER,
-    ]
-    if LOCALHOST.system_info.arch == "x86_64"
-    else []
+] + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
+
+CONTAINERS_WITHOUT_ZYPPER: List[Union[DerivedContainer, Container]] = [
+    MINIMAL_CONTAINER,
+    MICRO_CONTAINER,
+]
+
+#: Containers that are directly pulled from registry.suse.de
+ALL_CONTAINERS: List[Union[DerivedContainer, Container]] = (
+    CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER
 )

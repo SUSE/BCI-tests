@@ -5,23 +5,15 @@ then repository will be replaced in the containers and whether this was
 successful will be double checked here.
 
 """
-
 import pytest
-from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BCI_DEVEL_REPO
-from bci_tester.data import MICRO_CONTAINER
-from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.data import CONTAINERS_WITH_ZYPPER
+from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.util import get_repos_from_connection
 
 
 @pytest.mark.parametrize(
-    "container_per_test",
-    [
-        cont
-        for cont in ALL_CONTAINERS
-        if cont not in (MINIMAL_CONTAINER, MICRO_CONTAINER)
-    ],
-    indirect=True,
+    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
 )
 def test_container_build_and_repo(container_per_test, host):
     """Test all containers with zypper in them whether at least the ``SLE_BCI``
@@ -69,9 +61,7 @@ def test_container_build_and_repo(container_per_test, host):
     container_per_test.connection.run_expect([0], "zypper -n ref")
 
 
-@pytest.mark.parametrize(
-    "container", [MINIMAL_CONTAINER, MICRO_CONTAINER], indirect=["container"]
-)
+@pytest.mark.parametrize("container", CONTAINERS_WITHOUT_ZYPPER, indirect=True)
 def test_container_build(container):
     """Just pull down the minimal and micro containers and ensure that they
     launch.

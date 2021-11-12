@@ -1,12 +1,13 @@
 from typing import Dict
 
 import pytest
+from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from pytest_container.runtime import LOCALHOST
 
 
-CONTAINER_IMAGES = [MINIMAL_CONTAINER, MICRO_CONTAINER]
+CONTAINER_IMAGES = CONTAINERS_WITHOUT_ZYPPER
 
 #: size limits of the minimal image per architecture in MiB
 MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
