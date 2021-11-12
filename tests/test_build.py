@@ -47,7 +47,7 @@ def test_container_build_and_repo(container_per_test, host):
             len(repos) > 1
         ), "On a registered host, we must have more than one repository on the host"
     else:
-        assert len(repos) == 1
+        assert len(repos) in (1, 2)
 
     sle_bci_repo_candidates = [
         repo for repo in repos if repo.name == "SLE_BCI"
