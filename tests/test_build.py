@@ -5,14 +5,13 @@ then repository will be replaced in the containers and whether this was
 successful will be double checked here.
 
 """
-import xml.etree.ElementTree as ET
-from typing import List
 
 import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.util import get_repos_from_connection
 
 
 @pytest.mark.parametrize(
@@ -33,18 +32,6 @@ def test_container_build_and_repo(container_per_test, host):
     repository present.
 
     """
-
-    def get_repos() -> List[ET.Element]:
-        container_per_test.connection.run_expect([0], "zypper -n ref")
-        repos = ET.fromstring(
-            container_per_test.connection.run_expect(
-                [0], "zypper -x repos -u"
-            ).stdout
-        )
-        repo_list = [child for child in repos if child.tag == "repo-list"]
-        assert len(repo_list) == 1
-        return list(repo_list[0])
-
     # container-suseconnect will inject the correct repositories on registered
     # SLES hosts
     # => if the host is registered, we will have multiple repositories in the
@@ -55,14 +42,14 @@ def test_container_build_and_repo(container_per_test, host):
         and host.file("/etc/zypp/credentials.d/SCCcredentials").exists
     )
 
-    repos = get_repos()
+    repos = get_repos_from_connection(container_per_test.connection)
 
     if suseconnect_injects_repos:
         for _ in range(5):
             if len(repos) > 1:
                 break
 
-            repos = get_repos()
+            repos = get_repos_from_connection(container_per_test.connection)
 
         assert (
             len(repos) > 1
@@ -71,16 +58,13 @@ def test_container_build_and_repo(container_per_test, host):
         assert len(repos) == 1
 
     sle_bci_repo_candidates = [
-        repo for repo in repos if repo.get("name") == "SLE_BCI"
+        repo for repo in repos if repo.name == "SLE_BCI"
     ]
     assert len(sle_bci_repo_candidates) == 1
     sle_bci_repo = sle_bci_repo_candidates[0]
 
-    assert sle_bci_repo.get("name") == "SLE_BCI"
-    assert len(list(sle_bci_repo)) == 1
-
-    repo_url = list(sle_bci_repo)[0]
-    assert repo_url.text == BCI_DEVEL_REPO
+    assert sle_bci_repo.name == "SLE_BCI"
+    assert sle_bci_repo.url == BCI_DEVEL_REPO
 
     container_per_test.connection.run_expect([0], "zypper -n ref")
 
