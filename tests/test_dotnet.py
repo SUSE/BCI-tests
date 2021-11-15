@@ -3,17 +3,24 @@ Microsoft's binaries.
 
 """
 import re
+import xml.etree.ElementTree as ET
+from typing import List
 
 import pytest
 from bci_tester.data import DOTNET_ARCH_SKIP_MARK
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_CONTAINERS
 from bci_tester.data import DOTNET_RUNTIME_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
+from bci_tester.util import get_repos_from_connection
 from pytest_container import GitRepositoryBuild
 
+
+#: Name and alias of the microsoft .Net repository
+MS_REPO_NAME = "packages-microsoft-com-prod"
 
 CONTAINER_IMAGES = [
     DOTNET_SDK_3_1_BASE_CONTAINER,
@@ -159,3 +166,68 @@ def test_dotnet_sdk_telemetry_deactivated(container_per_test):
         [0], "dotnet help"
     ).stdout.strip()
     assert not re.search(r"telemetry", dotnet_new_stdout, re.IGNORECASE)
+
+
+@pytest.mark.parametrize(
+    "container_per_test", DOTNET_CONTAINERS, indirect=True
+)
+def test_microsoft_dotnet_repository(container_per_test):
+    """Check that we have correctly added and configured the Microsoft .Net
+    repository.
+
+    The following checks are run:
+
+    1. A repository with the alias and name :py:const:`MS_REPO_NAME` exists, is
+       enabled and ``gpgcheck`` is enabled as well.
+    2. The repository contains at least one package
+    3. Only packages starting with ``dotnet``, ``aspnet`` or
+       ``netstandard-targeting-pack`` are installed from that repository
+    """
+
+    def get_pkg_list(extra_search_flags: str = "") -> List[str]:
+        zypper_xml_out = ET.fromstring(
+            container_per_test.connection.run_expect(
+                [0], f"zypper -x se {extra_search_flags} -r {MS_REPO_NAME}"
+            ).stdout.strip()
+        )
+        solvable_list = [
+            se_child
+            for se_child in (
+                [
+                    child
+                    for child in zypper_xml_out
+                    if child.tag == "search-result"
+                ][0]
+            )
+        ]
+        assert len(solvable_list) == 1
+        pkg_names = [
+            pkg.get("name")
+            for pkg in solvable_list[0]
+            if pkg.tag == "solvable" and pkg.get("kind") == "package"
+        ]
+        valid_names = [pkg_name for pkg_name in pkg_names if pkg_name]
+        assert len(pkg_names) == len(valid_names)
+        return valid_names
+
+    repos = get_repos_from_connection(container_per_test.connection)
+    assert (
+        len(repos) == 2
+    ), "The .Net containers must contain the SLE_BCI and MS .Net repository"
+
+    ms_repos = [repo for repo in repos if repo.name == MS_REPO_NAME]
+    assert len(ms_repos) == 1
+    ms_repo = ms_repos[0]
+
+    assert ms_repo.alias == MS_REPO_NAME
+    assert ms_repo.url == "https://packages.microsoft.com/sles/15/prod/"
+    assert ms_repo.enabled
+    assert ms_repo.gpgcheck
+
+    assert len(get_pkg_list()) > 0
+    for pkg_name in get_pkg_list("-i"):
+        assert (
+            pkg_name[:6] == "dotnet"
+            or pkg_name[:6] == "aspnet"
+            or pkg_name[:27] == "netstandard-targeting-pack-"
+        )
