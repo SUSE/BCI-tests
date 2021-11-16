@@ -66,32 +66,32 @@ PYTHON39_CONTAINER: Union[Container, DerivedContainer] = Container(
 )
 
 DOTNET_SDK_3_1_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-sdk:3.1",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-sdk:3.1",
 )
 DOTNET_SDK_5_0_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-sdk:5.0",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-sdk:5.0",
 )
 
 DOTNET_ASPNET_3_1_BASE_CONTAINER: Union[
     Container, DerivedContainer
 ] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-aspnet:3.1",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-aspnet:3.1",
 )
 DOTNET_ASPNET_5_0_BASE_CONTAINER: Union[
     Container, DerivedContainer
 ] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-aspnet:5.0",
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-aspnet:5.0",
 )
 
 DOTNET_RUNTIME_3_1_BASE_CONTAINER: Union[
     Container, DerivedContainer
 ] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-runtime:3.1"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-runtime:3.1"
 )
 DOTNET_RUNTIME_5_0_BASE_CONTAINER: Union[
     Container, DerivedContainer
 ] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/dotnet-runtime:5.0"
+    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-runtime:5.0"
 )
 
 INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
