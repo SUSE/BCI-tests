@@ -212,7 +212,7 @@ def test_microsoft_dotnet_repository(container_per_test):
 
     repos = get_repos_from_connection(container_per_test.connection)
     assert (
-        len(repos) == 2
+        len(repos) >= 2
     ), "The .Net containers must contain the SLE_BCI and MS .Net repository"
 
     ms_repos = [repo for repo in repos if repo.name == MS_REPO_NAME]
