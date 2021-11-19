@@ -66,14 +66,19 @@ def test_repoclosure(container_per_test):
     excluding the packages in :py:const`REPOCLOSURE_FALSE_POSITIVES`.
 
     """
-    package_list = filter(
-        package_name_filter_func(REPOCLOSURE_FALSE_POSITIVES),
-        get_package_list(container_per_test.connection),
+    package_list = list(
+        filter(
+            package_name_filter_func(REPOCLOSURE_FALSE_POSITIVES),
+            get_package_list(container_per_test.connection),
+        )
     )
 
-    container_per_test.connection.run_expect(
-        [0], "dnf repoclosure --pkg " + " --pkg ".join(package_list)
-    )
+    for i in range(len(package_list) // 500):
+        container_per_test.connection.run_expect(
+            [0],
+            "dnf repoclosure --pkg "
+            + " --pkg ".join(package_list[i * 500 : (i + 1) * 500]),
+        )
 
 
 @pytest.mark.parametrize(
