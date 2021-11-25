@@ -165,7 +165,11 @@ else:
         DOTNET_RUNTIME_6_0_BASE_CONTAINER_WITH_DEVEL_REPO,
         INIT_CONTAINER_WITH_DEVEL_REPO,
     ) = (
-        DerivedContainer(base=cont, containerfile=REPLACE_REPO_CONTAINERFILE)
+        DerivedContainer(
+            base=cont.url,
+            containerfile=REPLACE_REPO_CONTAINERFILE,
+            **{k: v for (k, v) in cont.__dict__.items() if k != "url"},
+        )
         for cont in (
             BASE_CONTAINER,
             GO_1_16_CONTAINER,
