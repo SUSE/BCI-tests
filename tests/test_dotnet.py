@@ -10,11 +10,14 @@ import pytest
 from bci_tester.data import DOTNET_ARCH_SKIP_MARK
 from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_6_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_CONTAINERS
 from bci_tester.data import DOTNET_RUNTIME_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_5_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_6_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_SDK_6_0_BASE_CONTAINER
 from bci_tester.util import get_repos_from_connection
 from pytest_container import GitRepositoryBuild
 
@@ -22,10 +25,6 @@ from pytest_container import GitRepositoryBuild
 #: Name and alias of the microsoft .Net repository
 MS_REPO_NAME = "packages-microsoft-com-prod"
 
-CONTAINER_IMAGES = [
-    DOTNET_SDK_3_1_BASE_CONTAINER,
-    DOTNET_SDK_5_0_BASE_CONTAINER,
-]
 
 pytestmark = DOTNET_ARCH_SKIP_MARK
 
@@ -35,6 +34,7 @@ pytestmark = DOTNET_ARCH_SKIP_MARK
     [
         (DOTNET_SDK_3_1_BASE_CONTAINER, "3.1"),
         (DOTNET_SDK_5_0_BASE_CONTAINER, "5.0"),
+        (DOTNET_SDK_6_0_BASE_CONTAINER, "6.0"),
     ],
     indirect=["container"],
 )
@@ -54,6 +54,7 @@ def test_dotnet_sdk_version(container, sdk_version):
     [
         (DOTNET_ASPNET_3_1_BASE_CONTAINER, "3.1"),
         (DOTNET_ASPNET_5_0_BASE_CONTAINER, "5.0"),
+        (DOTNET_ASPNET_6_0_BASE_CONTAINER, "6.0"),
     ],
     indirect=["container"],
 )
@@ -75,6 +76,7 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     [
         (DOTNET_RUNTIME_3_1_BASE_CONTAINER, "3.1"),
         (DOTNET_RUNTIME_5_0_BASE_CONTAINER, "5.0"),
+        (DOTNET_RUNTIME_6_0_BASE_CONTAINER, "6.0"),
     ],
     indirect=["container"],
 )
@@ -90,14 +92,15 @@ def test_dotnet_runtime_present(container, runtime_version):
 
 
 @pytest.mark.parametrize(
-    "container_per_test",
+    "container_per_test,msg",
     [
-        DOTNET_SDK_3_1_BASE_CONTAINER,
-        DOTNET_SDK_5_0_BASE_CONTAINER,
+        (DOTNET_SDK_3_1_BASE_CONTAINER, "Hello World!"),
+        (DOTNET_SDK_5_0_BASE_CONTAINER, "Hello World!"),
+        (DOTNET_SDK_6_0_BASE_CONTAINER, "Hello, World!"),
     ],
-    indirect=True,
+    indirect=["container_per_test"],
 )
-def test_dotnet_hello_world(container_per_test):
+def test_dotnet_hello_world(container_per_test, msg):
     """Test the build of a hello world .Net console application by running:
 
     - :command:`dotnet new console -o MyApp`
@@ -111,7 +114,7 @@ def test_dotnet_hello_world(container_per_test):
         container_per_test.connection.run_expect(
             [0], "cd MyApp && dotnet run"
         ).stdout.strip()
-        == "Hello World!"
+        == msg
     )
 
 
@@ -150,6 +153,7 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     [
         DOTNET_SDK_3_1_BASE_CONTAINER,
         DOTNET_SDK_5_0_BASE_CONTAINER,
+        DOTNET_SDK_6_0_BASE_CONTAINER,
     ],
     indirect=True,
 )
