@@ -86,6 +86,17 @@ integration_tests_podman:
     TOX_PARALLEL_NO_SPINNER: 1
     CONTAINER_RUNTIME: podman
 
+integration_tests_podman_with_bci_repo:
+  <<: *integration
+  variables:
+    TOX_PARALLEL_NO_SPINNER: 1
+    CONTAINER_RUNTIME: podman
+  script:
+    - export BUILD_ID=$(curl -s http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP3:/Update:/BCI/images/repo/ | grep "\-Build"|head -1| sed 's/.*Build//' | sed 's/-Media.*//')
+    - export BCI_DEVEL_REPO="http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP3:/Update:/BCI/images/repo/SLE-BCI-15-SP3-x86_64-Build${BUILD_ID}-Media1/"
+    - tox -e build -- -n auto
+    - tox -e all,base,init,dotnet,python,node,go,openjdk,openjdk_devel,minimal,repository,metadata,multistage --parallel
+
 fips:
   stage: integration
   tags:
