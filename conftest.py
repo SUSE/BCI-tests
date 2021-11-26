@@ -9,6 +9,7 @@ from _pytest.fixtures import SubRequest
 from pytest_container import auto_container_parametrize
 from pytest_container import get_selected_runtime
 from pytest_container import GitRepositoryBuild
+from pytest_container.helpers import add_extra_run_and_build_args_options
 
 
 @pytest.fixture(scope="function")
@@ -91,6 +92,10 @@ def host_git_clone(request, host, tmp_path):
 
 def pytest_generate_tests(metafunc):
     auto_container_parametrize(metafunc)
+
+
+def pytest_addoption(parser):
+    add_extra_run_and_build_args_options(parser)
 
 
 @pytest.fixture(scope="module")
