@@ -126,6 +126,22 @@ For CI environments it is recommended to set the environment variable
 ``TOX_PARALLEL_NO_SPINNER`` to ``1`` so that the output from tox is not mangled.
 
 
+Running tests in production
+---------------------------
+
+Some of the tests can be a bit flaky due to network resources not being
+available. To avoid these issues, we make use of the `pytest-rerunfailures
+<https://github.com/pytest-dev/pytest-rerunfailures>`_ plugin. To enable it,
+invoke tox with the ``--reruns`` command line flag as follows:
+
+.. code-block:: shell-session
+
+   $ tox -e test_name -- --reruns 3 --reruns-delay 10
+
+The option ``--reruns-delay`` delays the rerun (in this case) by 10 seconds,
+thereby reducing the likelihood of another network issue.
+
+
 Running specific tests
 ----------------------
 
