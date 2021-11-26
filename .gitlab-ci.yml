@@ -27,6 +27,8 @@ cache:
 before_script:
   - pip install tox
 
+default:
+  timeout: 2h
 
 test_36:
   image: python:3.6
