@@ -65,10 +65,11 @@ def test_npm_version(auto_container):
             ),
             GitRepositoryBuild(
                 build_command="""npm -g install yarn &&
-                    yarn --frozen-lockfile &&
-                    yarn run build &&
+                    yarn install &&
+                    yarn add react@16 &&
                     yarn run pretest &&
-                    yarn run tests-only
+                    yarn run tests-only &&
+                    yarn run build
                     """,
                 repository_url="https://github.com/facebook/prop-types",
             ),

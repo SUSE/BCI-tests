@@ -5,7 +5,7 @@
     - dcermak-bci-tester
   script:
     - tox -e build -- -n auto
-    - tox -e all,base,init,dotnet,python,node,go,openjdk,openjdk_devel,minimal,repository,metadata,multistage --parallel
+    - tox -e all,base,init,dotnet,python,node,go,openjdk,openjdk_devel,minimal,repository,metadata,multistage --parallel -- --reruns 3 --reruns-delay 10
   before_script: []
   after_script:
     - "($CONTAINER_RUNTIME ps -aq|xargs $CONTAINER_RUNTIME rm -f) || :"
@@ -27,6 +27,8 @@ cache:
 before_script:
   - pip install tox
 
+default:
+  timeout: 2h
 
 test_36:
   image: python:3.6
@@ -95,7 +97,7 @@ integration_tests_podman_with_bci_repo:
     - export BUILD_ID=$(curl -s http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP3:/Update:/BCI/images/repo/ | grep "\-Build"|head -1| sed 's/.*Build//' | sed 's/-Media.*//')
     - export BCI_DEVEL_REPO="http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP3:/Update:/BCI/images/repo/SLE-BCI-15-SP3-x86_64-Build${BUILD_ID}-Media1/"
     - tox -e build -- -n auto
-    - tox -e all,base,init,dotnet,python,node,go,openjdk,openjdk_devel,minimal,repository,metadata,multistage --parallel
+    - tox -e all,base,init,dotnet,python,node,go,openjdk,openjdk_devel,minimal,repository,metadata,multistage --parallel -- --reruns 3 --reruns-delay 10
 
 fips:
   stage: integration
