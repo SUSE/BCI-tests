@@ -3,11 +3,12 @@ This module contains tests that are run for **all** containers.
 """
 import pytest
 from bci_tester.data import ALL_CONTAINERS
-from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from pytest_container import Container
+from pytest_container import get_extra_build_args
+from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
 
 CONTAINER_IMAGES = ALL_CONTAINERS
@@ -114,10 +115,11 @@ def test_certificates_are_present(
 
     cmd = host.run_expect(
         [0],
-        f"{' '.join(container_runtime.build_command + EXTRA_BUILD_ARGS)} {tmp_path}",
+        f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} {tmp_path}",
     )
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     host.run_expect(
-        [0], f"{container_runtime.runner_binary} run --rm {img_id}"
+        [0],
+        f"{container_runtime.runner_binary} run --rm {' '.join(get_extra_run_args(pytestconfig))} {img_id}",
     )

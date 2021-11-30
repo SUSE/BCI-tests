@@ -2,10 +2,11 @@
 import pytest
 from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
-from bci_tester.data import EXTRA_BUILD_ARGS
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
+from pytest_container import get_extra_build_args
+from pytest_container import get_extra_run_args
 from pytest_container import GitRepositoryBuild
 from pytest_container import MultiStageBuild
 from pytest_container.runtime import LOCALHOST
@@ -266,13 +267,14 @@ def test_dockerfile_build(
 
     cmd = host.run_expect(
         [0],
-        f"{' '.join(container_runtime.build_command + EXTRA_BUILD_ARGS)} {tmp_path}",
+        f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} {tmp_path}",
     )
     img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     assert (
         cmd_stdout
         in host.run_expect(
-            [retval], f"{container_runtime.runner_binary} run --rm {img_id}"
+            [retval],
+            f"{container_runtime.runner_binary} run --rm {' '.join(get_extra_run_args(pytestconfig))}{img_id}",
         ).stdout
     )

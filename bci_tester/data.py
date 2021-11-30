@@ -11,8 +11,6 @@ from pytest_container.runtime import LOCALHOST
 
 
 DEFAULT_REGISTRY = "registry.suse.de"
-EXTRA_RUN_ARGS = shlex.split(os.getenv("EXTRA_RUN_ARGS", ""))
-EXTRA_BUILD_ARGS = shlex.split(os.getenv("EXTRA_BUILD_ARGS", ""))
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
