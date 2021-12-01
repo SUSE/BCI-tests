@@ -1,7 +1,7 @@
 """Integration tests via multistage container builds."""
 import pytest
-from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
@@ -178,8 +178,8 @@ ENTRYPOINT ["/app/entrypoint.sh"]
             ),
             MultiStageBuild(
                 containers={
-                    "builder": DOTNET_SDK_5_0_BASE_CONTAINER,
-                    "runner": DOTNET_ASPNET_5_0_BASE_CONTAINER,
+                    "builder": DOTNET_SDK_5_0_CONTAINER,
+                    "runner": DOTNET_ASPNET_5_0_CONTAINER,
                 },
                 containerfile_template=DOTNET_K8S_SAMPLE_DOCKERFILE,
             ),

@@ -25,16 +25,16 @@ import pytest
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import DOTNET_ARCH_SKIP_MARK
-from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_6_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_CONTAINERS
-from bci_tester.data import DOTNET_RUNTIME_3_1_BASE_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_5_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_6_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
-from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_SDK_6_0_BASE_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_3_1_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_5_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
+from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import INIT_CONTAINER
@@ -66,15 +66,15 @@ URL = "https://www.suse.com/products/server/"
 DOTNET_IMAGES_AND_NAMES: List[
     Tuple[Union[Container, DerivedContainer], str]
 ] = [
-    (DOTNET_SDK_3_1_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_SDK_5_0_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_SDK_6_0_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_ASPNET_3_1_BASE_CONTAINER, "dotnet.aspnet"),
-    (DOTNET_ASPNET_5_0_BASE_CONTAINER, "dotnet.aspnet"),
-    (DOTNET_ASPNET_6_0_BASE_CONTAINER, "dotnet.aspnet"),
-    (DOTNET_RUNTIME_3_1_BASE_CONTAINER, "dotnet.runtime"),
-    (DOTNET_RUNTIME_5_0_BASE_CONTAINER, "dotnet.runtime"),
-    (DOTNET_RUNTIME_6_0_BASE_CONTAINER, "dotnet.runtime"),
+    (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk"),
+    (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk"),
+    (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk"),
+    (DOTNET_ASPNET_3_1_CONTAINER, "dotnet.aspnet"),
+    (DOTNET_ASPNET_5_0_CONTAINER, "dotnet.aspnet"),
+    (DOTNET_ASPNET_6_0_CONTAINER, "dotnet.aspnet"),
+    (DOTNET_RUNTIME_3_1_CONTAINER, "dotnet.runtime"),
+    (DOTNET_RUNTIME_5_0_CONTAINER, "dotnet.runtime"),
+    (DOTNET_RUNTIME_6_0_CONTAINER, "dotnet.runtime"),
 ]
 
 #: List of all containers and their respective names which are used in the image

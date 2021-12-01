@@ -25,6 +25,15 @@ DOTNET_ARCH_SKIP_MARK = pytest.mark.skipif(
     reason="The .Net containers are only available on x86_64",
 )
 
+OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
+
+assert (
+    OS_MAJOR_VERSION == 15
+), f"The tests are created for SLE 15 base images only, but got a request for SLE {OS_MAJOR_VERSION}"
+
+#: the base URL under which all containers can be found on registry.suse.de
+BASE_URL = f"{DEFAULT_REGISTRY}/suse/sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}/update/cr/totest/images"
+
 
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/suse/sle15:{OS_VERSION}",
@@ -63,46 +72,34 @@ PYTHON39_CONTAINER: Union[Container, DerivedContainer] = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/python:3.9"
 )
 
-DOTNET_SDK_3_1_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-sdk:3.1",
+DOTNET_SDK_3_1_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-sdk:3.1",
 )
-DOTNET_SDK_5_0_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-sdk:5.0",
+DOTNET_SDK_5_0_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-sdk:5.0",
 )
-DOTNET_SDK_6_0_BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-sdk:6.0",
-)
-
-DOTNET_ASPNET_3_1_BASE_CONTAINER: Union[
-    Container, DerivedContainer
-] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-aspnet:3.1",
-)
-DOTNET_ASPNET_5_0_BASE_CONTAINER: Union[
-    Container, DerivedContainer
-] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-aspnet:5.0",
-)
-DOTNET_ASPNET_6_0_BASE_CONTAINER: Union[
-    Container, DerivedContainer
-] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-aspnet:6.0",
+DOTNET_SDK_6_0_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-sdk:6.0",
 )
 
-DOTNET_RUNTIME_3_1_BASE_CONTAINER: Union[
-    Container, DerivedContainer
-] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-runtime:3.1"
+DOTNET_ASPNET_3_1_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-aspnet:3.1",
 )
-DOTNET_RUNTIME_5_0_BASE_CONTAINER: Union[
-    Container, DerivedContainer
-] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-runtime:5.0"
+DOTNET_ASPNET_5_0_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-aspnet:5.0",
 )
-DOTNET_RUNTIME_6_0_BASE_CONTAINER: Union[
-    Container, DerivedContainer
-] = Container(
-    url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/dotnet-runtime:6.0"
+DOTNET_ASPNET_6_0_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-aspnet:6.0",
+)
+
+DOTNET_RUNTIME_3_1_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-runtime:3.1"
+)
+DOTNET_RUNTIME_5_0_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-runtime:5.0"
+)
+DOTNET_RUNTIME_6_0_CONTAINER: Union[Container, DerivedContainer] = Container(
+    url=f"{BASE_URL}/bci/dotnet-runtime:6.0"
 )
 
 INIT_CONTAINER: Union[Container, DerivedContainer] = Container(
@@ -152,15 +149,15 @@ else:
         NODEJS_14_CONTAINER,
         PYTHON36_CONTAINER,
         PYTHON39_CONTAINER,
-        DOTNET_SDK_3_1_BASE_CONTAINER,
-        DOTNET_SDK_5_0_BASE_CONTAINER,
-        DOTNET_SDK_6_0_BASE_CONTAINER,
-        DOTNET_ASPNET_3_1_BASE_CONTAINER,
-        DOTNET_ASPNET_5_0_BASE_CONTAINER,
-        DOTNET_ASPNET_6_0_BASE_CONTAINER,
-        DOTNET_RUNTIME_3_1_BASE_CONTAINER,
-        DOTNET_RUNTIME_5_0_BASE_CONTAINER,
-        DOTNET_RUNTIME_6_0_BASE_CONTAINER,
+        DOTNET_SDK_3_1_CONTAINER,
+        DOTNET_SDK_5_0_CONTAINER,
+        DOTNET_SDK_6_0_CONTAINER,
+        DOTNET_ASPNET_3_1_CONTAINER,
+        DOTNET_ASPNET_5_0_CONTAINER,
+        DOTNET_ASPNET_6_0_CONTAINER,
+        DOTNET_RUNTIME_3_1_CONTAINER,
+        DOTNET_RUNTIME_5_0_CONTAINER,
+        DOTNET_RUNTIME_6_0_CONTAINER,
         INIT_CONTAINER,
     ) = (
         DerivedContainer(
@@ -178,15 +175,15 @@ else:
             NODEJS_14_CONTAINER,
             PYTHON36_CONTAINER,
             PYTHON39_CONTAINER,
-            DOTNET_SDK_3_1_BASE_CONTAINER,
-            DOTNET_SDK_5_0_BASE_CONTAINER,
-            DOTNET_SDK_6_0_BASE_CONTAINER,
-            DOTNET_ASPNET_3_1_BASE_CONTAINER,
-            DOTNET_ASPNET_5_0_BASE_CONTAINER,
-            DOTNET_ASPNET_6_0_BASE_CONTAINER,
-            DOTNET_RUNTIME_3_1_BASE_CONTAINER,
-            DOTNET_RUNTIME_5_0_BASE_CONTAINER,
-            DOTNET_RUNTIME_6_0_BASE_CONTAINER,
+            DOTNET_SDK_3_1_CONTAINER,
+            DOTNET_SDK_5_0_CONTAINER,
+            DOTNET_SDK_6_0_CONTAINER,
+            DOTNET_ASPNET_3_1_CONTAINER,
+            DOTNET_ASPNET_5_0_CONTAINER,
+            DOTNET_ASPNET_6_0_CONTAINER,
+            DOTNET_RUNTIME_3_1_CONTAINER,
+            DOTNET_RUNTIME_5_0_CONTAINER,
+            DOTNET_RUNTIME_6_0_CONTAINER,
             INIT_CONTAINER,
         )
     )
@@ -208,15 +205,15 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 )
 
 DOTNET_CONTAINERS = [
-    DOTNET_SDK_3_1_BASE_CONTAINER,
-    DOTNET_SDK_5_0_BASE_CONTAINER,
-    DOTNET_SDK_6_0_BASE_CONTAINER,
-    DOTNET_ASPNET_3_1_BASE_CONTAINER,
-    DOTNET_ASPNET_5_0_BASE_CONTAINER,
-    DOTNET_ASPNET_6_0_BASE_CONTAINER,
-    DOTNET_RUNTIME_3_1_BASE_CONTAINER,
-    DOTNET_RUNTIME_5_0_BASE_CONTAINER,
-    DOTNET_RUNTIME_6_0_BASE_CONTAINER,
+    DOTNET_SDK_3_1_CONTAINER,
+    DOTNET_SDK_5_0_CONTAINER,
+    DOTNET_SDK_6_0_CONTAINER,
+    DOTNET_ASPNET_3_1_CONTAINER,
+    DOTNET_ASPNET_5_0_CONTAINER,
+    DOTNET_ASPNET_6_0_CONTAINER,
+    DOTNET_RUNTIME_3_1_CONTAINER,
+    DOTNET_RUNTIME_5_0_CONTAINER,
+    DOTNET_RUNTIME_6_0_CONTAINER,
 ]
 CONTAINERS_WITH_ZYPPER: List[Union[Container, DerivedContainer]] = [
     BASE_CONTAINER,
