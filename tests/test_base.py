@@ -151,7 +151,7 @@ def test_rancher_build(host, host_git_clone, dapper):
 #: This is the base container with additional launch arguments applied to it so
 #: that docker can be launched inside the container
 DIND_CONTAINER = (
-    Container if isinstance(INIT_CONTAINER, Container) else DerivedContainer
+    Container if isinstance(BASE_CONTAINER, Container) else DerivedContainer
 )(
     **{
         x: getattr(BASE_CONTAINER, x)
