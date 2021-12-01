@@ -257,21 +257,7 @@ def test_techpreview_label(container_data: Union[Container, DerivedContainer]):
         pytest.param(
             img,
             name,
-            marks=[DOTNET_ARCH_SKIP_MARK]
-            + (
-                [
-                    pytest.mark.xfail(
-                        reason=".Net 6.0 is not yet on registry.suse.com"
-                    )
-                ]
-                if img
-                in (
-                    DOTNET_SDK_6_0_BASE_CONTAINER,
-                    DOTNET_ASPNET_6_0_BASE_CONTAINER,
-                    DOTNET_RUNTIME_6_0_BASE_CONTAINER,
-                )
-                else []
-            ),
+            marks=[DOTNET_ARCH_SKIP_MARK],
         )
         for (img, name) in DOTNET_IMAGES_AND_NAMES
     ],
