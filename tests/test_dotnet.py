@@ -25,9 +25,6 @@ from pytest_container import GitRepositoryBuild
 MS_REPO_NAME = "packages-microsoft-com-prod"
 
 
-pytestmark = DOTNET_ARCH_SKIP_MARK
-
-
 @pytest.mark.parametrize(
     "container,sdk_version",
     [
