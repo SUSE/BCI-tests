@@ -14,9 +14,15 @@ DEFAULT_REGISTRY = "registry.suse.de"
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
-OS_VERSION = "15.3"
+OS_VERSION = os.getenv("OS_VERSION", "15.3")
+
+OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
+
 #: The SLES 15 pretty name (from /etc/os-release)
-OS_PRETTY_NAME = "SUSE Linux Enterprise Server 15 SP3"
+OS_PRETTY_NAME = os.getenv(
+    "OS_PRETTY_NAME",
+    f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION} SP{OS_SP_VERSION}",
+)
 
 #: pytest mark to not run on non-x86_64 architectures because .Net is not
 #: supported on these architectures
@@ -24,8 +30,6 @@ DOTNET_ARCH_SKIP_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
     reason="The .Net containers are only available on x86_64",
 )
-
-OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
 
 assert (
     OS_MAJOR_VERSION == 15
