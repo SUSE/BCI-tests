@@ -4,6 +4,7 @@ from typing import List
 from typing import Union
 
 import pytest
+from _pytest.mark.structures import MarkDecorator
 from bci_tester.runtime_choice import DOCKER_SELECTED
 from pytest_container import Container
 from pytest_container import DerivedContainer
@@ -53,6 +54,31 @@ BASEURL = os.getenv(
 
 GO_1_16_CONTAINER: Union[Container, DerivedContainer] = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/golang:1.16"
+
+def create_container_version_mark(
+    available_versions=List[str],
+) -> MarkDecorator:
+    """Creates a pytest mark for a container that is only available for a
+    certain SLE version.
+
+    Parameters:
+
+    available_versions: list of versions for which this container is
+        available. Each version must be in the form ``15.4`` for SLE 15 SP4,
+        ``15.3`` for SLE 15 SP3 and so on
+    """
+    for ver in available_versions:
+        assert (
+            ver[:2] == str(OS_MAJOR_VERSION)
+            and len(ver.split(".")) == 2
+            and int(ver.split(".")[1]) >= 3
+        ), f"invalid version {ver} specified in {available_versions}"
+    return pytest.mark.skipif(
+        OS_VERSION not in available_versions,
+        reason=f"This container is not available for {OS_VERSION}, only for {', '.join(available_versions)}",
+    )
+
+
 )
 GO_1_17_CONTAINER: Union[Container, DerivedContainer] = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/golang:1.17"
