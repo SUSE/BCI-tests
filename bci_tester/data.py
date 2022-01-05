@@ -36,7 +36,6 @@ assert (
 ), f"The tests are created for SLE 15 base images only, but got a request for SLE {OS_MAJOR_VERSION}"
 
 #: the base URL under which all containers can be found on registry.suse.de
-BASE_URL = f"{DEFAULT_REGISTRY}/suse/sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}/update/cr/totest/images"
 
 
 BASE_CONTAINER: Union[Container, DerivedContainer] = Container(
@@ -47,6 +46,9 @@ MINIMAL_CONTAINER = Container(
 )
 MICRO_CONTAINER = Container(
     url=f"{DEFAULT_REGISTRY}/suse/sle-15-sp3/update/cr/totest/images/bci/micro:{OS_VERSION}"
+BASEURL = os.getenv(
+    "BASEURL",
+    f"{DEFAULT_REGISTRY}/suse/sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}/update/cr/totest/images",
 )
 
 GO_1_16_CONTAINER: Union[Container, DerivedContainer] = Container(
