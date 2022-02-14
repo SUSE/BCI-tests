@@ -139,7 +139,8 @@ def test_general_labels(
     ``org.opencontainers.image.$label``:
 
     - ensure that ``BCI`` is in ``$label=title``
-    - check that :py:const:`OS_PRETTY_NAME` is in ``$label=description``
+    - check that ``Image containing $name based on the SLE Base Container
+      Image`` is in ``$label=description``
     - ``$label=version`` is either ``latest`` or :py:const:`OS_VERSION`
     - ``$label=url`` equals :py:const:`URL`
     - ``$label=vendor`` equals :py:const:`VENDOR`
@@ -176,6 +177,12 @@ def test_general_labels(
             version == labels[f"{prefix}.version"]
         assert labels[f"{prefix}.url"] == URL
         assert labels[f"{prefix}.vendor"] == VENDOR
+
+    assert labels["com.suse.lifecycle-url"] in (
+        "https://www.suse.com/lifecycle",
+        "https://www.suse.com/lifecycle/",
+    )
+    assert labels["com.suse.eula"] == "sle-bci"
 
 
 @pytest.mark.parametrize(
@@ -235,6 +242,41 @@ def test_disturl_can_be_checked_out(
     check_output(["osc", "co", disturl], cwd=tmp_path)
 
 
+@pytest.mark.parametrize("container_data", [CONTAINER_389DS])
+def test_application_image_type_label(
+    container_data: ContainerT,
+):
+    """Check that all application containers have the label ``com.suse.image-type``
+    set to ``application``.
+
+    """
+    metadata = get_container_metadata(container_data)
+    assert (
+        metadata["Labels"]["com.suse.image-type"] == "application"
+    ), "images must be marked as an application image"
+
+
+@pytest.mark.parametrize(
+    "container_data",
+    [
+        cont
+        for cont in ALL_CONTAINERS
+        if cont not in (CONTAINER_389DS, BASE_CONTAINER)
+    ],
+)
+def test_sle_bci_image_type_label(
+    container_data: ContainerT,
+):
+    """Check that all non-application containers have the label
+    ``com.suse.image-type`` set to ``sle-bci``.
+
+    """
+    metadata = get_container_metadata(container_data)
+    assert (
+        metadata["Labels"]["com.suse.image-type"] == "sle-bci"
+    ), "images must be marked as a sle-bci image"
+
+
 @pytest.mark.parametrize(
     "container_data",
     [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
@@ -243,12 +285,12 @@ def test_techpreview_label(
     container_data: ContainerT,
 ):
     """Check that all containers (except for the base container) have the label
-    ``com.suse.techpreview`` set to ``1``.
+    ``com.suse.techpreview`` set to ``true``.
 
     """
     metadata = get_container_metadata(container_data)
     assert (
-        metadata["Labels"]["com.suse.techpreview"] == "1"
+        metadata["Labels"]["com.suse.techpreview"] == "true"
     ), "images must be marked as techpreview"
 
 

@@ -68,10 +68,10 @@ BASE_CONTAINER: ContainerT = Container(
     url=f"{BASEURL}/suse/sle15:{OS_VERSION}",
 )
 MINIMAL_CONTAINER: Union[Container, ParameterSet] = Container(
-    url=f"{BASEURL}/bci/minimal:{OS_VERSION}",
+    url=f"{BASEURL}/bci/bci-minimal:{OS_VERSION}",
 )
 MICRO_CONTAINER: Union[Container, ParameterSet] = Container(
-    url=f"{BASEURL}/bci/micro:{OS_VERSION}"
+    url=f"{BASEURL}/bci/bci-micro:{OS_VERSION}"
 )
 
 GO_1_16_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/golang:1.16")
@@ -118,7 +118,7 @@ DOTNET_RUNTIME_6_0_CONTAINER: ContainerT = Container(
 )
 
 INIT_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/init:{OS_VERSION}",
+    url=f"{BASEURL}/bci/bci-init:{OS_VERSION}",
     extra_launch_args=[
         "--privileged",
         "--tmpfs",
@@ -203,6 +203,10 @@ else:
         )
     )
 
+
+PYTHON39_CONTAINER = pytest.param(
+    PYTHON39_CONTAINER, marks=create_container_version_mark(["15.3"])
+)
 
 (
     DOTNET_SDK_3_1_CONTAINER,
