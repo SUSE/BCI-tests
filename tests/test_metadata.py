@@ -18,12 +18,12 @@ import json
 from subprocess import check_output
 from typing import Any
 from typing import List
-from typing import Union
 
 import pytest
 from _pytest.mark.structures import ParameterSet
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import CONTAINER_389DS
 from bci_tester.data import ContainerT
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
@@ -46,6 +46,7 @@ from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
+from bci_tester.data import RUBY_25_CONTAINER
 from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
@@ -82,7 +83,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (NODEJS_14_CONTAINER, "nodejs"),
         (PYTHON36_CONTAINER, "python"),
         (PYTHON39_CONTAINER, "python"),
+        (RUBY_25_CONTAINER, "ruby"),
         (INIT_CONTAINER, "init"),
+        (CONTAINER_389DS, "389-ds"),
         (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk"),
         (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk"),
         (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk"),

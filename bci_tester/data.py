@@ -87,6 +87,8 @@ NODEJS_14_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/nodejs:14")
 PYTHON36_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/python:3.6")
 PYTHON39_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/python:3.9")
 
+RUBY_25_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/ruby:2.5")
+
 DOTNET_SDK_3_1_CONTAINER: ContainerT = Container(
     url=f"{BASEURL}/bci/dotnet-sdk:3.1",
 )
@@ -135,6 +137,15 @@ INIT_CONTAINER: ContainerT = Container(
     default_entry_point=True,
 )
 
+CONTAINER_389DS = Container(
+    url=f"{BASEURL}/suse/389-ds:1.4",
+    default_entry_point=True,
+    healthcheck_timeout_ms=30 * 1000,
+    extra_launch_args=["-p", "3389:3389"],
+    extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
+    singleton=True,
+)
+
 
 #
 # !! IMPORTANT !!
@@ -164,6 +175,7 @@ else:
         NODEJS_14_CONTAINER,
         PYTHON36_CONTAINER,
         PYTHON39_CONTAINER,
+        RUBY_25_CONTAINER,
         DOTNET_SDK_3_1_CONTAINER,
         DOTNET_SDK_5_0_CONTAINER,
         DOTNET_SDK_6_0_CONTAINER,
@@ -174,6 +186,7 @@ else:
         DOTNET_RUNTIME_5_0_CONTAINER,
         DOTNET_RUNTIME_6_0_CONTAINER,
         INIT_CONTAINER,
+        CONTAINER_389DS,
     ) = (
         DerivedContainer(
             base=cont.url,
@@ -190,6 +203,7 @@ else:
             NODEJS_14_CONTAINER,
             PYTHON36_CONTAINER,
             PYTHON39_CONTAINER,
+            RUBY_25_CONTAINER,
             DOTNET_SDK_3_1_CONTAINER,
             DOTNET_SDK_5_0_CONTAINER,
             DOTNET_SDK_6_0_CONTAINER,
@@ -200,12 +214,16 @@ else:
             DOTNET_RUNTIME_5_0_CONTAINER,
             DOTNET_RUNTIME_6_0_CONTAINER,
             INIT_CONTAINER,
+            CONTAINER_389DS,
         )
     )
 
 
 PYTHON39_CONTAINER = pytest.param(
     PYTHON39_CONTAINER, marks=create_container_version_mark(["15.3"])
+)
+CONTAINER_389DS = pytest.param(
+    CONTAINER_389DS, marks=create_container_version_mark(["15.4"])
 )
 
 (
@@ -278,7 +296,9 @@ CONTAINERS_WITH_ZYPPER = [
     NODEJS_14_CONTAINER,
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
+    RUBY_25_CONTAINER,
     INIT_CONTAINER,
+    CONTAINER_389DS,
 ] + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 
 CONTAINERS_WITHOUT_ZYPPER = [
