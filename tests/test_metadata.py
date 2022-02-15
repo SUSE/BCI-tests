@@ -18,23 +18,22 @@ import json
 from subprocess import check_output
 from typing import Any
 from typing import List
-from typing import Tuple
-from typing import Union
 
 import pytest
+from _pytest.mark.structures import ParameterSet
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import DOTNET_ARCH_SKIP_MARK
-from bci_tester.data import DOTNET_ASPNET_3_1_BASE_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_5_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_6_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_CONTAINERS
-from bci_tester.data import DOTNET_RUNTIME_3_1_BASE_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_5_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_6_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_SDK_3_1_BASE_CONTAINER
-from bci_tester.data import DOTNET_SDK_5_0_BASE_CONTAINER
-from bci_tester.data import DOTNET_SDK_6_0_BASE_CONTAINER
+from bci_tester.data import CONTAINER_389DS
+from bci_tester.data import ContainerT
+from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_3_1_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_5_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
+from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import INIT_CONTAINER
@@ -44,18 +43,16 @@ from bci_tester.data import NODEJS_12_CONTAINER
 from bci_tester.data import NODEJS_14_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
-from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
+from bci_tester.data import RUBY_25_CONTAINER
 from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
+from pytest_container.container import container_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
-
-#: The full title of SLES (also present in :file:`/etc/os-release`)
-TITLE = "SUSE Linux Enterprise Server 15 SP3"
 
 #: The official vendor name
 VENDOR = "SUSE LLC"
@@ -63,45 +60,50 @@ VENDOR = "SUSE LLC"
 #: URL to the product's home page
 URL = "https://www.suse.com/products/server/"
 
-DOTNET_IMAGES_AND_NAMES: List[
-    Tuple[Union[Container, DerivedContainer], str]
-] = [
-    (DOTNET_SDK_3_1_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_SDK_5_0_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_SDK_6_0_BASE_CONTAINER, "dotnet.sdk"),
-    (DOTNET_ASPNET_3_1_BASE_CONTAINER, "dotnet.aspnet"),
-    (DOTNET_ASPNET_5_0_BASE_CONTAINER, "dotnet.aspnet"),
-    (DOTNET_ASPNET_6_0_BASE_CONTAINER, "dotnet.aspnet"),
-    (DOTNET_RUNTIME_3_1_BASE_CONTAINER, "dotnet.runtime"),
-    (DOTNET_RUNTIME_5_0_BASE_CONTAINER, "dotnet.runtime"),
-    (DOTNET_RUNTIME_6_0_BASE_CONTAINER, "dotnet.runtime"),
-]
 
 #: List of all containers and their respective names which are used in the image
 #: labels ``com.suse.bci.$name``.
-IMAGES_AND_NAMES: List[Tuple[Union[Container, DerivedContainer], str]] = [
-    (BASE_CONTAINER, "base"),
-    (MINIMAL_CONTAINER, "minimal"),
-    (MICRO_CONTAINER, "micro"),
-    (GO_1_16_CONTAINER, "golang"),
-    (GO_1_17_CONTAINER, "golang"),
-    (OPENJDK_11_CONTAINER, "openjdk"),
-    (OPENJDK_DEVEL_11_CONTAINER, "openjdk.devel"),
-    (NODEJS_12_CONTAINER, "nodejs"),
-    (NODEJS_14_CONTAINER, "nodejs"),
-    (PYTHON36_CONTAINER, "python"),
-    (PYTHON39_CONTAINER, "python"),
-    (INIT_CONTAINER, "init"),
-] + (DOTNET_IMAGES_AND_NAMES if LOCALHOST.system_info.arch == "x86_64" else [])
+IMAGES_AND_NAMES: List[ParameterSet] = [
+    pytest.param(
+        cont,
+        name,
+        marks=()
+        if isinstance(cont, (Container, DerivedContainer))
+        else cont.marks,
+    )
+    for cont, name in (
+        (BASE_CONTAINER, "base"),
+        (MINIMAL_CONTAINER, "minimal"),
+        (MICRO_CONTAINER, "micro"),
+        (GO_1_16_CONTAINER, "golang"),
+        (GO_1_17_CONTAINER, "golang"),
+        (OPENJDK_11_CONTAINER, "openjdk"),
+        (OPENJDK_DEVEL_11_CONTAINER, "openjdk.devel"),
+        (NODEJS_12_CONTAINER, "nodejs"),
+        (NODEJS_14_CONTAINER, "nodejs"),
+        (PYTHON36_CONTAINER, "python"),
+        (PYTHON39_CONTAINER, "python"),
+        (RUBY_25_CONTAINER, "ruby"),
+        (INIT_CONTAINER, "init"),
+        (CONTAINER_389DS, "389-ds"),
+        (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk"),
+        (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk"),
+        (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk"),
+        (DOTNET_ASPNET_3_1_CONTAINER, "dotnet.aspnet"),
+        (DOTNET_ASPNET_5_0_CONTAINER, "dotnet.aspnet"),
+        (DOTNET_ASPNET_6_0_CONTAINER, "dotnet.aspnet"),
+        (DOTNET_RUNTIME_3_1_CONTAINER, "dotnet.runtime"),
+        (DOTNET_RUNTIME_5_0_CONTAINER, "dotnet.runtime"),
+        (DOTNET_RUNTIME_6_0_CONTAINER, "dotnet.runtime"),
+    )
+]
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES
 ), "IMAGES_AND_NAMES must have all containers from BASE_CONTAINERS"
 
 
-def get_container_metadata(
-    container_data: Union[Container, DerivedContainer]
-) -> Any:
+def get_container_metadata(container_data: ContainerT) -> Any:
     """Helper function that fetches the container metadata via :command:`skopeo
     inspect` of the container's base image.
 
@@ -111,7 +113,7 @@ def get_container_metadata(
             [
                 "skopeo",
                 "inspect",
-                f"docker://{container_data.get_base().url}",
+                f"docker://{container_from_pytest_param(container_data).get_base().url}",
             ],
         )
         .decode()
@@ -121,7 +123,7 @@ def get_container_metadata(
 
 @pytest.mark.parametrize(
     "container_data,container_name",
-    [(img, name) for (img, name) in IMAGES_AND_NAMES if img != BASE_CONTAINER]
+    [param for param in IMAGES_AND_NAMES if param.values[0] != BASE_CONTAINER]
     + [
         pytest.param(
             BASE_CONTAINER,
@@ -133,31 +135,45 @@ def get_container_metadata(
     ],
 )
 def test_general_labels(
-    container_data: Union[Container, DerivedContainer],
+    container_data: ContainerT,
     container_name: str,
 ):
     """Base check of the labels ``com.suse.bci.$name.$label`` and
     ``org.opencontainers.image.$label``:
 
-    - ensure that :py:const:`TITLE` is in ``$label=title``
-    - check that :py:const:`OS_PRETTY_NAME` is in ``$label=description``
+    - ensure that ``BCI`` is in ``$label=title``
+    - check that ``Image containing $name based on the SLE Base Container
+      Image`` is in ``$label=description``
     - ``$label=version`` is either ``latest`` or :py:const:`OS_VERSION`
     - ``$label=url`` equals :py:const:`URL`
     - ``$label=vendor`` equals :py:const:`VENDOR`
     """
     metadata = get_container_metadata(container_data)
 
-    assert metadata["Name"] == container_data.get_base().url.split(":")[0]
+    assert (
+        metadata["Name"]
+        == container_from_pytest_param(container_data)
+        .get_base()
+        .url.split(":")[0]
+    )
 
     labels = metadata["Labels"]
-    version = container_data.get_base().url.split(":")[-1]
+    version = (
+        container_from_pytest_param(container_data)
+        .get_base()
+        .url.split(":")[-1]
+    )
 
     for prefix in (
         f"com.suse.bci.{container_name}",
         "org.opencontainers.image",
     ):
-        assert TITLE in labels[f"{prefix}.title"]
-        assert OS_PRETTY_NAME in labels[f"{prefix}.description"]
+        assert "BCI" in labels[f"{prefix}.title"]
+        assert ("Image containing" in labels[f"{prefix}.description"]) and (
+            "based on the SLE Base Container Image."
+            in labels[f"{prefix}.description"]
+        )
+
         if version == "latest":
             assert OS_VERSION in labels[f"{prefix}.version"]
         else:
@@ -165,10 +181,16 @@ def test_general_labels(
         assert labels[f"{prefix}.url"] == URL
         assert labels[f"{prefix}.vendor"] == VENDOR
 
+    assert labels["com.suse.lifecycle-url"] in (
+        "https://www.suse.com/lifecycle",
+        "https://www.suse.com/lifecycle/",
+    )
+    assert labels["com.suse.eula"] == "sle-bci"
+
 
 @pytest.mark.parametrize(
     "container_data,container_name",
-    [(img, name) for (img, name) in IMAGES_AND_NAMES if img != BASE_CONTAINER]
+    [param for param in IMAGES_AND_NAMES if param.values[0] != BASE_CONTAINER]
     + [
         pytest.param(
             BASE_CONTAINER,
@@ -180,7 +202,8 @@ def test_general_labels(
     ],
 )
 def test_disturl(
-    container_data: Union[Container, DerivedContainer], container_name: str
+    container_data: ContainerT,
+    container_name: str,
 ):
     """General check of the ``org.openbuildservice.disturl`` label:
 
@@ -203,7 +226,7 @@ def test_disturl(
 )
 @pytest.mark.parametrize("container_data", ALL_CONTAINERS)
 def test_disturl_can_be_checked_out(
-    container_data: Union[Container, DerivedContainer],
+    container_data: ContainerT,
     tmp_path,
 ):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
@@ -222,28 +245,61 @@ def test_disturl_can_be_checked_out(
     check_output(["osc", "co", disturl], cwd=tmp_path)
 
 
-@pytest.mark.parametrize(
-    "container_data",
-    [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
-)
-def test_techpreview_label(container_data: Union[Container, DerivedContainer]):
-    """Check that all containers (except for the base container) have the label
-    ``com.suse.techpreview`` set to ``1``.
+@pytest.mark.parametrize("container_data", [CONTAINER_389DS])
+def test_application_image_type_label(
+    container_data: ContainerT,
+):
+    """Check that all application containers have the label ``com.suse.image-type``
+    set to ``application``.
 
     """
     metadata = get_container_metadata(container_data)
     assert (
-        metadata["Labels"]["com.suse.techpreview"] == "1"
+        metadata["Labels"]["com.suse.image-type"] == "application"
+    ), "images must be marked as an application image"
+
+
+@pytest.mark.parametrize(
+    "container_data",
+    [
+        cont
+        for cont in ALL_CONTAINERS
+        if cont not in (CONTAINER_389DS, BASE_CONTAINER)
+    ],
+)
+def test_sle_bci_image_type_label(
+    container_data: ContainerT,
+):
+    """Check that all non-application containers have the label
+    ``com.suse.image-type`` set to ``sle-bci``.
+
+    """
+    metadata = get_container_metadata(container_data)
+    assert (
+        metadata["Labels"]["com.suse.image-type"] == "sle-bci"
+    ), "images must be marked as a sle-bci image"
+
+
+@pytest.mark.parametrize(
+    "container_data",
+    [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
+)
+def test_techpreview_label(
+    container_data: ContainerT,
+):
+    """Check that all containers (except for the base container) have the label
+    ``com.suse.techpreview`` set to ``true``.
+
+    """
+    metadata = get_container_metadata(container_data)
+    assert (
+        metadata["Labels"]["com.suse.techpreview"] == "true"
     ), "images must be marked as techpreview"
 
 
 @pytest.mark.parametrize(
     "container_data,container_name",
-    [
-        (img, name)
-        for (img, name) in IMAGES_AND_NAMES
-        if img not in [BASE_CONTAINER] + DOTNET_CONTAINERS
-    ]
+    [param for param in IMAGES_AND_NAMES if param.values[0] != BASE_CONTAINER]
     + [
         pytest.param(
             BASE_CONTAINER,
@@ -252,18 +308,10 @@ def test_techpreview_label(container_data: Union[Container, DerivedContainer]):
                 reason="The base container has no com.suse.bci.base labels yet"
             ),
         )
-    ]
-    + [
-        pytest.param(
-            img,
-            name,
-            marks=[DOTNET_ARCH_SKIP_MARK],
-        )
-        for (img, name) in DOTNET_IMAGES_AND_NAMES
     ],
 )
 def test_reference(
-    container_data: Union[Container, DerivedContainer],
+    container_data: ContainerT,
     container_name: str,
     container_runtime: OciRuntimeBase,
 ):
@@ -282,4 +330,16 @@ def test_reference(
     assert container_name.replace(".", "-") in reference
 
     assert reference[:22] == "registry.suse.com/bci/"
-    check_output([container_runtime.runner_binary, "pull", reference])
+
+    # for the OS versioned containers we'll get a reference that contains the
+    # current full version + release, which has not yet been published to the
+    # registry (obviously). So instead we just try to fetch the current major
+    # version of the OS for this container
+    name, ver = reference.split(":")
+    check_output(
+        [
+            container_runtime.runner_binary,
+            "pull",
+            reference if OS_VERSION != ver[:4] else f"{name}:{OS_VERSION}",
+        ]
+    )

@@ -22,6 +22,15 @@ REPOCLOSURE_FALSE_POSITIVES = [
     "suse-module-tools",
 ]
 
+#: Packages that have broken dependencies by intention and should be excluded
+#: from the repoclosure checks
+KNOWN_BROKEN = [
+    #: aaa_base requires 'distribution-release', which is provided by `sles-release`.
+    #: However, `sles-release` is not in the repository, as we do not want
+    #: people to be able to build their own SLES from the SLE_BCI repo alone.
+    "aaa_base"
+]
+
 
 def get_package_list(con) -> List[str]:
     """This function returns all packages available from the ``SLE_BCI`` repository
@@ -68,7 +77,9 @@ def test_repoclosure(container_per_test):
     """
     package_list = list(
         filter(
-            package_name_filter_func(REPOCLOSURE_FALSE_POSITIVES),
+            package_name_filter_func(
+                REPOCLOSURE_FALSE_POSITIVES + KNOWN_BROKEN
+            ),
             get_package_list(container_per_test.connection),
         )
     )

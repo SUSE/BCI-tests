@@ -7,7 +7,6 @@ from typing import Dict
 
 import pytest
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import INIT_CONTAINER
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
@@ -105,6 +104,9 @@ def test_all_openssl_hashes_known(auto_container):
     assert set(hashes) == set(ALL_DIGESTS)
 
 
+@pytest.mark.xfail(
+    reason="Rancher cannot be build without a secret value anymore"
+)
 @pytest.mark.parametrize(
     "host_git_clone",
     [
@@ -151,7 +153,7 @@ def test_rancher_build(host, host_git_clone, dapper):
 #: This is the base container with additional launch arguments applied to it so
 #: that docker can be launched inside the container
 DIND_CONTAINER = (
-    Container if isinstance(INIT_CONTAINER, Container) else DerivedContainer
+    Container if isinstance(BASE_CONTAINER, Container) else DerivedContainer
 )(
     **{
         x: getattr(BASE_CONTAINER, x)

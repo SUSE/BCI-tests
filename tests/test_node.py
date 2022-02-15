@@ -23,21 +23,6 @@ def test_node_version(auto_container):
     )
 
 
-def test_npm_version(auto_container):
-    """Check that the environment variable ``NPM_VERSION`` matches the output of
-    :command:`npm --version`.
-
-    """
-    npm_version = auto_container.connection.run_expect(
-        [0], "npm --version"
-    ).stdout.strip()
-    npm_version_from_env = auto_container.connection.run_expect(
-        [0], "echo $NPM_VERSION"
-    ).stdout.strip()
-
-    assert npm_version == npm_version_from_env
-
-
 @pytest.mark.parametrize(
     "container_git_clone",
     [
