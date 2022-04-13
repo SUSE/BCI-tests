@@ -19,9 +19,9 @@ MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
 #: size limits of the micro image per architecture in MiB
 MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
     "x86_64": 25,
-    "aarch64": 26,
+    "aarch64": 28,
     "s390x": 25,
-    "ppc64le": 31,
+    "ppc64le": 33,
 }
 
 
