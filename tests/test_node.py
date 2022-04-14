@@ -44,7 +44,7 @@ def test_node_version(auto_container):
                 repository_url="https://github.com/expressjs/express.git",
                 build_command="""npm config set shrinkwrap false &&
                     npm rm --silent --save-dev connect-redis &&
-                    npm run test-ci &&
+                    npm run test -- --timeout 7500 &&
                     npm run lint
                     """,
             ),
@@ -81,7 +81,7 @@ def test_popular_npm_repos(auto_container_per_test, container_git_clone):
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
          - :command:`npm ci && npm test && npm run lint`
        * - `Express <https://github.com/expressjs/express.git>`_
-         - :command:`npm config set shrinkwrap false && npm rm --silent --save-dev connect-redis && npm run test-ci && npm run lint`
+         - :command:`npm config set shrinkwrap false && npm rm --silent --save-dev connect-redis && npm run test -- --timeout 7500 && npm run lint`
        * - `prop-types <https://github.com/facebook/prop-types>`_
          - :command:`npm -g install yarn && yarn --frozen-lockfile && yarn run build && yarn run pretest && yarn run tests-only`
        * - `node-fs-extra <https://github.com/jprichardson/node-fs-extra>`_
