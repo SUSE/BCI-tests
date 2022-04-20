@@ -6,6 +6,7 @@ from typing import Callable
 from typing import List
 
 import pytest
+
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import REPOCLOSURE_CONTAINER
 

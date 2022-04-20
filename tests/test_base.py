@@ -6,16 +6,17 @@ import re
 from typing import Dict
 
 import pytest
+from pytest_container import Container
+from pytest_container import DerivedContainer
+from pytest_container import GitRepositoryBuild
+from pytest_container.runtime import LOCALHOST
+
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
 from bci_tester.runtime_choice import DOCKER_SELECTED
-from pytest_container import Container
-from pytest_container import DerivedContainer
-from pytest_container import GitRepositoryBuild
-from pytest_container.runtime import LOCALHOST
 
 #: size limits of the base container per arch in MiB
 BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
