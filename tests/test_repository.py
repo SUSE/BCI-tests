@@ -19,6 +19,7 @@ from bci_tester.data import REPOCLOSURE_CONTAINER
 REPOCLOSURE_FALSE_POSITIVES = [
     "multipath-tools",
     "patterns-base-fips",
+    "podman",
     "salt-minion",
     "suse-module-tools",
 ]
