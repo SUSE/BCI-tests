@@ -42,14 +42,20 @@ from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
+from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NODEJS_12_CONTAINER
 from bci_tester.data import NODEJS_14_CONTAINER
+from bci_tester.data import NODEJS_16_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
+from bci_tester.data import OPENJDK_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
+from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
+from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
+from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
@@ -78,12 +84,17 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (MICRO_CONTAINER, "micro"),
         (GO_1_16_CONTAINER, "golang"),
         (GO_1_17_CONTAINER, "golang"),
+        (GO_1_18_CONTAINER, "golang"),
         (OPENJDK_11_CONTAINER, "openjdk"),
         (OPENJDK_DEVEL_11_CONTAINER, "openjdk.devel"),
+        (OPENJDK_17_CONTAINER, "openjdk"),
+        (OPENJDK_DEVEL_17_CONTAINER, "openjdk.devel"),
         (NODEJS_12_CONTAINER, "nodejs"),
         (NODEJS_14_CONTAINER, "nodejs"),
+        (NODEJS_16_CONTAINER, "nodejs"),
         (PYTHON36_CONTAINER, "python"),
         (PYTHON39_CONTAINER, "python"),
+        (PYTHON310_CONTAINER, "python"),
         (RUBY_25_CONTAINER, "ruby"),
         (INIT_CONTAINER, "init"),
         (CONTAINER_389DS, "389-ds"),
