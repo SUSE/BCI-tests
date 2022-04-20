@@ -1,5 +1,8 @@
 import os
 from typing import List
+from typing import Literal
+from typing import Optional
+from typing import Sequence
 from typing import Union
 
 import pytest
@@ -14,8 +17,6 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 
 ContainerT = Union[Container, DerivedContainer, ParameterSet]
 
-
-DEFAULT_REGISTRY = "registry.suse.de"
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
@@ -34,20 +35,36 @@ assert (
     OS_MAJOR_VERSION == 15
 ), f"The tests are created for SLE 15 base images only, but got a request for SLE {OS_MAJOR_VERSION}"
 
-#: the base URL under which all containers can be found on registry.suse.de
-BASEURL = os.getenv(
-    "BASEURL",
-    f"{DEFAULT_REGISTRY}/suse/sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}/update/cr/totest/images",
-)
+
+#: value of the environment variable ``TARGET`` which defines whether we are
+#: taking the images from OBS, IBS or the ``CR:ToTest`` project on IBS
+TARGET = os.getenv("TARGET", "obs")
+
+#: If no target is defined, then you have to supply your own registry BASEURL
+#: via this variable instead
+BASEURL = os.getenv("BASEURL")
+
+if TARGET not in ("obs", "ibs", "ibs-cr"):
+    if BASEURL is None:
+        raise ValueError(
+            f"Unknown target {TARGET} specified and BASEURL is not set, cannot continue"
+        )
+else:
+    _SLE_SP = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
+    BASEURL = {
+        "obs": f"registry.opensuse.org/devel/bci/{_SLE_SP}",
+        "ibs": f"registry.suse.de/suse/{_SLE_SP}/update/bci",
+        "ibs-cr": f"registry.suse.de/suse/{_SLE_SP}/update/cr/totest",
+    }[TARGET]
 
 
-def create_container_version_mark(
+def _create_container_version_mark(
     available_versions=List[str],
 ) -> MarkDecorator:
     """Creates a pytest mark for a container that is only available for a
     certain SLE version.
 
-    Parameters:
+    Args:
 
     available_versions: list of versions for which this container is
         available. Each version must be in the form ``15.4`` for SLE 15 SP4,
@@ -65,63 +82,171 @@ def create_container_version_mark(
     )
 
 
-BASE_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/suse/sle15:{OS_VERSION}",
+#: URL to the SLE_BCI repository
+BCI_DEVEL_REPO = os.getenv("BCI_DEVEL_REPO")
+if BCI_DEVEL_REPO is None:
+    BCI_DEVEL_REPO = f"https://updates.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
+    _BCI_CONTAINERFILE = ""
+else:
+    _BCI_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo"
+
+
+_IMAGE_TYPE_T = Literal["dockerfile", "kiwi", "hybrid"]
+
+
+def _get_repository_name(image_type: _IMAGE_TYPE_T):
+    if TARGET == "ibs-cr":
+        return "images"
+
+    if image_type == "dockerfile":
+        return "containerfile"
+    elif image_type == "kiwi":
+        return "images"
+    elif image_type == "hybrid":
+        return "images" if OS_SP_VERSION == 3 else "containerfile"
+
+
+def create_BCI(
+    image_type: _IMAGE_TYPE_T,
+    build_tag: str,
+    available_versions: Optional[List[str]] = None,
+    extra_marks: Optional[Sequence[MarkDecorator]] = None,
+    **kwargs,
+) -> ParameterSet:
+    """Creates a DerivedContainer wrapped in a pytest.param for the BCI with the
+    given ``build_tag``.
+
+    Args:
+        image_type: define whether this image is build from a :file:`Dockerfile`
+            or :file:`kiwi.xml` or both (depending on the service pack version)
+        build_tag: the main build tag set for this image (it can be found at the
+            top of the :file:`Dockerfile` or :file:`kiwi.xml`)
+        available_versions: an optional list of operating system versions, for
+            which this container image is available. Use this for container
+            images that were not part of SLE 15 SP3.
+        extra_marks: an optional sequence of marks that should be applied to
+            this container image (e.g. to skip it on certain architectures)
+        **kwargs: additional keyword arguments are forwarded to the constructor
+            of the :py:class:`~pytest_container.DerivedContainer`
+    """
+    marks = [pytest.mark.__getattr__(build_tag)]
+    if extra_marks:
+        for m in extra_marks:
+            marks.append(m)
+
+    if available_versions is not None:
+        marks.append(_create_container_version_mark(available_versions))
+
+    return pytest.param(
+        DerivedContainer(
+            base=f"{BASEURL}/{_get_repository_name(image_type)}/{build_tag}",
+            containerfile=_BCI_CONTAINERFILE,
+            **kwargs,
+        ),
+        marks=marks,
+    )
+
+
+BASE_CONTAINER = create_BCI(
+    build_tag=f"bci/bci-base:{OS_VERSION}", image_type="kiwi"
 )
-MINIMAL_CONTAINER: Union[Container, ParameterSet] = Container(
-    url=f"{BASEURL}/bci/bci-minimal:{OS_VERSION}",
+MINIMAL_CONTAINER = create_BCI(
+    build_tag=f"bci/bci-minimal:{OS_VERSION}", image_type="kiwi"
 )
-MICRO_CONTAINER: Union[Container, ParameterSet] = Container(
-    url=f"{BASEURL}/bci/bci-micro:{OS_VERSION}"
+MICRO_CONTAINER = create_BCI(
+    build_tag=f"bci/bci-micro:{OS_VERSION}", image_type="kiwi"
 )
 
-GO_1_16_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/golang:1.16")
-GO_1_17_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/golang:1.17")
-
-OPENJDK_11_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/openjdk:11")
-OPENJDK_DEVEL_11_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/openjdk-devel:11"
+GO_1_16_CONTAINER = create_BCI(
+    build_tag=f"bci/golang:1.16", image_type="hybrid"
 )
-NODEJS_12_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/nodejs:12")
-NODEJS_14_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/nodejs:14")
-
-PYTHON36_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/python:3.6")
-PYTHON39_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/python:3.9")
-
-RUBY_25_CONTAINER: ContainerT = Container(url=f"{BASEURL}/bci/ruby:2.5")
-
-DOTNET_SDK_3_1_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-sdk:3.1",
+GO_1_17_CONTAINER = create_BCI(
+    build_tag=f"bci/golang:1.17", image_type="hybrid"
 )
-DOTNET_SDK_5_0_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-sdk:5.0",
-)
-DOTNET_SDK_6_0_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-sdk:6.0",
 )
 
-DOTNET_ASPNET_3_1_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-aspnet:3.1",
+
+OPENJDK_11_CONTAINER = create_BCI(
+    build_tag=f"bci/openjdk:11", image_type="hybrid"
 )
-DOTNET_ASPNET_5_0_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-aspnet:5.0",
+OPENJDK_DEVEL_11_CONTAINER = create_BCI(
+    build_tag=f"bci/openjdk-devel:11", image_type="hybrid"
 )
-DOTNET_ASPNET_6_0_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-aspnet:6.0",
+NODEJS_12_CONTAINER = create_BCI(
+    build_tag=f"bci/nodejs:12", image_type="kiwi", available_versions=["15.3"]
+)
+NODEJS_14_CONTAINER = create_BCI(
+    build_tag=f"bci/nodejs:14", image_type="hybrid"
+)
 )
 
-DOTNET_RUNTIME_3_1_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-runtime:3.1"
+PYTHON36_CONTAINER = create_BCI(
+    build_tag=f"bci/python:3.6", image_type="hybrid"
 )
-DOTNET_RUNTIME_5_0_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-runtime:5.0"
+PYTHON39_CONTAINER = create_BCI(
+    build_tag=f"bci/python:3.9", available_versions=["15.3"], image_type="kiwi"
 )
-DOTNET_RUNTIME_6_0_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/dotnet-runtime:6.0"
 )
 
-INIT_CONTAINER: ContainerT = Container(
-    url=f"{BASEURL}/bci/bci-init:{OS_VERSION}",
+
+RUBY_25_CONTAINER = create_BCI(build_tag=f"bci/ruby:2.5", image_type="hybrid")
+
+_DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
+    LOCALHOST.system_info.arch != "x86_64",
+    reason="The .Net containers are only available on x86_64",
+)
+
+DOTNET_SDK_3_1_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-sdk:3.1",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_SDK_5_0_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-sdk:5.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_SDK_6_0_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-sdk:6.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+
+DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-aspnet:3.1",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_ASPNET_5_0_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-aspnet:5.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-aspnet:6.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+
+DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-runtime:3.1",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_RUNTIME_5_0_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-runtime:5.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
+    build_tag=f"bci/dotnet-runtime:6.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+
+INIT_CONTAINER = create_BCI(
+    build_tag=f"bci/bci-init:{OS_VERSION}",
+    image_type="hybrid",
     extra_launch_args=[
         "--privileged",
         "--tmpfs",
@@ -138,126 +263,15 @@ INIT_CONTAINER: ContainerT = Container(
     default_entry_point=True,
 )
 
-CONTAINER_389DS = Container(
-    url=f"{BASEURL}/suse/389-ds:1.4",
+CONTAINER_389DS = create_BCI(
+    build_tag=f"suse/389-ds:2.0",
+    image_type="dockerfile",
+    available_versions=["15.4"],
     default_entry_point=True,
     healthcheck_timeout_ms=30 * 1000,
     extra_launch_args=["-p", "3389:3389"],
     extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
     singleton=True,
-)
-
-
-#
-# !! IMPORTANT !!
-# ===============
-#
-# All "base" containers which get pre-configured with the SLE_BCI repository
-# should be put into this if branch so that their repository gets replaced on
-# setting the `BCI_DEVEL_REPO` environment variable.
-#
-# We must not run any zypper commands here, as otherwise container-suseconnect
-# will keep a ton of metadata of the fetched repositories (which is a lot on
-# registered systems)
-#
-BCI_DEVEL_REPO = os.getenv("BCI_DEVEL_REPO")
-if BCI_DEVEL_REPO is None:
-    BCI_DEVEL_REPO = f"https://updates.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
-else:
-    REPLACE_REPO_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo"
-
-    (
-        BASE_CONTAINER,
-        GO_1_16_CONTAINER,
-        GO_1_17_CONTAINER,
-        OPENJDK_11_CONTAINER,
-        OPENJDK_DEVEL_11_CONTAINER,
-        NODEJS_12_CONTAINER,
-        NODEJS_14_CONTAINER,
-        PYTHON36_CONTAINER,
-        PYTHON39_CONTAINER,
-        RUBY_25_CONTAINER,
-        DOTNET_SDK_3_1_CONTAINER,
-        DOTNET_SDK_5_0_CONTAINER,
-        DOTNET_SDK_6_0_CONTAINER,
-        DOTNET_ASPNET_3_1_CONTAINER,
-        DOTNET_ASPNET_5_0_CONTAINER,
-        DOTNET_ASPNET_6_0_CONTAINER,
-        DOTNET_RUNTIME_3_1_CONTAINER,
-        DOTNET_RUNTIME_5_0_CONTAINER,
-        DOTNET_RUNTIME_6_0_CONTAINER,
-        INIT_CONTAINER,
-        CONTAINER_389DS,
-    ) = (
-        DerivedContainer(
-            base=cont.url,
-            containerfile=REPLACE_REPO_CONTAINERFILE,
-            **{k: v for (k, v) in cont.__dict__.items() if k != "url"},
-        )
-        for cont in (
-            BASE_CONTAINER,
-            GO_1_16_CONTAINER,
-            GO_1_17_CONTAINER,
-            OPENJDK_11_CONTAINER,
-            OPENJDK_DEVEL_11_CONTAINER,
-            NODEJS_12_CONTAINER,
-            NODEJS_14_CONTAINER,
-            PYTHON36_CONTAINER,
-            PYTHON39_CONTAINER,
-            RUBY_25_CONTAINER,
-            DOTNET_SDK_3_1_CONTAINER,
-            DOTNET_SDK_5_0_CONTAINER,
-            DOTNET_SDK_6_0_CONTAINER,
-            DOTNET_ASPNET_3_1_CONTAINER,
-            DOTNET_ASPNET_5_0_CONTAINER,
-            DOTNET_ASPNET_6_0_CONTAINER,
-            DOTNET_RUNTIME_3_1_CONTAINER,
-            DOTNET_RUNTIME_5_0_CONTAINER,
-            DOTNET_RUNTIME_6_0_CONTAINER,
-            INIT_CONTAINER,
-            CONTAINER_389DS,
-        )
-    )
-
-
-PYTHON39_CONTAINER = pytest.param(
-    PYTHON39_CONTAINER, marks=create_container_version_mark(["15.3"])
-)
-CONTAINER_389DS = pytest.param(
-    CONTAINER_389DS, marks=create_container_version_mark(["15.4"])
-)
-
-(
-    DOTNET_SDK_3_1_CONTAINER,
-    DOTNET_SDK_5_0_CONTAINER,
-    DOTNET_SDK_6_0_CONTAINER,
-    DOTNET_ASPNET_3_1_CONTAINER,
-    DOTNET_ASPNET_5_0_CONTAINER,
-    DOTNET_ASPNET_6_0_CONTAINER,
-    DOTNET_RUNTIME_3_1_CONTAINER,
-    DOTNET_RUNTIME_5_0_CONTAINER,
-    DOTNET_RUNTIME_6_0_CONTAINER,
-) = (
-    pytest.param(
-        cont,
-        marks=(
-            pytest.mark.skipif(
-                LOCALHOST.system_info.arch != "x86_64",
-                reason="The .Net containers are only available on x86_64",
-            ),
-        ),
-    )
-    for cont in (
-        DOTNET_SDK_3_1_CONTAINER,
-        DOTNET_SDK_5_0_CONTAINER,
-        DOTNET_SDK_6_0_CONTAINER,
-        DOTNET_ASPNET_3_1_CONTAINER,
-        DOTNET_ASPNET_5_0_CONTAINER,
-        DOTNET_ASPNET_6_0_CONTAINER,
-        DOTNET_RUNTIME_3_1_CONTAINER,
-        DOTNET_RUNTIME_5_0_CONTAINER,
-        DOTNET_RUNTIME_6_0_CONTAINER,
-    )
 )
 
 
