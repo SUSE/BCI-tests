@@ -1,10 +1,11 @@
 from typing import Dict
 
 import pytest
+from pytest_container.runtime import LOCALHOST
+
 from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from pytest_container.runtime import LOCALHOST
 
 
 CONTAINER_IMAGES = CONTAINERS_WITHOUT_ZYPPER

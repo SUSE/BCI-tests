@@ -5,10 +5,11 @@ from typing import Union
 import pytest
 from _pytest.mark.structures import MarkDecorator
 from _pytest.mark.structures import ParameterSet
-from bci_tester.runtime_choice import DOCKER_SELECTED
 from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container.runtime import LOCALHOST
+
+from bci_tester.runtime_choice import DOCKER_SELECTED
 
 
 ContainerT = Union[Container, DerivedContainer, ParameterSet]

@@ -1,5 +1,6 @@
 """Tests of the OpenJDK base container."""
 import pytest
+
 from bci_tester.data import OPENJDK_11_CONTAINER
 
 
