@@ -154,8 +154,8 @@ def test_general_labels(
     ``org.opencontainers.image.$label``:
 
     - ensure that ``BCI`` is in ``$label=title``
-    - check that ``Image containing $name based on the SLE Base Container
-      Image`` is in ``$label=description``
+    - check that ``based on the SLE Base Container Image`` is in
+      ``$label=description``
     - ``$label=version`` is either ``latest`` or :py:const:`OS_VERSION`
     - ``$label=url`` equals :py:const:`URL`
     - ``$label=vendor`` equals :py:const:`VENDOR`
@@ -181,7 +181,7 @@ def test_general_labels(
         "org.opencontainers.image",
     ):
         assert "BCI" in labels[f"{prefix}.title"]
-        assert ("Image containing" in labels[f"{prefix}.description"]) and (
+        assert (
             "based on the SLE Base Container Image."
             in labels[f"{prefix}.description"]
         )
@@ -220,16 +220,29 @@ def test_disturl(
     """General check of the ``org.openbuildservice.disturl`` label:
 
     verify that it exists, that it includes
-    ``obs://build.suse.de/SUSE:SLE-15-SP3:Update`` and equals
+    ``obs://build.suse.de/SUSE:SLE-15-SP3:Update`` or
+    ``obs://build.opensuse.org/devel:BCI:SLE-15-SP3`` and equals
     ``com.suse.bci.$name.disturl``.
 
     """
     labels = get_container_metadata(container_data)["Labels"]
 
     disturl = labels["org.openbuildservice.disturl"]
-
     assert disturl == labels[f"com.suse.bci.{container_name}.disturl"]
-    assert "obs://build.suse.de/SUSE:SLE-15-SP3:Update" in disturl
+
+    if (
+        "opensuse.org"
+        in container_from_pytest_param(container_data).get_base().url
+    ):
+        assert (
+            f"obs://build.opensuse.org/devel:BCI:SLE-15-SP{OS_SP_VERSION}"
+            in disturl
+        )
+    else:
+        assert (
+            f"obs://build.suse.de/SUSE:SLE-15-SP{OS_SP_VERSION}:Update"
+            in disturl
+        )
 
 
 @pytest.mark.skipif(
@@ -296,32 +309,20 @@ def test_sle_bci_image_type_label(
     "container_data",
     [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
 )
-def test_techpreview_label(
+def test_supportlevel_label(
     container_data: ContainerT,
 ):
     """Check that all containers (except for the base container) have the label
-    ``com.suse.techpreview`` set to ``true``.
+    ``com.suse.supportlevel`` set to ``true``.
 
     """
     metadata = get_container_metadata(container_data)
     assert (
-        metadata["Labels"]["com.suse.techpreview"] == "true"
+        metadata["Labels"]["com.suse.supportlevel"] == "techpreview"
     ), "images must be marked as techpreview"
 
 
-@pytest.mark.parametrize(
-    "container_data,container_name",
-    [param for param in IMAGES_AND_NAMES if param.values[0] != BASE_CONTAINER]
-    + [
-        pytest.param(
-            BASE_CONTAINER,
-            "base",
-            marks=pytest.mark.xfail(
-                reason="The base container has no com.suse.bci.base labels yet"
-            ),
-        )
-    ],
-)
+@pytest.mark.parametrize("container_data,container_name", IMAGES_AND_NAMES)
 def test_reference(
     container_data: ContainerT,
     container_name: str,
