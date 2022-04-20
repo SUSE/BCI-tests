@@ -163,6 +163,8 @@ GO_1_16_CONTAINER = create_BCI(
 GO_1_17_CONTAINER = create_BCI(
     build_tag=f"bci/golang:1.17", image_type="hybrid"
 )
+GO_1_18_CONTAINER = create_BCI(
+    build_tag=f"bci/golang:1.18", image_type="hybrid"
 )
 
 
@@ -172,12 +174,24 @@ OPENJDK_11_CONTAINER = create_BCI(
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(
     build_tag=f"bci/openjdk-devel:11", image_type="hybrid"
 )
+OPENJDK_17_CONTAINER = create_BCI(
+    build_tag=f"bci/openjdk:17",
+    image_type="dockerfile",
+    available_versions=["15.4"],
+)
+OPENJDK_DEVEL_17_CONTAINER = create_BCI(
+    build_tag=f"bci/openjdk-devel:17",
+    image_type="dockerfile",
+    available_versions=["15.4"],
+)
 NODEJS_12_CONTAINER = create_BCI(
     build_tag=f"bci/nodejs:12", image_type="kiwi", available_versions=["15.3"]
 )
 NODEJS_14_CONTAINER = create_BCI(
     build_tag=f"bci/nodejs:14", image_type="hybrid"
 )
+NODEJS_16_CONTAINER = create_BCI(
+    build_tag=f"bci/nodejs:16", image_type="hybrid"
 )
 
 PYTHON36_CONTAINER = create_BCI(
@@ -186,6 +200,10 @@ PYTHON36_CONTAINER = create_BCI(
 PYTHON39_CONTAINER = create_BCI(
     build_tag=f"bci/python:3.9", available_versions=["15.3"], image_type="kiwi"
 )
+PYTHON310_CONTAINER = create_BCI(
+    build_tag=f"bci/python:3.10",
+    available_versions=["15.4"],
+    image_type="dockerfile",
 )
 
 
@@ -305,12 +323,17 @@ CONTAINERS_WITH_ZYPPER = [
     BASE_CONTAINER,
     GO_1_16_CONTAINER,
     GO_1_17_CONTAINER,
+    GO_1_18_CONTAINER,
     OPENJDK_11_CONTAINER,
     OPENJDK_DEVEL_11_CONTAINER,
+    OPENJDK_17_CONTAINER,
+    OPENJDK_DEVEL_17_CONTAINER,
     NODEJS_12_CONTAINER,
     NODEJS_14_CONTAINER,
+    NODEJS_16_CONTAINER,
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
+    PYTHON310_CONTAINER,
     RUBY_25_CONTAINER,
     INIT_CONTAINER,
     CONTAINER_389DS,

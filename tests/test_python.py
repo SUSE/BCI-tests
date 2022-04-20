@@ -1,9 +1,14 @@
 """Basic tests for the Python 3.6 and 3.9 base container images."""
+from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 
 
-CONTAINER_IMAGES = [PYTHON36_CONTAINER, PYTHON39_CONTAINER]
+CONTAINER_IMAGES = [
+    PYTHON36_CONTAINER,
+    PYTHON39_CONTAINER,
+    PYTHON310_CONTAINER,
+]
 
 
 def test_python_version(auto_container):
