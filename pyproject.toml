@@ -10,6 +10,41 @@ build-backend = 'setuptools.build_meta'
 
 [tool.pytest.ini_options]
 xfail_strict = true
+addopts = "--strict-markers"
+markers = [
+    'bci/bci-base_15.3',
+    'bci/bci-base_15.4',
+    'bci/bci-minimal_15.3',
+    'bci/bci-minimal_15.4',
+    'bci/bci-micro_15.3',
+    'bci/bci-micro_15.4',
+    'bci/bci-init_15.3',
+    'bci/bci-init_15.4',
+    'bci/golang_1.16',
+    'bci/golang_1.17',
+    'bci/golang_1.18',
+    'bci/python_3.6',
+    'bci/python_3.9',
+    'bci/python_3.10',
+    'bci/openjdk_11',
+    'bci/openjdk_17',
+    'bci/openjdk-devel_11',
+    'bci/openjdk-devel_17',
+    'bci/nodejs_12',
+    'bci/nodejs_14',
+    'bci/nodejs_16',
+    'bci/ruby_2.5',
+    'bci/dotnet-sdk_3.1',
+    'bci/dotnet-sdk_5.0',
+    'bci/dotnet-sdk_6.0',
+    'bci/dotnet-runtime_3.1',
+    'bci/dotnet-runtime_5.0',
+    'bci/dotnet-runtime_6.0',
+    'bci/dotnet-aspnet_3.1',
+    'bci/dotnet-aspnet_5.0',
+    'bci/dotnet-aspnet_6.0',
+    'suse/389-ds_2.0'
+]
 
 [tool.black]
 line-length = 79

@@ -3,19 +3,14 @@ from typing import List
 from typing import Literal
 from typing import Optional
 from typing import Sequence
-from typing import Union
 
 import pytest
 from _pytest.mark.structures import MarkDecorator
 from _pytest.mark.structures import ParameterSet
-from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.runtime_choice import DOCKER_SELECTED
-
-
-ContainerT = Union[Container, DerivedContainer, ParameterSet]
 
 
 #: The operating system version as present in /etc/os-release & various other
@@ -129,7 +124,7 @@ def create_BCI(
         **kwargs: additional keyword arguments are forwarded to the constructor
             of the :py:class:`~pytest_container.DerivedContainer`
     """
-    marks = [pytest.mark.__getattr__(build_tag)]
+    marks = [pytest.mark.__getattr__(build_tag.replace(":", "_"))]
     if extra_marks:
         for m in extra_marks:
             marks.append(m)
