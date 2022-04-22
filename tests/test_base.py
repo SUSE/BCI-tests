@@ -6,7 +6,6 @@ import re
 from typing import Dict
 
 import pytest
-from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import container_from_pytest_param

@@ -1,7 +1,6 @@
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import host_fips_supported
 from bci_tester.util import get_repos_from_zypper_xmlout
-from bci_tester.util import Repository
 
 
 def test_host_fips_supported(tmp_path):
