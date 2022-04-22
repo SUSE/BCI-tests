@@ -83,7 +83,7 @@ def test_openssl_hashes(auto_container):
 
     assert (
         auto_container.connection.run_expect(
-            [1], f"openssl gost /dev/null"
+            [1], "openssl gost /dev/null"
         ).stderr.strip()
         == "gost is not a known digest"
     )
@@ -96,7 +96,7 @@ def test_all_openssl_hashes_known(auto_container):
     """
     hashes = (
         auto_container.connection.run_expect(
-            [0], f"openssl list --digest-commands"
+            [0], "openssl list --digest-commands"
         )
         .stdout.strip()
         .split()
