@@ -51,7 +51,6 @@ def test_build_kured(auto_container_per_test, container_git_clone):
     container with :command:`make` pre-installed.
 
     """
-    auto_container_per_test.connection.run_expect([0], "zypper -n in make")
     auto_container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )
