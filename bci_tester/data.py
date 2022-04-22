@@ -89,16 +89,17 @@ else:
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi", "hybrid"]
 
 
-def _get_repository_name(image_type: _IMAGE_TYPE_T):
+def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET == "ibs-cr":
         return "images"
 
     if image_type == "dockerfile":
         return "containerfile"
-    elif image_type == "kiwi":
+    if image_type == "kiwi":
         return "images"
-    elif image_type == "hybrid":
+    if image_type == "hybrid":
         return "images" if OS_SP_VERSION == 3 else "containerfile"
+    assert False, f"invalid {image_type=}"
 
 
 def create_BCI(
