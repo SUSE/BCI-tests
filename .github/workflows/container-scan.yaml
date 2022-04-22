@@ -13,7 +13,7 @@ jobs:
       matrix: ${{ steps.setmatrix.outputs.matrix }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install necessary software
         run: sudo apt update && sudo apt install jo tox
       - id: setmatrix
@@ -29,7 +29,7 @@ jobs:
       matrix:
         container_url: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: generate Dockerfile
         run: |
           cat << EOF > Dockerfile
@@ -59,7 +59,7 @@ jobs:
       matrix:
         container_url: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: generate Dockerfile
         run: |
           cat << EOF > Dockerfile
@@ -86,7 +86,7 @@ jobs:
       matrix:
         container_url: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
