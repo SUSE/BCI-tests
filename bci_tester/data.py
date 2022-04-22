@@ -143,66 +143,72 @@ def create_BCI(
 
 
 BASE_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-base:{OS_VERSION}", image_type="kiwi"
+    build_tag=f"bci/bci-base:{OS_VERSION}",
+    image_type="kiwi",
+    available_versions=[OS_VERSION],
 )
 MINIMAL_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-minimal:{OS_VERSION}", image_type="kiwi"
+    build_tag=f"bci/bci-minimal:{OS_VERSION}",
+    image_type="kiwi",
+    available_versions=[OS_VERSION],
 )
 MICRO_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-micro:{OS_VERSION}", image_type="kiwi"
+    build_tag=f"bci/bci-micro:{OS_VERSION}",
+    image_type="kiwi",
+    available_versions=[OS_VERSION],
 )
 
 GO_1_16_CONTAINER = create_BCI(
-    build_tag=f"bci/golang:1.16", image_type="hybrid"
+    build_tag="bci/golang:1.16", image_type="hybrid"
 )
 GO_1_17_CONTAINER = create_BCI(
-    build_tag=f"bci/golang:1.17", image_type="hybrid"
+    build_tag="bci/golang:1.17", image_type="hybrid"
 )
 GO_1_18_CONTAINER = create_BCI(
-    build_tag=f"bci/golang:1.18", image_type="hybrid"
+    build_tag="bci/golang:1.18", image_type="hybrid"
 )
 
 
 OPENJDK_11_CONTAINER = create_BCI(
-    build_tag=f"bci/openjdk:11", image_type="hybrid"
+    build_tag="bci/openjdk:11", image_type="hybrid"
 )
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(
-    build_tag=f"bci/openjdk-devel:11", image_type="hybrid"
+    build_tag="bci/openjdk-devel:11", image_type="hybrid"
 )
 OPENJDK_17_CONTAINER = create_BCI(
-    build_tag=f"bci/openjdk:17",
+    build_tag="bci/openjdk:17",
     image_type="dockerfile",
     available_versions=["15.4"],
 )
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(
-    build_tag=f"bci/openjdk-devel:17",
+    build_tag="bci/openjdk-devel:17",
     image_type="dockerfile",
     available_versions=["15.4"],
 )
 NODEJS_12_CONTAINER = create_BCI(
-    build_tag=f"bci/nodejs:12", image_type="kiwi", available_versions=["15.3"]
+    build_tag="bci/nodejs:12", image_type="kiwi", available_versions=["15.3"]
 )
 NODEJS_14_CONTAINER = create_BCI(
-    build_tag=f"bci/nodejs:14", image_type="hybrid"
+    build_tag="bci/nodejs:14", image_type="hybrid"
 )
 NODEJS_16_CONTAINER = create_BCI(
-    build_tag=f"bci/nodejs:16", image_type="hybrid"
+    build_tag="bci/nodejs:16", image_type="hybrid"
 )
 
 PYTHON36_CONTAINER = create_BCI(
-    build_tag=f"bci/python:3.6", image_type="hybrid"
+    build_tag="bci/python:3.6", image_type="hybrid"
 )
 PYTHON39_CONTAINER = create_BCI(
-    build_tag=f"bci/python:3.9", available_versions=["15.3"], image_type="kiwi"
+    build_tag="bci/python:3.9", available_versions=["15.3"], image_type="kiwi"
 )
 PYTHON310_CONTAINER = create_BCI(
-    build_tag=f"bci/python:3.10",
+    build_tag="bci/python:3.10",
     available_versions=["15.4"],
     image_type="dockerfile",
 )
 
 
-RUBY_25_CONTAINER = create_BCI(build_tag=f"bci/ruby:2.5", image_type="hybrid")
+RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5", image_type="hybrid")
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
@@ -210,49 +216,49 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
 )
 
 DOTNET_SDK_3_1_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-sdk:3.1",
+    build_tag="bci/dotnet-sdk:3.1",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_5_0_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-sdk:5.0",
+    build_tag="bci/dotnet-sdk:5.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_6_0_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-sdk:6.0",
+    build_tag="bci/dotnet-sdk:6.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
 DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-aspnet:3.1",
+    build_tag="bci/dotnet-aspnet:3.1",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_5_0_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-aspnet:5.0",
+    build_tag="bci/dotnet-aspnet:5.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-aspnet:6.0",
+    build_tag="bci/dotnet-aspnet:6.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
 DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-runtime:3.1",
+    build_tag="bci/dotnet-runtime:3.1",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_5_0_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-runtime:5.0",
+    build_tag="bci/dotnet-runtime:5.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
-    build_tag=f"bci/dotnet-runtime:6.0",
+    build_tag="bci/dotnet-runtime:6.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
@@ -260,6 +266,7 @@ DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
     image_type="hybrid",
+    available_versions=[OS_VERSION],
     extra_launch_args=[
         "--privileged",
         "--tmpfs",
@@ -277,7 +284,7 @@ INIT_CONTAINER = create_BCI(
 )
 
 CONTAINER_389DS = create_BCI(
-    build_tag=f"suse/389-ds:2.0",
+    build_tag="suse/389-ds:2.0",
     image_type="dockerfile",
     available_versions=["15.4"],
     default_entry_point=True,
