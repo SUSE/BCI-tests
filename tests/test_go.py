@@ -40,6 +40,7 @@ def test_go_version(auto_container):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/weaveworks/kured.git",
+            repository_tag="1.9.2",
             build_command="make cmd/kured/kured",
         ).to_pytest_param(),
     ],
