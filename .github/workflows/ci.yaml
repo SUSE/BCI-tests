@@ -69,6 +69,16 @@ jobs:
         run: sudo apt update && sudo apt install tox
       - run: tox -e doc
 
+  lint:
+    name: Lint the source code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: Install tox
+        run: sudo apt update && sudo apt install tox
+      - run: tox -e lint
+
   test-containers:
     name: Test containers
     runs-on: ubuntu-latest
