@@ -42,8 +42,8 @@ def test_dotnet_sdk_version(container, sdk_version):
         == sdk_version
     )
     runtimes = container.connection.check_output("dotnet --list-runtimes")
-    assert ("Microsoft.AspNetCore.App " + sdk_version) in runtimes
-    assert ("Microsoft.NETCore.App " + sdk_version) in runtimes
+    assert "Microsoft.AspNetCore.App " + sdk_version in runtimes
+    assert "Microsoft.NETCore.App " + sdk_version in runtimes
 
 
 @pytest.mark.parametrize(
@@ -64,8 +64,8 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     """
     assert container.connection.check_output("dotnet --list-sdks") == ""
     runtimes = container.connection.check_output("dotnet --list-runtimes")
-    assert ("Microsoft.AspNetCore.App " + runtime_version) in runtimes
-    assert ("Microsoft.NETCore.App " + runtime_version) in runtimes
+    assert "Microsoft.AspNetCore.App " + runtime_version in runtimes
+    assert "Microsoft.NETCore.App " + runtime_version in runtimes
 
 
 @pytest.mark.parametrize(
