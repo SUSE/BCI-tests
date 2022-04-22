@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install necessary software
         run: sudo apt update && sudo apt install jo tox
       - name: Test formatting with black
@@ -30,7 +30,7 @@ jobs:
       matrix: ${{ steps.setmatrix.outputs.matrix }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
         run: sudo apt update && sudo apt install jo tox
@@ -95,7 +95,7 @@ jobs:
           - 15.4
     steps:
       - name: checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install tox
         run: sudo apt update && sudo apt install tox
       - name: Set up Python
@@ -146,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install necessary software
         run: |
           sudo apt update
