@@ -47,7 +47,7 @@ jobs:
           image: ${{ matrix.container_url }}
           args: --file=Dockerfile
       - name: Upload the snyk result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif
 
@@ -74,7 +74,7 @@ jobs:
           image: ${{ matrix.container_url }}
           acs-report-enable: true
       - name: upload Anchore scan SARIF report
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 
@@ -95,6 +95,6 @@ jobs:
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
