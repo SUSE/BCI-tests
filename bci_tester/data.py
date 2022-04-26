@@ -99,7 +99,7 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return "images"
     if image_type == "hybrid":
         return "images" if OS_SP_VERSION == 3 else "containerfile"
-    assert False, f"invalid {image_type=}"
+    assert False, f"invalid image_type: {image_type}"
 
 
 def create_BCI(
