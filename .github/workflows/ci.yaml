@@ -136,7 +136,7 @@ jobs:
           EOF
 
       - name: Run tox job
-        run: sudo tox -e ${{ matrix.toxenv }}
+        run: sudo --preserve-env tox -e ${{ matrix.toxenv }}
         env:
           CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
           OS_VERSION: ${{ matrix.os_version }}
