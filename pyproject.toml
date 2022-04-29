@@ -18,6 +18,8 @@ markers = [
     'bci/bci-minimal_15.4',
     'bci/bci-micro_15.3',
     'bci/bci-micro_15.4',
+    'bci/bci-busybox_15.3',
+    'bci/bci-busybox_15.4',
     'bci/bci-init_15.3',
     'bci/bci-init_15.4',
     'bci/golang_1.16',

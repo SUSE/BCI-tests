@@ -53,7 +53,7 @@ else:
     }[TARGET]
 
 
-def _create_container_version_mark(
+def create_container_version_mark(
     available_versions=List[str],
 ) -> MarkDecorator:
     """Creates a pytest mark for a container that is only available for a
@@ -131,7 +131,7 @@ def create_BCI(
             marks.append(m)
 
     if available_versions is not None:
-        marks.append(_create_container_version_mark(available_versions))
+        marks.append(create_container_version_mark(available_versions))
 
     return pytest.param(
         DerivedContainer(
@@ -157,6 +157,12 @@ MICRO_CONTAINER = create_BCI(
     build_tag=f"bci/bci-micro:{OS_VERSION}",
     image_type="kiwi",
     available_versions=[OS_VERSION],
+)
+BUSYBOX_CONTAINER = create_BCI(
+    build_tag=f"bci/bci-busybox:{OS_VERSION}",
+    image_type="kiwi",
+    available_versions=["15.4"],
+    custom_entry_point="/bin/sh",
 )
 
 GO_1_16_CONTAINER = create_BCI(
