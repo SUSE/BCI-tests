@@ -139,13 +139,16 @@ def create_BCI(
     if available_versions is not None:
         marks.append(create_container_version_mark(available_versions))
 
+    baseurl = f"{BASEURL}/{_get_repository_name(image_type)}/{build_tag}"
+
     return pytest.param(
         DerivedContainer(
-            base=f"{BASEURL}/{_get_repository_name(image_type)}/{build_tag}",
+            base=baseurl,
             containerfile=_BCI_CONTAINERFILE,
             **kwargs,
         ),
         marks=marks,
+        id=f"{build_tag} from {baseurl}",
     )
 
 
