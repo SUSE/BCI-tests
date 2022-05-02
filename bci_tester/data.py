@@ -1,8 +1,14 @@
 import os
 from typing import List
-from typing import Literal
 from typing import Optional
 from typing import Sequence
+
+try:
+    from typing import Literal
+except ImportError:
+    # typing.Literal is available on python3.8+
+    # https://docs.python.org/3/library/typing.html#typing.Literal
+    from typing_extensions import Literal
 
 import pytest
 from _pytest.mark.structures import MarkDecorator
