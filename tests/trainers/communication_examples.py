@@ -1,4 +1,6 @@
-""" Tests for the Python base containers, based on communication functionalities. """
+""" Tests for the Python base containers, based on communication functionalities.
+Find a description in the README file.
+"""
 
 import sys
 import os
@@ -6,14 +8,14 @@ import time
 import wget
 
 
-def testwww(url, outdir):
+def get_file_www(url, outdir):
     """Test that the simple python webserver answers to an internal get request"""
 
     found = False
 
     # get the filename from url right
     xfile = os.path.basename(url)
-    print (xfile)
+    print(xfile)
 
     for x in range(4):
         print(f"\nN:{x} file:{xfile} ")
@@ -40,4 +42,4 @@ if __name__ == "__main__":
     a = sys.argv[1]
     b = sys.argv[2]
 
-    testwww(a, b)
+    get_file_www(a, b)

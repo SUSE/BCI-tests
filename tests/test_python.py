@@ -1,5 +1,5 @@
-"""Basic tests for the Python 3.6 and 3.9 base container images."""
-from pyparsing import MatchFirst
+"""Basic tests for the Python in base container images."""
+
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
@@ -9,18 +9,18 @@ from _pytest.mark.structures import ParameterSet
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
 
-wrk = "/tmp/"
-src = "tests/"
-rep = "trainers/"
-out = "output/"
-mtf = "tensorflow_examples.py"
+bcdir = "/tmp/"
+orig = "tests/"
+appdir = "trainers/"
+outdir = "output/"
+appl1 = "tensorflow_examples.py"
 
-# copy tensorflow module trainer from the local repo to the container
+# copy tensorflow module trainer from the local applico to the container
 DOCKERF_PY_T = f"""
-WORKDIR {wrk}
-RUN mkdir {rep}
-RUN mkdir {out}
-COPY {src + rep}/{mtf}  {rep}
+WORKDIR {bcdir}
+RUN mkdir {appdir}
+RUN mkdir {outdir}
+COPY {orig + appdir}/{appl1}  {appdir}
 """
 
 PYTHON36_CONTAINER_T = pytest.param(
@@ -47,7 +47,15 @@ PYTHON310_CONTAINER_T = pytest.param(
     marks=PYTHON310_CONTAINER.marks,
 )
 
+# Base containers under test, input of auto_container fixture
 CONTAINER_IMAGES = [
+    PYTHON36_CONTAINER,
+    PYTHON39_CONTAINER,
+    PYTHON310_CONTAINER,
+]
+
+# Derived containers including additional test files, parametrized per test
+CONTAINER_IMAGES_T = [
     PYTHON36_CONTAINER_T,
     PYTHON39_CONTAINER_T,
     PYTHON310_CONTAINER_T,
@@ -90,23 +98,32 @@ def test_tox(auto_container):
     auto_container.connection.run_expect([0], "pip install --user tox")
 
 
-def test_python_webserver_1(auto_container_per_test, host, container_runtime):
-    """Test that the simple python webserver answers to an internal get request"""
+@pytest.mark.parametrize(
+    "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
+)
+def test_python_webserver_1(container_per_test):
+    """Test python webserver able to listen on a given port"""
 
     port = "8123"
 
-    _serv = "nohup timeout 240s python3 -m http.server " + port + " &"
+    # pkg neeed to process check
+    if not container_per_test.connection.package("iproute2").is_installed:
+        container_per_test.connection.run_expect([0], "zypper -n in iproute2")
 
-    if not auto_container_per_test.connection.package("iproute2").is_installed:
-        auto_container_per_test.connection.run_expect(
-            [0], "zypper -n in iproute2"
-        )
+    # checks that the expected port is Not listening yet
+    assert not container_per_test.connection.socket(
+        "tcp://0.0.0.0:" + port
+    ).is_listening
 
     # start of the python http server
-    auto_container_per_test.connection.run_expect([0], _serv)
+    bci_pyt_serv = container_per_test.connection.run_expect(
+        [0], f"timeout 240s python3 -m http.server {port} &"
+    ).stdout
 
-    # check for python http.server process running in container
-    proc = auto_container_per_test.connection.process.filter(comm="python3")
+    # checks that the python http.server process is running in the container:
+    proc = container_per_test.connection.process.filter(comm="python3")
+
+    assert len(proc) > 0  # not empty process list
 
     x = None
 
@@ -115,101 +132,91 @@ def test_python_webserver_1(auto_container_per_test, host, container_runtime):
         if "http.server" in x:
             break
 
-    # check keywork present
+    # checks expected parameter of the running python process
     assert "http.server" in x, "http.server not running."
 
-    # check of expected port is listening
-    assert auto_container_per_test.connection.socket(
+    # checks that the expected port is listening in the container
+    assert container_per_test.connection.socket(
         "tcp://0.0.0.0:" + port
     ).is_listening
 
 
-def test_python_webserver_2(auto_container_per_test, host, container_runtime):
-    """Test that the simple python webserver answers to an internal get request"""
+@pytest.mark.parametrize(
+    "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
+)
+def test_python_webserver_2(container_per_test, host, container_runtime):
+    """Test python wget library able to get remote files"""
 
     # ID of the running container under test
-    c_id = auto_container_per_test.container_id
+    c_id = container_per_test.container_id
 
-    outdir = wrk + out
+    destdir = bcdir + outdir
 
-    mpy = "communication_examples.py"
+    appl2 = "communication_examples.py"
 
     url = "https://www.suse.com/assets/img/suse-white-logo-green.svg"
 
     xfilename = "suse-white-logo-green.svg"
 
-    _wget = (
-        "timeout 240s python3 "
-        + rep
-        + mpy
-        + " "
-        + url
-        + " "
-        + outdir
-    )
-
     # install wget for python
-    auto_container_per_test.connection.run_expect([0], "pip install wget")
+    container_per_test.connection.run_expect([0], "pip install wget")
 
-    # copy the pythom module in the running Container under test
+    # copy an application file from the local test-server into the running Container under test
     host.run_expect(
         [0],
-        f"{container_runtime.runner_binary} cp {src + rep + mpy} {c_id}:{wrk + rep + mpy}",
+        f"{container_runtime.runner_binary} cp {orig + appdir + appl2} {c_id}:{bcdir + appdir}",
     )
 
     # check the test python module is present in the container
-    assert auto_container_per_test.connection.file(wrk + rep + mpy).is_file
+    assert container_per_test.connection.file(bcdir + appdir + appl2).is_file
 
     # check expected file not present yet in the destination
-    assert not auto_container_per_test.connection.file(outdir + xfilename).exists
+    assert not container_per_test.connection.file(destdir + xfilename).exists
 
-    # run the test in the container and check expected keyword from the module
-    assert (
-        "PASS"
-        in auto_container_per_test.connection.run_expect([0], _wget).stdout
-    )
-
-    # check expected file present in the destination
-    assert auto_container_per_test.connection.file(outdir + xfilename).exists
-
-
-def test_tensorf(auto_container_per_test):
-    """Test that a tensorflow example works."""
-
-    mpy = "tensorflow_examples.py"
-
-    # commands for tests using python modules in the container, copied from local
-    _vers = 'python3 -c "import tensorflow as tf; print (tf.__version__)" 2>&1|tail -1;'
-
-    _test = "timeout 240s python3 " + rep + mpy
-
-    # check the test python module is present in the container
-    assert auto_container_per_test.connection.file(wrk + rep + mpy).is_file
-
-    # check the expected CPU flag for TF is available in the system
-    flg = auto_container_per_test.connection.run_expect(
-        [0], "lscpu| grep -c -i SSE4.. "
+    # execution of the python module in the container
+    bci_python_wget = container_per_test.connection.run_expect(
+        [0], f"timeout 240s python3 {appdir + appl2} {url} {destdir}"
     ).stdout
 
-    assert int(flg) > 0
+    # run the test in the container and check expected keyword from the module
+    assert "PASS" in bci_python_wget
+
+    # check expected file present in the bci destination
+    assert container_per_test.connection.file(destdir + xfilename).exists
+
+
+@pytest.mark.parametrize(
+    "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
+)
+def test_tensorf(container_per_test):
+    """Test the python tensorflow library can be used for ML calculations"""
+
+    # commands for tests using python modules in the container, copied from local
+    py_tf_vers = 'python3 -c "import tensorflow as tf; print (tf.__version__)" 2>&1|tail -1;'
+
+    py_tf_test = "timeout 240s python3 " + appdir + appl1
+
+    # check the test python module is present in the container
+    assert container_per_test.connection.file(bcdir + appdir + appl1).is_file
+
+    # check the expected CPU flag for TF is available in the system
+    flg = container_per_test.connection.run_expect(
+        [0], 'lscpu| grep -i " SSE4"'
+    ).stdout
 
     # install TF module for python
-    auto_container_per_test.connection.run_expect(
-        [0], "pip install tensorflow"
-    )
+    container_per_test.connection.run_expect([0], "pip install tensorflow")
 
-    ver = auto_container_per_test.connection.run_expect(
-        [0], _vers
-    ).stdout.strip()
+    tfver = container_per_test.connection.run_expect([0], py_tf_vers).stdout
 
-    # TF version: for python 3.x - tf > 2.0
-    assert int(ver[0]) >= 2
+    # TensorFlow version: for python 3.x - tf > 2.0
+    assert int(tfver[0]) >= 2
 
     # Exercise execution
-    xout = auto_container_per_test.connection.run_expect([0], _test)
+    testout = container_per_test.connection.run_expect([0], py_tf_test).stdout
 
     # keyword search
-    assert "accuracy" in xout.stdout
+    assert "accuracy" in testout
 
     # expected keyword value found: PASS
-    assert "PASS" in xout.stdout
+    assert "PASS" in testout
