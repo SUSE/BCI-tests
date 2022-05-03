@@ -5,7 +5,6 @@ systemd pre-installed.
 import pytest
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
@@ -28,20 +27,3 @@ def test_systemd_present(container):
     assert container.connection.exists("systemctl")
     assert container.connection.file("/etc/machine-id").exists
     assert container.connection.run_expect([0], "systemctl status")
-
-
-@pytest.mark.parametrize(
-    "container",
-    [c for c in ALL_CONTAINERS if c != INIT_CONTAINER],
-    indirect=True,
-)
-def test_systemd_not_installed_elsewhere(container):
-    """Ensure that systemd is not present in all containers besides the init
-    container.
-
-    """
-    assert not container.connection.exists("systemctl")
-
-    # we cannot check for an existing package if rpm is not installed
-    if container.connection.exists("rpm"):
-        assert not container.connection.package("systemd").is_installed

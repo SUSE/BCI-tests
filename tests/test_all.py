@@ -9,6 +9,7 @@ from pytest_container import MultiStageBuild
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import GO_1_16_CONTAINER
+from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 
@@ -89,6 +90,23 @@ def test_glibc_present(auto_container):
     """ensure that the glibc linker is present"""
     for binary in ("ldconfig", "ldd"):
         assert auto_container.connection.exists(binary)
+
+
+@pytest.mark.parametrize(
+    "container",
+    [c for c in ALL_CONTAINERS if c != INIT_CONTAINER],
+    indirect=True,
+)
+def test_systemd_not_installed_in_all_containers_except_init(container):
+    """Ensure that systemd is not present in all containers besides the init
+    container.
+
+    """
+    assert not container.connection.exists("systemctl")
+
+    # we cannot check for an existing package if rpm is not installed
+    if container.connection.exists("rpm"):
+        assert not container.connection.package("systemd").is_installed
 
 
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
