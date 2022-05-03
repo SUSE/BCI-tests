@@ -156,6 +156,11 @@ BASE_CONTAINER = create_BCI(
     build_tag=f"bci/bci-base:{OS_VERSION}",
     image_type="kiwi",
     available_versions=[OS_VERSION],
+    extra_marks=[
+        pytest.mark.xfail(reason="bci-base fails to build from source on OBS")
+    ]
+    if ((OS_SP_VERSION == 4) and (TARGET == "obs"))
+    else [],
 )
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"bci/bci-minimal:{OS_VERSION}",
@@ -303,6 +308,11 @@ CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
     image_type="dockerfile",
     available_versions=["15.4"],
+    extra_marks=[
+        pytest.mark.xfail(
+            reason="https://bugzilla.suse.com/show_bug.cgi?id=1199008"
+        )
+    ],
     default_entry_point=True,
     healthcheck_timeout_ms=30 * 1000,
     extra_launch_args=["-p", "3389:3389"],
