@@ -28,6 +28,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
@@ -87,6 +88,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (BASE_CONTAINER, "base", ImageType.OS),
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
+        (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
         (GO_1_16_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (GO_1_17_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (GO_1_18_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
