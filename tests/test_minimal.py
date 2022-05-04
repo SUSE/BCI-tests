@@ -3,12 +3,9 @@ from typing import Dict
 import pytest
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 
-
-CONTAINER_IMAGES = CONTAINERS_WITHOUT_ZYPPER
 
 #: size limits of the minimal image per architecture in MiB
 MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
@@ -54,7 +51,10 @@ def test_minimal_image_size(
     )
 
 
-def test_fat_packages_absent(auto_container):
+@pytest.mark.parametrize(
+    "container", [MICRO_CONTAINER, MINIMAL_CONTAINER], indirect=True
+)
+def test_fat_packages_absent(container):
     """Verify that the following binaries do not exist:
     - :command:`zypper`
     - :command:`grep`
@@ -64,7 +64,7 @@ def test_fat_packages_absent(auto_container):
     - :command:`man`
     """
     for pkg in ("zypper", "grep", "diff", "sed", "info", "man"):
-        assert not auto_container.connection.exists(pkg)
+        assert not container.connection.exists(pkg)
 
 
 @pytest.mark.parametrize(

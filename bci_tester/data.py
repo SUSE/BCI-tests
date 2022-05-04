@@ -370,6 +370,7 @@ CONTAINERS_WITH_ZYPPER = [
 CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,
     MICRO_CONTAINER,
+    BUSYBOX_CONTAINER,
 ]
 
 #: Containers that are directly pulled from registry.suse.de
