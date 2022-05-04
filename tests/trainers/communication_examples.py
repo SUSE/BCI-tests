@@ -1,6 +1,4 @@
-""" Tests for the Python base containers, based on communication functionalities.
-Find a description in the README file.
-"""
+""" Tests for the Python base containers, based on communication functionalities."""
 
 import sys
 import os
@@ -9,8 +7,9 @@ import wget
 
 
 def get_file_www(url, outdir):
-    """Test that the simple python webserver answers to an internal get request"""
-
+    """Test that, using the python wget library, we can fetch files from a webserver
+    More information available in the README file, Communication section:
+    """
     found = False
 
     # get the filename from url right

@@ -1,4 +1,4 @@
-"""Basic tests for the Python in base container images."""
+"""Basic tests for the Python base container images."""
 
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
@@ -56,9 +56,13 @@ CONTAINER_IMAGES = [
 
 # Derived containers including additional test files, parametrized per test
 CONTAINER_IMAGES_T = [
-    PYTHON36_CONTAINER_T,
-    PYTHON39_CONTAINER_T,
-    PYTHON310_CONTAINER_T,
+    pytest.param(
+        DerivedContainer(
+            base=container_from_pytest_param(CONTAINER_T),
+            containerfile=DOCKERF_PY_T,
+        ),
+    marks=CONTAINER_T.marks,
+    ) for CONTAINER_T in CONTAINER_IMAGES
 ]
 
 
@@ -102,7 +106,7 @@ def test_tox(auto_container):
     "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
 )
 def test_python_webserver_1(container_per_test):
-    """Test python webserver able to listen on a given port"""
+    """Test thqat the python webserver is able to open a given port"""
 
     port = "8123"
 
@@ -123,7 +127,8 @@ def test_python_webserver_1(container_per_test):
     # checks that the python http.server process is running in the container:
     proc = container_per_test.connection.process.filter(comm="python3")
 
-    assert len(proc) > 0  # not empty process list
+    # check that the filtered list is not empty
+    assert len(proc) > 0, "The python3 http.server process must be running"
 
     x = None
 
@@ -145,7 +150,9 @@ def test_python_webserver_1(container_per_test):
     "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
 )
 def test_python_webserver_2(container_per_test, host, container_runtime):
-    """Test python wget library able to get remote files"""
+    """Test that the python `wget <https://pypi.org/project/wget/>`_ library
+    is able to fetch files from a webserver
+    """
 
     # ID of the running container under test
     c_id = container_per_test.container_id
@@ -200,9 +207,7 @@ def test_tensorf(container_per_test):
     assert container_per_test.connection.file(bcdir + appdir + appl1).is_file
 
     # check the expected CPU flag for TF is available in the system
-    flg = container_per_test.connection.run_expect(
-        [0], 'lscpu| grep -i " SSE4"'
-    ).stdout
+    container_per_test.connection.run_expect([0], 'lscpu| grep -i " SSE4"')
 
     # install TF module for python
     container_per_test.connection.run_expect([0], "pip install tensorflow")
