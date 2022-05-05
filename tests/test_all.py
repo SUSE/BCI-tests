@@ -8,6 +8,7 @@ from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
 
 from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
@@ -77,13 +78,18 @@ def test_product(auto_container):
     )
 
 
-def test_coreutils_present(auto_container):
+@pytest.mark.parametrize(
+    "container",
+    [c for c in ALL_CONTAINERS if c != BUSYBOX_CONTAINER],
+    indirect=True,
+)
+def test_coreutils_present(container):
     """
     Check that some core utilities (:command:`cat`, :command:`sh`, etc.) exist
     in the container.
     """
     for binary in ("cat", "sh", "bash", "ls", "rm"):
-        assert auto_container.connection.exists(binary)
+        assert container.connection.exists(binary)
 
 
 def test_glibc_present(auto_container):
