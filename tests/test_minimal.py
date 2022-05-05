@@ -9,10 +9,10 @@ from bci_tester.data import MINIMAL_CONTAINER
 
 #: size limits of the minimal image per architecture in MiB
 MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 40,
-    "aarch64": 44,
-    "s390x": 40,
-    "ppc64le": 51,
+    "x86_64": 46,
+    "aarch64": 49,
+    "s390x": 46,
+    "ppc64le": 57,
 }
 #: size limits of the micro image per architecture in MiB
 MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
@@ -26,13 +26,7 @@ MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
 @pytest.mark.parametrize(
     "container,size",
     [
-        pytest.param(
-            MINIMAL_CONTAINER,
-            MINIMAL_IMAGE_MAX_SIZE,
-            marks=pytest.mark.xfail(
-                reason="Temporary size increase due to mozilla cert bundle hack"
-            ),
-        ),
+        (MINIMAL_CONTAINER, MINIMAL_IMAGE_MAX_SIZE),
         (MICRO_CONTAINER, MICRO_IMAGE_MAX_SIZE),
     ],
     indirect=["container"],
