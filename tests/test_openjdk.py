@@ -2,11 +2,19 @@
 import pytest
 
 from bci_tester.data import OPENJDK_11_CONTAINER
+from bci_tester.data import OPENJDK_17_CONTAINER
 
 
 @pytest.mark.parametrize(
     "container,java_version",
-    [(OPENJDK_11_CONTAINER, "11")],
+    [
+        pytest.param(
+            OPENJDK_11_CONTAINER, "11", marks=OPENJDK_11_CONTAINER.marks
+        ),
+        pytest.param(
+            OPENJDK_17_CONTAINER, "17", marks=OPENJDK_17_CONTAINER.marks
+        ),
+    ],
     indirect=["container"],
 )
 def test_jdk_version(container, java_version):
