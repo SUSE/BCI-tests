@@ -6,7 +6,7 @@ import tensorflow as tf
 
 
 def tensorflow_example_1():
-    """ Train a machine learning model using a prebuilt dataset.
+    """Train a machine learning model using a prebuilt dataset.
     More information available in the README file, Tensorflow section:
     """
     print("TensorFlow version:", tf.__version__)

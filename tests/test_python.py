@@ -61,8 +61,9 @@ CONTAINER_IMAGES_T = [
             base=container_from_pytest_param(CONTAINER_T),
             containerfile=DOCKERF_PY_T,
         ),
-    marks=CONTAINER_T.marks,
-    ) for CONTAINER_T in CONTAINER_IMAGES
+        marks=CONTAINER_T.marks,
+    )
+    for CONTAINER_T in CONTAINER_IMAGES
 ]
 
 

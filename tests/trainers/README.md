@@ -6,7 +6,7 @@ Description
 
 This directory contains modules and files that shall be copied into the container under test, for the execution of specific exercises and examples during the BCI validation .
 
-See the pytest_container documentation about the _copy to containers_.
+See the pytest_container/source/usage.rst documentation about the _copy to containers_.
 
 
 Tests for BCI python
