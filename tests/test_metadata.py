@@ -59,6 +59,7 @@ from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
+from bci_tester.data import RUST_CONTAINERS
 
 
 #: The official vendor name
@@ -128,6 +129,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (INIT_CONTAINER, "init", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
+    ]
+    + [
+        (rust_container, "rust", ImageType.LANGUAGE_STACK)
+        for rust_container in RUST_CONTAINERS
     ]
     + (
         [
@@ -385,15 +390,12 @@ def test_supportlevel_label(
     "container_data,container_name,container_type",
     [
         param
-        if param.values[0] != OPENJDK_DEVEL_17_CONTAINER
+        if param.values[0]
+        not in [OPENJDK_DEVEL_17_CONTAINER] + RUST_CONTAINERS
         else pytest.param(
             *param.values,
             marks=list(param.marks)
-            + [
-                pytest.mark.xfail(
-                    reason="openjdk-devel:17 is not published on registry.suse.com"
-                )
-            ],
+            + [pytest.mark.xfail(reason="not published on registry.suse.com")],
         )
         for param in IMAGES_AND_NAMES_WITH_BASE_XFAIL
     ],
