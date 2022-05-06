@@ -1,14 +1,26 @@
-"""Basic tests for the Python base container images,based on tensorflow library.
-Find a description in the README file
+"""Basic tests for the Python base container images,based on tensorflow library,
+and related tutorials, under Apache License.
 """
 
 import tensorflow as tf
 
 
 def tensorflow_example_1():
-    """Train a machine learning model using a prebuilt dataset.
-    More information available in the README file, Tensorflow section:
+    """This function test that the TF library in the BCI is able to
+    train a machine learning model and perform an evaluation:
+
+    It is derived from the code in the 'TensorFlow 2 - quickstart for beginners' `tutorial <https://github.com/tensorflow/docs/blob/master/site/en/tutorials/quickstart/beginner.ipynb>`_
+
+    The procedure is:
+
+    - Load a ML model using a prebuilt dataset with the Keras API
+    - Build a neural network ML model that classifies images
+    - Trains this neural network
+    - Evaluates the accuracy of the model
+
+    Expected for this test: accuracy greather than 0.9 and final loss lower than 0.1.
     """
+
     print("TensorFlow version:", tf.__version__)
 
     # Load a dataset
@@ -36,7 +48,7 @@ def tensorflow_example_1():
     # Define a loss function for training
     loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
-    # The value of the loss before model trained is high > 1
+    # The value of the loss before model trained is high,meaning >1.
     lo_initial = loss_fn(y_train[:1], predictions).numpy()
 
     # configure and compile the model
@@ -58,7 +70,7 @@ def tensorflow_example_1():
     if lo_initial > 1.0 and lo < 0.1 and ac > 0.9:
         print(f"PASS: loss,accuracy good")
     else:
-        # print ("FAIL")
+        # ("FAIL")
         raise RuntimeError("FAIL: loss,accuracy not good")
 
 

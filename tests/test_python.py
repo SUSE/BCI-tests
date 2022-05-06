@@ -5,7 +5,6 @@ from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 
 import pytest
-from _pytest.mark.structures import ParameterSet
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
 
@@ -15,37 +14,13 @@ appdir = "trainers/"
 outdir = "output/"
 appl1 = "tensorflow_examples.py"
 
-# copy tensorflow module trainer from the local applico to the container
+# copy tensorflow module trainer from the local application directory to the container
 DOCKERF_PY_T = f"""
 WORKDIR {bcdir}
 RUN mkdir {appdir}
 RUN mkdir {outdir}
 COPY {orig + appdir}/{appl1}  {appdir}
 """
-
-PYTHON36_CONTAINER_T = pytest.param(
-    DerivedContainer(
-        base=container_from_pytest_param(PYTHON36_CONTAINER),
-        containerfile=DOCKERF_PY_T,
-    ),
-    marks=PYTHON36_CONTAINER.marks,
-)
-
-PYTHON39_CONTAINER_T = pytest.param(
-    DerivedContainer(
-        base=container_from_pytest_param(PYTHON39_CONTAINER),
-        containerfile=DOCKERF_PY_T,
-    ),
-    marks=PYTHON39_CONTAINER.marks,
-)
-
-PYTHON310_CONTAINER_T = pytest.param(
-    DerivedContainer(
-        base=container_from_pytest_param(PYTHON310_CONTAINER),
-        containerfile=DOCKERF_PY_T,
-    ),
-    marks=PYTHON310_CONTAINER.marks,
-)
 
 # Base containers under test, input of auto_container fixture
 CONTAINER_IMAGES = [
@@ -107,7 +82,7 @@ def test_tox(auto_container):
     "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
 )
 def test_python_webserver_1(container_per_test):
-    """Test thqat the python webserver is able to open a given port"""
+    """Test that the python webserver is able to open a given port"""
 
     port = "8123"
 
@@ -144,15 +119,15 @@ def test_python_webserver_1(container_per_test):
     # checks that the expected port is listening in the container
     assert container_per_test.connection.socket(
         "tcp://0.0.0.0:" + port
-    ).is_listening
+    ).is_listening, "Error on the expected port"
 
 
 @pytest.mark.parametrize(
     "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
 )
 def test_python_webserver_2(container_per_test, host, container_runtime):
-    """Test that the python `wget <https://pypi.org/project/wget/>`_ library
-    is able to fetch files from a webserver
+    """Test that the python `wget <https://pypi.org/project/wget/>`_ library,
+    coded in the appl2 module, is able to fetch files from a webserver
     """
 
     # ID of the running container under test
@@ -197,7 +172,9 @@ def test_python_webserver_2(container_per_test, host, container_runtime):
     "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
 )
 def test_tensorf(container_per_test):
-    """Test the python tensorflow library can be used for ML calculations"""
+    """Test that the python tensorflow library, coded in the appl1 module, 
+    can be used for ML calculations
+    """
 
     # commands for tests using python modules in the container, copied from local
     py_tf_vers = 'python3 -c "import tensorflow as tf; print (tf.__version__)" 2>&1|tail -1;'
