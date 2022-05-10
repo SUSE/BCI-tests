@@ -172,7 +172,7 @@ def test_python_webserver_2(container_per_test, host, container_runtime):
     "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
 )
 def test_tensorf(container_per_test):
-    """Test that the python tensorflow library, coded in the appl1 module, 
+    """Test that the python tensorflow library, coded in the appl1 module,
     can be used for ML calculations
     """
 

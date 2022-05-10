@@ -18,7 +18,7 @@ def tensorflow_example_1():
     - Trains this neural network
     - Evaluates the accuracy of the model
 
-    Expected for this test: accuracy greather than 0.9 and final loss lower than 0.1.
+    Expected for this test: accuracy greater than 0.9 and final loss lower than 0.1.
     """
 
     print("TensorFlow version:", tf.__version__)

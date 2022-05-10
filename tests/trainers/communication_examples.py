@@ -7,7 +7,7 @@ import wget
 
 
 def get_file_www(url, outdir):
-    """This function test that the python `wget <https://pypi.org/project/wget/>`_ 
+    """This function test that the python `wget <https://pypi.org/project/wget/>`_
     library in the BCI is able to fetch files from a webserver.
 
     We use the "download" method to get a specific file from a remote url.
@@ -16,7 +16,7 @@ def get_file_www(url, outdir):
 
     - url    : the http remote url
     - xfile  : the remote file to get
-    - outdir : the directory in the container receiving xfile 
+    - outdir : the directory in the container receiving xfile
 
     Expected for this test: xfile present in outdir.
 
