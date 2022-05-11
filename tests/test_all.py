@@ -42,77 +42,87 @@ CMD ["/fetcher/main"]
 """
 
 
-def test_os_release(auto_container):
+def test_os_release(auto_container_per_test):
     """
     :file:`/etc/os-release` is present and the values of ``OS_VERSION`` and
     ``OS_PRETTY_NAME`` equal :py:const:`bci_tester.data.OS_VERSION` and
     :py:const:`bci_tester.data.OS_PRETTY_NAME` respectively
     """
-    assert auto_container.connection.file("/etc/os-release").exists
+    assert auto_container_per_test.connection.file("/etc/os-release").exists
 
     for (var_name, value) in (
         ("VERSION_ID", OS_VERSION),
         ("PRETTY_NAME", OS_PRETTY_NAME),
     ):
         assert (
-            auto_container.connection.run_expect(
+            auto_container_per_test.connection.run_expect(
                 [0], f". /etc/os-release && echo ${var_name}"
             ).stdout.strip()
             == value
         )
 
 
-def test_product(auto_container):
+def test_product(auto_container_per_test):
     """
     check that :file:`/etc/products.d/SLES.prod` exists and
     :file:`/etc/products.d/baseproduct` is a link to it
     """
-    assert auto_container.connection.file("/etc/products.d").is_directory
-    assert auto_container.connection.file("/etc/products.d/SLES.prod").is_file
-    assert auto_container.connection.file(
+    assert auto_container_per_test.connection.file(
+        "/etc/products.d"
+    ).is_directory
+    assert auto_container_per_test.connection.file(
+        "/etc/products.d/SLES.prod"
+    ).is_file
+    assert auto_container_per_test.connection.file(
         "/etc/products.d/baseproduct"
     ).is_symlink
     assert (
-        auto_container.connection.file("/etc/products.d/baseproduct").linked_to
+        auto_container_per_test.connection.file(
+            "/etc/products.d/baseproduct"
+        ).linked_to
         == "/etc/products.d/SLES.prod"
     )
 
 
 @pytest.mark.parametrize(
-    "container",
+    "container_per_test",
     [c for c in ALL_CONTAINERS if c != BUSYBOX_CONTAINER],
     indirect=True,
 )
-def test_coreutils_present(container):
+def test_coreutils_present(container_per_test):
     """
     Check that some core utilities (:command:`cat`, :command:`sh`, etc.) exist
     in the container.
     """
     for binary in ("cat", "sh", "bash", "ls", "rm"):
-        assert container.connection.exists(binary)
+        assert container_per_test.connection.exists(binary)
 
 
-def test_glibc_present(auto_container):
+def test_glibc_present(auto_container_per_test):
     """ensure that the glibc linker is present"""
     for binary in ("ldconfig", "ldd"):
-        assert auto_container.connection.exists(binary)
+        assert auto_container_per_test.connection.exists(binary)
 
 
 @pytest.mark.parametrize(
-    "container",
+    "container_per_test",
     [c for c in ALL_CONTAINERS if c != INIT_CONTAINER],
     indirect=True,
 )
-def test_systemd_not_installed_in_all_containers_except_init(container):
+def test_systemd_not_installed_in_all_containers_except_init(
+    container_per_test,
+):
     """Ensure that systemd is not present in all containers besides the init
     container.
 
     """
-    assert not container.connection.exists("systemctl")
+    assert not container_per_test.connection.exists("systemctl")
 
     # we cannot check for an existing package if rpm is not installed
-    if container.connection.exists("rpm"):
-        assert not container.connection.package("systemd").is_installed
+    if container_per_test.connection.exists("rpm"):
+        assert not container_per_test.connection.package(
+            "systemd"
+        ).is_installed
 
 
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
