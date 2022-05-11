@@ -48,10 +48,58 @@ def test_busybox_image_size(
     )
 
 
+def test_busybox_links(auto_container):
+    """Ensure all binaries in :file:`/bin` are links to :file:`/usr/bin/busybox`."""
+    auto_container.connection.run_expect(
+        [0],
+        'for i in /bin/*; do stat -c "%N" "$i" | grep "/usr/bin/busybox"; done',
+    )
+
+
+def test_busybox_binary_works(auto_container):
+    """Ensure the busybox binary works"""
+    busybox = auto_container.connection.run_expect([0], "busybox")
+
+
+def test_true(auto_container):
+    """Test if the busybox `true` and `false` commands are working"""
+    auto_container.connection.run_expect([0], "true")
+    auto_container.connection.run_expect([1], "false")
+
+
+def test_echo_cat_grep_pipes(auto_container):
+    """Test if a string gets passed correctly between `echo`, `cat` and `grep`"""
+    auto_container.connection.run_expect(
+        [0], "echo 'test' | cat | grep 'test'"
+    )
+
+
+def test_ps(auto_container):
+    """Check if the `ps` command yields some output"""
+    assert "root" in auto_container.connection.run_expect([0], "ps").stdout
+
+
+def test_base32_64(auto_container):
+    """Ensure the base32 and base64 commands are returning the correct result for a given "test" string"""
+    assert (
+        "ORSXG5AK"
+        in auto_container.connection.run_expect(
+            [0], "echo test | base32"
+        ).stdout
+    )
+    assert (
+        "dGVzdAo="
+        in auto_container.connection.run_expect(
+            [0], "echo test | base64"
+        ).stdout
+    )
+
+
 @pytest.mark.parametrize(
     "container_per_test", [BUSYBOX_CONTAINER], indirect=True
 )
 def test_busybox_adduser(container_per_test):
+    """Ensure the adduser command works and a new user can be created"""
     container_per_test.connection.run_expect([0], "adduser -D foo")
     getent_passwd = container_per_test.connection.run_expect(
         [0], "getent passwd foo"
