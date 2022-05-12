@@ -187,19 +187,9 @@ def test_tensorf(container_per_test):
     # check the expected CPU flag for TF is available in the system
     container_per_test.connection.run_expect([0], 'lscpu| grep -i " SSE4"')
 
-    # pip main version number 
-    pip_version = container_per_test.connection.run("pip --version|tr -cd .0-9| cut -d. -f1").stdout.strip(" \n")
-
-    # python tag version number
-    python_version = container_per_test.connection.run("python3 --version|tr -cd .0-9| cut -d. -f1,2").stdout.strip(" \n")
-
-    if python_version == "3.10":
-       if int(pip_version) <= 20:
-           # pip upgrade needed
-           pytest.xfail("To install Tensorflow with python 3.10 use a pip version > 20")
-
     # install TF module for python
-    container_per_test.connection.run_expect([0], "pip install tensorflow")
+    if container_per_test.connection.run("pip install tensorflow").rc != 0:
+        pytest.xfail("pip install failure: check tensorflow requirements or update pip")
 
     tfver = container_per_test.connection.run_expect([0], py_tf_vers).stdout
 
