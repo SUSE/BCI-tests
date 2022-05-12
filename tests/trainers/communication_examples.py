@@ -1,8 +1,8 @@
 """ Tests for the Python base containers, based on communication functionalities."""
-
-import sys
 import os
+import sys
 import time
+
 import wget
 
 

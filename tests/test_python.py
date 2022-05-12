@@ -1,12 +1,11 @@
 """Basic tests for the Python base container images."""
+import pytest
+from pytest_container import DerivedContainer
+from pytest_container.container import container_from_pytest_param
 
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
-
-import pytest
-from pytest_container import DerivedContainer
-from pytest_container.container import container_from_pytest_param
 
 bcdir = "/tmp/"
 orig = "tests/"
@@ -189,7 +188,9 @@ def test_tensorf(container_per_test):
 
     # install TF module for python
     if container_per_test.connection.run("pip install tensorflow").rc != 0:
-        pytest.xfail("pip install failure: check tensorflow requirements or update pip")
+        pytest.xfail(
+            "pip install failure: check tensorflow requirements or update pip"
+        )
 
     tfver = container_per_test.connection.run_expect([0], py_tf_vers).stdout
 
