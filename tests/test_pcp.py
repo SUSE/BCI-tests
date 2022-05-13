@@ -8,11 +8,11 @@ from bci_tester.data import PCP_CONTAINER
 
 CONTAINER_IMAGES = [PCP_CONTAINER]
 
+
 def test_systemd_present(auto_container_per_test):
     """Check that the pcp daemons are running."""
 
-    # pcp needs a little time to initialize
-    time.sleep(5)
+    wait_for_pmcd(auto_container_per_test)
 
     auto_container_per_test.connection.run_expect([0], "systemctl status")
     auto_container_per_test.connection.run_expect([0], "systemctl status pmcd")
@@ -29,3 +29,15 @@ def test_systemd_present(auto_container_per_test):
             [0],
             "curl -s http://localhost:44322/metrics?names=mem.physmem",
         )
+
+
+def wait_for_pmcd(con):
+    """pmcd takes a little time to initialize things before it is ready"""
+
+    for _ in range(30):
+        rc = con.connection.run("systemctl status pmcd").rc
+        if rc == 0:
+            return
+        time.sleep(1)
+
+    assert False, "Timed out waiting for pmcd to start"
