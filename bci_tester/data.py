@@ -312,7 +312,9 @@ PCP_CONTAINER = create_BCI(
     build_tag=f"suse/pcp:5.2.2",
     image_type="dockerfile",
     singleton=True,
-    extra_marks=[pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")],
+    extra_marks=[
+        pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
+    ],
     extra_launch_args=[]
     if DOCKER_SELECTED
     else [

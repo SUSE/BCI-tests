@@ -9,21 +9,34 @@ from bci_tester.data import PCP_CONTAINER
 CONTAINER_IMAGES = [PCP_CONTAINER]
 
 
-def test_systemd_present(auto_container_per_test):
-    """Check that the pcp daemons are running."""
+def test_systemd_status(auto_container_per_test):
+    auto_container_per_test.connection.run_expect([0], "systemctl status")
+
+
+def test_pcp_services_status(auto_container_per_test):
+    """Check that the pcp services are healthy."""
 
     wait_for_pmcd(auto_container_per_test)
 
-    auto_container_per_test.connection.run_expect([0], "systemctl status")
     auto_container_per_test.connection.run_expect([0], "systemctl status pmcd")
-    auto_container_per_test.connection.run_expect([0], "systemctl status pmlogger")
-    auto_container_per_test.connection.run_expect([0], "systemctl status pmproxy")
+    auto_container_per_test.connection.run_expect(
+        [0], "systemctl status pmlogger"
+    )
+    auto_container_per_test.connection.run_expect(
+        [0], "systemctl status pmproxy"
+    )
     auto_container_per_test.connection.run_expect([0], "systemctl status pmie")
 
-    # test call to pmcd
-    auto_container_per_test.connection.run_expect([0], "pmprobe -v mem.physmem")
 
-    # test call to pmproxy
+def test_call_pmcd(auto_container_per_test):
+    wait_for_pmcd(auto_container_per_test)
+    auto_container_per_test.connection.run_expect(
+        [0], "pmprobe -v mem.physmem"
+    )
+
+
+def test_call_pmproxy(auto_container_per_test):
+    wait_for_pmcd(auto_container_per_test)
     if LOCALHOST.exists("curl"):
         assert LOCALHOST.run_expect(
             [0],
