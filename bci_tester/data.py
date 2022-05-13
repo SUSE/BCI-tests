@@ -308,6 +308,21 @@ INIT_CONTAINER = create_BCI(
     default_entry_point=True,
 )
 
+PCP_CONTAINER = create_BCI(
+    build_tag=f"suse/pcp:5.2.2",
+    image_type="dockerfile",
+    available_versions=["15.3"],
+    extra_launch_args=[]
+    if DOCKER_SELECTED
+    else [
+        "--systemd",
+        "always",
+        "-p",
+        "44322:44322",
+    ],
+    default_entry_point=True,
+)
+
 CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
     image_type="dockerfile",
@@ -358,6 +373,7 @@ CONTAINERS_WITH_ZYPPER = [
     NODEJS_12_CONTAINER,
     NODEJS_14_CONTAINER,
     NODEJS_16_CONTAINER,
+    PCP_CONTAINER,
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
     PYTHON310_CONTAINER,
