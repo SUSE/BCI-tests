@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '0 0 * * *'
   repository_dispatch:
+  pull_request:
 
 jobs:
   gentestmatrix:
@@ -15,10 +16,14 @@ jobs:
       - name: checkout source code
         uses: actions/checkout@v3
       - name: Install necessary software
-        run: sudo apt update && sudo apt install jo tox
+        run: sudo apt update && sudo apt install tox jq
       - id: setmatrix
         run: |
-          stringified_matrix=$(tox -q -e list-all | awk  '/\|.*\|.*\|.*\|(.*)/ {print $8;}' | grep -v 'URL' | jo -a)
+          export OS_VERSION=15.3
+          export sp3_containers=$(tox -qq -e get_urls)
+          export OS_VERSION=15.4
+          export sp4_containers=$(tox -qq -e get_urls)
+          stringified_matrix=$(jq -c --argjson arr1 "$sp3_containers" --argjson arr2 "$sp4_containers" -n '$arr1 + $arr2')
           echo "::set-output name=matrix::$stringified_matrix"
 
   snyk:
