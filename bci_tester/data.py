@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
 import os
 from typing import List
 from typing import Optional
 from typing import Sequence
+
+from _pytest import mark
+from pytest_container.container import container_from_pytest_param
 
 try:
     from typing import Literal
@@ -370,3 +374,29 @@ CONTAINERS_WITHOUT_ZYPPER = [
 
 #: Containers that are directly pulled from registry.suse.de
 ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER
+
+
+if __name__ == "__main__":
+    import json
+
+    def has_true_skipif(param: ParameterSet) -> bool:
+        for mark in param.marks:
+            if mark.name == "skipif" and mark.args[0]:
+                return True
+        return False
+
+    def has_xfail(param: ParameterSet) -> bool:
+        for mark in param.marks:
+            if mark.name == "xfail":
+                return True
+        return False
+
+    print(
+        json.dumps(
+            [
+                container_from_pytest_param(cont).get_base().url
+                for cont in ALL_CONTAINERS
+                if (not has_true_skipif(cont) and not has_xfail(cont))
+            ]
+        )
+    )
