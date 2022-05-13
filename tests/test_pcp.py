@@ -2,29 +2,26 @@
 """
 import time
 
-import pytest
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import PCP_CONTAINER
-from bci_tester.runtime_choice import DOCKER_SELECTED
 
+CONTAINER_IMAGES = [PCP_CONTAINER]
 
-@pytest.mark.parametrize("container", [PCP_CONTAINER], indirect=True)
-@pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
-def test_systemd_present(container):
+def test_systemd_present(auto_container_per_test):
     """Check that the pcp daemons are running."""
 
     # pcp needs a little time to initialize
     time.sleep(5)
 
-    assert container.connection.run_expect([0], "systemctl status")
-    assert container.connection.run_expect([0], "systemctl status pmcd")
-    assert container.connection.run_expect([0], "systemctl status pmlogger")
-    assert container.connection.run_expect([0], "systemctl status pmproxy")
-    assert container.connection.run_expect([0], "systemctl status pmie")
+    auto_container_per_test.connection.run_expect([0], "systemctl status")
+    auto_container_per_test.connection.run_expect([0], "systemctl status pmcd")
+    auto_container_per_test.connection.run_expect([0], "systemctl status pmlogger")
+    auto_container_per_test.connection.run_expect([0], "systemctl status pmproxy")
+    auto_container_per_test.connection.run_expect([0], "systemctl status pmie")
 
     # test call to pmcd
-    assert container.connection.run_expect([0], "pmprobe -v mem.physmem")
+    auto_container_per_test.connection.run_expect([0], "pmprobe -v mem.physmem")
 
     # test call to pmproxy
     if LOCALHOST.exists("curl"):
