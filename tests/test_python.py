@@ -2,6 +2,7 @@
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
@@ -166,7 +167,11 @@ def test_python_webserver_2(container_per_test, host, container_runtime):
     # check expected file present in the bci destination
     assert container_per_test.connection.file(destdir + xfilename).exists
 
-
+@pytest.mark.skipif(
+    # skip test if architecture is not x86. 
+    LOCALHOST.system_info.arch != "x86_64",
+    reason="Tensorflow python library tested on x86_64",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
 )
