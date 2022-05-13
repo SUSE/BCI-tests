@@ -167,8 +167,9 @@ def test_python_webserver_2(container_per_test, host, container_runtime):
     # check expected file present in the bci destination
     assert container_per_test.connection.file(destdir + xfilename).exists
 
+
 @pytest.mark.skipif(
-    # skip test if architecture is not x86. 
+    # skip test if architecture is not x86.
     LOCALHOST.system_info.arch != "x86_64",
     reason="Tensorflow python library tested on x86_64",
 )
@@ -188,8 +189,11 @@ def test_tensorf(container_per_test):
     # check the test python module is present in the container
     assert container_per_test.connection.file(bcdir + appdir + appl1).is_file
 
-    # check the expected CPU flag for TF is available in the system
-    container_per_test.connection.run_expect([0], 'lscpu| grep -i " SSE4"')
+    # collect CPU flags of the system
+    cpuflg = container_per_test.connection.run_expect([0], "lscpu").stdout
+
+    # In precompiled Tensorflow library by default 'sse4' cpu flag expected
+    assert "sse4" in cpuflg
 
     # install TF module for python
     if container_per_test.connection.run("pip install tensorflow").rc != 0:
