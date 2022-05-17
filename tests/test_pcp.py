@@ -16,27 +16,28 @@ def test_systemd_status(auto_container_per_test):
 def test_pcp_services_status(auto_container_per_test):
     """Check that the pcp services are healthy."""
 
-    wait_for_pmcd(auto_container_per_test)
-
-    auto_container_per_test.connection.run_expect([0], "systemctl status pmcd")
-    auto_container_per_test.connection.run_expect(
-        [0], "systemctl status pmlogger"
-    )
-    auto_container_per_test.connection.run_expect(
-        [0], "systemctl status pmproxy"
-    )
-    auto_container_per_test.connection.run_expect([0], "systemctl status pmie")
+    for service in ("pmcd", "pmlogger", "pmproxy", "pmie"):
+        assert wait_for_service(
+            auto_container_per_test, service
+        ), f"Timed out waiting for {service} to start"
 
 
 def test_call_pmcd(auto_container_per_test):
-    wait_for_pmcd(auto_container_per_test)
+    assert wait_for_service(
+        auto_container_per_test, "pmcd"
+    ), "Timed out waiting for pmcd to start"
+
     auto_container_per_test.connection.run_expect(
         [0], "pmprobe -v mem.physmem"
     )
 
 
 def test_call_pmproxy(auto_container_per_test):
-    wait_for_pmcd(auto_container_per_test)
+    for service in ("pmcd", "pmproxy"):
+        assert wait_for_service(
+            auto_container_per_test, service
+        ), f"Timed out waiting for {service} to start"
+
     if LOCALHOST.exists("curl"):
         assert LOCALHOST.run_expect(
             [0],
@@ -44,13 +45,13 @@ def test_call_pmproxy(auto_container_per_test):
         )
 
 
-def wait_for_pmcd(con):
-    """pmcd takes a little time to initialize things before it is ready"""
+def wait_for_service(con, service):
+    """Wait up to 60 seconds for service to be active."""
 
     for _ in range(60):
-        rc = con.connection.run("systemctl is-active pmcd").rc
+        rc = con.connection.run(f"systemctl is-active {service}").rc
         if rc == 0:
-            return
+            return True
         time.sleep(1)
 
-    assert False, "Timed out waiting for pmcd to start"
+    return False
