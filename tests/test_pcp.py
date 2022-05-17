@@ -48,7 +48,7 @@ def wait_for_pmcd(con):
     """pmcd takes a little time to initialize things before it is ready"""
 
     for _ in range(30):
-        rc = con.connection.run("systemctl status pmcd").rc
+        rc = con.connection.run("systemctl is-active pmcd").rc
         if rc == 0:
             return
         time.sleep(1)
