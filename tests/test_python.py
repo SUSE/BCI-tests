@@ -1,5 +1,6 @@
 """Basic tests for the Python base container images."""
 import pytest
+import time
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
 from pytest_container.runtime import LOCALHOST
@@ -96,17 +97,23 @@ def test_python_webserver_1(container_per_test):
     ).is_listening
 
     # start of the python http server
-    bci_pyt_serv = container_per_test.connection.run_expect(
-        [0], f"timeout 240s python3 -m http.server {port} &"
-    ).stdout
+    container_per_test.connection.run_expect(
+        [0], f"python3 -m http.server {port} &"
+    )
+
+    # wait until the python http.server process is running in the container
+    timeout = 30
+    for i in range(timeout + 1):
+        assert i < timeout, "webserver startup timeout"
+        if container_per_test.connection.socket(
+            "tcp://0.0.0.0:" + port
+        ).is_listening:
+            break
+        time.sleep(1)
 
     # checks that the python http.server process is running in the container:
     proc = container_per_test.connection.process.filter(comm="python3")
-
-    # check that the filtered list is not empty
     assert len(proc) > 0, "The python3 http.server process must be running"
-
-    x = None
 
     for p in proc:
         x = p.args
@@ -115,11 +122,6 @@ def test_python_webserver_1(container_per_test):
 
     # checks expected parameter of the running python process
     assert "http.server" in x, "http.server not running."
-
-    # checks that the expected port is listening in the container
-    assert container_per_test.connection.socket(
-        "tcp://0.0.0.0:" + port
-    ).is_listening, "Error on the expected port"
 
 
 @pytest.mark.parametrize(
