@@ -1,12 +1,11 @@
 """Basic tests for the Python base container images."""
 import pytest
-from pytest_container import DerivedContainer
-from pytest_container.container import container_from_pytest_param
-from pytest_container.runtime import LOCALHOST
-
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
+from pytest_container import DerivedContainer
+from pytest_container.container import container_from_pytest_param
+from pytest_container.runtime import LOCALHOST
 
 bcdir = "/tmp/"
 orig = "tests/"
@@ -37,6 +36,7 @@ CONTAINER_IMAGES_T = [
             containerfile=DOCKERF_PY_T,
         ),
         marks=CONTAINER_T.marks,
+        id=CONTAINER_T.id,
     )
     for CONTAINER_T in CONTAINER_IMAGES
 ]
@@ -181,11 +181,6 @@ def test_tensorf(container_per_test):
     can be used for ML calculations
     """
 
-    # commands for tests using python modules in the container, copied from local
-    py_tf_vers = 'python3 -c "import tensorflow as tf; print (tf.__version__)" 2>&1|tail -1;'
-
-    py_tf_test = "timeout 240s python3 " + appdir + appl1
-
     # check the test python module is present in the container
     assert container_per_test.connection.file(bcdir + appdir + appl1).is_file
 
@@ -201,16 +196,26 @@ def test_tensorf(container_per_test):
             "pip install failure: check tensorflow requirements or update pip"
         )
 
-    tfver = container_per_test.connection.run_expect([0], py_tf_vers).stdout
+    # check library import ok
+    container_per_test.connection.run_expect(
+        [0], 'python3 -c "import tensorflow"'
+    )
 
-    # TensorFlow version: for python 3.x - tf > 2.0
-    assert int(tfver[0]) >= 2
+    # get tf version
+    tfver = container_per_test.connection.run_expect(
+        [0], 'python3 -c "import tensorflow as tf; print (tf.__version__)"'
+    )
 
-    # Exercise execution
-    testout = container_per_test.connection.run_expect([0], py_tf_test).stdout
+    # TensorFlow version: for python 3.x, major tag >= 2
+    assert int(tfver.stdout[0]) >= 2
+
+    # Exercise execution running python modules in the container
+    testout = container_per_test.connection.run_expect(
+        [0], "python3 " + appdir + appl1
+    )
 
     # keyword search
-    assert "accuracy" in testout
+    assert "accuracy" in testout.stdout
 
     # expected keyword value found: PASS
-    assert "PASS" in testout
+    assert "PASS" in testout.stdout
