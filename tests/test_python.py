@@ -13,12 +13,20 @@ orig = "tests/"
 appdir = "trainers/"
 outdir = "output/"
 appl1 = "tensorflow_examples.py"
+port1 = 8123
+t0 = time.time()
 
 # copy tensorflow module trainer from the local application directory to the container
-DOCKERF_PY_T = f"""
+DOCKERF_PY_T1 = f"""
+WORKDIR {bcdir}
+EXPOSE {port1}
+"""
+
+DOCKERF_PY_T2 = f"""
 WORKDIR {bcdir}
 RUN mkdir {appdir}
 RUN mkdir {outdir}
+EXPOSE {port1}
 COPY {orig + appdir}/{appl1}  {appdir}
 """
 
@@ -29,12 +37,27 @@ CONTAINER_IMAGES = [
     PYTHON310_CONTAINER,
 ]
 
-# Derived containers including additional test files, parametrized per test
-CONTAINER_IMAGES_T = [
+
+# Derived containers, from custom Dockerfile including additional test files and extra args, input to container_per_test fixture
+CONTAINER_IMAGES_T1 = [
     pytest.param(
         DerivedContainer(
             base=container_from_pytest_param(CONTAINER_T),
-            containerfile=DOCKERF_PY_T,
+            containerfile=DOCKERF_PY_T1,
+            extra_launch_args=["-p", f"{port1}:{port1}"],
+        ),
+        marks=CONTAINER_T.marks,
+        id=CONTAINER_T.id,
+    )
+    for CONTAINER_T in CONTAINER_IMAGES
+]
+
+# Derived containers, from custom Dockerfile including additional test files, input to container_per_test fixture
+CONTAINER_IMAGES_T2 = [
+    pytest.param(
+        DerivedContainer(
+            base=container_from_pytest_param(CONTAINER_T),
+            containerfile=DOCKERF_PY_T2,
         ),
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
@@ -80,15 +103,15 @@ def test_tox(auto_container):
 
 
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
+    "container_per_test", CONTAINER_IMAGES_T1, indirect=["container_per_test"]
 )
-@pytest.mark.parametrize("hmodule, port, timeout", [("http.server", 8123, 30)])
-def test_python_webserver_1(container_per_test, hmodule, port, timeout):
+@pytest.mark.parametrize("hmodule, port, retry", [("http.server", port1, 10)])
+def test_python_webserver_1(container_per_test, hmodule, port, retry):
     """Test that the python webserver is able to open a given port"""
 
     portstatus = False
 
-    processlist = None
+    t = 0
 
     # pkg neeed to run socket/port check
     if not container_per_test.connection.package("iproute2").is_installed:
@@ -96,37 +119,35 @@ def test_python_webserver_1(container_per_test, hmodule, port, timeout):
 
     # checks that the expected port is Not listening yet
     assert not container_per_test.connection.socket(
-        f"tcp://0.0.0.0: {port}"
+        f"tcp://0.0.0.0:{port}"
     ).is_listening
+
+    t1 = time.time() - t0
 
     # start of the python http server
     container_per_test.connection.run_expect(
-        [0], f"python3 -m {hmodule} {port} &"
+        [0], f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
     )
 
-    # race conditions prevention: port status inspection with timeout
-    for t in range(timeout):
+    # port status inspection with timeout
+    for t in range(retry):
         time.sleep(1)
         portstatus = container_per_test.connection.socket(
-            f"tcp://0.0.0.0: {port}"
+            f"tcp://0.0.0.0:{port}"
         ).is_listening
         if portstatus:
             break
 
-    # check inspection success or timeeout
-    assert portstatus, "timeout expired: expected port not listening"
+    t2 = time.time() - t0
 
-    # collect running processes (see man ps BSD options)
-    processlist = container_per_test.connection.run_expect(
-        [0], "ps axho command"
-    )
-
-    # check also that server is running
-    assert hmodule in processlist.stdout, f"{hmodule} not running."
+    # check inspection success or timeout
+    assert (
+        portstatus
+    ), f"Timeout expired:Before start {t1}s After {t} checks {t2}s. Expected port not listening"
 
 
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
+    "container_per_test", CONTAINER_IMAGES_T2, indirect=["container_per_test"]
 )
 @pytest.mark.parametrize(
     "destdir, appl2, url, xfilename",
@@ -163,7 +184,8 @@ def test_python_webserver_2(
 
     # execution of the python module in the container
     bci_python_wget = container_per_test.connection.run_expect(
-        [0], f"timeout 240s python3 {appdir + appl2} {url} {destdir}"
+        [0],
+        f"timeout --preserve-status 120s python3 {appdir + appl2} {url} {destdir}",
     ).stdout
 
     # run the test in the container and check expected keyword from the module
@@ -179,7 +201,7 @@ def test_python_webserver_2(
     reason="Tensorflow python library tested on x86_64",
 )
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINER_IMAGES_T, indirect=["container_per_test"]
+    "container_per_test", CONTAINER_IMAGES_T2, indirect=["container_per_test"]
 )
 def test_tensorf(container_per_test):
     """Test that the python tensorflow library, coded in the appl1 module,
