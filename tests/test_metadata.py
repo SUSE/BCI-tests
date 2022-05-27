@@ -54,6 +54,7 @@ from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
+from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
@@ -112,6 +113,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
+        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
         (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
         (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
