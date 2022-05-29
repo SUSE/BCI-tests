@@ -11,6 +11,7 @@ from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import INIT_CONTAINER
+from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 
@@ -106,14 +107,14 @@ def test_glibc_present(auto_container_per_test):
 
 @pytest.mark.parametrize(
     "container_per_test",
-    [c for c in ALL_CONTAINERS if c != INIT_CONTAINER],
+    [c for c in ALL_CONTAINERS if (c not in [INIT_CONTAINER, PCP_CONTAINER])],
     indirect=True,
 )
 def test_systemd_not_installed_in_all_containers_except_init(
     container_per_test,
 ):
     """Ensure that systemd is not present in all containers besides the init
-    container.
+    and pcp containers.
 
     """
     assert not container_per_test.connection.exists("systemctl")
