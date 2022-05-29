@@ -10,6 +10,8 @@ CONTAINER_IMAGES = [PCP_CONTAINER]
 
 
 def test_systemd_status(auto_container_per_test):
+    auto_container_per_test.connection.exists("systemctl")
+    auto_container_per_test.connection.file("/etc/machine-id").exists
     auto_container_per_test.connection.run_expect([0], "systemctl status")
 
 
