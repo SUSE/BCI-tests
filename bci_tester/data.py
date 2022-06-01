@@ -292,20 +292,12 @@ INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
     image_type="hybrid",
     available_versions=[OS_VERSION],
-    extra_launch_args=[
-        "--privileged",
-        "--tmpfs",
-        "/tmp",
-        "--tmpfs",
-        "/run",
-        "-v",
-        "/sys/fs/cgroup:/sys/fs/cgroup:ro,z",
-        "-e",
-        "container=docker",
-    ]
-    if DOCKER_SELECTED
-    else [],
-    default_entry_point=True,
+    extra_marks=[
+        pytest.mark.skipif(
+            DOCKER_SELECTED,
+            reason="only podman is supported, systemd is broken with docker.",
+        )
+    ],
 )
 
 PCP_CONTAINER = create_BCI(
