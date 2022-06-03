@@ -292,6 +292,7 @@ INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
     image_type="hybrid",
     available_versions=[OS_VERSION],
+    default_entry_point=True,
     extra_marks=[
         pytest.mark.skipif(
             DOCKER_SELECTED,
