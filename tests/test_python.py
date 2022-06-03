@@ -20,6 +20,7 @@ t0 = time.time()
 # copy tensorflow module trainer from the local application directory to the container
 DOCKERF_PY_T1 = f"""
 WORKDIR {bcdir}
+COPY {orig + appdir}/{appl1}  {bcdir}
 EXPOSE {port1}
 """
 
@@ -45,7 +46,7 @@ CONTAINER_IMAGES_T1 = [
         DerivedContainer(
             base=container_from_pytest_param(CONTAINER_T),
             containerfile=DOCKERF_PY_T1,
-            extra_launch_args=["-p", f"{port1}:{port1}"],
+            extra_launch_args=["-d", "-p", f"{port1}:{port1}"],
         ),
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
@@ -118,6 +119,11 @@ def test_python_webserver_1(container_per_test, hmodule, port, retry):
     if not container_per_test.connection.package("iproute2").is_installed:
         container_per_test.connection.run_expect([0], "zypper -n in iproute2")
 
+    #p2=LOCALHOST.socket(f"tcp://127.0.0.1:{port}").is_listening
+    # p3=LOCALHOST.run_expect([0], f"curl http://127.0.0.1:{port}")
+    # p3=LOCALHOST.run(f"timeout --preserve-status 30 wget http://127.0.0.1:{port}/{appl1}")
+    #print("ante start", p2) #, p3.stdout)
+
     # checks that the expected port is Not listening yet
     assert not container_per_test.connection.socket(
         f"tcp://0.0.0.0:{port}"
@@ -125,26 +131,44 @@ def test_python_webserver_1(container_per_test, hmodule, port, retry):
 
     t1 = time.time() - t0
 
+    # command = "ss --numeric --listening --tcp |grep 8123;echo before;" + f"(timeout --preserve-status 30 python3 -m {hmodule} {port} &); " + "sleep 2;echo after;" + "ss --numeric --listening --tcp |grep 8123;" 
+    command = f"(timeout --preserve-status 30 python3 -m {hmodule} {port} &);"
+    
     # start of the python http server
     container_per_test.connection.run_expect(
-        [0], f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
+        [0], command
     )
 
+    #container_per_test.connection.run_expect(
+    #    [0], f"timeout --preserve-status 30 python3 -m {hmodule} {port} &"
+    #)
+
+    t1b = time.time() - t0
+
+    #p2=LOCALHOST.socket(f"tcp://127.0.0.1:{port}").is_listening
+    # p3=LOCALHOST.run_expect([0], f"curl http://127.0.0.1:{port}")
+    # p3=LOCALHOST.run_expect([0], f"timeout --preserve-status 30 wget http://127.0.0.1:{port}/{appl1}")
+    #print("post start", p2) #, p3.stdout)
+    
     # port status inspection with timeout
     for t in range(retry):
         time.sleep(1)
         portstatus = container_per_test.connection.socket(
             f"tcp://0.0.0.0:{port}"
         ).is_listening
+        print (t,time.time() - t0)
+
         if portstatus:
             break
+    
+    x = container_per_test.connection.run_expect([0], "ps ax | grep python")
 
     t2 = time.time() - t0
 
     # check inspection success or timeout
     assert (
         portstatus
-    ), f"Timeout expired:Before start {t1}s After {t} checks {t2}s. Expected port not listening"
+    ), f"Timeout expired:Before start {t1}-{t1b}s After {t} checks {t2}s. Expected port not listening"
 
 
 @pytest.mark.parametrize(
