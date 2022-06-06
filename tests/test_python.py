@@ -1,7 +1,8 @@
 """Basic tests for the Python base container images."""
+import pytest
+import re
 import time
 
-import pytest
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
@@ -16,6 +17,8 @@ outdir = "output/"
 appl1 = "tensorflow_examples.py"
 port1 = 8123
 t0 = time.time()
+
+#container_version = lambda container_runtime: re.sub("[^0-9.:_-]", "", LOCALHOST.run(container_runtime.runner_binary + " --version")
 
 # copy tensorflow module trainer from the local application directory to the container
 DOCKERF_PY_T1 = f"""
@@ -46,7 +49,7 @@ CONTAINER_IMAGES_T1 = [
         DerivedContainer(
             base=container_from_pytest_param(CONTAINER_T),
             containerfile=DOCKERF_PY_T1,
-            extra_launch_args=["-d", "-p", f"{port1}:{port1}"],
+            extra_launch_args=["-p", f"{port1}:{port1}"],
         ),
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
@@ -67,6 +70,8 @@ CONTAINER_IMAGES_T2 = [
     for CONTAINER_T in CONTAINER_IMAGES
 ]
 
+# get container version and clean the result from not (numeric or separators) chars.
+container_version = lambda container_runtime: re.sub("[^0-9.,:_-]", "", LOCALHOST.run(container_runtime.runner_binary + " --version").stdout)
 
 def test_python_version(auto_container):
     """Test that the python version equals the value from the environment variable
@@ -108,21 +113,28 @@ def test_tox(auto_container):
     "container_per_test", CONTAINER_IMAGES_T1, indirect=["container_per_test"]
 )
 @pytest.mark.parametrize("hmodule, port, retry", [("http.server", port1, 10)])
-def test_python_webserver_1(container_per_test, hmodule, port, retry):
+def test_python_webserver_1(
+    container_per_test, container_runtime, hmodule, port, retry
+):
     """Test that the python webserver is able to open a given port"""
 
     portstatus = False
-
+    podman_version_x = None
     t = 0
+
+    if container_runtime.runner_binary == "podman":
+        podman_version = container_version(container_runtime).split(".")
+        assert podman_version[0].isnumeric()
+
+        # container version: old versions have issues with background processes
+        if int(podman_version[0]) < 2:
+            pytest.xfail("server port checks not compatible with old podman versions 1")
+
+    command = f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
 
     # pkg neeed to run socket/port check
     if not container_per_test.connection.package("iproute2").is_installed:
         container_per_test.connection.run_expect([0], "zypper -n in iproute2")
-
-    #p2=LOCALHOST.socket(f"tcp://127.0.0.1:{port}").is_listening
-    # p3=LOCALHOST.run_expect([0], f"curl http://127.0.0.1:{port}")
-    # p3=LOCALHOST.run(f"timeout --preserve-status 30 wget http://127.0.0.1:{port}/{appl1}")
-    #print("ante start", p2) #, p3.stdout)
 
     # checks that the expected port is Not listening yet
     assert not container_per_test.connection.socket(
@@ -131,44 +143,27 @@ def test_python_webserver_1(container_per_test, hmodule, port, retry):
 
     t1 = time.time() - t0
 
-    # command = "ss --numeric --listening --tcp |grep 8123;echo before;" + f"(timeout --preserve-status 30 python3 -m {hmodule} {port} &); " + "sleep 2;echo after;" + "ss --numeric --listening --tcp |grep 8123;" 
-    command = f"(timeout --preserve-status 30 python3 -m {hmodule} {port} &);"
-    
     # start of the python http server
-    container_per_test.connection.run_expect(
-        [0], command
-    )
+    server = container_per_test.connection.run_expect([0], command)
 
-    #container_per_test.connection.run_expect(
-    #    [0], f"timeout --preserve-status 30 python3 -m {hmodule} {port} &"
-    #)
+    t2 = time.time() - t0
 
-    t1b = time.time() - t0
-
-    #p2=LOCALHOST.socket(f"tcp://127.0.0.1:{port}").is_listening
-    # p3=LOCALHOST.run_expect([0], f"curl http://127.0.0.1:{port}")
-    # p3=LOCALHOST.run_expect([0], f"timeout --preserve-status 30 wget http://127.0.0.1:{port}/{appl1}")
-    #print("post start", p2) #, p3.stdout)
-    
     # port status inspection with timeout
     for t in range(retry):
         time.sleep(1)
         portstatus = container_per_test.connection.socket(
             f"tcp://0.0.0.0:{port}"
         ).is_listening
-        print (t,time.time() - t0)
-
+        
         if portstatus:
             break
-    
-    x = container_per_test.connection.run_expect([0], "ps ax | grep python")
 
-    t2 = time.time() - t0
+    t3 = time.time() - t0
 
     # check inspection success or timeout
     assert (
         portstatus
-    ), f"Timeout expired:Before start {t1}-{t1b}s After {t} checks {t2}s. Expected port not listening"
+    ), f"Timeout expired: expected port not listening. Time marks: before server start {t1}s, after start {t2}s, after {t} loops {t3}s."
 
 
 @pytest.mark.parametrize(
