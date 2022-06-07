@@ -18,8 +18,6 @@ appl1 = "tensorflow_examples.py"
 port1 = 8123
 t0 = time.time()
 
-#container_version = lambda container_runtime: re.sub("[^0-9.:_-]", "", LOCALHOST.run(container_runtime.runner_binary + " --version")
-
 # copy tensorflow module trainer from the local application directory to the container
 DOCKERF_PY_T1 = f"""
 WORKDIR {bcdir}
@@ -71,7 +69,12 @@ CONTAINER_IMAGES_T2 = [
 ]
 
 # get container version and clean the result from not (numeric or separators) chars.
-container_version = lambda container_runtime: re.sub("[^0-9.,:_-]", "", LOCALHOST.run(container_runtime.runner_binary + " --version").stdout)
+container_version = lambda container_runtime: re.sub(
+    "[^0-9.,:_-]",
+    "",
+    LOCALHOST.run(container_runtime.runner_binary + " --version").stdout,
+)
+
 
 def test_python_version(auto_container):
     """Test that the python version equals the value from the environment variable
@@ -128,7 +131,9 @@ def test_python_webserver_1(
 
         # container version: old versions have issues with background processes
         if int(podman_version[0]) < 2:
-            pytest.xfail("server port checks not compatible with old podman versions 1")
+            pytest.xfail(
+                "server port checks not compatible with old podman versions 1"
+            )
 
     command = f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
 
@@ -154,7 +159,7 @@ def test_python_webserver_1(
         portstatus = container_per_test.connection.socket(
             f"tcp://0.0.0.0:{port}"
         ).is_listening
-        
+
         if portstatus:
             break
 
