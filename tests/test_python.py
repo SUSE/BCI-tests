@@ -131,7 +131,7 @@ def test_python_webserver_1(
 
         # container version: old versions have issues with background processes
         if int(podman_version[0]) < 2:
-            pytest.xfail(
+            pytest.skip(
                 "server port checks not compatible with old podman versions 1"
             )
 
