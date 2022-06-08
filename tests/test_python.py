@@ -6,9 +6,10 @@ import time
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
-from pytest_container import DerivedContainer
+from bci_tester.runtime_choice import PODMAN_SELECTED
+from pytest_container import DerivedContainer, OciRuntimeBase
 from pytest_container.container import container_from_pytest_param
-from pytest_container.runtime import LOCALHOST
+from pytest_container.runtime import LOCALHOST, get_selected_runtime
 
 bcdir = "/tmp/"
 orig = "tests/"
@@ -21,7 +22,6 @@ t0 = time.time()
 # copy tensorflow module trainer from the local application directory to the container
 DOCKERF_PY_T1 = f"""
 WORKDIR {bcdir}
-COPY {orig + appdir}/{appl1}  {bcdir}
 EXPOSE {port1}
 """
 
@@ -68,12 +68,14 @@ CONTAINER_IMAGES_T2 = [
     for CONTAINER_T in CONTAINER_IMAGES
 ]
 
-# get container version and clean the result from not (numeric or separators) chars.
-container_version = lambda container_runtime: re.sub(
-    "[^0-9.,:_-]",
-    "",
-    LOCALHOST.run(container_runtime.runner_binary + " --version").stdout,
-)
+
+def get_container_runtime_version(container_runtime: OciRuntimeBase) -> str:
+    """get the container runtime version and clean the result from non-numeric or non-separators characters."""
+    return re.sub(
+        "[^0-9.,:_-]",
+        "",
+        LOCALHOST.run(container_runtime.runner_binary + " --version").stdout,
+    )
 
 
 def test_python_version(auto_container):
@@ -112,28 +114,24 @@ def test_tox(auto_container):
     auto_container.connection.run_expect([0], "pip install --user tox")
 
 
+@pytest.mark.skipif(
+    PODMAN_SELECTED == True
+    and int(
+        get_container_runtime_version(get_selected_runtime()).split(".")[0]
+    )
+    < 2,
+    reason="server port checks not compatible with old podman versions 1.x",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINER_IMAGES_T1, indirect=["container_per_test"]
 )
 @pytest.mark.parametrize("hmodule, port, retry", [("http.server", port1, 10)])
-def test_python_webserver_1(
-    container_per_test, container_runtime, hmodule, port, retry
-):
+def test_python_webserver_1(container_per_test, hmodule, port, retry):
     """Test that the python webserver is able to open a given port"""
 
     portstatus = False
-    podman_version_x = None
+
     t = 0
-
-    if container_runtime.runner_binary == "podman":
-        podman_version = container_version(container_runtime).split(".")
-        assert podman_version[0].isnumeric()
-
-        # container version: old versions have issues with background processes
-        if int(podman_version[0]) < 2:
-            pytest.skip(
-                "server port checks not compatible with old podman versions 1"
-            )
 
     command = f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
 
