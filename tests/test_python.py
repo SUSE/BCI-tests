@@ -1,6 +1,7 @@
 """Basic tests for the Python base container images."""
-import pytest
 import time
+
+import pytest
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER

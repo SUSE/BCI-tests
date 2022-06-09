@@ -3,7 +3,6 @@ JRE).
 
 """
 import pytest
-
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 

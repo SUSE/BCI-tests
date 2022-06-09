@@ -34,12 +34,25 @@ ALL_DIGESTS = NONFIPS_DIGESTS + FIPS_DIGESTS
 def host_fips_supported(
     fipsfile: str = "/proc/sys/crypto/fips_enabled",
 ) -> bool:
+    """Returns a boolean whether FIPS mode is supported on this machine.
+
+    Parameters:
+    fipsfile: path to the file in :file:`/proc` determining whether FIPS mode is enabled
+
+    """
     return os.path.exists(fipsfile)
 
 
 def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled") -> bool:
+    """Returns a boolean indicating whether FIPS mode is enabled on this
+    machine.
+
+    Parameters:
+    fipsfile: path to the file in :file:`/proc` determining whether FIPS mode is enabled
+
+    """
     if not host_fips_supported(fipsfile):
         return False
 
-    with open(fipsfile) as f:
+    with open(fipsfile, encoding="utf8") as f:
         return f.read().strip() == "1"

@@ -7,8 +7,6 @@ import xml.etree.ElementTree as ET
 from typing import List
 
 import pytest
-from pytest_container import GitRepositoryBuild
-
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
@@ -20,6 +18,7 @@ from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.util import get_repos_from_connection
+from pytest_container import GitRepositoryBuild
 
 
 #: Name and alias of the microsoft .Net repository

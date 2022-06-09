@@ -22,10 +22,6 @@ from typing import List
 
 import pytest
 from _pytest.mark.structures import ParameterSet
-from pytest_container import OciRuntimeBase
-from pytest_container.container import container_from_pytest_param
-from pytest_container.runtime import LOCALHOST
-
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
@@ -59,6 +55,9 @@ from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
+from pytest_container import OciRuntimeBase
+from pytest_container.container import container_from_pytest_param
+from pytest_container.runtime import LOCALHOST
 
 
 #: The official vendor name
@@ -70,6 +69,12 @@ URL = "https://www.suse.com/products/server/"
 
 @enum.unique
 class ImageType(enum.Enum):
+    """BCI type enumeration defining to which BCI class this container image
+    belongs. It primarily influences whether the image specific labels appear as
+    ``com.suse.bci`` or ``com.suse.application``.
+
+    """
+
     LANGUAGE_STACK = enum.auto()
     APPLICATION = enum.auto()
     OS = enum.auto()
@@ -238,8 +243,6 @@ def test_general_labels(
 
         if version == "latest":
             assert OS_VERSION in labels[f"{prefix}.version"]
-        else:
-            version == labels[f"{prefix}.version"]
         assert labels[f"{prefix}.url"] == URL
         assert labels[f"{prefix}.vendor"] == VENDOR
 
@@ -318,11 +321,14 @@ def test_disturl_can_be_checked_out(
 
 
 @pytest.mark.parametrize(
-    "container_data,container_name,container_type", IMAGES_AND_NAMES
+    "container_data,container_type",
+    [
+        pytest.param(param.values[0], param.values[2], marks=param.marks)
+        for param in IMAGES_AND_NAMES
+    ],
 )
 def test_image_type_label(
     container_data: ParameterSet,
-    container_name: str,
     container_type: ImageType,
 ):
     """Check that all non-application containers have the label
@@ -397,7 +403,7 @@ def test_reference(
     if container_type == ImageType.OS:
         ref = f"{name}:{OS_VERSION}"
     else:
-        version, release = version_release.split("-")
+        version, _ = version_release.split("-")
         ref = f"{name}:{version}"
 
     check_output([container_runtime.runner_binary, "pull", ref])

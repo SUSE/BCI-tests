@@ -3,10 +3,9 @@ systemd pre-installed.
 
 """
 import pytest
-from pytest_container.runtime import LOCALHOST
-
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.runtime_choice import DOCKER_SELECTED
+from pytest_container.runtime import LOCALHOST
 
 
 @pytest.mark.parametrize("container", [INIT_CONTAINER], indirect=True)

@@ -1,6 +1,5 @@
-from pytest_container.runtime import LOCALHOST
-
 from bci_tester.data import CONTAINER_389DS
+from pytest_container.runtime import LOCALHOST
 
 
 CONTAINER_IMAGES = [CONTAINER_389DS]
