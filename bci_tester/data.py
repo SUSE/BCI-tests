@@ -302,7 +302,7 @@ INIT_CONTAINER = create_BCI(
 )
 
 PCP_CONTAINER = create_BCI(
-    build_tag=f"suse/pcp:5.2.2",
+    build_tag="suse/pcp:5.2.2",
     image_type="dockerfile",
     singleton=True,
     extra_marks=[
