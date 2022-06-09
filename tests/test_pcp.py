@@ -9,6 +9,10 @@ CONTAINER_IMAGES = [PCP_CONTAINER]
 
 
 def test_systemd_status(auto_container_per_test):
+    """Verify that :command:`systemctl` is present and works and that
+    :file:`/etc/machine-id` exists.
+
+    """
     assert auto_container_per_test.connection.exists("systemctl")
     assert auto_container_per_test.connection.file("/etc/machine-id").exists
     auto_container_per_test.connection.run_expect([0], "systemctl status")
@@ -24,6 +28,10 @@ def test_pcp_services_status(auto_container_per_test):
 
 
 def test_call_pmcd(auto_container_per_test):
+    """Check that the ``pmcd`` service is started and that :command:`pmbrobe`
+    functions.
+
+    """
     assert wait_for_service(
         auto_container_per_test, "pmcd"
     ), "Timed out waiting for pmcd to start"
@@ -34,6 +42,10 @@ def test_call_pmcd(auto_container_per_test):
 
 
 def test_call_pmproxy(auto_container_per_test):
+    """Check that the ``pmcd`` and ``pmproxy`` services have started and that
+    the parameter ``mem.physmem`` can be queried via :command:`curl`.
+
+    """
     for service in ("pmcd", "pmproxy"):
         assert wait_for_service(
             auto_container_per_test, service
