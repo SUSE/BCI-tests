@@ -376,7 +376,18 @@ def test_supportlevel_label(
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    [
+        param
+        if param.values[0]
+        not in (PYTHON310_CONTAINER, OPENJDK_DEVEL_17_CONTAINER)
+        else pytest.param(
+            *param.values,
+            marks=pytest.mark.xfail(
+                reason="python:3.10 and openjdk-devel:17 are not published on registry.suse.com"
+            ),
+        )
+        for param in IMAGES_AND_NAMES_WITH_BASE_XFAIL
+    ],
 )
 def test_reference(
     container_data: ParameterSet,
@@ -419,4 +430,4 @@ def test_reference(
         version, _ = version_release.split("-")
         ref = f"{name}:{version}"
 
-    check_output([container_runtime.runner_binary, "pull", ref])
+    LOCALHOST.run_expect([0], f"{container_runtime.runner_binary} pull {ref}")
