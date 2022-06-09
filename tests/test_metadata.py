@@ -394,7 +394,7 @@ def test_reference(
     if container_type == ImageType.OS:
         ref = f"{name}:{OS_VERSION}"
     else:
-        version, release = version_release.split("-")
+        version, _ = version_release.split("-")
         ref = f"{name}:{version}"
 
     check_output([container_runtime.runner_binary, "pull", ref])

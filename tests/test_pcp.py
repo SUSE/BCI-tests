@@ -50,8 +50,7 @@ def wait_for_service(con, service):
     """Wait up to 60 seconds for service to be active."""
 
     for _ in range(60):
-        rc = con.connection.run(f"systemctl is-active {service}").rc
-        if rc == 0:
+        if con.connection.run(f"systemctl is-active {service}").rc == 0:
             return True
         time.sleep(1)
 
