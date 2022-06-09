@@ -402,7 +402,10 @@ def test_reference(
     )
     assert container_name.replace(".", "-") in reference
 
-    assert reference[:22] == "registry.suse.com/bci/"
+    if container_type == ImageType.APPLICATION:
+        assert reference[:23] == "registry.suse.com/suse/"
+    else:
+        assert reference[:22] == "registry.suse.com/bci/"
 
     # for the OS versioned containers we'll get a reference that contains the
     # current full version + release, which has not yet been published to the
