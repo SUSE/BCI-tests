@@ -163,7 +163,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     )
 ]
 
-IMAGES_AND_NAMES_WITH_BASE_SKIP = [
+IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
     pytest.param(
         *IMAGES_AND_NAMES[0],
         marks=(
@@ -204,7 +204,7 @@ def get_container_metadata(container_data: ParameterSet) -> Any:
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_SKIP,
+    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
 )
 def test_general_labels(
     container_data: ParameterSet,
@@ -265,7 +265,7 @@ def test_general_labels(
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_SKIP,
+    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
 )
 def test_disturl(
     container_data: ParameterSet,
@@ -376,7 +376,7 @@ def test_supportlevel_label(
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_SKIP,
+    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
 )
 def test_reference(
     container_data: ParameterSet,
