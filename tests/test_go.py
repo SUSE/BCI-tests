@@ -85,3 +85,27 @@ def test_base_PATH_present(auto_container, container):
         [0], "echo $PATH"
     ).stdout.strip()
     assert path_in_base_container in path_in_go_container
+
+
+@pytest.mark.parametrize(
+    "container_per_test, container_git_clone",
+    [
+        pytest.param(
+            GO_1_18_CONTAINER,
+            GitRepositoryBuild(
+                repository_url="https://github.com/Code-Hex/go-generics-cache.git",
+                repository_tag="v1.0.1",
+                build_command="go test ./...",
+            ),
+            id=GO_1_18_CONTAINER.id,
+        ),
+    ],
+    indirect=["container_per_test", "container_git_clone"],
+)
+def test_build_generics_cache(container_per_test, container_git_clone):
+    """Test generics by running the tests of `go-generics-cache <https://github.com/Code-Hex/go-generics-cache>`_ inside the
+    container. Generics are only supported for go 1.18+.
+    """
+    container_per_test.connection.run_expect(
+        [0], container_git_clone.test_command
+    )
