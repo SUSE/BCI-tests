@@ -1,15 +1,17 @@
 """Basic tests for the Python base container images."""
-import pytest
 import re
 import time
 
+import pytest
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.runtime_choice import PODMAN_SELECTED
-from pytest_container import DerivedContainer, OciRuntimeBase
+from pytest_container import DerivedContainer
+from pytest_container import OciRuntimeBase
 from pytest_container.container import container_from_pytest_param
-from pytest_container.runtime import LOCALHOST, get_selected_runtime
+from pytest_container.runtime import get_selected_runtime
+from pytest_container.runtime import LOCALHOST
 
 bcdir = "/tmp/"
 orig = "tests/"
