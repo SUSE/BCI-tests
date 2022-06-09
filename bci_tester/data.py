@@ -160,11 +160,6 @@ BASE_CONTAINER = create_BCI(
     build_tag=f"bci/bci-base:{OS_VERSION}",
     image_type="kiwi",
     available_versions=[OS_VERSION],
-    extra_marks=[
-        pytest.mark.xfail(reason="bci-base fails to build from source on OBS")
-    ]
-    if ((OS_SP_VERSION == 4) and (TARGET == "obs"))
-    else [],
 )
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"bci/bci-minimal:{OS_VERSION}",
