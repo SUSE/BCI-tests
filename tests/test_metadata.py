@@ -242,7 +242,9 @@ def test_general_labels(
         _get_container_label_prefix(container_name, container_type),
         "org.opencontainers.image",
     ):
-        assert "BCI" in labels[f"{prefix}.title"]
+        if container_type != ImageType.APPLICATION:
+            assert "BCI" in labels[f"{prefix}.title"]
+
         assert (
             "based on the SLE Base Container Image."
             in labels[f"{prefix}.description"]
