@@ -163,19 +163,20 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     )
 ]
 
-if OS_VERSION == "15.3":
-    IMAGES_AND_NAMES_WITH_BASE_SKIP = [
-        pytest.param(
-            *IMAGES_AND_NAMES[0],
-            marks=(
-                pytest.mark.xfail(
-                    reason="The base container has no com.suse.bci.base labels yet"
+IMAGES_AND_NAMES_WITH_BASE_SKIP = [
+    pytest.param(
+        *IMAGES_AND_NAMES[0],
+        marks=(
+            pytest.mark.xfail(
+                reason=(
+                    "The base container has no com.suse.bci.base labels yet"
+                    if OS_VERSION == "15.3"
+                    else "https://bugzilla.suse.com/show_bug.cgi?id=1200373"
                 )
-            ),
-        )
-    ] + IMAGES_AND_NAMES[1:]
-else:
-    IMAGES_AND_NAMES_WITH_BASE_SKIP = IMAGES_AND_NAMES
+            )
+        ),
+    )
+] + IMAGES_AND_NAMES[1:]
 
 
 assert len(ALL_CONTAINERS) == len(
