@@ -237,8 +237,6 @@ def test_general_labels(
 
         if version == "latest":
             assert OS_VERSION in labels[f"{prefix}.version"]
-        else:
-            version == labels[f"{prefix}.version"]
         assert labels[f"{prefix}.url"] == URL
         assert labels[f"{prefix}.vendor"] == VENDOR
 
