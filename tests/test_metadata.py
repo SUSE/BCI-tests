@@ -69,6 +69,12 @@ URL = "https://www.suse.com/products/server/"
 
 @enum.unique
 class ImageType(enum.Enum):
+    """BCI type enumeration defining to which BCI class this container image
+    belongs. It primarily influences whether the image specific labels appear as
+    ``com.suse.bci`` or ``com.suse.application``.
+
+    """
+
     LANGUAGE_STACK = enum.auto()
     APPLICATION = enum.auto()
     OS = enum.auto()
