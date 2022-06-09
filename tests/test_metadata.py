@@ -79,11 +79,18 @@ class ImageType(enum.Enum):
     APPLICATION = enum.auto()
     OS = enum.auto()
 
+    def __str__(self) -> str:
+        return (
+            "application"
+            if self.value == ImageType.APPLICATION.value
+            else "bci"
+        )
+
 
 def _get_container_label_prefix(
     container_name: str, container_type: ImageType
 ) -> str:
-    return f"com.suse.{'bci' if container_type != ImageType.APPLICATION else 'bci'}.{container_name}"
+    return f"com.suse.{container_type}.{container_name}"
 
 
 #: List of all containers and their respective names which are used in the image
