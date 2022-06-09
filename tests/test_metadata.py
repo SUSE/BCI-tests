@@ -315,11 +315,14 @@ def test_disturl_can_be_checked_out(
 
 
 @pytest.mark.parametrize(
-    "container_data,container_name,container_type", IMAGES_AND_NAMES
+    "container_data,container_type",
+    [
+        pytest.param(param.values[0], param.values[2], marks=param.marks)
+        for param in IMAGES_AND_NAMES
+    ],
 )
 def test_image_type_label(
     container_data: ParameterSet,
-    container_name: str,
     container_type: ImageType,
 ):
     """Check that all non-application containers have the label
