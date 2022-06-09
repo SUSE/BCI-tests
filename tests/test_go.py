@@ -1,11 +1,10 @@
 """Tests for the Go language container."""
 import pytest
-from pytest_container import GitRepositoryBuild
-
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
+from pytest_container import GitRepositoryBuild
 
 
 #: Maximum go container size in Bytes

@@ -22,10 +22,6 @@ from typing import List
 
 import pytest
 from _pytest.mark.structures import ParameterSet
-from pytest_container import OciRuntimeBase
-from pytest_container.container import container_from_pytest_param
-from pytest_container.runtime import LOCALHOST
-
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
@@ -59,6 +55,9 @@ from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
+from pytest_container import OciRuntimeBase
+from pytest_container.container import container_from_pytest_param
+from pytest_container.runtime import LOCALHOST
 
 
 #: The official vendor name
