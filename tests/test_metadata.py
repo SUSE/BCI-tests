@@ -79,11 +79,18 @@ class ImageType(enum.Enum):
     APPLICATION = enum.auto()
     OS = enum.auto()
 
+    def __str__(self) -> str:
+        return (
+            "application"
+            if self.value == ImageType.APPLICATION.value
+            else "bci"
+        )
+
 
 def _get_container_label_prefix(
     container_name: str, container_type: ImageType
 ) -> str:
-    return f"com.suse.{'bci' if container_type != ImageType.APPLICATION else 'bci'}.{container_name}"
+    return f"com.suse.{container_type}.{container_name}"
 
 
 #: List of all containers and their respective names which are used in the image
@@ -156,19 +163,20 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     )
 ]
 
-if OS_VERSION == "15.3":
-    IMAGES_AND_NAMES_WITH_BASE_SKIP = [
-        pytest.param(
-            *IMAGES_AND_NAMES[0],
-            marks=(
-                pytest.mark.xfail(
-                    reason="The base container has no com.suse.bci.base labels yet"
+IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
+    pytest.param(
+        *IMAGES_AND_NAMES[0],
+        marks=(
+            pytest.mark.xfail(
+                reason=(
+                    "The base container has no com.suse.bci.base labels yet"
+                    if OS_VERSION == "15.3"
+                    else "https://bugzilla.suse.com/show_bug.cgi?id=1200373"
                 )
-            ),
-        )
-    ] + IMAGES_AND_NAMES[1:]
-else:
-    IMAGES_AND_NAMES_WITH_BASE_SKIP = IMAGES_AND_NAMES
+            )
+        ),
+    )
+] + IMAGES_AND_NAMES[1:]
 
 
 assert len(ALL_CONTAINERS) == len(
@@ -196,7 +204,7 @@ def get_container_metadata(container_data: ParameterSet) -> Any:
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_SKIP,
+    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
 )
 def test_general_labels(
     container_data: ParameterSet,
@@ -235,7 +243,9 @@ def test_general_labels(
         _get_container_label_prefix(container_name, container_type),
         "org.opencontainers.image",
     ):
-        assert "BCI" in labels[f"{prefix}.title"]
+        if container_type != ImageType.APPLICATION:
+            assert "BCI" in labels[f"{prefix}.title"]
+
         assert (
             "based on the SLE Base Container Image."
             in labels[f"{prefix}.description"]
@@ -255,7 +265,7 @@ def test_general_labels(
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_SKIP,
+    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
 )
 def test_disturl(
     container_data: ParameterSet,
@@ -366,7 +376,18 @@ def test_supportlevel_label(
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_SKIP,
+    [
+        param
+        if param.values[0]
+        not in (PYTHON310_CONTAINER, OPENJDK_DEVEL_17_CONTAINER)
+        else pytest.param(
+            *param.values,
+            marks=pytest.mark.xfail(
+                reason="python:3.10 and openjdk-devel:17 are not published on registry.suse.com"
+            ),
+        )
+        for param in IMAGES_AND_NAMES_WITH_BASE_XFAIL
+    ],
 )
 def test_reference(
     container_data: ParameterSet,
@@ -393,7 +414,10 @@ def test_reference(
     )
     assert container_name.replace(".", "-") in reference
 
-    assert reference[:22] == "registry.suse.com/bci/"
+    if container_type == ImageType.APPLICATION:
+        assert reference[:23] == "registry.suse.com/suse/"
+    else:
+        assert reference[:22] == "registry.suse.com/bci/"
 
     # for the OS versioned containers we'll get a reference that contains the
     # current full version + release, which has not yet been published to the
@@ -406,4 +430,4 @@ def test_reference(
         version, _ = version_release.split("-")
         ref = f"{name}:{version}"
 
-    check_output([container_runtime.runner_binary, "pull", ref])
+    LOCALHOST.run_expect([0], f"{container_runtime.runner_binary} pull {ref}")
