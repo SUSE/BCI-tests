@@ -7,6 +7,7 @@ from typing import List
 
 import pytest
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import REPOCLOSURE_CONTAINER
 
 
@@ -18,10 +19,17 @@ from bci_tester.data import REPOCLOSURE_CONTAINER
 REPOCLOSURE_FALSE_POSITIVES = [
     "multipath-tools",
     "patterns-base-fips",
+    "patterns-base-minimal_base",
     "podman",
     "salt-minion",
     "suse-module-tools",
-]
+] + (
+    [
+        "qml-autoreqprov",
+    ]
+    if OS_SP_VERSION >= 4
+    else []
+)
 
 #: Packages that have broken dependencies by intention and should be excluded
 #: from the repoclosure checks
