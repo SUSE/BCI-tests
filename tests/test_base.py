@@ -48,24 +48,26 @@ without_fips = pytest.mark.skipif(
 )
 
 
-@without_fips
-def test_openssl_hashes(auto_container):
-    """If the host is not running in fips mode, then we check that all hash
-    algorithms work (except for ``gost``, which has been disabled) via
-    :command:`openssl $digest /dev/null`.
-
-    """
-    for md in ALL_DIGESTS:
-        if md == "gost":
-            continue
-        auto_container.connection.run_expect([0], f"openssl {md} /dev/null")
-
+def test_gost_digest_disable(auto_container):
+    """Checks that the gost message digest is not known to openssl."""
     assert (
         "gost is not a known digest"
         in auto_container.connection.run_expect(
             [1], "openssl gost /dev/null"
         ).stderr.strip()
     )
+
+
+@without_fips
+def test_openssl_hashes(auto_container):
+    """If the host is not running in fips mode, then we check that all hash
+    algorithms work via :command:`openssl $digest /dev/null`.
+
+    """
+    for digest in ALL_DIGESTS:
+        auto_container.connection.run_expect(
+            [0], f"openssl {digest} /dev/null"
+        )
 
 
 def test_all_openssl_hashes_known(auto_container):
@@ -80,8 +82,11 @@ def test_all_openssl_hashes_known(auto_container):
         .stdout.strip()
         .split()
     )
-    assert len(hashes) == len(ALL_DIGESTS)
-    assert set(hashes) == set(ALL_DIGESTS)
+    # gost is not supported to generate digests, but it appears in:
+    # openssl list --digest-commands
+    EXPECTED_DIGEST_LIST = ALL_DIGESTS + ("gost",)
+    assert len(hashes) == len(EXPECTED_DIGEST_LIST)
+    assert set(hashes) == set(EXPECTED_DIGEST_LIST)
 
 
 @pytest.mark.xfail(
