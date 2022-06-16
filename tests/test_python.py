@@ -137,7 +137,7 @@ def test_python_webserver_1(container_per_test, hmodule, port, retry):
     t1 = time.time() - t0
 
     # start of the python http server
-    server = container_per_test.connection.run_expect([0], command)
+    container_per_test.connection.run_expect([0], command)
 
     t2 = time.time() - t0
 

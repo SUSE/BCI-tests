@@ -57,7 +57,7 @@ def test_busybox_links(auto_container):
 
 def test_busybox_binary_works(auto_container):
     """Ensure the busybox binary works"""
-    busybox = auto_container.connection.run_expect([0], "busybox")
+    auto_container.connection.run_expect([0], "busybox")
 
 
 def test_true(auto_container):
