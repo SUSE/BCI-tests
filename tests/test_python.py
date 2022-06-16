@@ -183,10 +183,12 @@ def test_python_webserver_2(
     # install wget for python
     container_per_test.connection.run_expect([0], "pip install wget")
 
-    # copy an application file from the local test-server into the running Container under test
+    # copy an application file from the local test-server into the running
+    # container under test
     host.run_expect(
         [0],
-        f"{container_runtime.runner_binary} cp {orig + appdir + appl2} {container_per_test.container_id}:{bcdir + appdir}",
+        f"{container_runtime.runner_binary} cp {orig + appdir + appl2} "
+        f"{container_per_test.container_id}:{bcdir + appdir}",
     )
 
     # check the test python module is present in the container
