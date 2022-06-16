@@ -1,6 +1,7 @@
+"""Module containing utility functions & constants for FIPS compliant digests."""
 import os
 
-
+#: openssl digests that are not FIPS compliant
 NONFIPS_DIGESTS = (
     "blake2b512",
     "blake2s256",
@@ -11,6 +12,7 @@ NONFIPS_DIGESTS = (
     "sm3",
 )
 
+#: FIPS compliant openssl digests
 FIPS_DIGESTS = (
     "sha1",
     "sha224",
@@ -27,6 +29,7 @@ FIPS_DIGESTS = (
     "shake256",
 )
 
+#: all digests supported by openssl
 ALL_DIGESTS = NONFIPS_DIGESTS + FIPS_DIGESTS
 
 
@@ -53,5 +56,5 @@ def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled") -> bool:
     if not host_fips_supported(fipsfile):
         return False
 
-    with open(fipsfile, encoding="utf8") as f:
-        return f.read().strip() == "1"
+    with open(fipsfile, encoding="utf8") as fipsfile_fd:
+        return fipsfile_fd.read().strip() == "1"
