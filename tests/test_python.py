@@ -1,5 +1,4 @@
 """Basic tests for the Python base container images."""
-import re
 import time
 
 import pytest
@@ -8,10 +7,10 @@ from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.runtime_choice import PODMAN_SELECTED
 from pytest_container import DerivedContainer
-from pytest_container import OciRuntimeBase
 from pytest_container.container import container_from_pytest_param
 from pytest_container.runtime import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
+from pytest_container.runtime import Version
 
 bcdir = "/tmp/"
 orig = "tests/"
@@ -71,15 +70,6 @@ CONTAINER_IMAGES_T2 = [
 ]
 
 
-def get_container_runtime_version(container_runtime: OciRuntimeBase) -> str:
-    """get the container runtime version and clean the result from non-numeric or non-separators characters."""
-    return re.sub(
-        "[^0-9.,:_-]",
-        "",
-        LOCALHOST.run(container_runtime.runner_binary + " --version").stdout,
-    )
-
-
 def test_python_version(auto_container):
     """Test that the python version equals the value from the environment variable
     ``PYTHON_VERSION``.
@@ -117,11 +107,7 @@ def test_tox(auto_container):
 
 
 @pytest.mark.skipif(
-    PODMAN_SELECTED == True
-    and int(
-        get_container_runtime_version(get_selected_runtime()).split(".")[0]
-    )
-    < 2,
+    PODMAN_SELECTED and get_selected_runtime().version < Version(2, 0),
     reason="server port checks not compatible with old podman versions 1.x",
 )
 @pytest.mark.parametrize(
