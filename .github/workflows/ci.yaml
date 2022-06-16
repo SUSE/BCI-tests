@@ -8,9 +8,6 @@ on:
   pull_request:
   repository_dispatch:
 
-env:
-  TOX_PARALLEL_NO_SPINNER: 1
-
 jobs:
   format:
     name: Ensure code is black formatted
