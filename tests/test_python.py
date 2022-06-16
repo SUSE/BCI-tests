@@ -34,7 +34,7 @@ EXPOSE {port1}
 COPY {orig + appdir}/{appl1}  {appdir}
 """
 
-# Base containers under test, input of auto_container fixture
+#: Base containers under test, input of auto_container fixture
 CONTAINER_IMAGES = [
     PYTHON36_CONTAINER,
     PYTHON39_CONTAINER,
@@ -42,7 +42,8 @@ CONTAINER_IMAGES = [
 ]
 
 
-# Derived containers, from custom Dockerfile including additional test files and extra args, input to container_per_test fixture
+#: Derived containers, from custom Dockerfile including additional test files
+#: and extra args, input to container_per_test fixture
 CONTAINER_IMAGES_T1 = [
     pytest.param(
         DerivedContainer(
@@ -56,7 +57,8 @@ CONTAINER_IMAGES_T1 = [
     for CONTAINER_T in CONTAINER_IMAGES
 ]
 
-# Derived containers, from custom Dockerfile including additional test files, input to container_per_test fixture
+#: Derived containers, from custom Dockerfile including additional test files,
+#: input to container_per_test fixture
 CONTAINER_IMAGES_T2 = [
     pytest.param(
         DerivedContainer(
