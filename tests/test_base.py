@@ -13,9 +13,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.fips import ALL_DIGESTS
-from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
-from bci_tester.fips import NONFIPS_DIGESTS
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: size limits of the base container per arch in MiB
@@ -45,28 +43,9 @@ def test_base_size(auto_container, container_runtime):
     )
 
 
-with_fips = pytest.mark.skipif(
-    not host_fips_enabled(), reason="host not running in FIPS 140 mode"
-)
 without_fips = pytest.mark.skipif(
     host_fips_enabled(), reason="host running in FIPS 140 mode"
 )
-
-
-@with_fips
-def test_openssl_fips_hashes(auto_container):
-    """If the host is running in FIPS mode, then we check that all fips certified
-    hash algorithms can be invoked via :command:`openssl $digest /dev/null` and
-    all non-fips hash algorithms fail.
-
-    """
-    for md in NONFIPS_DIGESTS:
-        cmd = auto_container.connection.run(f"openssl {md} /dev/null")
-        assert cmd.rc != 0
-        assert "not a known digest" in cmd.stderr
-
-    for md in FIPS_DIGESTS:
-        auto_container.connection.run_expect([0], f"openssl {md} /dev/null")
 
 
 @without_fips
