@@ -4,7 +4,6 @@ import os
 NONFIPS_DIGESTS = (
     "blake2b512",
     "blake2s256",
-    "gost",
     "md4",
     "md5",
     "mdc2",
