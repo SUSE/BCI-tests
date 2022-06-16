@@ -57,9 +57,7 @@ $fips_test_script = <<~SCRIPT
   #prevent setuptools_scm barfing because it cannot obtain the version from git
   export SETUPTOOLS_SCM_PRETEND_VERSION=0.0.1
 
-  for runtime in docker podman; do
-      CONTAINER_RUNTIME=${runtime} tox -e fips -- -n auto
-  done
+  tox -e fips -- -n auto
 SCRIPT
 
 $registered_test_script = <<~SCRIPT
@@ -69,12 +67,7 @@ $registered_test_script = <<~SCRIPT
   fi
   SUSEConnect --regcode ${REGCODE}
   cd /vagrant/
-  for runtime in docker podman; do
-      export CONTAINER_RUNTIME=${runtime}
-      # retry the build stage a few times as sometimes it fails due to
-      # networking issues
-      tox -e build -- -k container_build_and_repo -n auto
-  done
+  tox -e build -- -k container_build_and_repo -n auto
 SCRIPT
 
 Vagrant.configure('2') do |config|
@@ -93,7 +86,7 @@ Vagrant.configure('2') do |config|
 
   config.vm.provision 'setup system', type: 'shell', inline: $setup_system
 
-  env = { 'OS_VERSION': ENV['OS_VERSION'], "REGCODE": ENV['REGCODE'] }
+  env = Hash[%w[OS_VERSION REGCODE CONTAINER_RUNTIME].collect { |k| [k, ENV[k]] }].compact
 
   config.vm.define 'fips' do |fips|
     fips.vm.provision 'run fips test', type: 'shell',
