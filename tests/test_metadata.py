@@ -378,13 +378,15 @@ def test_supportlevel_label(
     "container_data,container_name,container_type",
     [
         param
-        if param.values[0]
-        not in (PYTHON310_CONTAINER, OPENJDK_DEVEL_17_CONTAINER)
+        if param.values[0] != OPENJDK_DEVEL_17_CONTAINER
         else pytest.param(
             *param.values,
-            marks=pytest.mark.xfail(
-                reason="python:3.10 and openjdk-devel:17 are not published on registry.suse.com"
-            ),
+            marks=list(param.marks)
+            + [
+                pytest.mark.xfail(
+                    reason="openjdk-devel:17 is not published on registry.suse.com"
+                )
+            ],
         )
         for param in IMAGES_AND_NAMES_WITH_BASE_XFAIL
     ],
