@@ -52,6 +52,14 @@ Minimal and Micro container tests
    :undoc-members:
 
 
+Tests of FIPS compatibility
+---------------------------
+
+.. automodule:: tests.test_fips
+   :members:
+   :undoc-members:
+
+
 Tests of the Init container (contains systemd)
 ----------------------------------------------
 
