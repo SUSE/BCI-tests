@@ -7,6 +7,7 @@ import shutil
 import sys
 
 import pytest
+from _pytest.config import Config
 from _pytest.mark.structures import ParameterSet
 from pytest_container.build import MultiStageBuild
 from pytest_container.helpers import get_extra_build_args
@@ -66,7 +67,7 @@ RUN /bin/fips-test sha256
 def test_openssl_binary(
     runner: ParameterSet,
     tmp_path,
-    pytestconfig,
+    pytestconfig: Config,
     host,
     container_runtime: OciRuntimeBase,
 ):
@@ -85,7 +86,7 @@ def test_openssl_binary(
         containers={"builder": BASE_CONTAINER, "runner": runner},
         containerfile_template=DOCKERFILE,
     )
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
+    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
 
     shutil.copy(
         os.path.join(
