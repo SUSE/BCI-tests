@@ -1,4 +1,5 @@
 """Integration tests via multistage container builds."""
+from _pytest.config import Config
 import pytest
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
@@ -208,7 +209,7 @@ def test_dockerfile_build(
     multi_stage_build: MultiStageBuild,
     retval: int,
     cmd_stdout: str,
-    pytestconfig,
+    pytestconfig: Config,
 ):
     """Integration test of multistage container builds. We fetch a project
     (optionally checking out a specific tag), run a two stage build using a
@@ -264,7 +265,7 @@ def test_dockerfile_build(
     """
     tmp_path, _ = host_git_clone
 
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
+    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
 
     cmd = host.run_expect(
         [0],
