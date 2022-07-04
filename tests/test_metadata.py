@@ -97,7 +97,7 @@ def _get_container_label_prefix(
 #: labels ``com.suse.bci.$name``.
 IMAGES_AND_NAMES: List[ParameterSet] = [
     pytest.param(cont, name, img_type, marks=cont.marks)
-    for cont, name, img_type in (
+    for cont, name, img_type in [
         (BASE_CONTAINER, "base", ImageType.OS),
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
@@ -127,39 +127,45 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (INIT_CONTAINER, "init", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
-        (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
-        (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
-        (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
-        (
-            DOTNET_ASPNET_3_1_CONTAINER,
-            "dotnet.aspnet",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (
-            DOTNET_ASPNET_5_0_CONTAINER,
-            "dotnet.aspnet",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (
-            DOTNET_ASPNET_6_0_CONTAINER,
-            "dotnet.aspnet",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (
-            DOTNET_RUNTIME_3_1_CONTAINER,
-            "dotnet.runtime",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (
-            DOTNET_RUNTIME_5_0_CONTAINER,
-            "dotnet.runtime",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (
-            DOTNET_RUNTIME_6_0_CONTAINER,
-            "dotnet.runtime",
-            ImageType.LANGUAGE_STACK,
-        ),
+    ]
+    + (
+        [
+            (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
+            (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
+            (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
+            (
+                DOTNET_ASPNET_3_1_CONTAINER,
+                "dotnet.aspnet",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_ASPNET_5_0_CONTAINER,
+                "dotnet.aspnet",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_ASPNET_6_0_CONTAINER,
+                "dotnet.aspnet",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_RUNTIME_3_1_CONTAINER,
+                "dotnet.runtime",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_RUNTIME_5_0_CONTAINER,
+                "dotnet.runtime",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_RUNTIME_6_0_CONTAINER,
+                "dotnet.runtime",
+                ImageType.LANGUAGE_STACK,
+            ),
+        ]
+        if LOCALHOST.system_info.arch == "x86_64"
+        else []
     )
 ]
 
