@@ -57,7 +57,7 @@ def test_lang_set(auto_container):
 def test_install_gems(auto_container_per_test, gem):
     """Check that we can :command:`gem install` a few commonly used and/or
     popular gems (this is a selection from
-    `https://rubygems.org/search?query=downloads%3A+%3E400000`_):
+    `<https://rubygems.org/search?query=downloads%3A+%3E400000>`_):
 
     - ffi
     - rails < 7.0
