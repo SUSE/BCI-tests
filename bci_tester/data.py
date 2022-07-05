@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+from datetime import timedelta
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -319,7 +320,7 @@ CONTAINER_389DS = create_BCI(
     image_type="dockerfile",
     available_versions=["15.4"],
     default_entry_point=True,
-    healthcheck_timeout_ms=80 * 1000,
+    healthcheck_timeout=timedelta(seconds=80),
     extra_launch_args=["-p", "3389:3389"],
     extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
     singleton=True,
