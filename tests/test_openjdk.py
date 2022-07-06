@@ -71,7 +71,8 @@ def test_jdk_version(container, java_version):
         (
             "threads_concurrency_and_sleep",
             ["I am the thread 1", "I am the thread 2"],
-        )
+        ),
+        ("time", ["All OK"]),
     ],
 )
 def test_jdk_extended(
@@ -84,6 +85,7 @@ def test_jdk_extended(
     """Executes a set of java files stored on test/trainers/java/ directory.
     It covers:
     - threading tests
+    - java time and date tests
     The validation is done checking the exit code (0) and checking that some
     expected strings can be found on the stdout of the execution.
     """
