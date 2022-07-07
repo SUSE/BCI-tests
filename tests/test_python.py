@@ -109,6 +109,24 @@ def test_tox(auto_container):
     auto_container.connection.run_expect([0], "pip install --user tox")
 
 
+def test_python_devel(auto_container):
+    """Check that python_devel package can be installed."""
+    version = auto_container.connection.run_expect(
+        [0], "echo $PYTHON_VERSION"
+    ).stdout.strip()
+    if "3.6" in version:
+        pkg = "python3-devel"
+    elif "3.9" in version:
+        pkg = "python39-devel"
+    elif "3.10" in version:
+        pkg = "python310-devel"
+    else:
+        raise Exception(f"Unknown python version: {version}")
+    auto_container.connection.run_expect(
+        [0], f"zypper --non-interactive in {pkg}"
+    )
+
+
 @pytest.mark.skipif(
     PODMAN_SELECTED and get_selected_runtime().version < Version(2, 0),
     reason="server port checks not compatible with old podman versions 1.x",
