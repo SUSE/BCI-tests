@@ -71,8 +71,8 @@ $registered_test_script = <<~SCRIPT
 SCRIPT
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'SLES15-SP3-Vagrant.x86_64'
-  config.vm.box_url = 'https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP3/images/boxes/SLES15-SP3-Vagrant.x86_64.json'
+  config.vm.box = 'SLES-15-SP4-Vagrant.x86_64'
+  config.vm.box_url = 'https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP4/images/boxes/SLES-15-SP4-Vagrant.x86_64.json'
 
   config.vm.synced_folder '.',
                           '/vagrant',
