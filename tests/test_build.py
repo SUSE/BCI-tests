@@ -6,6 +6,7 @@ successful will be double checked here.
 
 """
 import pytest
+
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
