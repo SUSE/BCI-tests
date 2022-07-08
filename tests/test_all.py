@@ -2,6 +2,11 @@
 This module contains tests that are run for **all** containers.
 """
 import pytest
+from pytest_container import Container
+from pytest_container import get_extra_build_args
+from pytest_container import get_extra_run_args
+from pytest_container import MultiStageBuild
+
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
@@ -9,10 +14,6 @@ from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PCP_CONTAINER
-from pytest_container import Container
-from pytest_container import get_extra_build_args
-from pytest_container import get_extra_run_args
-from pytest_container import MultiStageBuild
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 

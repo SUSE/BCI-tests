@@ -2,8 +2,9 @@
 """
 import time
 
-from bci_tester.data import PCP_CONTAINER
 from pytest_container.runtime import LOCALHOST
+
+from bci_tester.data import PCP_CONTAINER
 
 CONTAINER_IMAGES = [PCP_CONTAINER]
 

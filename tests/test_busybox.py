@@ -2,9 +2,10 @@
 from typing import Dict
 
 import pytest
+from pytest_container.runtime import LOCALHOST
+
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import create_container_version_mark
-from pytest_container.runtime import LOCALHOST
 
 
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]

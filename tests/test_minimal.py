@@ -1,9 +1,10 @@
 from typing import Dict
 
 import pytest
+from pytest_container.runtime import LOCALHOST
+
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from pytest_container.runtime import LOCALHOST
 
 
 #: size limits of the minimal image per architecture in MiB
