@@ -2,15 +2,16 @@
 import time
 
 import pytest
-from bci_tester.data import PYTHON310_CONTAINER
-from bci_tester.data import PYTHON36_CONTAINER
-from bci_tester.data import PYTHON39_CONTAINER
-from bci_tester.runtime_choice import PODMAN_SELECTED
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
 from pytest_container.runtime import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import Version
+
+from bci_tester.data import PYTHON310_CONTAINER
+from bci_tester.data import PYTHON36_CONTAINER
+from bci_tester.data import PYTHON39_CONTAINER
+from bci_tester.runtime_choice import PODMAN_SELECTED
 
 bcdir = "/tmp/"
 orig = "tests/"
@@ -106,6 +107,24 @@ def test_pip(auto_container):
 def test_tox(auto_container):
     """Ensure we can use :command:`pip` to install :command:`tox`."""
     auto_container.connection.run_expect([0], "pip install --user tox")
+
+
+def test_python_devel(auto_container):
+    """Check that python_devel package can be installed."""
+    version = auto_container.connection.run_expect(
+        [0], "echo $PYTHON_VERSION"
+    ).stdout.strip()
+    if "3.6" in version:
+        pkg = "python3-devel"
+    elif "3.9" in version:
+        pkg = "python39-devel"
+    elif "3.10" in version:
+        pkg = "python310-devel"
+    else:
+        raise Exception(f"Unknown python version: {version}")
+    auto_container.connection.run_expect(
+        [0], f"zypper --non-interactive in {pkg}"
+    )
 
 
 @pytest.mark.skipif(

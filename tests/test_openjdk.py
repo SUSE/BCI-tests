@@ -2,11 +2,12 @@
 from typing import List
 
 import pytest
-from bci_tester.data import OPENJDK_11_CONTAINER
-from bci_tester.data import OPENJDK_17_CONTAINER
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
 from pytest_container.container import container_from_pytest_param
+
+from bci_tester.data import OPENJDK_11_CONTAINER
+from bci_tester.data import OPENJDK_17_CONTAINER
 
 condir = "/tmp/"
 appdir = "tests/trainers/java/"
