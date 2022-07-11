@@ -9,12 +9,12 @@ from pytest_container.container import container_from_pytest_param
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 
-condir = "/tmp/"
-appdir = "tests/trainers/java/"
+container_test_dir = "/tmp/"
+host_test_dir = "tests/trainers/java/"
 
 DOCKERF_EXTENDED = f"""
-WORKDIR {condir}
-COPY {appdir} {condir}
+WORKDIR {container_test_dir}
+COPY {host_test_dir} {container_test_dir}
 """
 
 CONTAINER_IMAGES = [
@@ -67,23 +67,36 @@ def test_jdk_version(container, java_version):
     indirect=["container_per_test"],
 )
 @pytest.mark.parametrize(
-    "test_to_run, expected_strings",
+    "test_to_run, expected_strings, expected_exit_status, java_params",
     [
         (
             "threads_concurrency_and_sleep",
             ["I am the thread 1", "I am the thread 2"],
+            [0],
+            "",
         ),
-        ("time", ["All OK"]),
+        ("time", ["All OK"], [0], ""),
         (
             "files_and_directories",
             ["All OK"],
+            [0],
+            "",
         ),
+        (
+            "memory",
+            ["Iteration: (2)", "OutOfMemoryError"],
+            [1],
+            "-Xmx10M",
+        ),
+        ("garbage_collector", [], [0], ""),
     ],
 )
 def test_jdk_extended(
     container_per_test,
     test_to_run: str,
     expected_strings: List[str],
+    expected_exit_status: List[int],
+    java_params: str,
     host,
     container_runtime: OciRuntimeBase,
 ):
@@ -92,12 +105,20 @@ def test_jdk_extended(
     - threading tests
     - java time and date tests
     - files and dirs tests
+    - memory allocation
+    - garbage collector
     The validation is done checking the exit code (0) and checking that some
     expected strings can be found on the stdout of the execution.
     """
 
     testout = container_per_test.connection.run_expect(
-        [0], "java " + condir + test_to_run + ".java"
+        expected_exit_status,
+        "java "
+        + java_params
+        + " "
+        + container_test_dir
+        + test_to_run
+        + ".java 2>&1",
     )
 
     for check in expected_strings:
