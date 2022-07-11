@@ -125,17 +125,7 @@ def test_openssl_binary(
 
 
 @pytest.mark.parametrize(
-    "container_per_test",
-    CONTAINERS_WITH_ZYPPER
-    + [
-        pytest.param(
-            *param.values,
-            marks=list(param.marks)
-            + [pytest.mark.xfail(reason="openssl is not installed")],
-        )
-        for param in CONTAINERS_WITHOUT_ZYPPER
-    ],
-    indirect=True,
+    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
 )
 def test_openssl_fips_hashes(container_per_test):
     """If the host is running in FIPS mode, then we check that all fips certified
