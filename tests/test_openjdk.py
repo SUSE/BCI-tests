@@ -74,6 +74,10 @@ def test_jdk_version(container, java_version):
             ["I am the thread 1", "I am the thread 2"],
         ),
         ("time", ["All OK"]),
+        (
+            "files_and_directories",
+            ["All OK"],
+        ),
     ],
 )
 def test_jdk_extended(
@@ -87,6 +91,7 @@ def test_jdk_extended(
     It covers:
     - threading tests
     - java time and date tests
+    - files and dirs tests
     The validation is done checking the exit code (0) and checking that some
     expected strings can be found on the stdout of the execution.
     """
