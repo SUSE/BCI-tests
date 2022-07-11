@@ -1,11 +1,6 @@
 """Integration tests via multistage container builds."""
 import pytest
 from _pytest.config import Config
-from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
-from bci_tester.data import GO_1_16_CONTAINER
-from bci_tester.data import OPENJDK_11_CONTAINER
-from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import GitRepositoryBuild
