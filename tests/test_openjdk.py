@@ -1,4 +1,6 @@
 """Tests of the OpenJDK base container."""
+from dataclasses import dataclass
+from dataclasses import field
 from typing import List
 
 import pytest
@@ -61,42 +63,69 @@ def test_jdk_version(container, java_version):
     )
 
 
+@dataclass(frozen=True)
+class TestExtendedParams:
+    """
+    A class used to pass parameters and options to test_jdk_extended
+
+    Attributes:
+        expected_strings Expected standard output strings
+        expected_err_strings Expected standard error strings
+        expected_exit_status Expected list of allowed exit codes
+        java_params java runtime parameters as they would be passed on the CLI
+        arguments arguments to pass to the java test
+        environment environment variables in the form ``VAR=foo VAR2=bar``
+    """
+
+    expected_strings: list = field(default_factory=lambda: [])
+    expected_err_strings: list = field(default_factory=lambda: [])
+    expected_exit_status: list = field(default_factory=lambda: [0])
+    java_params: str = ""
+    arguments: str = ""
+    environment: str = ""
+
+
 @pytest.mark.parametrize(
     "container_per_test",
     CONTAINER_IMAGES_EXTENDED,
     indirect=["container_per_test"],
 )
 @pytest.mark.parametrize(
-    "test_to_run, expected_strings, expected_exit_status, java_params",
+    "test_to_run, params",
     [
         (
             "threads_concurrency_and_sleep",
-            ["I am the thread 1", "I am the thread 2"],
-            [0],
-            "",
+            TestExtendedParams(
+                expected_strings=["I am the thread 1", "I am the thread 2"]
+            ),
         ),
-        ("time", ["All OK"], [0], ""),
-        (
-            "files_and_directories",
-            ["All OK"],
-            [0],
-            "",
-        ),
+        ("time", TestExtendedParams(expected_strings=["All OK"])),
         (
             "memory",
-            ["Iteration: (2)", "OutOfMemoryError"],
-            [1],
-            "-Xmx10M",
+            TestExtendedParams(
+                expected_strings=["Iteration: (2)"],
+                expected_err_strings=["OutOfMemoryError"],
+                expected_exit_status=[1],
+                java_params="-Xmx10M",
+            ),
         ),
-        ("garbage_collector", [], [0], ""),
+        ("garbage_collector", TestExtendedParams()),
+        (
+            "system_exit",
+            TestExtendedParams(expected_exit_status=[2], arguments="2"),
+        ),
+        (
+            "system_env",
+            TestExtendedParams(
+                expected_strings=["test"], environment="ENV1=test"
+            ),
+        ),
     ],
 )
 def test_jdk_extended(
     container_per_test,
     test_to_run: str,
-    expected_strings: List[str],
-    expected_exit_status: List[int],
-    java_params: str,
+    params: TestExtendedParams,
     host,
     container_runtime: OciRuntimeBase,
 ):
@@ -107,19 +136,18 @@ def test_jdk_extended(
     - files and dirs tests
     - memory allocation
     - garbage collector
+    - system module (env, exit, properties)
     The validation is done checking the exit code (0) and checking that some
     expected strings can be found on the stdout of the execution.
     """
 
+    cmd = f"{params.environment} java {params.java_params} {container_test_dir}{test_to_run}.java {params.arguments}"
     testout = container_per_test.connection.run_expect(
-        expected_exit_status,
-        "java "
-        + java_params
-        + " "
-        + container_test_dir
-        + test_to_run
-        + ".java 2>&1",
+        params.expected_exit_status, cmd
     )
 
-    for check in expected_strings:
+    for check in params.expected_strings:
         assert check in testout.stdout
+
+    for check in params.expected_err_strings:
+        assert check in testout.stderr
