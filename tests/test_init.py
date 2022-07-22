@@ -3,6 +3,7 @@ systemd pre-installed.
 
 """
 import datetime
+import re
 from typing import Dict
 
 import pytest
@@ -135,7 +136,9 @@ class TestSystemd:
         output = auto_container.connection.run_expect(
             [0], "timedatectl"
         ).stdout
-        assert "Time zone: UTC" in output, "Time zone not set to UTC"
+        assert re.search(
+            r"Time zone:.*(Etc/UTC|UTC)", output
+        ), "Time zone not set to UTC"
 
         # Check that the reported timestamp for UTC and local time match the system time
         def check_timestamp(pattern, timestamp, delta):
