@@ -23,7 +23,7 @@ BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
     "x86_64": 120,
     "aarch64": 135,
     "ppc64le": 160,
-    "s390x": 120,
+    "s390x": 125,
 }
 
 CONTAINER_IMAGES = [BASE_CONTAINER]
