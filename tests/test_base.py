@@ -21,7 +21,7 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 #: size limits of the base container per arch in MiB
 BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
     "x86_64": 120,
-    "aarch64": 135,
+    "aarch64": 140,
     "ppc64le": 160,
     "s390x": 125,
 }
