@@ -39,7 +39,7 @@ jobs:
         run: sudo apt update && sudo apt install jo tox
       - id: setmatrix
         run: |
-          stringified_matrix=$(tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' | jo -a)
+          stringified_matrix=$(tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d' | jo -a)
           echo "::set-output name=matrix::$stringified_matrix"
 
   unit-tests:
@@ -152,14 +152,30 @@ jobs:
 
   fips:
     name: Run the tests on a FIPS host
-    runs-on: ubuntu-latest
+    runs-on: macos-10.15
+    strategy:
+      fail-fast: false
+      matrix:
+        os_version:
+          - "15.3"
+          - "15.4"
+        container_runtime:
+          - "DOCKER"
+          - "PODMAN"
     steps:
       - name: checkout source code
         uses: actions/checkout@v3
-      - name: Install necessary software
-        run: |
-          sudo apt update
-          sudo apt install vagrant vagrant-libvirt
-          sudo systemctl start libvirtd
+
+      - name: cache vagrant boxes
+        uses: actions/cache@v2
+        with:
+          path: ~/.vagrant.d/boxes
+          key: vagrant-${{ hashFiles('Vagrantfile') }}
+          restore-keys: |
+            vagrant-
+
       - name: Run the tests in a vagrant box
         run: vagrant up fips
+        env:
+          OS_VERSION: ${{ matrix.os_version }}
+          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}

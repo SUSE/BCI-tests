@@ -13,9 +13,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.fips import ALL_DIGESTS
-from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
-from bci_tester.fips import NONFIPS_DIGESTS
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: size limits of the base container per arch in MiB
@@ -45,48 +43,31 @@ def test_base_size(auto_container, container_runtime):
     )
 
 
-with_fips = pytest.mark.skipif(
-    not host_fips_enabled(), reason="host not running in FIPS 140 mode"
-)
 without_fips = pytest.mark.skipif(
     host_fips_enabled(), reason="host running in FIPS 140 mode"
 )
 
 
-@with_fips
-def test_openssl_fips_hashes(auto_container):
-    """If the host is running in FIPS mode, then we check that all fips certified
-    hash algorithms can be invoked via :command:`openssl $digest /dev/null` and
-    all non-fips hash algorithms fail.
-
-    """
-    for md in NONFIPS_DIGESTS:
-        cmd = auto_container.connection.run(f"openssl {md} /dev/null")
-        assert cmd.rc != 0
-        assert "not a known digest" in cmd.stderr
-
-    for md in FIPS_DIGESTS:
-        auto_container.connection.run_expect([0], f"openssl {md} /dev/null")
-
-
-@without_fips
-def test_openssl_hashes(auto_container):
-    """If the host is not running in fips mode, then we check that all hash
-    algorithms work (except for ``gost``, which has been disabled) via
-    :command:`openssl $digest /dev/null`.
-
-    """
-    for md in ALL_DIGESTS:
-        if md == "gost":
-            continue
-        auto_container.connection.run_expect([0], f"openssl {md} /dev/null")
-
+def test_gost_digest_disable(auto_container):
+    """Checks that the gost message digest is not known to openssl."""
     assert (
         "gost is not a known digest"
         in auto_container.connection.run_expect(
             [1], "openssl gost /dev/null"
         ).stderr.strip()
     )
+
+
+@without_fips
+def test_openssl_hashes(auto_container):
+    """If the host is not running in fips mode, then we check that all hash
+    algorithms work via :command:`openssl $digest /dev/null`.
+
+    """
+    for digest in ALL_DIGESTS:
+        auto_container.connection.run_expect(
+            [0], f"openssl {digest} /dev/null"
+        )
 
 
 def test_all_openssl_hashes_known(auto_container):
@@ -101,8 +82,11 @@ def test_all_openssl_hashes_known(auto_container):
         .stdout.strip()
         .split()
     )
-    assert len(hashes) == len(ALL_DIGESTS)
-    assert set(hashes) == set(ALL_DIGESTS)
+    # gost is not supported to generate digests, but it appears in:
+    # openssl list --digest-commands
+    EXPECTED_DIGEST_LIST = ALL_DIGESTS + ("gost",)
+    assert len(hashes) == len(EXPECTED_DIGEST_LIST)
+    assert set(hashes) == set(EXPECTED_DIGEST_LIST)
 
 
 @pytest.mark.xfail(

@@ -54,10 +54,10 @@ SCRIPT
 
 $fips_test_script = <<~SCRIPT
   cd /vagrant/
+  #prevent setuptools_scm barfing because it cannot obtain the version from git
+  export SETUPTOOLS_SCM_PRETEND_VERSION=0.0.1
 
-  for runtime in docker podman; do
-      CONTAINER_RUNTIME=${runtime} tox -e base -- -k fips
-  done
+  tox -e fips -- -n auto
 SCRIPT
 
 $registered_test_script = <<~SCRIPT
@@ -67,17 +67,12 @@ $registered_test_script = <<~SCRIPT
   fi
   SUSEConnect --regcode ${REGCODE}
   cd /vagrant/
-  for runtime in docker podman; do
-      export CONTAINER_RUNTIME=${runtime}
-      # retry the build stage a few times as sometimes it fails due to
-      # networking issues
-      tox -e build -- -k container_build_and_repo -n auto
-  done
+  tox -e build -- -k container_build_and_repo -n auto
 SCRIPT
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'SLES15-SP3-Vagrant.x86_64'
-  config.vm.box_url = 'https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP3/images/boxes/SLES15-SP3-Vagrant.x86_64.json'
+  config.vm.box = 'SLES-15-SP4-Vagrant.x86_64'
+  config.vm.box_url = 'https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP4/images/boxes/SLES-15-SP4-Vagrant.x86_64.json'
 
   config.vm.synced_folder '.',
                           '/vagrant',
@@ -91,12 +86,17 @@ Vagrant.configure('2') do |config|
 
   config.vm.provision 'setup system', type: 'shell', inline: $setup_system
 
+  env = Hash[%w[OS_VERSION REGCODE CONTAINER_RUNTIME].collect { |k| [k, ENV[k]] }].compact
+
   config.vm.define 'fips' do |fips|
-    fips.vm.provision 'run fips test', type: 'shell', inline: $fips_test_script
+    fips.vm.provision 'run fips test', type: 'shell',
+                                       inline: $fips_test_script,
+                                       env: env
   end
 
   config.vm.define 'registered' do |reg|
-    reg.vm.provision 'run build tests', type: 'shell', inline: $registered_test_script,
-                                        env: { "REGCODE": ENV['REGCODE'] }
+    reg.vm.provision 'run build tests', type: 'shell',
+                                        inline: $registered_test_script,
+                                        env: env
   end
 end

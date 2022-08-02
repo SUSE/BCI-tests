@@ -52,6 +52,14 @@ Minimal and Micro container tests
    :undoc-members:
 
 
+Tests of FIPS compatibility
+---------------------------
+
+.. automodule:: tests.test_fips
+   :members:
+   :undoc-members:
+
+
 Tests of the Init container (contains systemd)
 ----------------------------------------------
 
@@ -84,6 +92,14 @@ Tests for the Python containers
    :undoc-members:
 
 
+Tests for the Ruby containers
+-----------------------------
+
+.. automodule:: tests.test_ruby
+   :members:
+   :undoc-members:
+
+
 Tests for the Node.js containers
 --------------------------------
 
@@ -108,5 +124,21 @@ Multistage build tests
 ----------------------
 
 .. automodule:: tests.test_multistage
+   :members:
+   :undoc-members:
+
+
+Tests of the PCP container
+--------------------------
+
+.. automodule:: tests.test_pcp
+   :members:
+   :undoc-members:
+
+
+Tests of the 389ds container
+----------------------------
+
+.. automodule:: tests.test_389ds
    :members:
    :undoc-members:
