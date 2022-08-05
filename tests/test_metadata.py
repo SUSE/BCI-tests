@@ -390,8 +390,7 @@ def test_supportlevel_label(
     "container_data,container_name,container_type",
     [
         param
-        if param.values[0]
-        not in [OPENJDK_DEVEL_17_CONTAINER] + RUST_CONTAINERS
+        if param.values[0] != OPENJDK_DEVEL_17_CONTAINER
         else pytest.param(
             *param.values,
             marks=list(param.marks)
