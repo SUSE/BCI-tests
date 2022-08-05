@@ -120,6 +120,10 @@ class TestExtendedParams:
                 expected_strings=["test"], environment="ENV1=test"
             ),
         ),
+        (
+            "subprocesses",
+            TestExtendedParams(expected_strings=["tmp", "usr"]),
+        ),
     ],
 )
 def test_jdk_extended(
@@ -137,6 +141,7 @@ def test_jdk_extended(
     - memory allocation
     - garbage collector
     - system module (env, exit, properties)
+    - subprocesses
     The validation is done checking the exit code (0) and checking that some
     expected strings can be found on the stdout of the execution.
     """
