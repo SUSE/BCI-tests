@@ -42,6 +42,7 @@ from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
+from bci_tester.data import GO_1_19_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
@@ -107,6 +108,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (GO_1_16_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (GO_1_17_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (GO_1_18_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
+        (GO_1_19_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
         (
             OPENJDK_DEVEL_11_CONTAINER,
