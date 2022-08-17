@@ -50,7 +50,8 @@ markers = [
     'suse/pcp_5.2.2',
     'bci/rust_1.59',
     'bci/rust_1.60',
-    'bci/rust_1.61'
+    'bci/rust_1.61',
+	'bci/rust_1.62'
 ]
 
 [tool.black]

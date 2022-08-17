@@ -295,7 +295,7 @@ RUST_CONTAINERS = [
         image_type="dockerfile",
         available_versions=["15.4"],
     )
-    for rust_version in ("1.59", "1.60", "1.61")
+    for rust_version in ("1.59", "1.60", "1.61", "1.62")
 ]
 
 INIT_CONTAINER = create_BCI(
