@@ -188,6 +188,11 @@ GO_1_17_CONTAINER = create_BCI(
 GO_1_18_CONTAINER = create_BCI(
     build_tag="bci/golang:1.18", image_type="hybrid"
 )
+GO_1_19_CONTAINER = create_BCI(
+    build_tag="bci/golang:1.19",
+    image_type="hybrid",
+    available_versions=["15.4"],
+)
 
 
 OPENJDK_11_CONTAINER = create_BCI(
@@ -368,6 +373,7 @@ CONTAINERS_WITH_ZYPPER = (
         GO_1_16_CONTAINER,
         GO_1_17_CONTAINER,
         GO_1_18_CONTAINER,
+        GO_1_19_CONTAINER,
         OPENJDK_11_CONTAINER,
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_17_CONTAINER,

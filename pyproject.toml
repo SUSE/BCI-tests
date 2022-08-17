@@ -25,6 +25,7 @@ markers = [
     'bci/golang_1.16',
     'bci/golang_1.17',
     'bci/golang_1.18',
+    'bci/golang_1.19',
     'bci/python_3.6',
     'bci/python_3.9',
     'bci/python_3.10',

@@ -6,12 +6,17 @@ from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
-
+from bci_tester.data import GO_1_19_CONTAINER
 
 #: Maximum go container size in Bytes
 GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 
-CONTAINER_IMAGES = [GO_1_16_CONTAINER, GO_1_17_CONTAINER, GO_1_18_CONTAINER]
+CONTAINER_IMAGES = [
+    GO_1_16_CONTAINER,
+    GO_1_17_CONTAINER,
+    GO_1_18_CONTAINER,
+    GO_1_19_CONTAINER,
+]
 
 
 def test_go_size(auto_container, container_runtime):
