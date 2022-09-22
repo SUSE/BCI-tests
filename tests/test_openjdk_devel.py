@@ -4,7 +4,6 @@ JRE).
 """
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import OciRuntimeBase
 from pytest_container.container import container_from_pytest_param
 
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER

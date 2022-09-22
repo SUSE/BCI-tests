@@ -1,11 +1,9 @@
 """Tests of the OpenJDK base container."""
 from dataclasses import dataclass
 from dataclasses import field
-from typing import List
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import OciRuntimeBase
 from pytest_container.container import container_from_pytest_param
 
 from bci_tester.data import OPENJDK_11_CONTAINER
