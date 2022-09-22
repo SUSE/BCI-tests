@@ -1,12 +1,17 @@
 """Tests for the Go language container."""
+import re
+
 import pytest
 from pytest_container import GitRepositoryBuild
+from pytest_container import Version
+from pytest_container.container import ContainerData
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import GO_1_19_CONTAINER
+from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: Maximum go container size in Bytes
 GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
@@ -114,3 +119,67 @@ def test_build_generics_cache(container_per_test, container_git_clone):
     container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )
+
+
+@pytest.mark.parametrize(
+    "container,go_version",
+    [
+        pytest.param(
+            GO_1_19_CONTAINER, Version(1, 19), marks=GO_1_19_CONTAINER.marks
+        )
+    ],
+    indirect=["container"],
+)
+@pytest.mark.parametrize(
+    "host_git_clone",
+    [
+        GitRepositoryBuild(
+            repository_url="https://github.com/rancher/rancher",
+        ).to_pytest_param()
+    ],
+    indirect=["host_git_clone"],
+)
+@pytest.mark.skipif(
+    not DOCKER_SELECTED, reason="Dapper only works with docker"
+)
+def test_rancher_build(
+    host, host_git_clone, dapper, container: ContainerData, go_version: Version
+):
+    """Regression test that we can build Rancher in the go container:
+
+    - clone the `rancher/rancher <https://github.com/rancher/rancher>`_ repository
+    - monkey patch their :file:`Dockerfile.dapper` replacing their container
+      image with the url or id of the go container
+    - run :command:`dapper build`
+
+    This test is only enabled for docker (dapper does not support podman).
+    """
+    dest, git_repo = host_git_clone
+    rancher_dir = dest / git_repo.repo_name
+    with open(
+        rancher_dir / "Dockerfile.dapper", "r", encoding="utf-8"
+    ) as dapperfile:
+        contents = dapperfile.read(-1)
+
+    from_line_regex = re.compile(
+        r"^from registry\.suse\.com/bci/golang:(?P<go_ver>.*)$",
+        re.IGNORECASE | re.MULTILINE,
+    )
+    from_line = from_line_regex.match(contents)
+
+    assert from_line and from_line.group(
+        "go_ver"
+    ), f"No valid FROM line found in Dockerfile.dapper: {contents}"
+    assert Version.parse(from_line.group("go_ver")) == go_version, (
+        f"Golang version mismatch between the go container ({go_version}) "
+        + f"and the rancher Dockerfile.dapper ({from_line.group('go_ver')})"
+    )
+
+    with open(
+        rancher_dir / "Dockerfile.dapper", "w", encoding="utf-8"
+    ) as dapperfile:
+        dapperfile.write(
+            from_line_regex.sub(f"FROM {container.image_url_or_id}", contents)
+        )
+
+    host.run_expect([0], f"cd {rancher_dir} && {dapper} build")
