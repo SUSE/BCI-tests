@@ -139,7 +139,7 @@ def test_entrypoint(container, java_version, host, container_runtime):
     "java_file",
     ["Basic"],
 )
-def test_compile(container, java_file, host, container_runtime):
+def test_compile(container, java_file: str):
     """Verify that the entry point of the OpenJDK devel container is the
     :command:`jshell`.
 

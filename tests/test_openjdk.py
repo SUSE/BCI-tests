@@ -130,8 +130,6 @@ def test_jdk_extended(
     container_per_test,
     test_to_run: str,
     params: TestExtendedParams,
-    host,
-    container_runtime: OciRuntimeBase,
 ):
     """Executes a set of java files stored on test/trainers/java/ directory.
     It covers:
