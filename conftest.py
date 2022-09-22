@@ -138,7 +138,7 @@ def dapper(host):
     with tempfile.TemporaryDirectory() as tmpdir:
         gopath = os.path.join(tmpdir, "gopath")
         host.run_expect(
-            [0], f"GOPATH={gopath} go get github.com/rancher/dapper"
+            [0], f"GOPATH={gopath} go install github.com/rancher/dapper@latest"
         )
         yield os.path.join(gopath, "bin", "dapper")
 
