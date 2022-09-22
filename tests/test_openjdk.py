@@ -1,22 +1,20 @@
 """Tests of the OpenJDK base container."""
 from dataclasses import dataclass
 from dataclasses import field
-from typing import List
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import OciRuntimeBase
 from pytest_container.container import container_from_pytest_param
 
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 
-container_test_dir = "/tmp/"
-host_test_dir = "tests/trainers/java/"
+CONTAINER_TEST_DIR = "/tmp/"
+HOST_TEST_DIR = "tests/trainers/java/"
 
 DOCKERF_EXTENDED = f"""
-WORKDIR {container_test_dir}
-COPY {host_test_dir} {container_test_dir}
+WORKDIR {CONTAINER_TEST_DIR}
+COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 """
 
 CONTAINER_IMAGES = [
@@ -130,8 +128,6 @@ def test_jdk_extended(
     container_per_test,
     test_to_run: str,
     params: TestExtendedParams,
-    host,
-    container_runtime: OciRuntimeBase,
 ):
     """Executes a set of java files stored on test/trainers/java/ directory.
     It covers:
@@ -146,7 +142,7 @@ def test_jdk_extended(
     expected strings can be found on the stdout of the execution.
     """
 
-    cmd = f"{params.environment} java {params.java_params} {container_test_dir}{test_to_run}.java {params.arguments}"
+    cmd = f"{params.environment} java {params.java_params} {CONTAINER_TEST_DIR}{test_to_run}.java {params.arguments}"
     testout = container_per_test.connection.run_expect(
         params.expected_exit_status, cmd
     )
