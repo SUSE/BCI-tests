@@ -150,11 +150,11 @@ def test_compile(container, java_file: str):
     )
     container.connection.run_expect(
         [0],
-        f"javac --version",
+        "javac --version",
     )
     container.connection.run_expect(
         [0],
-        f"java --version",
+        "java --version",
     )
     container.connection.run_expect(
         [0],
