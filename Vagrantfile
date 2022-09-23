@@ -70,6 +70,18 @@ $registered_test_script = <<~SCRIPT
   tox -e build -- -k container_build_and_repo -n auto
 SCRIPT
 
+def osx_memory_mb
+  `sysctl -a`.split("\n").each do |t|
+    return t.split(' ')[1].to_i / (1024 * 1024) if t.start_with?('hw.memsize:')
+  end
+end
+
+def linux_memory_mb
+  `free -m`.split("\n").each do |t|
+    return t.split(' ')[1].to_i if t.start_with?('Mem:')
+  end
+end
+
 Vagrant.configure('2') do |config|
   config.vm.box = 'SLES-15-SP4-Vagrant.x86_64'
   config.vm.box_url = 'https://download.opensuse.org/repositories/home:/dancermak:/SLE-15-SP4/images/boxes/SLES-15-SP4-Vagrant.x86_64.json'
@@ -79,9 +91,26 @@ Vagrant.configure('2') do |config|
                           type: 'rsync',
                           rsync__exclude: ['.tox/', '*.egg-info', '*/__pycache__/']
 
+  require 'etc'
+  ncpus = [6, Etc.nprocessors].min
+
+  if RUBY_PLATFORM.include?('linux')
+    total_ram_mb = linux_memory_mb
+  elsif RUBY_PLATFORM.include?('darwin')
+    total_ram_mb = osx_memory_mb
+  else
+    raise StandardError, "Can't get max memory for #{RUBY_PLATFORM}"
+  end
+  memory = [4096, total_ram_mb].min
+
   config.vm.provider :libvirt do |libvirt|
-    libvirt.cpus = 4
-    libvirt.memory = 4096
+    libvirt.cpus = ncpus
+    libvirt.memory = memory
+  end
+
+  config.vm.provider 'virtualbox' do |v|
+    v.cpus = ncpus
+    v.memory = memory
   end
 
   config.vm.provision 'setup system', type: 'shell', inline: $setup_system
