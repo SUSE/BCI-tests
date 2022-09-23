@@ -5,7 +5,6 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 
-from _pytest import mark
 from pytest_container.container import container_from_pytest_param
 
 try:

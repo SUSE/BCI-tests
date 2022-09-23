@@ -2,6 +2,7 @@
 This module contains tests that are run for **all** containers.
 """
 import pytest
+from _pytest.config import Config
 from pytest_container import Container
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
@@ -128,7 +129,7 @@ def test_systemd_not_installed_in_all_containers_except_init(
 
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
 def test_certificates_are_present(
-    host, tmp_path, container_runtime, runner: Container, pytestconfig
+    host, tmp_path, container_runtime, runner: Container, pytestconfig: Config
 ):
     """This is a multistage container build, verifying that the certificates are
     correctly set up in the containers.
@@ -144,7 +145,7 @@ def test_certificates_are_present(
         containers={"builder": GO_1_16_CONTAINER, "runner": runner},
         containerfile_template=MULTISTAGE_DOCKERFILE,
     )
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootdir)
+    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
 
     with open(tmp_path / "main.go", "w") as main_go:
         main_go.write(FETCH_SUSE_DOT_COM)
