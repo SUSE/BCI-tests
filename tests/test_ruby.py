@@ -42,7 +42,12 @@ def test_lang_set(auto_container):
             "rails -v '<7.0'",
             marks=pytest.mark.xfail(reason="rails 6 is not installable"),
         ),
-        "sqlite3",
+        pytest.param(
+            "sqlite3",
+            marks=pytest.mark.xfail(
+                reason="sqlite3 gem fails to install, bsc#1203692"
+            ),
+        ),
         "rspec-expectations",
         "diff-lcs",
         "rspec-mocks",
