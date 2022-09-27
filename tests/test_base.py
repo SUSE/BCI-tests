@@ -2,12 +2,10 @@
 registry.suse.com)
 
 """
-import re
 from typing import Dict
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import GitRepositoryBuild
 from pytest_container.container import container_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
@@ -87,52 +85,6 @@ def test_all_openssl_hashes_known(auto_container):
     EXPECTED_DIGEST_LIST = ALL_DIGESTS + ("gost",)
     assert len(hashes) == len(EXPECTED_DIGEST_LIST)
     assert set(hashes) == set(EXPECTED_DIGEST_LIST)
-
-
-@pytest.mark.xfail(
-    reason="Rancher cannot be build without a secret value anymore"
-)
-@pytest.mark.parametrize(
-    "host_git_clone",
-    [
-        GitRepositoryBuild(
-            repository_url="https://github.com/rancher/rancher",
-        ).to_pytest_param()
-    ],
-    indirect=["host_git_clone"],
-)
-@pytest.mark.skipif(
-    not DOCKER_SELECTED, reason="Dapper only works with docker"
-)
-def test_rancher_build(host, host_git_clone, dapper):
-    """Regression test that we can build Rancher in the base container:
-
-    - clone the `rancher/rancher <https://github.com/rancher/rancher>`_ repository
-    - monkey patch their :file:`Dockerfile.dapper` replacing their container
-      image with the url or id of the base container
-    - monkey patch their :file:`Dockerfile.dapper` further removing their
-      version pin of the docker version
-    - run :command:`dapper build`
-
-    This test is only enabled for docker (dapper does not support podman).
-    """
-    dest, git_repo = host_git_clone
-    rancher_dir = dest / git_repo.repo_name
-    with open(rancher_dir / "Dockerfile.dapper", "r") as dapperfile:
-        contents = dapperfile.read(-1)
-
-    with open(rancher_dir / "Dockerfile.dapper", "w") as dapperfile:
-        dapperfile.write(
-            re.sub(
-                r"FROM .*",
-                f"FROM {container_from_pytest_param(BASE_CONTAINER).container_id or container_from_pytest_param(BASE_CONTAINER).url}",
-                contents,
-            ),
-        )
-
-    # FIMXE: enable dapper ci at some point instead of just dapper build
-    # host.run_expect([0], f"cd {rancher_dir} && {dapper} ci")
-    host.run_expect([0], f"cd {rancher_dir} && {dapper} build")
 
 
 #: This is the base container with additional launch arguments applied to it so
