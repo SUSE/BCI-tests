@@ -6,6 +6,7 @@ from typing import Optional
 from typing import Sequence
 
 from pytest_container.container import container_from_pytest_param
+from pytest_container.container import PortForwarding
 
 try:
     from typing import Literal
@@ -313,18 +314,11 @@ INIT_CONTAINER = create_BCI(
 PCP_CONTAINER = create_BCI(
     build_tag="suse/pcp:5.2.2",
     image_type="dockerfile",
-    singleton=True,
     extra_marks=[
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
-    extra_launch_args=[]
-    if DOCKER_SELECTED
-    else [
-        "--systemd",
-        "always",
-        "-p",
-        "44322:44322",
-    ],
+    forwarded_ports=[PortForwarding(container_port=44322)],
+    extra_launch_args=[] if DOCKER_SELECTED else ["--systemd", "always"],
     default_entry_point=True,
 )
 
@@ -334,9 +328,8 @@ CONTAINER_389DS = create_BCI(
     available_versions=["15.4"],
     default_entry_point=True,
     healthcheck_timeout=timedelta(seconds=80),
-    extra_launch_args=["-p", "3389:3389"],
     extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
-    singleton=True,
+    forwarded_ports=[PortForwarding(container_port=3389)],
 )
 
 

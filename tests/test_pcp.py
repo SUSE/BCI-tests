@@ -9,14 +9,14 @@ from bci_tester.data import PCP_CONTAINER
 CONTAINER_IMAGES = [PCP_CONTAINER]
 
 
-def test_systemd_status(auto_container_per_test):
+def test_systemd_status(auto_container):
     """Verify that :command:`systemctl` is present and works and that
     :file:`/etc/machine-id` exists.
 
     """
-    assert auto_container_per_test.connection.exists("systemctl")
-    assert auto_container_per_test.connection.file("/etc/machine-id").exists
-    auto_container_per_test.connection.run_expect([0], "systemctl status")
+    assert auto_container.connection.exists("systemctl")
+    assert auto_container.connection.file("/etc/machine-id").exists
+    auto_container.connection.run_expect([0], "systemctl status")
 
 
 def test_pcp_services_status(auto_container_per_test):
@@ -47,6 +47,7 @@ def test_call_pmproxy(auto_container_per_test):
     the parameter ``mem.physmem`` can be queried via :command:`curl`.
 
     """
+    port = auto_container_per_test.forwarded_ports[0].host_port
     for service in ("pmcd", "pmproxy"):
         assert wait_for_service(
             auto_container_per_test, service
@@ -55,7 +56,7 @@ def test_call_pmproxy(auto_container_per_test):
     if LOCALHOST.exists("curl"):
         assert LOCALHOST.run_expect(
             [0],
-            "curl -s http://localhost:44322/metrics?names=mem.physmem",
+            f"curl -s http://localhost:{port}/metrics?names=mem.physmem",
         )
 
 
