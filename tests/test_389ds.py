@@ -33,11 +33,12 @@ def test_ldapwhoami(auto_container_per_test):
         "dsidm localhost account unlock uid=demo_user,ou=people,dc=example,dc=com",
     )
 
+    host_port = auto_container_per_test.forwarded_ports[0].host_port
     if LOCALHOST.exists("ldapwhoami"):
         assert (
             LOCALHOST.run_expect(
                 [0],
-                "ldapwhoami -H ldap://127.0.0.1:3389 -x -D 'uid=demo_user,ou=people,dc=example,dc=com' -w password",
+                f"ldapwhoami -H ldap://127.0.0.1:{host_port} -x -D 'uid=demo_user,ou=people,dc=example,dc=com' -w password",
             ).stdout.strip()
             == "dn: uid=demo_user,ou=people,dc=example,dc=com"
         )
