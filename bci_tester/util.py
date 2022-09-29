@@ -4,6 +4,19 @@ from dataclasses import dataclass
 from typing import Dict
 from typing import List
 
+from pytest_container import Version
+
+
+def get_host_go_version(host) -> Version:
+    # output of go version:
+    # go version go1.19.1 linux/amd64
+    return Version.parse(
+        host.run_expect([0], "go version")
+        .stdout.strip()
+        .split()[2]
+        .replace("go", "")
+    )
+
 
 @dataclass(frozen=True)
 class Repository:
