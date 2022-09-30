@@ -5,6 +5,7 @@ import pytest
 from pytest_container import GitRepositoryBuild
 from pytest_container import Version
 from pytest_container.container import ContainerData
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
@@ -146,6 +147,10 @@ def test_build_generics_cache(
 )
 @pytest.mark.skipif(
     not DOCKER_SELECTED, reason="Dapper only works with docker"
+)
+@pytest.mark.skipif(
+    LOCALHOST.system_info.arch not in ("x86_64", "aarch64", "s390x"),
+    reason=f"{LOCALHOST.system_info.arch} is not supported to build rancher",
 )
 def test_rancher_build(
     host, host_git_clone, dapper, container: ContainerData, go_version: Version

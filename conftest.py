@@ -9,9 +9,12 @@ from _pytest.fixtures import SubRequest
 from pytest_container import auto_container_parametrize
 from pytest_container import get_selected_runtime
 from pytest_container import GitRepositoryBuild
+from pytest_container import Version
 from pytest_container.helpers import add_extra_run_and_build_args_options
 from pytest_container.helpers import add_logging_level_options
 from pytest_container.helpers import set_logging_level_from_cli_args
+
+from bci_tester.util import get_host_go_version
 
 
 @pytest.fixture(scope="function")
@@ -120,25 +123,36 @@ def dapper(host):
         yield host.find_command("dapper")
         return
 
-    # go is not available on the host => fetch
-    if not host.exists("go"):
+    def download_dapper(temporary_directory) -> str:
         with urllib.request.urlopen(
             "https://releases.rancher.com/dapper/latest/dapper-Linux-"
             + host.system_info.arch
         ) as f:
-            with tempfile.TemporaryDirectory() as tempdir:
-                dapper_path = os.path.join(tempdir, "dapper")
-                with open(dapper_path, "wb") as dapper_file:
-                    dapper_file.write(f.read())
-                os.chmod(dapper_path, 0o755)
-                yield dapper_path
-                return
+            dapper_path = os.path.join(temporary_directory, "dapper")
+            with open(dapper_path, "wb") as dapper_file:
+                dapper_file.write(f.read())
+            os.chmod(dapper_path, 0o755)
+            return dapper_path
+
+    # go is not available on the host => fetch
+    if not host.exists("go"):
+        with tempfile.TemporaryDirectory() as tempdir:
+            yield download_dapper(tempdir)
+            return
 
     # build dapper from source if we have go
     with tempfile.TemporaryDirectory() as tmpdir:
         gopath = os.path.join(tmpdir, "gopath")
+
+        # dapper needs go 1.17+ to build => fallback to downloading
+        if get_host_go_version(host) < Version(1, 17):
+            with tempfile.TemporaryDirectory() as tempdir:
+                yield download_dapper(tempdir)
+                return
+
         host.run_expect(
-            [0], f"GOPATH={gopath} go install github.com/rancher/dapper@latest"
+            [0],
+            f"GOPATH={gopath} go install github.com/rancher/dapper@latest",
         )
         yield os.path.join(gopath, "bin", "dapper")
 
