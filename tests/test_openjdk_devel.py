@@ -22,48 +22,20 @@ WORKDIR {CONTAINER_TEST_DIR}
 COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 """
 
-# FIXME: once the xfail is removed, use this list to parametrize test_entrypoint
-# as well
 CONTAINER_IMAGES_EXTENDED = [
     pytest.param(
         DerivedContainer(
-            base=container_from_pytest_param(OPENJDK_DEVEL_11_CONTAINER),
+            base=container_from_pytest_param(container),
             containerfile=DOCKERF_EXTENDED,
         ),
-        marks=OPENJDK_DEVEL_11_CONTAINER.marks,
-    ),
-    pytest.param(
-        DerivedContainer(
-            base=container_from_pytest_param(OPENJDK_DEVEL_17_CONTAINER),
-            containerfile=DOCKERF_EXTENDED,
-        ),
-        marks=list(OPENJDK_DEVEL_17_CONTAINER.marks)
-        + [
-            pytest.mark.xfail(
-                reason="https://bugzilla.suse.com/show_bug.cgi?id=1199262"
-            )
-        ],
-    ),
+        marks=container.marks,
+    )
+    for container in CONTAINER_IMAGES
 ]
 
-# FIXME: once the xfail is removed, use this list to parametrize test_entrypoint
-# as well
 CONTAINER_IMAGES_WITH_VERSION = [
-    pytest.param(
-        OPENJDK_DEVEL_11_CONTAINER,
-        "11",
-        marks=OPENJDK_DEVEL_11_CONTAINER.marks,
-    ),
-    pytest.param(
-        OPENJDK_DEVEL_17_CONTAINER,
-        "17",
-        marks=list(OPENJDK_DEVEL_17_CONTAINER.marks)
-        + [
-            pytest.mark.xfail(
-                reason="https://bugzilla.suse.com/show_bug.cgi?id=1199262"
-            )
-        ],
-    ),
+    pytest.param(container, version, marks=container.marks)
+    for container, version in zip(CONTAINER_IMAGES, ("11", "17"))
 ]
 
 
@@ -106,13 +78,7 @@ def test_maven_present(auto_container):
 
 @pytest.mark.parametrize(
     "container,java_version",
-    [
-        pytest.param(cont, ver, marks=cont.marks)
-        for cont, ver in (
-            (OPENJDK_DEVEL_11_CONTAINER, "11"),
-            (OPENJDK_DEVEL_17_CONTAINER, "17"),
-        )
-    ],
+    CONTAINER_IMAGES_WITH_VERSION,
     indirect=["container"],
 )
 def test_entrypoint(container, java_version, host, container_runtime):
@@ -130,14 +96,9 @@ def test_entrypoint(container, java_version, host, container_runtime):
 
 
 @pytest.mark.parametrize(
-    "container",
-    CONTAINER_IMAGES_EXTENDED,
-    indirect=["container"],
+    "container", CONTAINER_IMAGES_EXTENDED, indirect=["container"]
 )
-@pytest.mark.parametrize(
-    "java_file",
-    ["Basic"],
-)
+@pytest.mark.parametrize("java_file", ["Basic"])
 def test_compile(container, java_file: str):
     """Verify that the entry point of the OpenJDK devel container is the
     :command:`jshell`.
