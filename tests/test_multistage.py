@@ -265,13 +265,12 @@ def test_dockerfile_build(
     """
     tmp_path, _ = host_git_clone
 
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
-
-    cmd = host.run_expect(
-        [0],
-        f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} {tmp_path}",
+    img_id = multi_stage_build.build(
+        tmp_path,
+        pytestconfig,
+        container_runtime,
+        extra_build_args=get_extra_build_args(pytestconfig),
     )
-    img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     assert (
         cmd_stdout
