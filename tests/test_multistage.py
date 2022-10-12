@@ -9,13 +9,13 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
-from bci_tester.data import GO_1_16_CONTAINER
+from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 
 
 #: maven version that is being build in the multistage test build
-MAVEN_VERSION = "3.8.3"
+MAVEN_VERSION = "3.8.6"
 
 #: Dockerfile template to build `amidst
 #: <https://github.com/toolbox4minecraft/amidst>`_
@@ -143,7 +143,7 @@ ENTRYPOINT ["/app/entrypoint.sh"]
         ),
         (
             GitRepositoryBuild(
-                repository_tag="v3.3.1",
+                repository_tag="v3.3.3",
                 repository_url="https://gitlab.com/pdftk-java/pdftk.git",
             ),
             MultiStageBuild(
@@ -160,11 +160,11 @@ ENTRYPOINT ["/app/entrypoint.sh"]
         ),
         pytest.param(
             GitRepositoryBuild(
-                repository_tag="0.11.1",
+                repository_tag="0.12.4",
                 repository_url="https://github.com/alexellis/k3sup",
             ),
             MultiStageBuild(
-                containers={"builder": GO_1_16_CONTAINER, "runner": "scratch"},
+                containers={"builder": GO_1_18_CONTAINER, "runner": "scratch"},
                 containerfile_template=K3SUP_DOCKERFILE,
             ),
             0,
@@ -265,13 +265,12 @@ def test_dockerfile_build(
     """
     tmp_path, _ = host_git_clone
 
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
-
-    cmd = host.run_expect(
-        [0],
-        f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} {tmp_path}",
+    img_id = multi_stage_build.build(
+        tmp_path,
+        pytestconfig,
+        container_runtime,
+        extra_build_args=get_extra_build_args(pytestconfig),
     )
-    img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     assert (
         cmd_stdout
