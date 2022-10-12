@@ -303,6 +303,7 @@ INIT_CONTAINER = create_BCI(
     image_type="hybrid",
     available_versions=[OS_VERSION],
     default_entry_point=True,
+    healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
         pytest.mark.skipif(
             DOCKER_SELECTED,
@@ -318,6 +319,7 @@ PCP_CONTAINER = create_BCI(
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
     forwarded_ports=[PortForwarding(container_port=44322)],
+    healthcheck_timeout=timedelta(seconds=240),
     extra_launch_args=[] if DOCKER_SELECTED else ["--systemd", "always"],
     default_entry_point=True,
 )
@@ -327,7 +329,7 @@ CONTAINER_389DS = create_BCI(
     image_type="dockerfile",
     available_versions=["15.4"],
     default_entry_point=True,
-    healthcheck_timeout=timedelta(seconds=80),
+    healthcheck_timeout=timedelta(seconds=240),
     extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
     forwarded_ports=[PortForwarding(container_port=3389)],
 )
