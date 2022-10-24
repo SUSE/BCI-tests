@@ -1,9 +1,13 @@
 """Tests of the OpenJDK base container."""
+import os
+import re
+import time
 from dataclasses import dataclass
 from dataclasses import field
 
 import pytest
 from pytest_container import DerivedContainer
+from pytest_container import Version
 from pytest_container.container import container_from_pytest_param
 
 from bci_tester.data import OPENJDK_11_CONTAINER
@@ -15,6 +19,10 @@ HOST_TEST_DIR = "tests/trainers/java/"
 DOCKERF_EXTENDED = f"""
 WORKDIR {CONTAINER_TEST_DIR}
 COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
+"""
+
+DOCKERF_CASSANDRA = """
+RUN zypper in -y tar gzip awk git
 """
 
 CONTAINER_IMAGES = [
@@ -32,6 +40,18 @@ CONTAINER_IMAGES_EXTENDED = [
         id=container.id,
     )
     for container in CONTAINER_IMAGES
+]
+
+CONTAINER_IMAGES_CASSANDRA = [
+    pytest.param(
+        DerivedContainer(
+            base=container_from_pytest_param(container),
+            containerfile=DOCKERF_CASSANDRA,
+        ),
+        marks=container.marks,
+        id=container.id,
+    )
+    for container in [OPENJDK_11_CONTAINER]
 ]
 
 
@@ -152,3 +172,68 @@ def test_jdk_extended(
 
     for check in params.expected_err_strings:
         assert check in testout.stderr
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    CONTAINER_IMAGES_CASSANDRA,
+    indirect=["container_per_test"],
+)
+def test_jdk_cassandra(container_per_test):
+    """Starts the Cassandra DB and executes some write and read tests
+    using the cassandra-stress
+    """
+
+    logs = "/var/log/cassandra.log"
+
+    cassandra_versions = container_per_test.connection.check_output(
+        "git ls-remote --tags https://gitbox.apache.org/repos/asf/cassandra.git"
+    )
+
+    cassandra_version = Version(0, 0, 0)
+    for line in cassandra_versions.splitlines():
+        match = re.search(r"cassandra-(\d).(\d).(\d)$", line)
+        if match:
+            cur_ver = Version(
+                int(match.group(1)), int(match.group(2)), int(match.group(3))
+            )
+            if cur_ver > cassandra_version:
+                cassandra_version = cur_ver
+
+    container_per_test.connection.run_expect(
+        [0],
+        f"curl -OL https://downloads.apache.org/cassandra/{cassandra_version}/apache-cassandra-{cassandra_version}-bin.tar.gz",
+    )
+
+    container_per_test.connection.run_expect(
+        [0],
+        f"tar xzvf apache-cassandra-{cassandra_version}-bin.tar.gz >/dev/null",
+    )
+
+    container_per_test.connection.run_expect(
+        [0],
+        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/ && bin/cassandra -R | tee {logs}",
+    )
+
+    check_str = "state jump to NORMAL"
+    found = False
+    for t in range(80):
+        time.sleep(10)
+        if (
+            check_str
+            in container_per_test.connection.file(logs).content_string
+        ):
+            found = True
+            break
+
+    assert found, f"{check_str} not found in {logs}"
+
+    container_per_test.connection.run_expect(
+        [0],
+        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress write n=1",
+    )
+
+    container_per_test.connection.run_expect(
+        [0],
+        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress read n=1",
+    )
