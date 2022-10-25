@@ -44,6 +44,7 @@ from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import GO_1_19_CONTAINER
 from bci_tester.data import INIT_CONTAINER
+from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NODEJS_12_CONTAINER
@@ -373,19 +374,36 @@ def test_image_type_label(
 
 @pytest.mark.parametrize(
     "container_data",
-    [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
+    [cont for cont in ALL_CONTAINERS if cont not in L3_CONTAINERS],
 )
-def test_supportlevel_label(
+def test_techpreview_label(
     container_data: ParameterSet,
 ):
-    """Check that all containers (except for the base container) have the label
-    ``com.suse.supportlevel`` set to ``true``.
-
+    """Check that containers that are not L3 supported have the label
+    ``com.suse.supportlevel`` set to ``techpreview``.
+    Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
     """
     metadata = get_container_metadata(container_data)
     assert (
         metadata["Labels"]["com.suse.supportlevel"] == "techpreview"
     ), "images must be marked as techpreview"
+
+
+@pytest.mark.parametrize(
+    "container_data",
+    [cont for cont in L3_CONTAINERS],
+)
+def test_l3_label(
+    container_data: ParameterSet,
+):
+    """Check that containers under L3 support have the label
+    ``com.suse.supportlevel`` set to ``l3``.
+    Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
+    """
+    metadata = get_container_metadata(container_data)
+    assert (
+        metadata["Labels"]["com.suse.supportlevel"] == "l3"
+    ), "image supportlevel must be marked as L3"
 
 
 @pytest.mark.parametrize(
