@@ -23,6 +23,7 @@ COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 
 DOCKERF_CASSANDRA = """
 RUN zypper in -y tar gzip awk git
+ENV JAVA_HOME=/usr/
 """
 
 CONTAINER_IMAGES = [
@@ -184,7 +185,8 @@ def test_jdk_cassandra(container_per_test):
     using the cassandra-stress
     """
 
-    logs = "/var/log/cassandra.log"
+    logs = "/cassandra.log"
+    check_str = "state jump to NORMAL"
 
     cassandra_versions = container_per_test.connection.check_output(
         "git ls-remote --tags https://gitbox.apache.org/repos/asf/cassandra.git"
@@ -210,14 +212,40 @@ def test_jdk_cassandra(container_per_test):
         f"tar xzvf apache-cassandra-{cassandra_version}-bin.tar.gz >/dev/null",
     )
 
+    cd_to_cassandra_dir_cmd = f"cd apache-cassandra-{cassandra_version}/"
+
+    # container_per_test.connection.run(
+    #     f'{cd_to_cassandra_dir_cmd} && cat ./conf/jvm-server.options; echo END_LOG0a',
+    # )
+
+    # container_per_test.connection.run_expect(
+    #     [0],
+    #     cd_to_cassandra_dir_cmd
+    #     + ' && awk \'{sub("Xss256k","Xss2048k")}1\' ./conf/jvm-server.options >./conf/jvm-server.options',
+    # )
+
     container_per_test.connection.run_expect(
         [0],
-        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/ && bin/cassandra -R | tee {logs}",
+        cd_to_cassandra_dir_cmd
+        + " && sed -i 's/Xss256k/Xss2048k/' ./conf/jvm-server.options",
     )
 
-    check_str = "state jump to NORMAL"
+
+    container_per_test.connection.run(
+        f'{cd_to_cassandra_dir_cmd} && cat ./conf/jvm-server.options; echo END_LOG0b',
+    )
+
+    container_per_test.connection.run_expect(
+        [0],
+        f"{cd_to_cassandra_dir_cmd} && bin/cassandra -R 2>&1 >{logs}",
+    )
+    
+    container_per_test.connection.run(
+        f'tail -100 {logs}; echo END_LOG1',
+    )
+
     found = False
-    for t in range(80):
+    for t in range(120):
         time.sleep(10)
         if (
             check_str
@@ -226,14 +254,18 @@ def test_jdk_cassandra(container_per_test):
             found = True
             break
 
+    container_per_test.connection.run(
+        f'tail -100 {logs}; echo END_LOG2; grep "{check_str}" {logs}',
+    )
+
     assert found, f"{check_str} not found in {logs}"
 
     container_per_test.connection.run_expect(
         [0],
-        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress write n=1",
+        f"{cd_to_cassandra_dir_cmd}/tools/bin/ && ./cassandra-stress write n=1",
     )
 
     container_per_test.connection.run_expect(
         [0],
-        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress read n=1",
+        f"{cd_to_cassandra_dir_cmd}/tools/bin/ && ./cassandra-stress read n=1",
     )
