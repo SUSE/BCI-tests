@@ -36,10 +36,13 @@ class TestSystemd:
     def test_systemd_boottime(self, auto_container):
         """Ensure the container startup time is below 5 seconds"""
 
-        STARTUP_LIMIT = 5.5  # Container startup time limit in seconds
-        TARGET_LIMIT = (
-            5.5  # Limit for the systemd target to be reached in seconds
+        # Container startup time limit in seconds - aarch64 workers are slow sometimes.
+        STARTUP_LIMIT = (
+            11
+            if auto_container.connection.system_info.arch == "aarch64"
+            else 5.5
         )
+        TARGET_LIMIT = STARTUP_LIMIT  # Limit for the systemd target to be reached in seconds
 
         def extract_time(stdout, prefix):
             """internal helper function to extract the time from systemd-analyze time
