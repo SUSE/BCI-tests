@@ -9,6 +9,7 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container import Version
 from pytest_container.container import container_from_pytest_param
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
@@ -174,6 +175,10 @@ def test_jdk_extended(
         assert check in testout.stderr
 
 
+@pytest.mark.skipif(
+    LOCALHOST.system_info.arch == "ppc64le",
+    reason="Cassandra test skipped for PPC architecture. See https://progress.opensuse.org/issues/119344",
+)
 @pytest.mark.parametrize(
     "container_per_test",
     CONTAINER_IMAGES_CASSANDRA,
