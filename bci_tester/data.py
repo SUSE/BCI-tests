@@ -180,13 +180,19 @@ BUSYBOX_CONTAINER = create_BCI(
 )
 
 GO_1_16_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.16", image_type="hybrid"
+    build_tag="bci/golang:1.16",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 GO_1_17_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.17", image_type="hybrid"
+    build_tag="bci/golang:1.17",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 GO_1_18_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.18", image_type="hybrid"
+    build_tag="bci/golang:1.18",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 GO_1_19_CONTAINER = create_BCI(
     build_tag="bci/golang:1.19",
@@ -196,10 +202,14 @@ GO_1_19_CONTAINER = create_BCI(
 
 
 OPENJDK_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:11", image_type="hybrid"
+    build_tag="bci/openjdk:11",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:11", image_type="hybrid"
+    build_tag="bci/openjdk-devel:11",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 OPENJDK_17_CONTAINER = create_BCI(
     build_tag="bci/openjdk:17",
@@ -215,14 +225,20 @@ NODEJS_12_CONTAINER = create_BCI(
     build_tag="bci/nodejs:12", image_type="kiwi", available_versions=["15.3"]
 )
 NODEJS_14_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:14", image_type="hybrid"
+    build_tag="bci/nodejs:14",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 NODEJS_16_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:16", image_type="hybrid"
+    build_tag="bci/nodejs:16",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 
 PYTHON36_CONTAINER = create_BCI(
-    build_tag="bci/python:3.6", image_type="hybrid"
+    build_tag="bci/python:3.6",
+    image_type="hybrid",
+    available_versions=["15.4"],
 )
 PYTHON39_CONTAINER = create_BCI(
     build_tag="bci/python:3.9", available_versions=["15.3"], image_type="kiwi"
@@ -234,7 +250,11 @@ PYTHON310_CONTAINER = create_BCI(
 )
 
 
-RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5", image_type="hybrid")
+RUBY_25_CONTAINER = create_BCI(
+    build_tag="bci/ruby:2.5",
+    image_type="hybrid",
+    available_versions=["15.4"],
+)
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
@@ -245,48 +265,57 @@ DOTNET_SDK_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:3.1",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 DOTNET_SDK_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:5.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 DOTNET_SDK_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:6.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 
 DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:3.1",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 DOTNET_ASPNET_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:5.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:6.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 
 DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:3.1",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 DOTNET_RUNTIME_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:5.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:6.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 
 RUST_CONTAINERS = [
@@ -327,6 +356,7 @@ PCP_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=44322)],
     healthcheck_timeout=timedelta(seconds=240),
     extra_launch_args=[] if DOCKER_SELECTED else ["--systemd", "always"],
+    available_versions=["15.4"],
     default_entry_point=True,
 )
 
