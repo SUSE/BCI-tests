@@ -26,7 +26,7 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
-OS_VERSION = os.getenv("OS_VERSION", "15.3")
+OS_VERSION = os.getenv("OS_VERSION", "15.4")
 
 OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
 
