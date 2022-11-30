@@ -39,10 +39,6 @@ def test_node_version(auto_container):
                 build_command="npm ci && npm test",
             ),
             GitRepositoryBuild(
-                repository_url="https://github.com/chalk/chalk.git",
-                build_command="npm install && npm test",
-            ),
-            GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
                 build_command="npm ci && npm test && npm run lint",
             ),
