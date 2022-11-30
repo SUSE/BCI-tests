@@ -65,7 +65,7 @@ else:
 
 
 def create_container_version_mark(
-    available_versions=List[str],
+    available_versions: List[str],
 ) -> MarkDecorator:
     """Creates a pytest mark for a container that is only available for a
     certain SLE version.
