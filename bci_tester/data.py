@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import enum
 import os
 from datetime import timedelta
 from typing import List
@@ -111,6 +112,26 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if image_type == "hybrid":
         return "images" if OS_SP_VERSION == 3 else "containerfile"
     assert False, f"invalid image_type: {image_type}"
+
+
+@enum.unique
+class ImageType(enum.Enum):
+    """BCI type enumeration defining to which BCI class this container image
+    belongs. It primarily influences whether the image specific labels appear as
+    ``com.suse.bci`` or ``com.suse.application``.
+
+    """
+
+    LANGUAGE_STACK = enum.auto()
+    APPLICATION = enum.auto()
+    OS = enum.auto()
+
+    def __str__(self) -> str:
+        return (
+            "application"
+            if self.value == ImageType.APPLICATION.value
+            else "bci"
+        )
 
 
 def create_BCI(
