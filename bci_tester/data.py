@@ -256,6 +256,12 @@ DOTNET_SDK_6_0_CONTAINER = create_BCI(
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
+DOTNET_SDK_7_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-sdk:7.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
+)
 
 DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:3.1",
@@ -271,6 +277,12 @@ DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:6.0",
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-aspnet:7.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
 )
 
 DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
@@ -288,6 +300,12 @@ DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
     image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
+DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-runtime:7.0",
+    image_type="dockerfile",
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+    available_versions=["15.4"],
+)
 
 RUST_CONTAINERS = [
     create_BCI(
@@ -295,14 +313,9 @@ RUST_CONTAINERS = [
         image_type="dockerfile",
         available_versions=["15.4"],
     )
-    for rust_version in ("1.59", "1.60", "1.61", "1.62")
+    for rust_version in ("1.64", "1.65")
 ]
-(
-    RUST_1_59_CONTAINER,
-    RUST_1_60_CONTAINER,
-    RUST_1_61_CONTAINER,
-    RUST_1_62_CONTAINER,
-) = RUST_CONTAINERS
+(RUST_1_64_CONTAINER, RUST_1_65_CONTAINER) = RUST_CONTAINERS
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
@@ -360,12 +373,15 @@ DOTNET_CONTAINERS = [
     DOTNET_SDK_3_1_CONTAINER,
     DOTNET_SDK_5_0_CONTAINER,
     DOTNET_SDK_6_0_CONTAINER,
+    DOTNET_SDK_7_0_CONTAINER,
     DOTNET_ASPNET_3_1_CONTAINER,
     DOTNET_ASPNET_5_0_CONTAINER,
     DOTNET_ASPNET_6_0_CONTAINER,
+    DOTNET_ASPNET_7_0_CONTAINER,
     DOTNET_RUNTIME_3_1_CONTAINER,
     DOTNET_RUNTIME_5_0_CONTAINER,
     DOTNET_RUNTIME_6_0_CONTAINER,
+    DOTNET_RUNTIME_7_0_CONTAINER,
 ]
 CONTAINERS_WITH_ZYPPER = (
     [
@@ -418,6 +434,8 @@ L3_CONTAINERS = [
     PYTHON39_CONTAINER,
     PYTHON310_CONTAINER,
     RUBY_25_CONTAINER,
+    RUST_1_64_CONTAINER,
+    RUST_1_65_CONTAINER,
 ]
 
 #: Containers that are directly pulled from registry.suse.de
