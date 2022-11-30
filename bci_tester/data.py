@@ -29,6 +29,14 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 #: places
 OS_VERSION = os.getenv("OS_VERSION", "15.4")
 
+OS_VERSIONS = ["15.3", "15.4"]
+
+if OS_VERSION not in OS_VERSIONS:
+    raise ValueError(
+        f"Invalid OS_VERSION: {OS_VERSION}, allowed values are: "
+        + ", ".join(OS_VERSIONS)
+    )
+
 OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
 
 #: The SLES 15 pretty name (from /etc/os-release)
