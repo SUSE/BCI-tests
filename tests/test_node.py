@@ -1,5 +1,6 @@
 import pytest
 from pytest_container import GitRepositoryBuild
+from pytest_container.container import ContainerData
 
 from bci_tester.data import NODEJS_12_CONTAINER
 from bci_tester.data import NODEJS_14_CONTAINER
@@ -72,7 +73,10 @@ def test_node_version(auto_container):
     ],
     indirect=["container_git_clone"],
 )
-def test_popular_npm_repos(auto_container_per_test, container_git_clone):
+def test_popular_npm_repos(
+    auto_container_per_test: ContainerData,
+    container_git_clone: GitRepositoryBuild,
+):
     """Try to build and run the tests of a few popular npm packages:
 
     .. list-table::
@@ -94,6 +98,11 @@ def test_popular_npm_repos(auto_container_per_test, container_git_clone):
          - :command:`npm install && npm run unit`
 
     """
+    node_version = auto_container_per_test.connection.run_expect(
+        [0], "echo $NODE_VERSION"
+    ).stdout.strip()
+    if (node_version == "12") and ("chalk" in container_git_clone.repo_name):
+        pytest.skip("Chalk does not work with nodejs 12 anymore")
     auto_container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )
