@@ -46,6 +46,7 @@ from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import GO_1_19_CONTAINER
+from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
@@ -72,26 +73,6 @@ VENDOR = "SUSE LLC"
 
 #: URL to the product's home page
 URL = "https://www.suse.com/products/server/"
-
-
-@enum.unique
-class ImageType(enum.Enum):
-    """BCI type enumeration defining to which BCI class this container image
-    belongs. It primarily influences whether the image specific labels appear as
-    ``com.suse.bci`` or ``com.suse.application``.
-
-    """
-
-    LANGUAGE_STACK = enum.auto()
-    APPLICATION = enum.auto()
-    OS = enum.auto()
-
-    def __str__(self) -> str:
-        return (
-            "application"
-            if self.value == ImageType.APPLICATION.value
-            else "bci"
-        )
 
 
 def _get_container_label_prefix(
@@ -424,7 +405,12 @@ def test_l3_label(
     "container_data,container_name,container_type",
     [
         param
-        if param.values[0] != OPENJDK_DEVEL_17_CONTAINER
+        if param.values[0]
+        not in (
+            DOTNET_SDK_7_0_CONTAINER,
+            DOTNET_RUNTIME_7_0_CONTAINER,
+            DOTNET_ASPNET_7_0_CONTAINER,
+        )
         else pytest.param(
             *param.values,
             marks=list(param.marks)

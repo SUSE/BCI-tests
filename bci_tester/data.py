@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import enum
 import os
 from datetime import timedelta
 from typing import List
@@ -27,6 +28,18 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 #: The operating system version as present in /etc/os-release & various other
 #: places
 OS_VERSION = os.getenv("OS_VERSION", "15.4")
+
+ALLOWED_OS_VERSIONS = ("15.3", "15.4")
+
+assert sorted(ALLOWED_OS_VERSIONS) == list(
+    ALLOWED_OS_VERSIONS
+), f"list ALLOWED_OS_VERSIONS must be sorted, but got {ALLOWED_OS_VERSIONS}"
+
+if OS_VERSION not in ALLOWED_OS_VERSIONS:
+    raise ValueError(
+        f"Invalid OS_VERSION: {OS_VERSION}, allowed values are: "
+        + ", ".join(ALLOWED_OS_VERSIONS)
+    )
 
 OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
 
@@ -65,7 +78,7 @@ else:
 
 
 def create_container_version_mark(
-    available_versions=List[str],
+    available_versions: List[str],
 ) -> MarkDecorator:
     """Creates a pytest mark for a container that is only available for a
     certain SLE version.
@@ -113,11 +126,32 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     assert False, f"invalid image_type: {image_type}"
 
 
+@enum.unique
+class ImageType(enum.Enum):
+    """BCI type enumeration defining to which BCI class this container image
+    belongs. It primarily influences whether the image specific labels appear as
+    ``com.suse.bci`` or ``com.suse.application``.
+
+    """
+
+    LANGUAGE_STACK = enum.auto()
+    APPLICATION = enum.auto()
+    OS = enum.auto()
+
+    def __str__(self) -> str:
+        return (
+            "application"
+            if self.value == ImageType.APPLICATION.value
+            else "bci"
+        )
+
+
 def create_BCI(
     image_type: _IMAGE_TYPE_T,
     build_tag: str,
     available_versions: Optional[List[str]] = None,
     extra_marks: Optional[Sequence[MarkDecorator]] = None,
+    bci_type: ImageType = ImageType.LANGUAGE_STACK,
     **kwargs,
 ) -> ParameterSet:
     """Creates a DerivedContainer wrapped in a pytest.param for the BCI with the
@@ -141,6 +175,8 @@ def create_BCI(
         for m in extra_marks:
             marks.append(m)
 
+    if bci_type != ImageType.OS:
+        marks.append(create_container_version_mark([ALLOWED_OS_VERSIONS[-1]]))
     if available_versions is not None:
         marks.append(create_container_version_mark(available_versions))
 
@@ -161,22 +197,26 @@ BASE_CONTAINER = create_BCI(
     build_tag=f"bci/bci-base:{OS_VERSION}",
     image_type="kiwi",
     available_versions=[OS_VERSION],
+    bci_type=ImageType.OS,
 )
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"bci/bci-minimal:{OS_VERSION}",
     image_type="kiwi",
     available_versions=[OS_VERSION],
+    bci_type=ImageType.OS,
 )
 MICRO_CONTAINER = create_BCI(
     build_tag=f"bci/bci-micro:{OS_VERSION}",
     image_type="kiwi",
     available_versions=[OS_VERSION],
+    bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
     build_tag=f"bci/bci-busybox:{OS_VERSION}",
     image_type="kiwi",
     available_versions=["15.4"],
     custom_entry_point="/bin/sh",
+    bci_type=ImageType.OS,
 )
 
 GO_1_16_CONTAINER = create_BCI(
@@ -341,12 +381,14 @@ PCP_CONTAINER = create_BCI(
     healthcheck_timeout=timedelta(seconds=240),
     extra_launch_args=[] if DOCKER_SELECTED else ["--systemd", "always"],
     default_entry_point=True,
+    bci_type=ImageType.APPLICATION,
 )
 
 CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
     image_type="dockerfile",
     available_versions=["15.4"],
+    bci_type=ImageType.APPLICATION,
     default_entry_point=True,
     healthcheck_timeout=timedelta(seconds=240),
     extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
