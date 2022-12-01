@@ -403,7 +403,21 @@ def test_l3_label(
 
 @pytest.mark.parametrize(
     "container_data,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    [
+        param
+        if param.values[0]
+        not in (
+            DOTNET_SDK_7_0_CONTAINER,
+            DOTNET_RUNTIME_7_0_CONTAINER,
+            DOTNET_ASPNET_7_0_CONTAINER,
+        )
+        else pytest.param(
+            *param.values,
+            marks=list(param.marks)
+            + [pytest.mark.xfail(reason="not published on registry.suse.com")],
+        )
+        for param in IMAGES_AND_NAMES_WITH_BASE_XFAIL
+    ],
 )
 def test_reference(
     container_data: ParameterSet,
