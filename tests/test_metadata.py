@@ -33,12 +33,15 @@ from bci_tester.data import CONTAINER_389DS
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_3_1_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_5_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
 from bci_tester.data import GO_1_16_CONTAINER
 from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
@@ -142,6 +145,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
+            (DOTNET_SDK_7_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (
                 DOTNET_ASPNET_3_1_CONTAINER,
                 "dotnet.aspnet",
@@ -158,6 +162,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
                 ImageType.LANGUAGE_STACK,
             ),
             (
+                DOTNET_ASPNET_7_0_CONTAINER,
+                "dotnet.aspnet",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
                 DOTNET_RUNTIME_3_1_CONTAINER,
                 "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
@@ -169,6 +178,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             ),
             (
                 DOTNET_RUNTIME_6_0_CONTAINER,
+                "dotnet.runtime",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_RUNTIME_7_0_CONTAINER,
                 "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
             ),
