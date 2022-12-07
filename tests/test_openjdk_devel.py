@@ -5,7 +5,9 @@ JRE).
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
+from pytest_container.container import ContainerData
 
+import tests.test_openjdk as test_openjdk
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 
@@ -37,6 +39,10 @@ CONTAINER_IMAGES_WITH_VERSION = [
     pytest.param(container, version, marks=container.marks)
     for container, version in zip(CONTAINER_IMAGES, ("11", "17"))
 ]
+
+
+def test_java_home(auto_container: ContainerData):
+    test_openjdk.test_java_home(auto_container)
 
 
 @pytest.mark.parametrize(
