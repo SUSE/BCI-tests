@@ -1,6 +1,7 @@
 """Tests of the OpenJDK base container."""
-import os
+import os.path
 import re
+import stat
 import time
 from dataclasses import dataclass
 from dataclasses import field
@@ -9,6 +10,7 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container import Version
 from pytest_container.container import container_from_pytest_param
+from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import OPENJDK_11_CONTAINER
@@ -80,6 +82,54 @@ def test_jdk_version(container, java_version):
     assert (
         container.connection.check_output("echo $JAVA_VERSION") == java_version
     )
+
+
+def test_java_home(auto_container: ContainerData):
+    """Check that the environment variable ``JAVA_HOME`` is set to the correct
+    value.
+
+    - check that ``JAVA_HOME`` is a directory
+    - check that ``JAVA_ROOT`` is a directory
+    - check that ``JAVA_BINDIR`` is a directory and that it contains the
+      executable :command:`java`.
+    - parse the output of :command:`java -XshowSettings:properties -version`,
+      extract the setting ``java.home`` and compare it to ``JAVA_HOME``
+
+    Regression test following https://bugzilla.suse.com/show_bug.cgi?id=1206128
+
+    """
+
+    def get_env_var(var: str) -> str:
+        return auto_container.connection.check_output(f"echo ${var}").strip()
+
+    java_home_path = get_env_var("JAVA_HOME")
+    java_home = auto_container.connection.file(java_home_path)
+    assert java_home.exists and java_home.is_directory
+
+    java_root = auto_container.connection.file(get_env_var("JAVA_ROOT"))
+    assert java_root.exists and java_root.is_directory
+
+    java_bindir_path = get_env_var("JAVA_BINDIR")
+    java_bindir = auto_container.connection.file(java_bindir_path)
+    assert java_bindir.exists and java_bindir.is_directory
+
+    auto_container.connection.file(os.path.join(java_bindir_path, "java"))
+    auto_container.connection.run_expect(
+        [0], f"{os.path.join(java_bindir_path, 'java')} --version"
+    )
+
+    java_props_cmd = "java -XshowSettings:properties -version"
+    java_properties = auto_container.connection.run_expect(
+        [0], java_props_cmd
+    ).stderr.strip()
+    java_home_setting_checked = False
+    for line in java_properties.splitlines():
+        if line.strip().startswith("java.home"):
+            assert line.strip().replace("java.home = ", "") == java_home_path
+            java_home_setting_checked = True
+    assert (
+        java_home_setting_checked
+    ), f"java.home setting missing in the output of {java_props_cmd}"
 
 
 @dataclass(frozen=True)
