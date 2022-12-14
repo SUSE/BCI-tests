@@ -247,7 +247,7 @@ def test_jdk_cassandra(container_per_test):
 
     cassandra_version = Version(0, 0, 0)
     for line in cassandra_versions.splitlines():
-        match = re.search(r"cassandra-(\d).(\d).(\d)$", line)
+        match = re.search(r"cassandra-(\d+)\.(\d+)\.(\d+)$", line)
         if match:
             cur_ver = Version(
                 int(match.group(1)), int(match.group(2)), int(match.group(3))
@@ -257,7 +257,7 @@ def test_jdk_cassandra(container_per_test):
 
     container_per_test.connection.run_expect(
         [0],
-        f"curl -OL https://downloads.apache.org/cassandra/{cassandra_version}/apache-cassandra-{cassandra_version}-bin.tar.gz",
+        f"curl -fOL https://downloads.apache.org/cassandra/{cassandra_version}/apache-cassandra-{cassandra_version}-bin.tar.gz",
     )
 
     container_per_test.connection.run_expect(
