@@ -478,6 +478,7 @@ L3_CONTAINERS = [
     RUBY_25_CONTAINER,
     RUST_1_64_CONTAINER,
     RUST_1_65_CONTAINER,
+    CONTAINER_389DS,
 ]
 
 #: Containers that are directly pulled from registry.suse.de
