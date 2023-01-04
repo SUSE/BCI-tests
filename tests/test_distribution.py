@@ -17,7 +17,8 @@ def test_registry_service(
     """run registry container with attached volume '/var/lib/docker-registry'"""
     engine = container_runtime.runner_binary
     host_port = auto_container_per_test.forwarded_ports[0].host_port
-    content = """FROM alpine:latest
+    content = """
+    FROM alpine:latest
     CMD ["echo", "container from my local registry"]
     """
 
@@ -37,26 +38,19 @@ def test_registry_service(
         [0],
         f"""
 cd {tmp_path} && {' '.join(container_runtime.build_command)} \
-    -t {container_path} -f Containerfile .
-""",
+    -t {container_path} -f Containerfile .""",
     )
 
     force_http_mode = ""
     if container_runtime.runner_binary == "podman":
         force_http_mode = "--tls-verify=false"
 
-    host.run_expect(
-        [0],
-        f"{engine} push {force_http_mode} {container_path}",
-    )
+    host.run_expect([0], f"{engine} push {force_http_mode} {container_path}")
     out = host.check_output(
         f"curl -sb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
     )
     assert out == '{"repositories":["test_container"]}'
 
     host.run_expect([0], f"{engine} rmi {container_path}")
-    host.run_expect(
-        [0],
-        f"{engine} pull {container_path}",
-    )
+    host.run_expect([0], f"{engine} pull {force_http_mode} {container_path}")
     host.run_expect([0], f"{engine} run --rm {container_path}")
