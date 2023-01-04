@@ -9,7 +9,6 @@ from typing import Sequence
 from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
-from pytest_container.container import VolumeFlag
 
 try:
     from typing import Literal
@@ -424,13 +423,6 @@ DISTRIBUTION_CONTAINER = create_BCI(
         ContainerVolume(
             host_path=f"docker-registry-{os.getpid()}",
             container_path="/var/lib/docker-registry",
-            flags=[VolumeFlag.CHOWN_USER, VolumeFlag.NOEXEC],
-        )
-    ],
-    extra_marks=[
-        pytest.mark.skipif(
-            DOCKER_SELECTED,
-            reason="docker does not support the same volume flags as podman (missing CHOWN and NOEXEC), e.g. https://github.com/moby/moby/issues/7054",
         )
     ],
 )
