@@ -7,6 +7,7 @@ from typing import Optional
 from typing import Sequence
 
 from pytest_container.container import container_from_pytest_param
+from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
 
 try:
@@ -409,6 +410,16 @@ baseurl="""
     + r""" \n\
 priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 """,
+)
+
+
+DISTRIBUTION_CONTAINER = create_BCI(
+    build_tag="suse/registry:2.8",
+    image_type="kiwi",
+    available_versions=["15.4"],
+    forwarded_ports=[PortForwarding(container_port=5000)],
+    default_entry_point=True,
+    volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
 DOTNET_CONTAINERS = [
