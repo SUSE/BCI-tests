@@ -419,12 +419,7 @@ DISTRIBUTION_CONTAINER = create_BCI(
     available_versions=["15.4"],
     forwarded_ports=[PortForwarding(container_port=5000)],
     default_entry_point=True,
-    volume_mounts=[
-        ContainerVolume(
-            host_path=f"docker-registry-{os.getpid()}",
-            container_path="/var/lib/docker-registry",
-        )
-    ],
+    volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
 DOTNET_CONTAINERS = [
