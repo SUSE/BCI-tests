@@ -1,6 +1,7 @@
 """ Tests for the distribution container """
 import json
 import os
+from textwrap import dedent
 
 import pytest
 from pytest_container import OciRuntimeBase
@@ -22,10 +23,12 @@ def test_registry_service(
     CMD ["echo", "container from my local registry"]
     """
 
-    out = host.check_output(
-        f"curl -sb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
+    out = json.loads(
+        host.check_output(
+            f"curl -sb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
+        )
     )
-    assert out == '{"repositories":[]}'
+    assert str(out) == "{'repositories': []}"
 
     container_tag = "test_container"
     container_path = f"localhost:{host_port}/{container_tag}"
@@ -36,9 +39,11 @@ def test_registry_service(
         cfile.write(content)
     host.run_expect(
         [0],
-        f"""
+        dedent(
+            f"""
 cd {tmp_path} && {' '.join(container_runtime.build_command)} \
     -t {container_path} -f Containerfile .""",
+        ),
     )
 
     force_http_mode = ""
@@ -46,10 +51,12 @@ cd {tmp_path} && {' '.join(container_runtime.build_command)} \
         force_http_mode = "--tls-verify=false"
 
     host.run_expect([0], f"{engine} push {force_http_mode} {container_path}")
-    out = host.check_output(
-        f"curl -sb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
+    out = json.loads(
+        host.check_output(
+            f"curl -sb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
+        )
     )
-    assert out == '{"repositories":["test_container"]}'
+    assert str(out) == "{'repositories': ['test_container']}"
 
     host.run_expect([0], f"{engine} rmi {container_path}")
     host.run_expect([0], f"{engine} pull {force_http_mode} {container_path}")
