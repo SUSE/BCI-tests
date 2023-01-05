@@ -1,7 +1,7 @@
 """ Tests for the distribution container """
 import json
 import os
-from textwrap import dedent
+import textwrap
 
 import pytest
 from pytest_container import OciRuntimeBase
@@ -39,10 +39,9 @@ def test_registry_service(
         cfile.write(content)
     host.run_expect(
         [0],
-        dedent(
-            f"""
-cd {tmp_path} && {' '.join(container_runtime.build_command)} \
-    -t {container_path} -f Containerfile .""",
+        textwrap.dedent(
+            f"""cd {tmp_path} && {' '.join(container_runtime.build_command)} \
+            -t {container_path} -f Containerfile .""",
         ),
     )
 
