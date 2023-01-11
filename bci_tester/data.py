@@ -354,9 +354,13 @@ RUST_CONTAINERS = [
         image_type="dockerfile",
         available_versions=["15.4"],
     )
-    for rust_version in ("1.64", "1.65")
+    for rust_version in ("1.64", "1.65", "1.66")
 ]
-(RUST_1_64_CONTAINER, RUST_1_65_CONTAINER) = RUST_CONTAINERS
+(
+    RUST_1_64_CONTAINER,
+    RUST_1_65_CONTAINER,
+    RUST_1_66_CONTAINER,
+) = RUST_CONTAINERS
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
@@ -489,6 +493,7 @@ L3_CONTAINERS = [
     RUBY_25_CONTAINER,
     RUST_1_64_CONTAINER,
     RUST_1_65_CONTAINER,
+    RUST_1_66_CONTAINER,
     CONTAINER_389DS,
 ]
 
