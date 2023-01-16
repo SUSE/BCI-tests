@@ -1,6 +1,7 @@
 """Basic tests for the Python base container images."""
 import time
 
+import packaging.version
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
@@ -109,21 +110,37 @@ def test_tox(auto_container):
     auto_container.connection.run_expect([0], "pip install --user tox")
 
 
-def test_python_devel(auto_container):
-    """Check that python_devel package can be installed."""
-    version = auto_container.connection.run_expect(
+def test_pip_install_source_cryptography(auto_container_per_test):
+    """Check that cryptography python module can be installed from source so that
+    it is built against the SLE BCI FIPS enabled libopenssl."""
+    version = auto_container_per_test.connection.run_expect(
         [0], "echo $PYTHON_VERSION"
     ).stdout.strip()
-    if "3.6" in version:
-        pkg = "python3-devel"
-    elif "3.9" in version:
-        pkg = "python39-devel"
-    elif "3.10" in version:
-        pkg = "python310-devel"
-    else:
-        raise Exception(f"Unknown python version: {version}")
-    auto_container.connection.run_expect(
-        [0], f"zypper --non-interactive in {pkg}"
+
+    if packaging.version.Version(version) < packaging.version.Version("3.8"):
+        pytest.skip("cryptography tests only supported on >= 3.8")
+
+    # install dependencies
+    auto_container_per_test.connection.run_expect(
+        [0],
+        f"zypper --non-interactive in cargo libffi-devel openssl-devel gcc tar gzip",
+    )
+
+    # pin cryptography to a version that works with SLE BCI
+    cryptography_version = "37.0.4"
+    auto_container_per_test.connection.run_expect(
+        [0],
+        f"pip install --no-binary :all: cryptography=={cryptography_version}",
+    )
+
+    # test cryptography
+    auto_container_per_test.connection.run_expect(
+        [0],
+        f"""pip install cryptography-vectors=={cryptography_version} pytest &&
+            pip download --no-binary :all: cryptography=={cryptography_version} &&
+            tar xf cryptography-{cryptography_version}.tar.gz && cd cryptography-{cryptography_version} &&
+            rm -v pyproject.toml &&
+            python3 -m pytest tests/hazmat/bindings/test_openssl.py""",
     )
 
 
