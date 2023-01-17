@@ -42,8 +42,6 @@ from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
 from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
-from bci_tester.data import GO_1_16_CONTAINER
-from bci_tester.data import GO_1_17_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import GO_1_19_CONTAINER
 from bci_tester.data import ImageType
@@ -51,7 +49,6 @@ from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import NODEJS_12_CONTAINER
 from bci_tester.data import NODEJS_14_CONTAINER
 from bci_tester.data import NODEJS_16_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
@@ -63,7 +60,6 @@ from bci_tester.data import OS_VERSION
 from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
-from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
 
@@ -90,8 +86,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
-        (GO_1_16_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
-        (GO_1_17_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (GO_1_18_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (GO_1_19_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
@@ -106,11 +100,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             "openjdk.devel",
             ImageType.LANGUAGE_STACK,
         ),
-        (NODEJS_12_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (NODEJS_14_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (NODEJS_16_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (PYTHON36_CONTAINER, "python", ImageType.LANGUAGE_STACK),
-        (PYTHON39_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),

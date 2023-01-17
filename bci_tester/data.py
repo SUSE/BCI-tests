@@ -197,19 +197,18 @@ def create_BCI(
 BASE_CONTAINER = create_BCI(
     build_tag=f"bci/bci-base:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=[OS_VERSION],
     bci_type=ImageType.OS,
 )
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"bci/bci-minimal:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=[OS_VERSION],
+    available_versions=["15.4"],
     bci_type=ImageType.OS,
 )
 MICRO_CONTAINER = create_BCI(
     build_tag=f"bci/bci-micro:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=[OS_VERSION],
+    available_versions=["15.4"],
     bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
@@ -220,12 +219,6 @@ BUSYBOX_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
-GO_1_16_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.16", image_type="hybrid"
-)
-GO_1_17_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.17", image_type="hybrid"
-)
 GO_1_18_CONTAINER = create_BCI(
     build_tag="bci/golang:1.18", image_type="hybrid"
 )
@@ -252,9 +245,6 @@ OPENJDK_DEVEL_17_CONTAINER = create_BCI(
     image_type="dockerfile",
     available_versions=["15.4"],
 )
-NODEJS_12_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:12", image_type="kiwi", available_versions=["15.3"]
-)
 NODEJS_14_CONTAINER = create_BCI(
     build_tag="bci/nodejs:14", image_type="hybrid"
 )
@@ -264,9 +254,6 @@ NODEJS_16_CONTAINER = create_BCI(
 
 PYTHON36_CONTAINER = create_BCI(
     build_tag="bci/python:3.6", image_type="hybrid"
-)
-PYTHON39_CONTAINER = create_BCI(
-    build_tag="bci/python:3.9", available_versions=["15.3"], image_type="kiwi"
 )
 PYTHON310_CONTAINER = create_BCI(
     build_tag="bci/python:3.10",
@@ -354,10 +341,9 @@ RUST_CONTAINERS = [
         image_type="dockerfile",
         available_versions=["15.4"],
     )
-    for rust_version in ("1.64", "1.65", "1.66")
+    for rust_version in ("1.65", "1.66")
 ]
 (
-    RUST_1_64_CONTAINER,
     RUST_1_65_CONTAINER,
     RUST_1_66_CONTAINER,
 ) = RUST_CONTAINERS
@@ -365,8 +351,9 @@ RUST_CONTAINERS = [
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
     image_type="hybrid",
-    available_versions=[OS_VERSION],
+    available_versions=["15.4"],
     default_entry_point=True,
+    available_versions=["15.4"],
     healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
         pytest.mark.skipif(
@@ -443,20 +430,16 @@ DOTNET_CONTAINERS = [
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
-        GO_1_16_CONTAINER,
-        GO_1_17_CONTAINER,
         GO_1_18_CONTAINER,
         GO_1_19_CONTAINER,
         OPENJDK_11_CONTAINER,
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_17_CONTAINER,
         OPENJDK_DEVEL_17_CONTAINER,
-        NODEJS_12_CONTAINER,
         NODEJS_14_CONTAINER,
         NODEJS_16_CONTAINER,
         PCP_CONTAINER,
         PYTHON36_CONTAINER,
-        PYTHON39_CONTAINER,
         PYTHON310_CONTAINER,
         RUBY_25_CONTAINER,
         INIT_CONTAINER,
@@ -488,10 +471,8 @@ L3_CONTAINERS = [
     OPENJDK_DEVEL_11_CONTAINER,
     OPENJDK_DEVEL_17_CONTAINER,
     PYTHON36_CONTAINER,
-    PYTHON39_CONTAINER,
     PYTHON310_CONTAINER,
     RUBY_25_CONTAINER,
-    RUST_1_64_CONTAINER,
     RUST_1_65_CONTAINER,
     RUST_1_66_CONTAINER,
     CONTAINER_389DS,

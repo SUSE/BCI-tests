@@ -10,7 +10,7 @@ from pytest_container import MultiStageBuild
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
-from bci_tester.data import GO_1_16_CONTAINER
+from bci_tester.data import GO_1_19_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
@@ -134,7 +134,7 @@ def test_certificates_are_present(
     If the certificates are incorrectly set up, then the GET request will fail.
     """
     multi_stage_build = MultiStageBuild(
-        containers={"builder": GO_1_16_CONTAINER, "runner": runner},
+        containers={"builder": GO_1_19_CONTAINER, "runner": runner},
         containerfile_template=MULTISTAGE_DOCKERFILE,
     )
     multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
