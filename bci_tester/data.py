@@ -2,6 +2,7 @@
 import enum
 import os
 from datetime import timedelta
+from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -31,6 +32,7 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 OS_VERSION = os.getenv("OS_VERSION", "15.4")
 
 ALLOWED_OS_VERSIONS = ("15.3", "15.4")
+_LANGUAGE_APPLICATION_STACK_OS_VERSIONS = ("15.4",)
 
 assert sorted(ALLOWED_OS_VERSIONS) == list(
     ALLOWED_OS_VERSIONS
@@ -79,14 +81,14 @@ else:
 
 
 def create_container_version_mark(
-    available_versions: List[str],
+    available_versions: Iterable[str],
 ) -> MarkDecorator:
     """Creates a pytest mark for a container that is only available for a
     certain SLE version.
 
     Args:
 
-    available_versions: list of versions for which this container is
+    available_versions: iterable of versions for which this container is
         available. Each version must be in the form ``15.4`` for SLE 15 SP4,
         ``15.3`` for SLE 15 SP3 and so on
     """
@@ -147,8 +149,8 @@ class ImageType(enum.Enum):
 
 def create_BCI(
     build_tag: str,
-    available_versions: Optional[List[str]] = None,
     image_type: _IMAGE_TYPE_T = "dockerfile",
+    available_versions: Optional[List[str]] = None,
     extra_marks: Optional[Sequence[MarkDecorator]] = None,
     bci_type: ImageType = ImageType.LANGUAGE_STACK,
     **kwargs,
@@ -158,14 +160,22 @@ def create_BCI(
 
     Args:
         image_type: define whether this image is build from a :file:`Dockerfile`
-            or :file:`kiwi.xml` or both (depending on the service pack version)
+            or :file:`kiwi.xml`
+
         build_tag: the main build tag set for this image (it can be found at the
             top of the :file:`Dockerfile` or :file:`kiwi.xml`)
+
         available_versions: an optional list of operating system versions, for
             which this container image is available. Use this for container
-            images that were not part of SLE 15 SP3.
+            images that were not part of older SLE releases.
+
         extra_marks: an optional sequence of marks that should be applied to
             this container image (e.g. to skip it on certain architectures)
+
+        bci_type: Defines whether this is a language, application or OS
+            container. Language and application containers are automatically
+            restricted to the latest OS versions.
+
         **kwargs: additional keyword arguments are forwarded to the constructor
             of the :py:class:`~pytest_container.DerivedContainer`
     """
@@ -175,8 +185,21 @@ def create_BCI(
             marks.append(m)
 
     if bci_type != ImageType.OS:
-        marks.append(create_container_version_mark([ALLOWED_OS_VERSIONS[-1]]))
-    if available_versions is not None:
+        if available_versions:
+            for ver in available_versions:
+                if ver not in _LANGUAGE_APPLICATION_STACK_OS_VERSIONS:
+                    raise ValueError(
+                        f"Invalid os version for a language or application stack container: {ver}"
+                    )
+            marks.append(create_container_version_mark(available_versions))
+        else:
+            marks.append(
+                create_container_version_mark(
+                    _LANGUAGE_APPLICATION_STACK_OS_VERSIONS
+                )
+            )
+
+    elif available_versions is not None:
         marks.append(create_container_version_mark(available_versions))
 
     baseurl = f"{BASEURL}/{_get_repository_name(image_type)}/{build_tag}"
@@ -254,7 +277,6 @@ DOTNET_SDK_6_0_CONTAINER = create_BCI(
 DOTNET_SDK_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:7.0",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-    available_versions=["15.4"],
 )
 
 DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
@@ -272,7 +294,6 @@ DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
 DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:7.0",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-    available_versions=["15.4"],
 )
 
 DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
@@ -290,7 +311,6 @@ DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
 DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:7.0",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-    available_versions=["15.4"],
 )
 
 RUST_CONTAINERS = [
@@ -304,7 +324,6 @@ RUST_CONTAINERS = [
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
-    available_versions=["15.4"],
     default_entry_point=True,
     available_versions=["15.4"],
     healthcheck_timeout=timedelta(seconds=240),
@@ -330,7 +349,6 @@ PCP_CONTAINER = create_BCI(
 
 CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
-    available_versions=["15.4"],
     bci_type=ImageType.APPLICATION,
     default_entry_point=True,
     healthcheck_timeout=timedelta(seconds=240),
@@ -358,7 +376,6 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 DISTRIBUTION_CONTAINER = create_BCI(
     build_tag="suse/registry:2.8",
     image_type="kiwi",
-    available_versions=["15.4"],
     forwarded_ports=[PortForwarding(container_port=5000)],
     default_entry_point=True,
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
