@@ -2,6 +2,7 @@
 import enum
 import os
 from datetime import timedelta
+from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -31,6 +32,7 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 OS_VERSION = os.getenv("OS_VERSION", "15.4")
 
 ALLOWED_OS_VERSIONS = ("15.3", "15.4")
+_LANGUAGE_APPLICATION_STACK_OS_VERSIONS = ("15.4",)
 
 assert sorted(ALLOWED_OS_VERSIONS) == list(
     ALLOWED_OS_VERSIONS
@@ -79,14 +81,14 @@ else:
 
 
 def create_container_version_mark(
-    available_versions: List[str],
+    available_versions: Iterable[str],
 ) -> MarkDecorator:
     """Creates a pytest mark for a container that is only available for a
     certain SLE version.
 
     Args:
 
-    available_versions: list of versions for which this container is
+    available_versions: iterable of versions for which this container is
         available. Each version must be in the form ``15.4`` for SLE 15 SP4,
         ``15.3`` for SLE 15 SP3 and so on
     """
@@ -111,7 +113,7 @@ else:
     _BCI_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo"
 
 
-_IMAGE_TYPE_T = Literal["dockerfile", "kiwi", "hybrid"]
+_IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 
 
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
@@ -122,8 +124,6 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return "containerfile"
     if image_type == "kiwi":
         return "images"
-    if image_type == "hybrid":
-        return "images" if OS_SP_VERSION == 3 else "containerfile"
     assert False, f"invalid image_type: {image_type}"
 
 
@@ -148,8 +148,8 @@ class ImageType(enum.Enum):
 
 
 def create_BCI(
-    image_type: _IMAGE_TYPE_T,
     build_tag: str,
+    image_type: _IMAGE_TYPE_T = "dockerfile",
     available_versions: Optional[List[str]] = None,
     extra_marks: Optional[Sequence[MarkDecorator]] = None,
     bci_type: ImageType = ImageType.LANGUAGE_STACK,
@@ -160,14 +160,22 @@ def create_BCI(
 
     Args:
         image_type: define whether this image is build from a :file:`Dockerfile`
-            or :file:`kiwi.xml` or both (depending on the service pack version)
+            or :file:`kiwi.xml`
+
         build_tag: the main build tag set for this image (it can be found at the
             top of the :file:`Dockerfile` or :file:`kiwi.xml`)
+
         available_versions: an optional list of operating system versions, for
             which this container image is available. Use this for container
-            images that were not part of SLE 15 SP3.
+            images that were not part of older SLE releases.
+
         extra_marks: an optional sequence of marks that should be applied to
             this container image (e.g. to skip it on certain architectures)
+
+        bci_type: Defines whether this is a language, application or OS
+            container. Language and application containers are automatically
+            restricted to the latest OS versions.
+
         **kwargs: additional keyword arguments are forwarded to the constructor
             of the :py:class:`~pytest_container.DerivedContainer`
     """
@@ -177,8 +185,21 @@ def create_BCI(
             marks.append(m)
 
     if bci_type != ImageType.OS:
-        marks.append(create_container_version_mark([ALLOWED_OS_VERSIONS[-1]]))
-    if available_versions is not None:
+        if available_versions:
+            for ver in available_versions:
+                if ver not in _LANGUAGE_APPLICATION_STACK_OS_VERSIONS:
+                    raise ValueError(
+                        f"Invalid os version for a language or application stack container: {ver}"
+                    )
+            marks.append(create_container_version_mark(available_versions))
+        else:
+            marks.append(
+                create_container_version_mark(
+                    _LANGUAGE_APPLICATION_STACK_OS_VERSIONS
+                )
+            )
+
+    elif available_versions is not None:
         marks.append(create_container_version_mark(available_versions))
 
     baseurl = f"{BASEURL}/{_get_repository_name(image_type)}/{build_tag}"
@@ -197,19 +218,18 @@ def create_BCI(
 BASE_CONTAINER = create_BCI(
     build_tag=f"bci/bci-base:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=[OS_VERSION],
     bci_type=ImageType.OS,
 )
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"bci/bci-minimal:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=[OS_VERSION],
+    available_versions=["15.4"],
     bci_type=ImageType.OS,
 )
 MICRO_CONTAINER = create_BCI(
     build_tag=f"bci/bci-micro:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=[OS_VERSION],
+    available_versions=["15.4"],
     bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
@@ -220,62 +240,22 @@ BUSYBOX_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
-GO_1_16_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.16", image_type="hybrid"
-)
-GO_1_17_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.17", image_type="hybrid"
-)
-GO_1_18_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.18", image_type="hybrid"
-)
-GO_1_19_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.19",
-    image_type="hybrid",
-    available_versions=["15.4"],
-)
+GO_1_18_CONTAINER = create_BCI(build_tag="bci/golang:1.18")
+GO_1_19_CONTAINER = create_BCI(build_tag="bci/golang:1.19")
 
 
-OPENJDK_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:11", image_type="hybrid"
-)
-OPENJDK_DEVEL_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:11", image_type="hybrid"
-)
-OPENJDK_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:17",
-    image_type="dockerfile",
-    available_versions=["15.4"],
-)
-OPENJDK_DEVEL_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:17",
-    image_type="dockerfile",
-    available_versions=["15.4"],
-)
-NODEJS_12_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:12", image_type="kiwi", available_versions=["15.3"]
-)
-NODEJS_14_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:14", image_type="hybrid"
-)
-NODEJS_16_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:16", image_type="hybrid"
-)
+OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
+OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
+OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
+OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
+NODEJS_14_CONTAINER = create_BCI(build_tag="bci/nodejs:14")
+NODEJS_16_CONTAINER = create_BCI(build_tag="bci/nodejs:16")
 
-PYTHON36_CONTAINER = create_BCI(
-    build_tag="bci/python:3.6", image_type="hybrid"
-)
-PYTHON39_CONTAINER = create_BCI(
-    build_tag="bci/python:3.9", available_versions=["15.3"], image_type="kiwi"
-)
-PYTHON310_CONTAINER = create_BCI(
-    build_tag="bci/python:3.10",
-    available_versions=["15.4"],
-    image_type="dockerfile",
-)
+PYTHON36_CONTAINER = create_BCI(build_tag="bci/python:3.6")
+PYTHON310_CONTAINER = create_BCI(build_tag="bci/python:3.10")
 
 
-RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5", image_type="hybrid")
+RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5")
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
@@ -284,89 +264,68 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
 
 DOTNET_SDK_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:3.1",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:5.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:6.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:7.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-    available_versions=["15.4"],
 )
 
 DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:3.1",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:5.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:6.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:7.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-    available_versions=["15.4"],
 )
 
 DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:3.1",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:5.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:6.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:7.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-    available_versions=["15.4"],
 )
 
 RUST_CONTAINERS = [
-    create_BCI(
-        build_tag=f"bci/rust:{rust_version}",
-        image_type="dockerfile",
-        available_versions=["15.4"],
-    )
-    for rust_version in ("1.64", "1.65", "1.66")
+    create_BCI(build_tag=f"bci/rust:{rust_version}")
+    for rust_version in ("1.65", "1.66")
 ]
 (
-    RUST_1_64_CONTAINER,
     RUST_1_65_CONTAINER,
     RUST_1_66_CONTAINER,
 ) = RUST_CONTAINERS
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
-    image_type="hybrid",
-    available_versions=[OS_VERSION],
     default_entry_point=True,
+    available_versions=["15.4"],
     healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
         pytest.mark.skipif(
@@ -378,7 +337,6 @@ INIT_CONTAINER = create_BCI(
 
 PCP_CONTAINER = create_BCI(
     build_tag="suse/pcp:5.2.2",
-    image_type="dockerfile",
     extra_marks=[
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
@@ -391,8 +349,6 @@ PCP_CONTAINER = create_BCI(
 
 CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
-    image_type="dockerfile",
-    available_versions=["15.4"],
     bci_type=ImageType.APPLICATION,
     default_entry_point=True,
     healthcheck_timeout=timedelta(seconds=240),
@@ -420,7 +376,6 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 DISTRIBUTION_CONTAINER = create_BCI(
     build_tag="suse/registry:2.8",
     image_type="kiwi",
-    available_versions=["15.4"],
     forwarded_ports=[PortForwarding(container_port=5000)],
     default_entry_point=True,
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
@@ -443,20 +398,16 @@ DOTNET_CONTAINERS = [
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
-        GO_1_16_CONTAINER,
-        GO_1_17_CONTAINER,
         GO_1_18_CONTAINER,
         GO_1_19_CONTAINER,
         OPENJDK_11_CONTAINER,
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_17_CONTAINER,
         OPENJDK_DEVEL_17_CONTAINER,
-        NODEJS_12_CONTAINER,
         NODEJS_14_CONTAINER,
         NODEJS_16_CONTAINER,
         PCP_CONTAINER,
         PYTHON36_CONTAINER,
-        PYTHON39_CONTAINER,
         PYTHON310_CONTAINER,
         RUBY_25_CONTAINER,
         INIT_CONTAINER,
@@ -488,10 +439,8 @@ L3_CONTAINERS = [
     OPENJDK_DEVEL_11_CONTAINER,
     OPENJDK_DEVEL_17_CONTAINER,
     PYTHON36_CONTAINER,
-    PYTHON39_CONTAINER,
     PYTHON310_CONTAINER,
     RUBY_25_CONTAINER,
-    RUST_1_64_CONTAINER,
     RUST_1_65_CONTAINER,
     RUST_1_66_CONTAINER,
     CONTAINER_389DS,

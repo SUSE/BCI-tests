@@ -2,13 +2,11 @@ import pytest
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
 
-from bci_tester.data import NODEJS_12_CONTAINER
 from bci_tester.data import NODEJS_14_CONTAINER
 from bci_tester.data import NODEJS_16_CONTAINER
 
 
 CONTAINER_IMAGES = [
-    NODEJS_12_CONTAINER,
     NODEJS_14_CONTAINER,
     NODEJS_16_CONTAINER,
 ]

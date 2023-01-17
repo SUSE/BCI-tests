@@ -11,7 +11,6 @@ from pytest_container.runtime import Version
 
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
-from bci_tester.data import PYTHON39_CONTAINER
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
 bcdir = "/tmp/"
@@ -39,7 +38,6 @@ COPY {orig + appdir}/{appl1}  {appdir}
 #: Base containers under test, input of auto_container fixture
 CONTAINER_IMAGES = [
     PYTHON36_CONTAINER,
-    PYTHON39_CONTAINER,
     PYTHON310_CONTAINER,
 ]
 
