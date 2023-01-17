@@ -111,7 +111,7 @@ else:
     _BCI_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo"
 
 
-_IMAGE_TYPE_T = Literal["dockerfile", "kiwi", "hybrid"]
+_IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 
 
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
@@ -122,8 +122,6 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return "containerfile"
     if image_type == "kiwi":
         return "images"
-    if image_type == "hybrid":
-        return "images" if OS_SP_VERSION == 3 else "containerfile"
     assert False, f"invalid image_type: {image_type}"
 
 
@@ -148,9 +146,9 @@ class ImageType(enum.Enum):
 
 
 def create_BCI(
-    image_type: _IMAGE_TYPE_T,
     build_tag: str,
     available_versions: Optional[List[str]] = None,
+    image_type: _IMAGE_TYPE_T = "dockerfile",
     extra_marks: Optional[Sequence[MarkDecorator]] = None,
     bci_type: ImageType = ImageType.LANGUAGE_STACK,
     **kwargs,
@@ -219,50 +217,22 @@ BUSYBOX_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
-GO_1_18_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.18", image_type="hybrid"
-)
-GO_1_19_CONTAINER = create_BCI(
-    build_tag="bci/golang:1.19",
-    image_type="hybrid",
-    available_versions=["15.4"],
-)
+GO_1_18_CONTAINER = create_BCI(build_tag="bci/golang:1.18")
+GO_1_19_CONTAINER = create_BCI(build_tag="bci/golang:1.19")
 
 
-OPENJDK_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:11", image_type="hybrid"
-)
-OPENJDK_DEVEL_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:11", image_type="hybrid"
-)
-OPENJDK_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:17",
-    image_type="dockerfile",
-    available_versions=["15.4"],
-)
-OPENJDK_DEVEL_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:17",
-    image_type="dockerfile",
-    available_versions=["15.4"],
-)
-NODEJS_14_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:14", image_type="hybrid"
-)
-NODEJS_16_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:16", image_type="hybrid"
-)
+OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
+OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
+OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
+OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
+NODEJS_14_CONTAINER = create_BCI(build_tag="bci/nodejs:14")
+NODEJS_16_CONTAINER = create_BCI(build_tag="bci/nodejs:16")
 
-PYTHON36_CONTAINER = create_BCI(
-    build_tag="bci/python:3.6", image_type="hybrid"
-)
-PYTHON310_CONTAINER = create_BCI(
-    build_tag="bci/python:3.10",
-    available_versions=["15.4"],
-    image_type="dockerfile",
-)
+PYTHON36_CONTAINER = create_BCI(build_tag="bci/python:3.6")
+PYTHON310_CONTAINER = create_BCI(build_tag="bci/python:3.10")
 
 
-RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5", image_type="hybrid")
+RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5")
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
@@ -271,76 +241,60 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
 
 DOTNET_SDK_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:3.1",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:5.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:6.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:7.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
     available_versions=["15.4"],
 )
 
 DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:3.1",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:5.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:6.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:7.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
     available_versions=["15.4"],
 )
 
 DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:3.1",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_5_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:5.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:6.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:7.0",
-    image_type="dockerfile",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
     available_versions=["15.4"],
 )
 
 RUST_CONTAINERS = [
-    create_BCI(
-        build_tag=f"bci/rust:{rust_version}",
-        image_type="dockerfile",
-        available_versions=["15.4"],
-    )
+    create_BCI(build_tag=f"bci/rust:{rust_version}")
     for rust_version in ("1.65", "1.66")
 ]
 (
@@ -350,7 +304,6 @@ RUST_CONTAINERS = [
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
-    image_type="hybrid",
     available_versions=["15.4"],
     default_entry_point=True,
     available_versions=["15.4"],
@@ -365,7 +318,6 @@ INIT_CONTAINER = create_BCI(
 
 PCP_CONTAINER = create_BCI(
     build_tag="suse/pcp:5.2.2",
-    image_type="dockerfile",
     extra_marks=[
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
@@ -378,7 +330,6 @@ PCP_CONTAINER = create_BCI(
 
 CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
-    image_type="dockerfile",
     available_versions=["15.4"],
     bci_type=ImageType.APPLICATION,
     default_entry_point=True,
