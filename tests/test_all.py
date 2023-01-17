@@ -134,7 +134,10 @@ def test_certificates_are_present(
     If the certificates are incorrectly set up, then the GET request will fail.
     """
     multi_stage_build = MultiStageBuild(
-        containers={"builder": GO_1_19_CONTAINER, "runner": runner},
+        containers={
+            "builder": "registry.suse.com/bci/golang:latest",
+            "runner": runner,
+        },
         containerfile_template=MULTISTAGE_DOCKERFILE,
     )
     multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
