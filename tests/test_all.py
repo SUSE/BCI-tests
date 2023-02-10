@@ -52,7 +52,7 @@ def test_os_release(auto_container):
     """
     assert auto_container.connection.file("/etc/os-release").exists
 
-    for (var_name, value) in (
+    for var_name, value in (
         ("VERSION_ID", OS_VERSION),
         ("PRETTY_NAME", OS_PRETTY_NAME),
     ):
