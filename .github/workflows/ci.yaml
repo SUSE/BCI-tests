@@ -40,7 +40,7 @@ jobs:
       - id: setmatrix
         run: |
           stringified_matrix=$(tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d' | jo -a)
-          echo "::set-output name=matrix::$stringified_matrix"
+          echo "matrix=$stringified_matrix" >> $GITHUB_OUTPUT
 
   unit-tests:
     name: Unit tests
