@@ -66,7 +66,7 @@ TARGET = os.getenv("TARGET", "obs")
 #: via this variable instead
 BASEURL = os.getenv("BASEURL")
 
-if TARGET not in ("obs", "ibs", "ibs-cr"):
+if TARGET not in ("obs", "ibs", "ibs-cr", "dso"):
     if BASEURL is None:
         raise ValueError(
             f"Unknown target {TARGET} specified and BASEURL is not set, cannot continue"
@@ -76,6 +76,7 @@ else:
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{_SLE_SP}",
         "ibs": f"registry.suse.de/suse/{_SLE_SP}/update/bci",
+        "dso": f"registry1.dso.mil/ironbank/suse",
         "ibs-cr": f"registry.suse.de/suse/{_SLE_SP}/update/cr/totest",
     }[TARGET]
 
@@ -117,13 +118,14 @@ _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 
 
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
+    if TARGET == "dso":
+        return ""
     if TARGET == "ibs-cr":
-        return "images"
-
+        return "images/"
     if image_type == "dockerfile":
-        return "containerfile"
+        return "containerfile/"
     if image_type == "kiwi":
-        return "images"
+        return "images/"
     assert False, f"invalid image_type: {image_type}"
 
 
@@ -202,7 +204,7 @@ def create_BCI(
     elif available_versions is not None:
         marks.append(create_container_version_mark(available_versions))
 
-    baseurl = f"{BASEURL}/{_get_repository_name(image_type)}/{build_tag}"
+    baseurl = f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
 
     return pytest.param(
         DerivedContainer(

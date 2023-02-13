@@ -12,6 +12,7 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import host_fips_enabled
+from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: size limits of the base container per arch in MiB
@@ -42,7 +43,8 @@ def test_base_size(auto_container, container_runtime):
 
 
 without_fips = pytest.mark.skipif(
-    host_fips_enabled(), reason="host running in FIPS 140 mode"
+    host_fips_enabled() or target_fips_enforced(),
+    reason="host running in FIPS 140 mode",
 )
 
 

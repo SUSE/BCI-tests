@@ -58,3 +58,8 @@ def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled") -> bool:
 
     with open(fipsfile, encoding="utf8") as fipsfile_fd:
         return fipsfile_fd.read().strip() == "1"
+
+
+def target_fips_enforced() -> bool:
+    """Returns a boolean indicating whether FIPS mode is enforced on this target."""
+    return os.getenv("TARGET", "obs") in ("dso",)
