@@ -31,8 +31,8 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 #: places
 OS_VERSION = os.getenv("OS_VERSION", "15.4")
 
-ALLOWED_OS_VERSIONS = ("15.3", "15.4")
-_LANGUAGE_APPLICATION_STACK_OS_VERSIONS = ("15.4",)
+ALLOWED_OS_VERSIONS = ("15.3", "15.4", "15.5")
+_LANGUAGE_APPLICATION_STACK_OS_VERSIONS = ("15.4", "15.5")
 
 assert sorted(ALLOWED_OS_VERSIONS) == list(
     ALLOWED_OS_VERSIONS
@@ -225,19 +225,19 @@ BASE_CONTAINER = create_BCI(
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"bci/bci-minimal:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=["15.4"],
+    available_versions=["15.4", "15.5"],
     bci_type=ImageType.OS,
 )
 MICRO_CONTAINER = create_BCI(
     build_tag=f"bci/bci-micro:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=["15.4"],
+    available_versions=["15.4", "15.5"],
     bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
     build_tag=f"bci/bci-busybox:{OS_VERSION}",
     image_type="kiwi",
-    available_versions=["15.4"],
+    available_versions=["15.4", "15.5"],
     custom_entry_point="/bin/sh",
     bci_type=ImageType.OS,
 )
@@ -327,7 +327,7 @@ RUST_CONTAINERS = [
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
     default_entry_point=True,
-    available_versions=["15.4"],
+    available_versions=["15.4", "15.5"],
     healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
         pytest.mark.skipif(

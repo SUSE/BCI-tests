@@ -10,7 +10,7 @@ from bci_tester.data import create_container_version_mark
 
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]
 
-pytestmark = create_container_version_mark(["15.4"])
+pytestmark = create_container_version_mark(["15.4", "15.5"])
 
 
 def test_busybox_provides_sh(auto_container):
