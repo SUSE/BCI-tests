@@ -252,6 +252,7 @@ OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
 NODEJS_14_CONTAINER = create_BCI(build_tag="bci/nodejs:14")
 NODEJS_16_CONTAINER = create_BCI(build_tag="bci/nodejs:16")
+NODEJS_18_CONTAINER = create_BCI(build_tag="bci/nodejs:18")
 
 PYTHON36_CONTAINER = create_BCI(build_tag="bci/python:3.6")
 PYTHON310_CONTAINER = create_BCI(build_tag="bci/python:3.10")
@@ -409,6 +410,7 @@ CONTAINERS_WITH_ZYPPER = (
         OPENJDK_DEVEL_17_CONTAINER,
         NODEJS_14_CONTAINER,
         NODEJS_16_CONTAINER,
+        NODEJS_18_CONTAINER,
         PCP_CONTAINER,
         PYTHON36_CONTAINER,
         PYTHON310_CONTAINER,
@@ -437,6 +439,7 @@ L3_CONTAINERS = [
     GO_1_19_CONTAINER,
     NODEJS_14_CONTAINER,
     NODEJS_16_CONTAINER,
+    NODEJS_18_CONTAINER,
     OPENJDK_11_CONTAINER,
     OPENJDK_17_CONTAINER,
     OPENJDK_DEVEL_11_CONTAINER,
