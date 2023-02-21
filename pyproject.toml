@@ -37,6 +37,7 @@ markers = [
     'bci/openjdk-devel_17',
     'bci/nodejs_14',
     'bci/nodejs_16',
+    'bci/nodejs_18',
     'bci/ruby_2.5',
     'bci/dotnet-sdk_3.1',
     'bci/dotnet-sdk_5.0',
