@@ -54,6 +54,7 @@ markers = [
     'suse/pcp_5.2.2',
     'bci/rust_1.65',
     'bci/rust_1.66',
+    'bci/rust_1.67',
     'suse/registry_2.8'
 ]
 
