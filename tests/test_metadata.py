@@ -55,6 +55,9 @@ from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PCP_CONTAINER
+from bci_tester.data import PHP_8_APACHE
+from bci_tester.data import PHP_8_CLI
+from bci_tester.data import PHP_8_FPM
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
@@ -106,6 +109,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (INIT_CONTAINER, "init", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
+        (PHP_8_APACHE, "php", ImageType.LANGUAGE_STACK),
+        (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
+        (PHP_8_FPM, "php", ImageType.LANGUAGE_STACK),
     ]
     + [
         (rust_container, "rust", ImageType.LANGUAGE_STACK)
