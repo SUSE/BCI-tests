@@ -328,7 +328,6 @@ RUST_CONTAINERS = [
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
-    default_entry_point=True,
     available_versions=["15.4", "15.5"],
     healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
@@ -347,14 +346,12 @@ PCP_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=44322)],
     healthcheck_timeout=timedelta(seconds=240),
     extra_launch_args=[] if DOCKER_SELECTED else ["--systemd", "always"],
-    default_entry_point=True,
     bci_type=ImageType.APPLICATION,
 )
 
 CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
     bci_type=ImageType.APPLICATION,
-    default_entry_point=True,
     healthcheck_timeout=timedelta(seconds=240),
     extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
     forwarded_ports=[PortForwarding(container_port=3389)],
@@ -381,7 +378,6 @@ DISTRIBUTION_CONTAINER = create_BCI(
     build_tag="suse/registry:2.8",
     image_type="kiwi",
     forwarded_ports=[PortForwarding(container_port=5000)],
-    default_entry_point=True,
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
