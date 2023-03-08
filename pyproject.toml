@@ -52,7 +52,7 @@ markers = [
     'bci/dotnet-aspnet_6.0',
     'bci/dotnet-aspnet_7.0',
     'suse/389-ds_2.0',
-    'suse/pcp_5.2.2',
+    'suse/pcp_5',
     'bci/rust_1.65',
     'bci/rust_1.66',
     'bci/rust_1.67',

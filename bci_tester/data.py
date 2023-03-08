@@ -339,7 +339,7 @@ INIT_CONTAINER = create_BCI(
 )
 
 PCP_CONTAINER = create_BCI(
-    build_tag="suse/pcp:5.2.2",
+    build_tag="suse/pcp:5",
     extra_marks=[
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
