@@ -1,5 +1,4 @@
-"""Verification of the container metadata that are available via the registry
-leveraging mostly :command:`skopeo`.
+"""Verification of the container metadata that are available via the registry.
 
 These tests are host OS independent and it is thus not necessary to run them on
 a non-x86_64 host.
@@ -14,16 +13,13 @@ to skip some of the tests for the SLE 15 SP3 base container, as it does not
 offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
-import enum
-import json
 from subprocess import check_output
-from typing import Any
 from typing import List
 
 import pytest
 from _pytest.mark.structures import ParameterSet
 from pytest_container import OciRuntimeBase
-from pytest_container.container import container_from_pytest_param
+from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ALL_CONTAINERS
@@ -188,30 +184,13 @@ assert len(ALL_CONTAINERS) == len(
 ), "IMAGES_AND_NAMES must have all containers from BASE_CONTAINERS"
 
 
-def get_container_metadata(container_data: ParameterSet) -> Any:
-    """Helper function that fetches the container metadata via :command:`skopeo
-    inspect` of the container's base image.
-
-    """
-    return json.loads(
-        check_output(
-            [
-                "skopeo",
-                "inspect",
-                f"docker://{container_from_pytest_param(container_data).get_base().url}",
-            ],
-        )
-        .decode()
-        .strip()
-    )
-
-
 @pytest.mark.parametrize(
-    "container_data,container_name,container_type",
+    "container,container_name,container_type",
     IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    indirect=["container"],
 )
 def test_general_labels(
-    container_data: ParameterSet,
+    container: ContainerData,
     container_name: str,
     container_type: ImageType,
 ):
@@ -227,21 +206,9 @@ def test_general_labels(
     - ``$label=vendor`` equals :py:const:`VENDOR`
 
     """
-    metadata = get_container_metadata(container_data)
 
-    assert (
-        metadata["Name"]
-        == container_from_pytest_param(container_data)
-        .get_base()
-        .url.split(":")[0]
-    )
-
-    labels = metadata["Labels"]
-    version = (
-        container_from_pytest_param(container_data)
-        .get_base()
-        .url.split(":")[-1]
-    )
+    labels = container.inspect.config.labels
+    version = container.container.get_base().url.split(":")[-1]
 
     for prefix in (
         _get_container_label_prefix(container_name, container_type),
@@ -268,11 +235,12 @@ def test_general_labels(
 
 
 @pytest.mark.parametrize(
-    "container_data,container_name,container_type",
+    "container,container_name,container_type",
     IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    indirect=["container"],
 )
 def test_disturl(
-    container_data: ParameterSet,
+    container: ContainerData,
     container_name: str,
     container_type: ImageType,
 ):
@@ -284,7 +252,7 @@ def test_disturl(
     ``com.suse.bci.$name.disturl``.
 
     """
-    labels = get_container_metadata(container_data)["Labels"]
+    labels = container.inspect.config.labels
 
     disturl = labels["org.openbuildservice.disturl"]
     assert (
@@ -294,10 +262,7 @@ def test_disturl(
         ]
     )
 
-    if (
-        "opensuse.org"
-        in container_from_pytest_param(container_data).get_base().url
-    ):
+    if "opensuse.org" in container.container.get_base().url:
         assert (
             f"obs://build.opensuse.org/devel:BCI:SLE-15-SP{OS_SP_VERSION}"
             in disturl
@@ -313,9 +278,9 @@ def test_disturl(
     not LOCALHOST.exists("osc"),
     reason="osc needs to be installed for this test",
 )
-@pytest.mark.parametrize("container_data", ALL_CONTAINERS)
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
 def test_disturl_can_be_checked_out(
-    container_data: ParameterSet,
+    container: ContainerData,
     tmp_path,
 ):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
@@ -328,21 +293,20 @@ def test_disturl_can_be_checked_out(
     when `<https://build.suse.de>`_ is unreachable.
 
     """
-    labels = get_container_metadata(container_data)["Labels"]
-
-    disturl = labels["org.openbuildservice.disturl"]
+    disturl = container.inspect.config.labels["org.openbuildservice.disturl"]
     check_output(["osc", "co", disturl], cwd=tmp_path)
 
 
 @pytest.mark.parametrize(
-    "container_data,container_type",
+    "container,container_type",
     [
         pytest.param(param.values[0], param.values[2], marks=param.marks)
         for param in IMAGES_AND_NAMES
     ],
+    indirect=["container"],
 )
 def test_image_type_label(
-    container_data: ParameterSet,
+    container: ContainerData,
     container_type: ImageType,
 ):
     """Check that all non-application containers have the label
@@ -350,57 +314,53 @@ def test_image_type_label(
     containers have it set to ``application``.
 
     """
-    metadata = get_container_metadata(container_data)
+    labels = container.inspect.config.labels
     if container_type == ImageType.APPLICATION:
         assert (
-            metadata["Labels"]["com.suse.image-type"] == "application"
+            labels["com.suse.image-type"] == "application"
         ), "application container images must be marked as such"
     else:
         assert (
-            metadata["Labels"]["com.suse.image-type"] == "sle-bci"
+            labels["com.suse.image-type"] == "sle-bci"
         ), "sle-bci images must be marked as such"
 
 
 @pytest.mark.parametrize(
-    "container_data",
+    "container",
     [cont for cont in ALL_CONTAINERS if cont not in L3_CONTAINERS],
+    indirect=True,
 )
-def test_techpreview_label(
-    container_data: ParameterSet,
-):
+def test_techpreview_label(container: ContainerData):
     """Check that containers that are not L3 supported have the label
     ``com.suse.supportlevel`` set to ``techpreview``.
     Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
     """
-    metadata = get_container_metadata(container_data)
     assert (
-        metadata["Labels"]["com.suse.supportlevel"] == "techpreview"
+        container.inspect.config.labels["com.suse.supportlevel"]
+        == "techpreview"
     ), "images must be marked as techpreview"
 
 
 @pytest.mark.parametrize(
-    "container_data",
-    [cont for cont in L3_CONTAINERS],
+    "container", [cont for cont in L3_CONTAINERS], indirect=True
 )
-def test_l3_label(
-    container_data: ParameterSet,
-):
+def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label
     ``com.suse.supportlevel`` set to ``l3``.
     Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
     """
-    metadata = get_container_metadata(container_data)
     assert (
-        metadata["Labels"]["com.suse.supportlevel"] == "l3"
+        container.inspect.config.labels["com.suse.supportlevel"] == "l3"
     ), "image supportlevel must be marked as L3"
 
 
 @pytest.mark.parametrize(
-    "container_data,container_name,container_type",
+    "container,container_name,container_type",
     IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    indirect=["container"],
 )
 def test_reference(
-    container_data: ParameterSet,
+    container: ContainerData,
     container_name: str,
     container_type: ImageType,
     container_runtime: OciRuntimeBase,
@@ -413,7 +373,7 @@ def test_reference(
     the reference and that the reference begins with ``registry.suse.com/bci/``.
 
     """
-    labels = get_container_metadata(container_data)["Labels"]
+    labels = container.inspect.config.labels
 
     reference = labels["org.opensuse.reference"]
     assert (
