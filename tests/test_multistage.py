@@ -194,10 +194,15 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 \x1b[40m\x1b[32minfo\x1b[39m\x1b[22m\x1b[49m: Microsoft.Hosting.Lifetime[0]
       Content root path: /app
 """,
-            marks=pytest.mark.skipif(
-                LOCALHOST.system_info.arch != "x86_64",
-                reason="The dotnet containers are only available for x86_64",
-            ),
+            marks=[
+                pytest.mark.skipif(
+                    LOCALHOST.system_info.arch != "x86_64",
+                    reason="The dotnet containers are only available for x86_64",
+                ),
+                pytest.mark.skip(
+                    reason="This relies on .Net 5, which reached Eol, see: https://github.com/phillipsj/adventureworks-k8s-sample/issues/4"
+                ),
+            ],
         ),
     ],
     indirect=["host_git_clone"],

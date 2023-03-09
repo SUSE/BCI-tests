@@ -27,7 +27,6 @@ What do I need to contribute?
 * tox
 * go
 * docker and/or podman+buildah
-* skopeo (only required for the metadata tests)
 * vagrant (optional, can be used to test FIPS mode and registered hosts)
 
 How can I run the tests?
