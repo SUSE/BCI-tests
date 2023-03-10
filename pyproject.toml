@@ -58,7 +58,12 @@ markers = [
     'suse/registry_2.8',
     'bci/php_8',
     'bci/php-apache_8',
-    'bci/php-fpm_8'
+    'bci/php-fpm_8',
+    'suse/registry_2.8',
+    'suse/postgres_10',
+    'suse/postgres_12',
+    'suse/postgres_13',
+    'suse/postgres_14',
 ]
 
 [tool.black]

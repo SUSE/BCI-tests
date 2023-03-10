@@ -366,6 +366,18 @@ PHP_8_FPM = create_BCI(
     image_type="dockerfile",
 )
 
+POSTGRES_PASSWORD = "n0ts3cr3t"
+
+POSTGRESQL_CONTAINERS = [
+    create_BCI(
+        build_tag=f"suse/postgres:{pg_ver}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=5432)],
+        extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
+    )
+    for pg_ver in (10, 12, 13, 14)
+]
+
 REPOCLOSURE_CONTAINER = DerivedContainer(
     base="registry.fedoraproject.org/fedora:latest",
     containerfile=r"""RUN dnf -y install 'dnf-command(repoclosure)'
@@ -423,6 +435,7 @@ CONTAINERS_WITH_ZYPPER = (
     ]
     + GOLANG_CONTAINERS
     + RUST_CONTAINERS
+    + POSTGRESQL_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
 
@@ -454,6 +467,7 @@ L3_CONTAINERS = (
     ]
     + GOLANG_CONTAINERS
     + RUST_CONTAINERS
+    + POSTGRESQL_CONTAINERS
 )
 
 #: Containers that are directly pulled from registry.suse.de
