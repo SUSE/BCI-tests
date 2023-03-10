@@ -189,7 +189,7 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES
-), "IMAGES_AND_NAMES must have all containers from BASE_CONTAINERS"
+), "IMAGES_AND_NAMES must have all containers from ALL_CONTAINERS"
 
 
 @pytest.mark.parametrize(
