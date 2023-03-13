@@ -4,6 +4,7 @@ This module contains tests that are run for **all** containers.
 import pytest
 from _pytest.config import Config
 from pytest_container import Container
+from pytest_container import container_from_pytest_param
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
@@ -14,6 +15,7 @@ from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PCP_CONTAINER
+from bci_tester.data import POSTGRESQL_CONTAINERS
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -101,12 +103,28 @@ def test_glibc_present(auto_container):
 
 @pytest.mark.parametrize(
     "container",
-    [c for c in ALL_CONTAINERS if (c not in [INIT_CONTAINER, PCP_CONTAINER])],
+    [
+        c
+        for c in ALL_CONTAINERS
+        if (c not in [INIT_CONTAINER, PCP_CONTAINER] + POSTGRESQL_CONTAINERS)
+    ]
+    + [
+        pytest.param(
+            container_from_pytest_param(pg_cont),
+            marks=(
+                pg_cont.marks
+                + [
+                    pytest.mark.xfail(
+                        reason="systemd is in the postgresql containers, bsc#1209208"
+                    )
+                ]
+            ),
+        )
+        for pg_cont in POSTGRESQL_CONTAINERS
+    ],
     indirect=True,
 )
-def test_systemd_not_installed_in_all_containers_except_init(
-    container,
-):
+def test_systemd_not_installed_in_all_containers_except_init(container):
     """Ensure that systemd is not present in all containers besides the init
     and pcp containers.
 
