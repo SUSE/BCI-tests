@@ -71,6 +71,8 @@ if TARGET not in ("obs", "ibs", "ibs-cr", "dso"):
         raise ValueError(
             f"Unknown target {TARGET} specified and BASEURL is not set, cannot continue"
         )
+    if BASEURL.endswith("/"):
+        BASEURL = BASEURL[:-1]
 else:
     _SLE_SP = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
     BASEURL = {
@@ -357,6 +359,18 @@ CONTAINER_389DS = create_BCI(
     forwarded_ports=[PortForwarding(container_port=3389)],
 )
 
+PHP_8_CLI = create_BCI(
+    build_tag="bci/php:8",
+    image_type="dockerfile",
+)
+PHP_8_APACHE = create_BCI(
+    build_tag="bci/php-apache:8",
+    image_type="dockerfile",
+)
+PHP_8_FPM = create_BCI(
+    build_tag="bci/php-fpm:8",
+    image_type="dockerfile",
+)
 
 REPOCLOSURE_CONTAINER = DerivedContainer(
     base="registry.fedoraproject.org/fedora:latest",
@@ -413,6 +427,9 @@ CONTAINERS_WITH_ZYPPER = (
         RUBY_25_CONTAINER,
         INIT_CONTAINER,
         CONTAINER_389DS,
+        PHP_8_APACHE,
+        PHP_8_CLI,
+        PHP_8_FPM,
     ]
     + RUST_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])

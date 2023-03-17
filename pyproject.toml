@@ -56,7 +56,10 @@ markers = [
     'bci/rust_1.65',
     'bci/rust_1.66',
     'bci/rust_1.67',
-    'suse/registry_2.8'
+    'suse/registry_2.8',
+    'bci/php_8',
+    'bci/php-apache_8',
+    'bci/php-fpm_8'
 ]
 
 [tool.black]
