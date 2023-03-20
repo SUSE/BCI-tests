@@ -47,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: ["3.6", "3.9", "3.10"]
+        python_version: ["3.6", "3.9", "3.10", "3.11"]
     container:
       image: registry.suse.com/bci/python:${{ matrix.python_version }}
     steps:
