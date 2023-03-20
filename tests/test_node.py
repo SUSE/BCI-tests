@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 import pytest
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
@@ -48,20 +50,28 @@ def test_node_version(auto_container):
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/expressjs/express.git",
-                build_command="""npm config set shrinkwrap false &&
-                    npm rm --silent --save-dev connect-redis &&
-                    npm run test -- --timeout 7500 &&
-                    npm run lint
-                    """,
+                build_command=dedent(
+                    """if [[ "$(npm config get package-lock)" == "true" ]]; then
+                    npm config set package-lock false
+                else
+                    npm config set shrinkwrap false
+                fi &&
+                npm rm --silent --save-dev connect-redis &&
+                npm run test -- --timeout 7500 &&
+                npm run lint
+                """
+                ),
             ),
             GitRepositoryBuild(
-                build_command="""npm -g install yarn &&
+                build_command=dedent(
+                    """npm -g install yarn &&
                     yarn install &&
                     yarn add react@16 &&
                     yarn run pretest &&
                     yarn run tests-only &&
                     yarn run build
-                    """,
+                    """
+                ),
                 repository_url="https://github.com/facebook/prop-types",
             ),
             GitRepositoryBuild(
