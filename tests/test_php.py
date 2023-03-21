@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-from dataclasses import field
-from typing import List
 from typing import Literal
 
 import pytest
@@ -151,13 +148,6 @@ def test_install_phpize_deps(auto_container_per_test: ContainerData):
     )
     auto_container_per_test.connection.run_expect([0], "touch config.m4")
     auto_container_per_test.connection.run_expect([0], "phpize")
-
-
-@dataclass
-class PhpExtension:
-    name: str
-    extra_dependencies: List[str] = field(default_factory=list)
-    configure_flags: str = ""
 
 
 @pytest.mark.parametrize("extension", ["pcntl", "gd"])
