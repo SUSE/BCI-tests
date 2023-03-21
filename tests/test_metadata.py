@@ -108,9 +108,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (INIT_CONTAINER, "init", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
-        (PHP_8_APACHE, "php", ImageType.LANGUAGE_STACK),
+        (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
-        (PHP_8_FPM, "php", ImageType.LANGUAGE_STACK),
+        (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
     ]
     + [
         (rust_container, "rust", ImageType.LANGUAGE_STACK)
