@@ -335,9 +335,7 @@ def test_techpreview_label(container: ContainerData):
     ), "images must be marked as techpreview"
 
 
-@pytest.mark.parametrize(
-    "container", [cont for cont in L3_CONTAINERS], indirect=True
-)
+@pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label
     ``com.suse.supportlevel`` set to ``l3``.

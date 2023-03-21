@@ -189,16 +189,13 @@ def test_microsoft_dotnet_repository(container_per_test):
                 [0], f"zypper -x se {extra_search_flags} -r {MS_REPO_NAME}"
             ).stdout.strip()
         )
-        solvable_list = [
-            se_child
-            for se_child in (
-                [
-                    child
-                    for child in zypper_xml_out
-                    if child.tag == "search-result"
-                ][0]
-            )
-        ]
+        solvable_list = list(
+            [
+                child
+                for child in zypper_xml_out
+                if child.tag == "search-result"
+            ][0]
+        )
         assert len(solvable_list) == 1
         pkg_names = [
             pkg.get("name")
