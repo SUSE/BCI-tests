@@ -272,10 +272,6 @@ DOTNET_SDK_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:3.1",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-DOTNET_SDK_5_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-sdk:5.0",
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
 DOTNET_SDK_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:6.0",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
@@ -289,10 +285,6 @@ DOTNET_ASPNET_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:3.1",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-DOTNET_ASPNET_5_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-aspnet:5.0",
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
 DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:6.0",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
@@ -304,10 +296,6 @@ DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
 
 DOTNET_RUNTIME_3_1_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:3.1",
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
-DOTNET_RUNTIME_5_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-runtime:5.0",
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
@@ -398,15 +386,12 @@ DISTRIBUTION_CONTAINER = create_BCI(
 
 DOTNET_CONTAINERS = [
     DOTNET_SDK_3_1_CONTAINER,
-    DOTNET_SDK_5_0_CONTAINER,
     DOTNET_SDK_6_0_CONTAINER,
     DOTNET_SDK_7_0_CONTAINER,
     DOTNET_ASPNET_3_1_CONTAINER,
-    DOTNET_ASPNET_5_0_CONTAINER,
     DOTNET_ASPNET_6_0_CONTAINER,
     DOTNET_ASPNET_7_0_CONTAINER,
     DOTNET_RUNTIME_3_1_CONTAINER,
-    DOTNET_RUNTIME_5_0_CONTAINER,
     DOTNET_RUNTIME_6_0_CONTAINER,
     DOTNET_RUNTIME_7_0_CONTAINER,
 ]
