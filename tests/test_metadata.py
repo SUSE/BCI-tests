@@ -408,4 +408,8 @@ def test_reference(
         version, _ = version_release.split("-")
         ref = f"{name}:{version}"
 
-    LOCALHOST.run_expect([0], f"{container_runtime.runner_binary} pull {ref}")
+    output = LOCALHOST.run_expect(
+        [0, 125], f"{container_runtime.runner_binary} pull {ref}"
+    )
+    if output.rc != 0:
+        pytest.xfail("Reference container image is not published yet")
