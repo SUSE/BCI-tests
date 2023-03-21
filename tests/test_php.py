@@ -1,3 +1,4 @@
+"""Tests for the PHP-cli, -apache and -fpm containers."""
 from typing import Literal
 
 import pytest
@@ -142,6 +143,10 @@ MEDIAWIKI_FPM_POD = Pod(
 
 
 def test_install_phpize_deps(auto_container_per_test: ContainerData):
+    """Check that we can install whatever is in the environment variable
+    ``PHPIZE_DEPS`` and that afterwards :command:`phpize` works.
+
+    """
     auto_container_per_test.connection.run_expect(
         [0],
         "zypper -n in $PHPIZE_DEPS",
@@ -154,6 +159,12 @@ def test_install_phpize_deps(auto_container_per_test: ContainerData):
 def test_install_php_extension_via_script(
     auto_container_per_test: ContainerData, extension: str
 ):
+    """Verify that :command:`docker-php-ext-configuer $ex &&
+    docker-php-ext-install` works for the ``pcntl`` and ``gd`` extensions and
+    that both are present in the output of :command:`php -m` after running the
+    former command.
+
+    """
     auto_container_per_test.connection.run_expect(
         [0], f"docker-php-ext-configure {extension}"
     )
@@ -170,6 +181,11 @@ def test_install_php_extension_via_script(
 def test_install_multiple_extensions_via_script(
     auto_container_per_test: ContainerData,
 ) -> None:
+    """Try to install multiple extensions at the same time via
+    :commad:`docker-php-ext-install $ext1 $ext2` and check that they have
+    actually been installed via :command:`zypper`.
+
+    """
     extensions = [
         "calendar",
         "intl",
@@ -194,6 +210,11 @@ def test_install_multiple_extensions_via_script(
 def test_zypper_install_php_extensions(
     auto_container_per_test: ContainerData, extension_name: str
 ):
+    """Test that the ``gd`` extension is not registered with php before
+    installing ``php$ver-gd``, and that it is after installing the package
+    ``php$ver-gd``.
+
+    """
     assert (
         extension_name
         not in auto_container_per_test.connection.run_expect(
@@ -217,6 +238,16 @@ def test_zypper_install_php_extensions(
 def test_environment_variables(
     container_per_test: ContainerData, flavor: PHP_FLAVOR_T
 ):
+    """Sanity check of the environment variables:
+    - ``PHP_VERSION``
+    - ``COMPOSER_VERSION``
+    - ``PHP_INI_DIR``
+
+    and for the php-apache variant additionally:
+    - ``APACHE_CONFDIR``
+    - ``APACHE_ENVVARS``
+    """
+
     def get_env_var(env_var: str) -> str:
         return container_per_test.connection.run_expect(
             [0], f"echo ${env_var}"
@@ -255,7 +286,12 @@ def test_cli_entry_point(
     container_runtime: OciRuntimeBase,
     host,
     pytestconfig: pytest.Config,
-):
+) -> None:
+    """Smoke test of the entrypoint of the php-cli variant: run the container
+    and verify that the arguments ``-r 'print_r(get_defined_constants());'`` are
+    forwarded to :command:`php`.
+
+    """
     container_image.prepare_container(pytestconfig.rootpath)
 
     assert (
@@ -276,6 +312,12 @@ def test_mediawiki_php_apache(
     container_per_test: ContainerData,
     host,
 ) -> None:
+    """Application test of the php-apache variant.
+
+    This test builds mediawiki deployed via mod_php. The test itself just checks
+    if the container is reachable using curl.
+
+    """
     host.run_expect(
         [0],
         f"curl --fail http://localhost:{container_per_test.forwarded_ports[0].host_port}",
@@ -288,7 +330,14 @@ def test_mediawiki_php_apache(
 def test_mediawiki_fpm_build(
     pod_per_test: PodData,
     host,
-):
+) -> None:
+    """Application test of the php-fpm variant.
+
+    This test builds mediawiki deployed via fpm with a nginx proxy infront of
+    it, both deployed via two containers in a podman pod.  The test itself just
+    checks if the pod is reachable using curl.
+
+    """
     host.run_expect(
         [0],
         f"curl --fail http://localhost:{pod_per_test.forwarded_ports[0].host_port}",
