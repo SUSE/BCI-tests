@@ -1,7 +1,6 @@
 """Tests of the OpenJDK base container."""
 import os.path
 import re
-import stat
 import time
 from dataclasses import dataclass
 from dataclasses import field
