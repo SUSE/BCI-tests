@@ -89,9 +89,7 @@ class TestSystemd:
             "0 loaded units listed" in output.stdout
         ), "failed systemd units detected"
 
-    def test_systemd_detect_virt(
-        self, auto_container, host, container_runtime
-    ):
+    def test_systemd_detect_virt(self, auto_container, container_runtime):
         """
         Ensure :command:`systemd-detect-virt` detects the container runtime
         """
@@ -116,7 +114,7 @@ class TestSystemd:
             "Reached target Multi-User System" in journal.stdout
         ), "Multi-User target was not reached"
 
-    def test_hostnamectl(self, auto_container, host, container_runtime):
+    def test_hostnamectl(self, auto_container, container_runtime):
         """
         Ensure :command:`hostnamectl` works correctly by asserting expected values
         """
