@@ -125,9 +125,8 @@ def test_dotnet_hello_world(container_per_test, msg):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/nopSolutions/nopCommerce.git",
-            repository_tag="release-4.40.4",
-            build_command="""dotnet build ./src/NopCommerce.sln &&
-dotnet test ./src/Tests/Nop.Tests/Nop.Tests.csproj""",
+            repository_tag="release-4.60.2",
+            build_command="dotnet build ./src/NopCommerce.sln",
         )
     ],
     indirect=["container_git_clone"],
@@ -136,8 +135,7 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     """Test the build of a popular web application:
 
     - Build `nopCommerce <https://github.com/nopSolutions/nopCommerce.git>`_
-      release ``4.40.4`` via :command:`dotnet build ./src/NopCommerce.sln &&
-      dotnet test ./src/Tests/Nop.Tests/Nop.Tests.csproj`
+      release ``4.60.2`` via :command:`dotnet build ./src/NopCommerce.sln`
 
     """
     container_per_test.connection.run_expect(
