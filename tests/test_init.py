@@ -64,7 +64,7 @@ class TestSystemd:
             )  # pick the the next word after the prefix, i.e. this should contain the time
             if t.endswith("ms"):
                 return float(t[:-2]) / 1000.0
-            elif t.endswith("s"):
+            if t.endswith("s"):
                 return float(t[:-1])
             raise ValueError("time unit not recognized")
 
