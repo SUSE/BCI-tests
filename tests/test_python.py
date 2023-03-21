@@ -121,7 +121,7 @@ def test_pip_install_source_cryptography(auto_container_per_test):
     # install dependencies
     auto_container_per_test.connection.run_expect(
         [0],
-        f"zypper --non-interactive in cargo libffi-devel openssl-devel gcc tar gzip",
+        "zypper --non-interactive in cargo libffi-devel openssl-devel gcc tar gzip",
     )
 
     # pin cryptography to a version that works with SLE BCI

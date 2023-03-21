@@ -78,7 +78,7 @@ else:
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{_SLE_SP}",
         "ibs": f"registry.suse.de/suse/{_SLE_SP}/update/bci",
-        "dso": f"registry1.dso.mil/ironbank/suse",
+        "dso": "registry1.dso.mil/ironbank/suse",
         "ibs-cr": f"registry.suse.de/suse/{_SLE_SP}/update/cr/totest",
     }[TARGET]
 
