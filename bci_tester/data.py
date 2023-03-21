@@ -246,6 +246,7 @@ BUSYBOX_CONTAINER = create_BCI(
 
 GO_1_18_CONTAINER = create_BCI(build_tag="bci/golang:1.18")
 GO_1_19_CONTAINER = create_BCI(build_tag="bci/golang:1.19")
+GO_1_20_CONTAINER = create_BCI(build_tag="bci/golang:1.20")
 
 
 OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
@@ -414,6 +415,7 @@ CONTAINERS_WITH_ZYPPER = (
         BASE_CONTAINER,
         GO_1_18_CONTAINER,
         GO_1_19_CONTAINER,
+        GO_1_20_CONTAINER,
         OPENJDK_11_CONTAINER,
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_17_CONTAINER,
@@ -450,6 +452,7 @@ L3_CONTAINERS = [
     BUSYBOX_CONTAINER,
     GO_1_18_CONTAINER,
     GO_1_19_CONTAINER,
+    GO_1_20_CONTAINER,
     NODEJS_14_CONTAINER,
     NODEJS_16_CONTAINER,
     NODEJS_18_CONTAINER,

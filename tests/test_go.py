@@ -10,6 +10,7 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import GO_1_19_CONTAINER
+from bci_tester.data import GO_1_20_CONTAINER
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: Maximum go container size in Bytes
@@ -18,6 +19,7 @@ GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 CONTAINER_IMAGES = [
     GO_1_18_CONTAINER,
     GO_1_19_CONTAINER,
+    GO_1_20_CONTAINER,
 ]
 
 

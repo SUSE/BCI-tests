@@ -40,6 +40,7 @@ from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
 from bci_tester.data import GO_1_19_CONTAINER
+from bci_tester.data import GO_1_20_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
@@ -88,6 +89,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
         (GO_1_18_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (GO_1_19_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
+        (GO_1_20_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
         (
             OPENJDK_DEVEL_11_CONTAINER,
