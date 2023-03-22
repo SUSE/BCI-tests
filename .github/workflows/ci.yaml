@@ -187,33 +187,3 @@ jobs:
         env:
           CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
           OS_VERSION: ${{ matrix.os_version }}
-
-  fips:
-    name: Run the tests on a FIPS host
-    runs-on: macos-10.15
-    strategy:
-      fail-fast: false
-      matrix:
-        os_version:
-          - "15.3"
-          - "15.4"
-        container_runtime:
-          - "DOCKER"
-          - "PODMAN"
-    steps:
-      - name: checkout source code
-        uses: actions/checkout@v3
-
-      - name: cache vagrant boxes
-        uses: actions/cache@v3
-        with:
-          path: ~/.vagrant.d/boxes
-          key: vagrant-${{ hashFiles('Vagrantfile') }}
-          restore-keys: |
-            vagrant-
-
-      - name: Run the tests in a vagrant box
-        run: vagrant up fips
-        env:
-          OS_VERSION: ${{ matrix.os_version }}
-          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}

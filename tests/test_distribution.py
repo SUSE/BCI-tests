@@ -1,13 +1,10 @@
 """ Tests for the distribution container """
 import json
-import os
 import textwrap
 
-import pytest
 from pytest_container import OciRuntimeBase
 
 from bci_tester.data import DISTRIBUTION_CONTAINER
-from bci_tester.runtime_choice import DOCKER_SELECTED
 
 CONTAINER_IMAGES = [DISTRIBUTION_CONTAINER]
 

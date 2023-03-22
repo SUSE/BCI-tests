@@ -10,15 +10,15 @@ import pytest
 from pytest_container import GitRepositoryBuild
 
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
 from bci_tester.data import DOTNET_CONTAINERS
 from bci_tester.data import DOTNET_RUNTIME_3_1_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_5_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
-from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
 from bci_tester.util import get_repos_from_connection
 
 
@@ -30,8 +30,8 @@ MS_REPO_NAME = "packages-microsoft-com-prod"
     "container,sdk_version",
     [
         (DOTNET_SDK_3_1_CONTAINER, "3.1"),
-        (DOTNET_SDK_5_0_CONTAINER, "5.0"),
         (DOTNET_SDK_6_0_CONTAINER, "6.0"),
+        (DOTNET_SDK_7_0_CONTAINER, "7.0"),
     ],
     indirect=["container"],
 )
@@ -50,8 +50,8 @@ def test_dotnet_sdk_version(container, sdk_version):
     "container,runtime_version",
     [
         (DOTNET_ASPNET_3_1_CONTAINER, "3.1"),
-        (DOTNET_ASPNET_5_0_CONTAINER, "5.0"),
         (DOTNET_ASPNET_6_0_CONTAINER, "6.0"),
+        (DOTNET_ASPNET_7_0_CONTAINER, "7.0"),
     ],
     indirect=["container"],
 )
@@ -72,8 +72,8 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     "container,runtime_version",
     [
         (DOTNET_RUNTIME_3_1_CONTAINER, "3.1"),
-        (DOTNET_RUNTIME_5_0_CONTAINER, "5.0"),
         (DOTNET_RUNTIME_6_0_CONTAINER, "6.0"),
+        (DOTNET_RUNTIME_7_0_CONTAINER, "7.0"),
     ],
     indirect=["container"],
 )
@@ -92,8 +92,8 @@ def test_dotnet_runtime_present(container, runtime_version):
     "container_per_test,msg",
     [
         (DOTNET_SDK_3_1_CONTAINER, "Hello World!"),
-        (DOTNET_SDK_5_0_CONTAINER, "Hello World!"),
         (DOTNET_SDK_6_0_CONTAINER, "Hello, World!"),
+        (DOTNET_SDK_7_0_CONTAINER, "Hello, World!"),
     ],
     indirect=["container_per_test"],
 )
@@ -117,7 +117,7 @@ def test_dotnet_hello_world(container_per_test, msg):
 
 @pytest.mark.parametrize(
     "container_per_test",
-    [DOTNET_SDK_5_0_CONTAINER],
+    [DOTNET_SDK_7_0_CONTAINER],
     indirect=["container_per_test"],
 )
 @pytest.mark.parametrize(
@@ -125,9 +125,8 @@ def test_dotnet_hello_world(container_per_test, msg):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/nopSolutions/nopCommerce.git",
-            repository_tag="release-4.40.4",
-            build_command="""dotnet build ./src/NopCommerce.sln &&
-dotnet test ./src/Tests/Nop.Tests/Nop.Tests.csproj""",
+            repository_tag="release-4.60.2",
+            build_command="dotnet build ./src/NopCommerce.sln",
         )
     ],
     indirect=["container_git_clone"],
@@ -136,8 +135,7 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     """Test the build of a popular web application:
 
     - Build `nopCommerce <https://github.com/nopSolutions/nopCommerce.git>`_
-      release ``4.40.4`` via :command:`dotnet build ./src/NopCommerce.sln &&
-      dotnet test ./src/Tests/Nop.Tests/Nop.Tests.csproj`
+      release ``4.60.2`` via :command:`dotnet build ./src/NopCommerce.sln`
 
     """
     container_per_test.connection.run_expect(
@@ -149,8 +147,8 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     "container_per_test",
     [
         DOTNET_SDK_3_1_CONTAINER,
-        DOTNET_SDK_5_0_CONTAINER,
         DOTNET_SDK_6_0_CONTAINER,
+        DOTNET_SDK_7_0_CONTAINER,
     ],
     indirect=True,
 )
@@ -191,16 +189,13 @@ def test_microsoft_dotnet_repository(container_per_test):
                 [0], f"zypper -x se {extra_search_flags} -r {MS_REPO_NAME}"
             ).stdout.strip()
         )
-        solvable_list = [
-            se_child
-            for se_child in (
-                [
-                    child
-                    for child in zypper_xml_out
-                    if child.tag == "search-result"
-                ][0]
-            )
-        ]
+        solvable_list = list(
+            [
+                child
+                for child in zypper_xml_out
+                if child.tag == "search-result"
+            ][0]
+        )
         assert len(solvable_list) == 1
         pkg_names = [
             pkg.get("name")

@@ -1,7 +1,6 @@
 """Tests of the OpenJDK base container."""
 import os.path
 import re
-import stat
 import time
 from dataclasses import dataclass
 from dataclasses import field
@@ -272,7 +271,7 @@ def test_jdk_cassandra(container_per_test):
 
     check_str = "state jump to NORMAL"
     found = False
-    for t in range(80):
+    for _ in range(80):
         time.sleep(10)
         if (
             check_str

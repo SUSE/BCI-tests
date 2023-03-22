@@ -27,15 +27,12 @@ from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_5_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_3_1_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_5_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
-from bci_tester.data import DOTNET_SDK_5_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
 from bci_tester.data import GO_1_18_CONTAINER
@@ -111,9 +108,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (INIT_CONTAINER, "init", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
-        (PHP_8_APACHE, "php", ImageType.LANGUAGE_STACK),
+        (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
-        (PHP_8_FPM, "php", ImageType.LANGUAGE_STACK),
+        (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
     ]
     + [
         (rust_container, "rust", ImageType.LANGUAGE_STACK)
@@ -122,16 +119,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + (
         [
             (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
-            (DOTNET_SDK_5_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_7_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (
                 DOTNET_ASPNET_3_1_CONTAINER,
-                "dotnet.aspnet",
-                ImageType.LANGUAGE_STACK,
-            ),
-            (
-                DOTNET_ASPNET_5_0_CONTAINER,
                 "dotnet.aspnet",
                 ImageType.LANGUAGE_STACK,
             ),
@@ -147,11 +138,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             ),
             (
                 DOTNET_RUNTIME_3_1_CONTAINER,
-                "dotnet.runtime",
-                ImageType.LANGUAGE_STACK,
-            ),
-            (
-                DOTNET_RUNTIME_5_0_CONTAINER,
                 "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
             ),
@@ -349,9 +335,7 @@ def test_techpreview_label(container: ContainerData):
     ), "images must be marked as techpreview"
 
 
-@pytest.mark.parametrize(
-    "container", [cont for cont in L3_CONTAINERS], indirect=True
-)
+@pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label
     ``com.suse.supportlevel`` set to ``l3``.
