@@ -205,7 +205,7 @@ jobs:
           -----END PGP PUBLIC KEY BLOCK-----
 
       - name: Run tox job
-        run: sudo --preserve-env tox -e ${{ matrix.toxenv }}
+        run: sudo --preserve-env tox -e ${{ matrix.toxenv }} -- -n auto
         env:
           CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
           OS_VERSION: ${{ matrix.os_version }}
