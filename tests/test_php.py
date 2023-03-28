@@ -1,5 +1,8 @@
 """Tests for the PHP-cli, -apache and -fpm containers."""
-from typing import Literal
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 import pytest
 from pytest_container import container_from_pytest_param
