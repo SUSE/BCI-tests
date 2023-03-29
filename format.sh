@@ -7,5 +7,5 @@ fi
 
 black . ${args}
 for f in $(git ls-files|grep '.*py$'); do
-    reorder-python-imports $f
+    reorder-python-imports "$f"
 done
