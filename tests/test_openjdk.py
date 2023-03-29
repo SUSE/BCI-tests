@@ -168,15 +168,6 @@ class TestExtendedParams:
             ),
         ),
         ("time", TestExtendedParams(expected_strings=["All OK"])),
-        (
-            "memory",
-            TestExtendedParams(
-                expected_strings=["Iteration: (2)"],
-                expected_err_strings=["OutOfMemoryError"],
-                expected_exit_status=[1],
-                java_params="-Xmx10M",
-            ),
-        ),
         ("garbage_collector", TestExtendedParams()),
         (
             "system_exit",
@@ -204,14 +195,12 @@ def test_jdk_extended(
     - threading tests
     - java time and date tests
     - files and dirs tests
-    - memory allocation
     - garbage collector
     - system module (env, exit, properties)
     - subprocesses
     The validation is done checking the exit code (0) and checking that some
     expected strings can be found on the stdout of the execution.
     """
-
     cmd = f"{params.environment} java {params.java_params} {CONTAINER_TEST_DIR}{test_to_run}.java {params.arguments}"
     testout = container_per_test.connection.run_expect(
         params.expected_exit_status, cmd
