@@ -149,8 +149,10 @@ def test_pip_install_source_cryptography(auto_container_per_test):
 @pytest.mark.parametrize(
     "container_per_test", CONTAINER_IMAGES_T1, indirect=["container_per_test"]
 )
-@pytest.mark.parametrize("hmodule, port, retry", [("http.server", port1, 10)])
-def test_python_webserver_1(container_per_test, hmodule, port, retry):
+@pytest.mark.parametrize("hmodule, retry", [("http.server", 10)])
+def test_python_webserver_1(
+    container_per_test: ContainerData, hmodule: str, retry: int
+) -> None:
     """Test that the python webserver is able to open a given port"""
 
     portstatus = False
@@ -208,8 +210,14 @@ def test_python_webserver_1(container_per_test, hmodule, port, retry):
     ],
 )
 def test_python_webserver_2(
-    container_per_test, host, container_runtime, destdir, appl2, url, xfilename
-):
+    container_per_test: ContainerData,
+    host,
+    container_runtime: OciRuntimeBase,
+    destdir: str,
+    appl2: str,
+    url: str,
+    xfilename: str,
+) -> None:
     """Test that the python `wget <https://pypi.org/project/wget/>`_ library,
     coded in the appl2 module, is able to fetch files from a webserver
     """
