@@ -21,12 +21,9 @@ jobs:
         run: |
           set -e
           sudo apt update
-          sudo apt -y install jo tox fd-find
+          sudo apt -y install jo tox
       - name: Test formatting with black
-        run: |
-          # fd is installed into /usr/lib/cargo/bin/ on Ubuntu for $reasons
-          export PATH="/usr/lib/cargo/bin/:${PATH}"
-          tox -e format -- --check
+        run: tox -e format -- --check
 
   gentestmatrix:
     name: Generate test matrix
