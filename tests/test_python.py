@@ -193,9 +193,10 @@ def test_python_webserver_1(
     t3 = time.time() - t0
 
     # check inspection success or timeout
-    assert (
-        portstatus
-    ), f"Timeout expired: expected port not listening. Time marks: before server start {t1}s, after start {t2}s, after {t} loops {t3}s."
+    assert portstatus, (
+        "Timeout expired: expected port not listening. Time marks: before "
+        + f"server start {t1}s, after start {t2}s, after {t} loops {t3}s."
+    )
 
 
 @pytest.mark.parametrize(
