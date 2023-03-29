@@ -4,7 +4,10 @@ import time
 import packaging.version
 import pytest
 from pytest_container import DerivedContainer
+from pytest_container import OciRuntimeBase
+from pytest_container import PortForwarding
 from pytest_container.container import container_from_pytest_param
+from pytest_container.container import ContainerData
 from pytest_container.runtime import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import Version
@@ -49,7 +52,7 @@ CONTAINER_IMAGES_T1 = [
         DerivedContainer(
             base=container_from_pytest_param(CONTAINER_T),
             containerfile=DOCKERF_PY_T1,
-            extra_launch_args=["-p", f"{port1}:{port1}"],
+            forwarded_ports=[PortForwarding(container_port=port1)],
         ),
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
@@ -156,8 +159,8 @@ def test_python_webserver_1(
     """Test that the python webserver is able to open a given port"""
 
     portstatus = False
-
     t = 0
+    port = container_per_test.forwarded_ports[0].host_port
 
     command = f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
 
