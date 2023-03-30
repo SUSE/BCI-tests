@@ -130,3 +130,23 @@ def test_compile(container, java_file: str):
         [0],
         f"java -cp {CONTAINER_TEST_DIR} {java_file}",
     )
+
+
+@pytest.mark.parametrize(
+    "container",
+    CONTAINER_IMAGES_EXTENDED,
+    indirect=["container"],
+)
+def test_jdk_memory_error(container):
+    """The purpose of this test is to verify two things: firstly,
+    whether the flag that restricts memory usage (-Xmx) is working properly;
+    and secondly, whether the Java test raises an OutOfMemoryError
+    exception when the memory usage exceeds the set limit.
+    """
+    cmd = f"javac -Xlint:unchecked {CONTAINER_TEST_DIR}MemoryTest.java"
+    testout = container.connection.run_expect([0], cmd)
+
+    cmd = f"java -Xmx10M MemoryTest"
+    testout = container.connection.run_expect([1], cmd)
+
+    assert "OutOfMemoryError" in testout.stderr
