@@ -78,7 +78,10 @@ def _get_container_label_prefix(
 IMAGES_AND_NAMES: List[ParameterSet] = [
     pytest.param(cont, name, img_type, marks=cont.marks)
     for cont, name, img_type in [
+        # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
+        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
+        # all other containers
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
@@ -101,7 +104,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
-        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
@@ -168,8 +170,14 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
                 )
             )
         ),
-    )
-] + IMAGES_AND_NAMES[1:]
+    ),
+    pytest.param(
+        *IMAGES_AND_NAMES[1],
+        marks=(
+            pytest.mark.xfail(reason=("The PCP 5.2.5 container is unreleased"))
+        ),
+    ),
+] + IMAGES_AND_NAMES[2:]
 
 
 assert len(ALL_CONTAINERS) == len(
