@@ -67,7 +67,7 @@ def tensorflow_example_1():
     print(f"loss initial:{lo_initial},loss final:{lo},accuracy:{ac}")
 
     if lo_initial > 1.0 and lo < 0.1 and ac > 0.9:
-        print(f"PASS: loss,accuracy good")
+        print("PASS: loss,accuracy good")
     else:
         # ("FAIL")
         raise RuntimeError("FAIL: loss,accuracy not good")

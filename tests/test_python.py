@@ -181,7 +181,7 @@ def test_python_webserver_1(
     t2 = time.time() - t0
 
     # port status inspection with timeout
-    for t in range(retry):
+    for _ in range(retry):
         time.sleep(1)
         portstatus = container_per_test.connection.socket(
             f"tcp://0.0.0.0:{port}"

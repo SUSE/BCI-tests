@@ -128,7 +128,7 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return "containerfile/"
     if image_type == "kiwi":
         return "images/"
-    assert False, f"invalid image_type: {image_type}"
+    raise AssertionError(f"invalid image_type: {image_type}")
 
 
 @enum.unique
