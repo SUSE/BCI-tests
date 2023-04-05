@@ -8,19 +8,13 @@ from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import GO_1_18_CONTAINER
-from bci_tester.data import GO_1_19_CONTAINER
-from bci_tester.data import GO_1_20_CONTAINER
+from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: Maximum go container size in Bytes
 GOLANG_MAX_CONTAINER_SIZE_ON_DISK = 1181116006  # 1.1GB uncompressed
 
-CONTAINER_IMAGES = [
-    GO_1_18_CONTAINER,
-    GO_1_19_CONTAINER,
-    GO_1_20_CONTAINER,
-]
+CONTAINER_IMAGES = GOLANG_CONTAINERS
 
 
 def test_go_size(auto_container, container_runtime):
@@ -112,26 +106,16 @@ def test_build_generics_cache(
 ):
     """Test generics by running the tests of `go-generics-cache
     <https://github.com/Code-Hex/go-generics-cache>`_ inside the
-    container. Generics are only supported for go 1.18+.
-
+    container.
     """
-    if Version.parse(
-        auto_container_per_test.connection.check_output("echo $GOLANG_VERSION")
-    ) < Version(1, 18):
-        pytest.skip("Generics are only supported by go 1.18+")
-
     auto_container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )
 
 
 @pytest.mark.parametrize(
-    "container,go_version",
-    [
-        pytest.param(
-            GO_1_19_CONTAINER, Version(1, 19), marks=GO_1_19_CONTAINER.marks
-        )
-    ],
+    "container",
+    GOLANG_CONTAINERS,
     indirect=["container"],
 )
 @pytest.mark.parametrize(
@@ -150,9 +134,7 @@ def test_build_generics_cache(
     LOCALHOST.system_info.arch not in ("x86_64", "aarch64", "s390x"),
     reason=f"{LOCALHOST.system_info.arch} is not supported to build rancher",
 )
-def test_rancher_build(
-    host, host_git_clone, dapper, container: ContainerData, go_version: Version
-):
+def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
     """Regression test that we can build Rancher in the go container:
 
     - clone the `rancher/rancher <https://github.com/rancher/rancher>`_ repository
@@ -178,10 +160,11 @@ def test_rancher_build(
     assert from_line and from_line.group(
         "go_ver"
     ), f"No valid FROM line found in Dockerfile.dapper: {contents}"
-    assert Version.parse(from_line.group("go_ver")) == go_version, (
-        f"Golang version mismatch between the go container ({go_version}) "
-        + f"and the rancher Dockerfile.dapper ({from_line.group('go_ver')})"
-    )
+    go_version = container.connection.check_output("echo $GOLANG_VERSION")
+    if not go_version.startswith(from_line.group("go_ver")):
+        pytest.skip(
+            f"Dapper is only supported on {from_line.group('go_ver')}, got {go_version}"
+        )
 
     with open(
         rancher_dir / "Dockerfile.dapper", "w", encoding="utf-8"

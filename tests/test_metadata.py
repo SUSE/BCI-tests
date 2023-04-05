@@ -35,9 +35,7 @@ from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
-from bci_tester.data import GO_1_18_CONTAINER
-from bci_tester.data import GO_1_19_CONTAINER
-from bci_tester.data import GO_1_20_CONTAINER
+from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
@@ -84,9 +82,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
-        (GO_1_18_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
-        (GO_1_19_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
-        (GO_1_20_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
         (
             OPENJDK_DEVEL_11_CONTAINER,
@@ -111,6 +106,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
+    ]
+    + [
+        (golang_container, "golang", ImageType.LANGUAGE_STACK)
+        for golang_container in GOLANG_CONTAINERS
     ]
     + [
         (rust_container, "rust", ImageType.LANGUAGE_STACK)
