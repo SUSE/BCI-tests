@@ -24,10 +24,10 @@ FETCH_SUSE_DOT_COM = """package main
 import "net/http"
 
 func main() {
-	_, err := http.Get("https://suse.com/")
-	if err != nil {
-		panic(err)
-	}
+        _, err := http.Get("https://suse.com/")
+        if err != nil {
+                panic(err)
+        }
 }
 """
 
