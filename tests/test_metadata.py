@@ -35,9 +35,7 @@ from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
-from bci_tester.data import GO_1_18_CONTAINER
-from bci_tester.data import GO_1_19_CONTAINER
-from bci_tester.data import GO_1_20_CONTAINER
+from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
@@ -80,13 +78,13 @@ def _get_container_label_prefix(
 IMAGES_AND_NAMES: List[ParameterSet] = [
     pytest.param(cont, name, img_type, marks=cont.marks)
     for cont, name, img_type in [
+        # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
+        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
+        # all other containers
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
-        (GO_1_18_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
-        (GO_1_19_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
-        (GO_1_20_CONTAINER, "golang", ImageType.LANGUAGE_STACK),
         (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
         (
             OPENJDK_DEVEL_11_CONTAINER,
@@ -106,11 +104,14 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
-        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
+    ]
+    + [
+        (golang_container, "golang", ImageType.LANGUAGE_STACK)
+        for golang_container in GOLANG_CONTAINERS
     ]
     + [
         (rust_container, "rust", ImageType.LANGUAGE_STACK)
@@ -169,8 +170,14 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
                 )
             )
         ),
-    )
-] + IMAGES_AND_NAMES[1:]
+    ),
+    pytest.param(
+        *IMAGES_AND_NAMES[1],
+        marks=(
+            pytest.mark.xfail(reason=("The PCP 5.2.5 container is unreleased"))
+        ),
+    ),
+] + IMAGES_AND_NAMES[2:]
 
 
 assert len(ALL_CONTAINERS) == len(

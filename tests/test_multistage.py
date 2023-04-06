@@ -9,7 +9,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
-from bci_tester.data import GO_1_18_CONTAINER
+from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 
@@ -164,7 +164,10 @@ ENTRYPOINT ["/app/entrypoint.sh"]
                 repository_url="https://github.com/alexellis/k3sup",
             ),
             MultiStageBuild(
-                containers={"builder": GO_1_18_CONTAINER, "runner": "scratch"},
+                containers={
+                    "builder": GOLANG_CONTAINERS[-1],
+                    "runner": "scratch",
+                },
                 containerfile_template=K3SUP_DOCKERFILE,
             ),
             0,

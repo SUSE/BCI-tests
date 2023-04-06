@@ -128,7 +128,7 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return "containerfile/"
     if image_type == "kiwi":
         return "images/"
-    assert False, f"invalid image_type: {image_type}"
+    raise AssertionError(f"invalid image_type: {image_type}")
 
 
 @enum.unique
@@ -244,10 +244,10 @@ BUSYBOX_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
-GO_1_18_CONTAINER = create_BCI(build_tag="bci/golang:1.18")
-GO_1_19_CONTAINER = create_BCI(build_tag="bci/golang:1.19")
-GO_1_20_CONTAINER = create_BCI(build_tag="bci/golang:1.20")
-
+GOLANG_CONTAINERS = [
+    create_BCI(build_tag=f"bci/golang:{rust_version}")
+    for rust_version in ("1.19", "1.20")
+]
 
 OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
@@ -309,13 +309,8 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 
 RUST_CONTAINERS = [
     create_BCI(build_tag=f"bci/rust:{rust_version}")
-    for rust_version in ("1.65", "1.66", "1.67")
+    for rust_version in ("1.67",)
 ]
-(
-    RUST_1_65_CONTAINER,
-    RUST_1_66_CONTAINER,
-    RUST_1_67_CONTAINER,
-) = RUST_CONTAINERS
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_VERSION}",
@@ -398,9 +393,6 @@ DOTNET_CONTAINERS = [
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
-        GO_1_18_CONTAINER,
-        GO_1_19_CONTAINER,
-        GO_1_20_CONTAINER,
         OPENJDK_11_CONTAINER,
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_17_CONTAINER,
@@ -418,6 +410,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_CLI,
         PHP_8_FPM,
     ]
+    + GOLANG_CONTAINERS
     + RUST_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
@@ -429,30 +422,28 @@ CONTAINERS_WITHOUT_ZYPPER = [
 ]
 
 #: Containers with L3 support
-L3_CONTAINERS = [
-    BASE_CONTAINER,
-    MINIMAL_CONTAINER,
-    MICRO_CONTAINER,
-    INIT_CONTAINER,
-    BUSYBOX_CONTAINER,
-    GO_1_18_CONTAINER,
-    GO_1_19_CONTAINER,
-    GO_1_20_CONTAINER,
-    NODEJS_14_CONTAINER,
-    NODEJS_16_CONTAINER,
-    NODEJS_18_CONTAINER,
-    OPENJDK_11_CONTAINER,
-    OPENJDK_17_CONTAINER,
-    OPENJDK_DEVEL_11_CONTAINER,
-    OPENJDK_DEVEL_17_CONTAINER,
-    PYTHON36_CONTAINER,
-    PYTHON310_CONTAINER,
-    RUBY_25_CONTAINER,
-    RUST_1_65_CONTAINER,
-    RUST_1_66_CONTAINER,
-    RUST_1_67_CONTAINER,
-    CONTAINER_389DS,
-]
+L3_CONTAINERS = (
+    [
+        BASE_CONTAINER,
+        MINIMAL_CONTAINER,
+        MICRO_CONTAINER,
+        INIT_CONTAINER,
+        BUSYBOX_CONTAINER,
+        NODEJS_14_CONTAINER,
+        NODEJS_16_CONTAINER,
+        NODEJS_18_CONTAINER,
+        OPENJDK_11_CONTAINER,
+        OPENJDK_17_CONTAINER,
+        OPENJDK_DEVEL_11_CONTAINER,
+        OPENJDK_DEVEL_17_CONTAINER,
+        PYTHON36_CONTAINER,
+        PYTHON310_CONTAINER,
+        RUBY_25_CONTAINER,
+        CONTAINER_389DS,
+    ]
+    + GOLANG_CONTAINERS
+    + RUST_CONTAINERS
+)
 
 #: Containers that are directly pulled from registry.suse.de
 ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER

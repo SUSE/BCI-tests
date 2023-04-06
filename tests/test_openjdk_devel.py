@@ -146,7 +146,7 @@ def test_jdk_memory_error(container):
     cmd = f"javac -Xlint:unchecked {CONTAINER_TEST_DIR}MemoryTest.java"
     testout = container.connection.run_expect([0], cmd)
 
-    cmd = f"java -Xmx10M MemoryTest"
+    cmd = "java -Xmx10M MemoryTest"
     testout = container.connection.run_expect([1], cmd)
 
     assert "OutOfMemoryError" in testout.stderr
