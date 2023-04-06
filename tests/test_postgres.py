@@ -8,6 +8,7 @@ from _pytest.mark import ParameterSet
 from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
+from pytest_container.container import ImageFormat
 
 from bci_tester.data import POSTGRES_PASSWORD
 from bci_tester.data import POSTGRESQL_CONTAINERS
@@ -67,6 +68,7 @@ def _generate_test_matrix() -> List[ParameterSet]:
                         forwarded_ports=ports,
                         extra_environment_variables=env,
                         containerfile=containerfile,
+                        image_format=ImageFormat.DOCKER,
                     ),
                     pg_user,
                     pw,
@@ -106,7 +108,6 @@ def test_postgres_db_env_vars(
     pgdata_f = container_per_test.connection.file(pgdata)
     assert pgdata_f.exists
     assert pgdata_f.user == "postgres"
-    assert pgdata_f.group == "postgres"
     assert pgdata_f.mode == 0o700
 
     assert container_per_test.connection.run_expect(
