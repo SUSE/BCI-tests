@@ -60,7 +60,11 @@ def _generate_test_matrix() -> List[ParameterSet]:
 
             containerfile = ""
             if username:
-                containerfile = f"USER {username}"
+                containerfile = f"USER {username}\n"
+
+            if _pgdata:
+                containerfile += f"VOLUME {_pgdata}\n"
+
             params.append(
                 pytest.param(
                     DerivedContainer(
