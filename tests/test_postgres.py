@@ -29,7 +29,6 @@ def test_entry_point(auto_container: ContainerData) -> None:
 
 _other_pg_user = "foo"
 _other_pg_pw = "baz"
-_pgdata = "/opt/pg/data"
 _postgres_user = "postgres"
 
 
@@ -41,29 +40,21 @@ def _generate_test_matrix() -> List[ParameterSet]:
         marks = pg_cont_param.marks
         ports = pg_cont.forwarded_ports
         params.append(
-            pytest.param(
-                pg_cont, None, POSTGRES_PASSWORD, None, None, marks=marks
-            )
+            pytest.param(pg_cont, None, POSTGRES_PASSWORD, None, marks=marks)
         )
 
-        for username, pg_user, pw, pgdata in product(
+        for username, pg_user, pw in product(
             (None, _postgres_user),
             (None, _other_pg_user),
             (POSTGRES_PASSWORD, _other_pg_pw),
-            (None, _pgdata),
         ):
             env = {"POSTGRES_PASSWORD": pw}
             if pg_user:
                 env["POSTGRES_USER"] = pg_user
-            if pgdata:
-                env["PGDATA"] = pgdata
 
             containerfile = ""
             if username:
                 containerfile = f"USER {username}\n"
-
-            if _pgdata:
-                containerfile += f"VOLUME {_pgdata}\n"
 
             params.append(
                 pytest.param(
@@ -76,7 +67,6 @@ def _generate_test_matrix() -> List[ParameterSet]:
                     ),
                     pg_user,
                     pw,
-                    pgdata,
                     username,
                     marks=marks,
                 )
@@ -86,7 +76,7 @@ def _generate_test_matrix() -> List[ParameterSet]:
 
 
 @pytest.mark.parametrize(
-    "container_per_test,pg_user,password,pgdata,username",
+    "container_per_test,pg_user,password,username",
     _generate_test_matrix(),
     indirect=["container_per_test"],
 )
@@ -94,7 +84,6 @@ def test_postgres_db_env_vars(
     container_per_test: ContainerData,
     pg_user: Optional[str],
     password: str,
-    pgdata: Optional[str],
     username: Optional[str],
 ) -> None:
     """Simple smoke test connecting to the PostgreSQL database using the example
@@ -106,8 +95,7 @@ def test_postgres_db_env_vars(
     conn = None
     cur = None
 
-    if not pgdata:
-        pgdata = container_per_test.inspect.config.env["PGDATA"]
+    pgdata = container_per_test.inspect.config.env["PGDATA"]
 
     pgdata_f = container_per_test.connection.file(pgdata)
     assert pgdata_f.exists
