@@ -31,6 +31,7 @@ markers = [
     'bci/golang_1.20',
     'bci/python_3.6',
     'bci/python_3.10',
+    'bci/python_3.11',
     'bci/openjdk_11',
     'bci/openjdk_17',
     'bci/openjdk-devel_11',

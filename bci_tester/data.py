@@ -258,8 +258,18 @@ NODEJS_16_CONTAINER = create_BCI(build_tag="bci/nodejs:16")
 NODEJS_18_CONTAINER = create_BCI(build_tag="bci/nodejs:18")
 
 PYTHON36_CONTAINER = create_BCI(build_tag="bci/python:3.6")
-PYTHON310_CONTAINER = create_BCI(build_tag="bci/python:3.10")
+PYTHON310_CONTAINER = create_BCI(
+    build_tag="bci/python:3.10", available_versions=["15.4"]
+)
+PYTHON311_CONTAINER = create_BCI(
+    build_tag="bci/python:3.11", available_versions=["15.5"]
+)
 
+PYTHON_CONTAINERS = [
+    PYTHON36_CONTAINER,
+    PYTHON310_CONTAINER,
+    PYTHON311_CONTAINER,
+]
 
 RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5")
 
@@ -403,6 +413,7 @@ CONTAINERS_WITH_ZYPPER = (
         PCP_CONTAINER,
         PYTHON36_CONTAINER,
         PYTHON310_CONTAINER,
+        PYTHON311_CONTAINER,
         RUBY_25_CONTAINER,
         INIT_CONTAINER,
         CONTAINER_389DS,

@@ -64,7 +64,7 @@ jobs:
           PY_VER: ${{ matrix.python_version }}
 
   documentation:
-    name: Build the documentation
+    name: Build documentation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -76,7 +76,7 @@ jobs:
       - run: tox -e doc
 
   lint:
-    name: Lint the source code
+    name: Lint source code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -88,7 +88,7 @@ jobs:
       - run: tox -e lint
 
   test-containers:
-    name: Test containers
+    name: tox
     runs-on: ubuntu-latest
     needs: gentestmatrix
     strategy:
@@ -131,6 +131,28 @@ jobs:
           - toxenv: repository
             container_runtime: PODMAN
             os_version: 15.3
+          - toxenv: base
+            container_runtime: DOCKER
+            os_version: 15.5
+            experimental: true
+          - toxenv: base
+            container_runtime: PODMAN
+            os_version: 15.5
+            experimental: true
+          - toxenv: metadata
+            container_runtime: DOCKER
+            os_version: 15.5
+            experimental: true
+          - toxenv: metadata
+            container_runtime: PODMAN
+            os_version: 15.5
+            experimental: true
+          - toxenv: python
+            container_runtime: DOCKER
+            os_version: 15.5
+          - toxenv: python
+            container_runtime: PODMAN
+            os_version: 15.5
 
     steps:
       - name: checkout source code

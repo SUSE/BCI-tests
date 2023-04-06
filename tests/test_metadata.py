@@ -55,6 +55,7 @@ from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
 from bci_tester.data import PYTHON310_CONTAINER
+from bci_tester.data import PYTHON311_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
@@ -102,6 +103,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (NODEJS_18_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (PYTHON36_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
+        (PYTHON311_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
         (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),

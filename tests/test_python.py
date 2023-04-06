@@ -12,8 +12,7 @@ from pytest_container.runtime import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import Version
 
-from bci_tester.data import PYTHON310_CONTAINER
-from bci_tester.data import PYTHON36_CONTAINER
+from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
 bcdir = "/tmp/"
@@ -39,10 +38,7 @@ COPY {orig + appdir}/{appl1}  {appdir}
 """
 
 #: Base containers under test, input of auto_container fixture
-CONTAINER_IMAGES = [
-    PYTHON36_CONTAINER,
-    PYTHON310_CONTAINER,
-]
+CONTAINER_IMAGES = PYTHON_CONTAINERS
 
 
 #: Derived containers, from custom Dockerfile including additional test files
