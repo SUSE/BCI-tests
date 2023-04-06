@@ -20,10 +20,9 @@ def test_entry_point(auto_container: ContainerData) -> None:
     # do really nothing here, just check that the container launched
     assert auto_container.connection.run_expect([0], "ps")
 
+    assert len(auto_container.inspect.config.entrypoint) == 1
     assert (
-        len(auto_container.inspect.config.entrypoint) == 1
-        and "docker-entrypoint.sh"
-        in auto_container.inspect.config.entrypoint[0]
+        "docker-entrypoint.sh" in auto_container.inspect.config.entrypoint[0]
     )
 
 
@@ -105,12 +104,10 @@ def test_postgres_db_env_vars(
         pgdata = container_per_test.inspect.config.env["PGDATA"]
 
     pgdata_f = container_per_test.connection.file(pgdata)
-    assert (
-        pgdata_f.exists
-        and pgdata_f.user == "postgres"
-        and pgdata_f.group == "postgres"
-        and pgdata_f.mode == 0o700
-    )
+    assert pgdata_f.exists
+    assert pgdata_f.user == "postgres"
+    assert pgdata_f.group == "postgres"
+    assert pgdata_f.mode == 0o700
 
     assert container_per_test.connection.run_expect(
         [0], "id -un"
