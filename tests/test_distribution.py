@@ -15,10 +15,11 @@ def test_registry_service(
     """run registry container with attached volume '/var/lib/docker-registry'"""
     engine = container_runtime.runner_binary
     host_port = auto_container_per_test.forwarded_ports[0].host_port
-    content = """
-    FROM alpine:latest
+    content = textwrap.dedent(
+        """FROM registry.opensuse.org/opensuse/busybox:latest
     CMD ["echo", "container from my local registry"]
     """
+    )
 
     out = json.loads(
         host.check_output(
