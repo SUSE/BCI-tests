@@ -54,6 +54,7 @@ from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
+from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON311_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
@@ -118,6 +119,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (rust_container, "rust", ImageType.LANGUAGE_STACK)
         for rust_container in RUST_CONTAINERS
+    ]
+    + [
+        (pg_container, "postgres", ImageType.APPLICATION)
+        for pg_container in POSTGRESQL_CONTAINERS
     ]
     + (
         [
@@ -184,7 +189,7 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES
-), "IMAGES_AND_NAMES must have all containers from BASE_CONTAINERS"
+), "IMAGES_AND_NAMES must have all containers from ALL_CONTAINERS"
 
 
 @pytest.mark.parametrize(
