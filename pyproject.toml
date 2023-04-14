@@ -56,6 +56,7 @@ markers = [
     'bci/python_3.6',
     'bci/ruby_2.5',
     'bci/rust_1.67',
+    'bci/rust_1.68',
     'suse/389-ds_2.0',
     'suse/pcp_5',
     'suse/postgres_10',
