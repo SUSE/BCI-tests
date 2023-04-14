@@ -319,7 +319,7 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 
 RUST_CONTAINERS = [
     create_BCI(build_tag=f"bci/rust:{rust_version}")
-    for rust_version in ("1.67",)
+    for rust_version in ("1.67", "1.68")
 ]
 
 INIT_CONTAINER = create_BCI(
