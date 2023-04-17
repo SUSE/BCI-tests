@@ -249,13 +249,27 @@ GOLANG_CONTAINERS = [
     for rust_version in ("1.19", "1.20")
 ]
 
-OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
-OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
-OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
-OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
-NODEJS_14_CONTAINER = create_BCI(build_tag="bci/nodejs:14")
-NODEJS_16_CONTAINER = create_BCI(build_tag="bci/nodejs:16")
-NODEJS_18_CONTAINER = create_BCI(build_tag="bci/nodejs:18")
+OPENJDK_11_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:11", available_versions=["15.4"]
+)
+OPENJDK_DEVEL_11_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:11", available_versions=["15.4"]
+)
+OPENJDK_17_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:17", available_versions=["15.4"]
+)
+OPENJDK_DEVEL_17_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:17", available_versions=["15.4"]
+)
+NODEJS_14_CONTAINER = create_BCI(
+    build_tag="bci/nodejs:14", available_versions=["15.4"]
+)
+NODEJS_16_CONTAINER = create_BCI(
+    build_tag="bci/nodejs:16", available_versions=["15.4"]
+)
+NODEJS_18_CONTAINER = create_BCI(
+    build_tag="bci/nodejs:18", available_versions=["15.4"]
+)
 
 PYTHON36_CONTAINER = create_BCI(build_tag="bci/python:3.6")
 PYTHON310_CONTAINER = create_BCI(
@@ -318,7 +332,9 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 )
 
 RUST_CONTAINERS = [
-    create_BCI(build_tag=f"bci/rust:{rust_version}")
+    create_BCI(
+        build_tag=f"bci/rust:{rust_version}", available_versions=["15.4"]
+    )
     for rust_version in ("1.67", "1.68")
 ]
 
@@ -336,6 +352,7 @@ INIT_CONTAINER = create_BCI(
 
 PCP_CONTAINER = create_BCI(
     build_tag="suse/pcp:5",
+    available_versions=["15.4"],
     extra_marks=[
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
@@ -348,23 +365,17 @@ PCP_CONTAINER = create_BCI(
 CONTAINER_389DS = create_BCI(
     build_tag="suse/389-ds:2.0",
     bci_type=ImageType.APPLICATION,
+    available_versions=["15.4"],
     healthcheck_timeout=timedelta(seconds=240),
     extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
     forwarded_ports=[PortForwarding(container_port=3389)],
 )
 
-PHP_8_CLI = create_BCI(
-    build_tag="bci/php:8",
-    image_type="dockerfile",
-)
+PHP_8_CLI = create_BCI(build_tag="bci/php:8", available_versions=["15.4"])
 PHP_8_APACHE = create_BCI(
-    build_tag="bci/php-apache:8",
-    image_type="dockerfile",
+    build_tag="bci/php-apache:8", available_versions=["15.4"]
 )
-PHP_8_FPM = create_BCI(
-    build_tag="bci/php-fpm:8",
-    image_type="dockerfile",
-)
+PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8", available_versions=["15.4"])
 
 POSTGRES_PASSWORD = "n0ts3cr3t"
 
@@ -372,6 +383,7 @@ POSTGRESQL_CONTAINERS = [
     create_BCI(
         build_tag=f"suse/postgres:{pg_ver}",
         bci_type=ImageType.APPLICATION,
+        available_versions=["15.4"],
         forwarded_ports=[PortForwarding(container_port=5432)],
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
@@ -397,6 +409,7 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 DISTRIBUTION_CONTAINER = create_BCI(
     build_tag="suse/registry:2.8",
     image_type="kiwi",
+    available_versions=["15.4"],
     forwarded_ports=[PortForwarding(container_port=5000)],
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )

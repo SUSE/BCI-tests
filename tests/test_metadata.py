@@ -83,7 +83,13 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
-        # all other containers
+    ]
+    + [
+        (rust_container, "rust", ImageType.LANGUAGE_STACK)
+        for rust_container in RUST_CONTAINERS
+    ]
+    # all other containers
+    + [
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
@@ -115,10 +121,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (golang_container, "golang", ImageType.LANGUAGE_STACK)
         for golang_container in GOLANG_CONTAINERS
-    ]
-    + [
-        (rust_container, "rust", ImageType.LANGUAGE_STACK)
-        for rust_container in RUST_CONTAINERS
     ]
     + [
         (pg_container, "postgres", ImageType.APPLICATION)
@@ -165,26 +167,40 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     )
 ]
 
-IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
-    pytest.param(
-        *IMAGES_AND_NAMES[0],
-        marks=(
-            pytest.mark.xfail(
-                reason=(
-                    "The base container has no com.suse.bci.base labels yet"
-                    if OS_VERSION == "15.3"
-                    else "https://bugzilla.suse.com/show_bug.cgi?id=1200373"
+IMAGES_AND_NAMES_WITH_BASE_XFAIL = (
+    [
+        pytest.param(
+            *IMAGES_AND_NAMES[0],
+            marks=(
+                pytest.mark.xfail(
+                    reason=(
+                        "The base container has no com.suse.bci.base labels yet"
+                        if OS_VERSION == "15.3"
+                        else "https://bugzilla.suse.com/show_bug.cgi?id=1200373"
+                    )
                 )
-            )
+            ),
         ),
-    ),
-    pytest.param(
-        *IMAGES_AND_NAMES[1],
-        marks=(
-            pytest.mark.xfail(reason=("The PCP 5.2.5 container is unreleased"))
+        pytest.param(
+            *IMAGES_AND_NAMES[1],
+            marks=(
+                pytest.mark.xfail(
+                    reason=("The PCP 5.2.5 container is unreleased")
+                )
+            ),
         ),
-    ),
-] + IMAGES_AND_NAMES[2:]
+        pytest.param(
+            *IMAGES_AND_NAMES[3],
+            marks=(
+                pytest.mark.xfail(
+                    reason=("The Rust 1.68 container is unreleased")
+                )
+            ),
+        ),
+    ]
+    + [IMAGES_AND_NAMES[2]]
+    + IMAGES_AND_NAMES[4:]
+)
 
 
 assert len(ALL_CONTAINERS) == len(
