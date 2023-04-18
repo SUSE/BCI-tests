@@ -52,18 +52,19 @@ def _generate_test_matrix() -> List[ParameterSet]:
             if pg_user:
                 env["POSTGRES_USER"] = pg_user
 
-            containerfile = ""
-            if username:
-                containerfile = f"USER {username}\n"
-
             params.append(
                 pytest.param(
                     DerivedContainer(
                         base=pg_cont,
                         forwarded_ports=ports,
                         extra_environment_variables=env,
-                        containerfile=containerfile,
-                        image_format=ImageFormat.DOCKER,
+                        # don't use a Dockerfile to set USER, as buildah on RHEL
+                        # 7 fails to create a container image with a
+                        # healthcheck…
+                        # so avoid an image build at all cost
+                        extra_launch_args=(
+                            ["--user", username] if username else []
+                        ),
                     ),
                     pg_user,
                     pw,
