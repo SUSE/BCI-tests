@@ -8,9 +8,11 @@ from pytest_container import container_from_pytest_param
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
+from pytest_container.container import ContainerData
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
+from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
@@ -99,6 +101,14 @@ def test_glibc_present(auto_container):
     """ensure that the glibc linker is present"""
     for binary in ("ldconfig", "ldd"):
         assert auto_container.connection.exists(binary)
+
+
+@pytest.mark.parametrize(
+    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
+)
+def test_zypper_up_works(container_per_test: ContainerData) -> None:
+    """Check that :command:`zypper -n up` works."""
+    container_per_test.connection.run_expect([0], "zypper -n up")
 
 
 @pytest.mark.parametrize(
