@@ -9,6 +9,7 @@ from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
 from pytest_container.container import ImageFormat
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import POSTGRES_PASSWORD
 from bci_tester.data import POSTGRESQL_CONTAINERS
@@ -52,9 +53,13 @@ def _generate_test_matrix() -> List[ParameterSet]:
             if pg_user:
                 env["POSTGRES_USER"] = pg_user
 
-            containerfile = ""
-            if username:
-                containerfile = f"USER {username}\n"
+            # postgres on RHEL7 is too ancient to support scram-sha-256 and only
+            # works with md5 auth
+            if (
+                LOCALHOST.system_info.distribution == "rhel"
+                and LOCALHOST.system_info.release.startswith("7.")
+            ):
+                env["POSTGRES_HOST_AUTH_METHOD"] = "md5"
 
             params.append(
                 pytest.param(
@@ -62,8 +67,13 @@ def _generate_test_matrix() -> List[ParameterSet]:
                         base=pg_cont,
                         forwarded_ports=ports,
                         extra_environment_variables=env,
-                        containerfile=containerfile,
-                        image_format=ImageFormat.DOCKER,
+                        # don't use a Dockerfile to set USER, as buildah on RHEL
+                        # 7 fails to create a container image with a
+                        # healthcheck…
+                        # so avoid an image build at all cost
+                        extra_launch_args=(
+                            ["--user", username] if username else []
+                        ),
                     ),
                     pg_user,
                     pw,
