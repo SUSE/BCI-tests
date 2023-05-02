@@ -41,7 +41,6 @@ from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import NODEJS_14_CONTAINER
 from bci_tester.data import NODEJS_16_CONTAINER
 from bci_tester.data import NODEJS_18_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
@@ -105,7 +104,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             "openjdk.devel",
             ImageType.LANGUAGE_STACK,
         ),
-        (NODEJS_14_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (NODEJS_16_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (NODEJS_18_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (PYTHON36_CONTAINER, "python", ImageType.LANGUAGE_STACK),
