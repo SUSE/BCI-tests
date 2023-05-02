@@ -22,6 +22,7 @@ from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
+from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
@@ -351,7 +352,11 @@ def test_image_type_label(
 
 @pytest.mark.parametrize(
     "container",
-    [cont for cont in ALL_CONTAINERS if cont not in L3_CONTAINERS],
+    [
+        cont
+        for cont in ALL_CONTAINERS
+        if cont not in L3_CONTAINERS and cont not in ACC_CONTAINERS
+    ],
     indirect=True,
 )
 def test_techpreview_label(container: ContainerData):
@@ -363,6 +368,21 @@ def test_techpreview_label(container: ContainerData):
         container.inspect.config.labels["com.suse.supportlevel"]
         == "techpreview"
     ), "images must be marked as techpreview"
+
+
+@pytest.mark.parametrize(
+    "container",
+    [cont for cont in ACC_CONTAINERS],
+    indirect=True,
+)
+def test_acc_label(container: ContainerData):
+    """Check that containers that are in ACC_CONTAINERS have
+    ``com.suse.supportlevel`` set to ``acc``.
+    Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
+    """
+    assert (
+        container.inspect.config.labels["com.suse.supportlevel"] == "acc"
+    ), "acc images must be marked as acc"
 
 
 @pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
