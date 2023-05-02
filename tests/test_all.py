@@ -106,9 +106,17 @@ def test_glibc_present(auto_container):
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
 )
-def test_zypper_up_works(container_per_test: ContainerData) -> None:
-    """Check that :command:`zypper -n up` works."""
-    container_per_test.connection.run_expect([0], "zypper -n up")
+def test_zypper_dup_works(container_per_test: ContainerData) -> None:
+    """Check that there are no packages installed that we wouldn't find in SLE
+    BCI repo by running :command:`zypper -n dup` and checking that there are no
+    downgrades or arch changes.
+
+    """
+    container_per_test.connection.run_expect(
+        [0],
+        "timeout 1m zypper -n dup -l -d -D "
+        "--no-allow-vendor-change --no-allow-downgrade --no-allow-arch-change",
+    )
 
 
 @pytest.mark.parametrize(
