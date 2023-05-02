@@ -8,9 +8,11 @@ from pytest_container import container_from_pytest_param
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
+from pytest_container.container import ContainerData
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
+from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
@@ -99,6 +101,22 @@ def test_glibc_present(auto_container):
     """ensure that the glibc linker is present"""
     for binary in ("ldconfig", "ldd"):
         assert auto_container.connection.exists(binary)
+
+
+@pytest.mark.parametrize(
+    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
+)
+def test_zypper_dup_works(container_per_test: ContainerData) -> None:
+    """Check that there are no packages installed that we wouldn't find in SLE
+    BCI repo by running :command:`zypper -n dup` and checking that there are no
+    downgrades or arch changes.
+
+    """
+    container_per_test.connection.run_expect(
+        [0],
+        "timeout 1m zypper -n dup -l -d -D "
+        "--no-allow-vendor-change --no-allow-downgrade --no-allow-arch-change",
+    )
 
 
 @pytest.mark.parametrize(
