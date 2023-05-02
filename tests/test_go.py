@@ -3,7 +3,6 @@ import re
 
 import pytest
 from pytest_container import GitRepositoryBuild
-from pytest_container import Version
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
