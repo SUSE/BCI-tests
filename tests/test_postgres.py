@@ -8,7 +8,6 @@ from _pytest.mark import ParameterSet
 from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
-from pytest_container.container import ImageFormat
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import POSTGRES_PASSWORD

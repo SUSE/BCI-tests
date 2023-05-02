@@ -245,8 +245,8 @@ BUSYBOX_CONTAINER = create_BCI(
 )
 
 GOLANG_CONTAINERS = [
-    create_BCI(build_tag=f"bci/golang:{rust_version}")
-    for rust_version in ("1.19", "1.20")
+    create_BCI(build_tag=f"bci/golang:{golang_version}")
+    for golang_version in ("1.19", "1.20")
 ]
 
 OPENJDK_11_CONTAINER = create_BCI(
