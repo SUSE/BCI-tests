@@ -261,9 +261,6 @@ OPENJDK_17_CONTAINER = create_BCI(
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:17", available_versions=["15.4"]
 )
-NODEJS_14_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:14", available_versions=["15.4"]
-)
 NODEJS_16_CONTAINER = create_BCI(
     build_tag="bci/nodejs:16", available_versions=["15.4"]
 )
@@ -432,7 +429,6 @@ CONTAINERS_WITH_ZYPPER = (
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_17_CONTAINER,
         OPENJDK_DEVEL_17_CONTAINER,
-        NODEJS_14_CONTAINER,
         NODEJS_16_CONTAINER,
         NODEJS_18_CONTAINER,
         PCP_CONTAINER,
@@ -466,7 +462,6 @@ L3_CONTAINERS = (
         MICRO_CONTAINER,
         INIT_CONTAINER,
         BUSYBOX_CONTAINER,
-        NODEJS_14_CONTAINER,
         NODEJS_16_CONTAINER,
         NODEJS_18_CONTAINER,
         OPENJDK_11_CONTAINER,

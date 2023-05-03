@@ -41,7 +41,6 @@ markers = [
     'bci/dotnet-sdk_7.0',
     'bci/golang_1.19',
     'bci/golang_1.20',
-    'bci/nodejs_14',
     'bci/nodejs_16',
     'bci/nodejs_18',
     'bci/openjdk_11',
