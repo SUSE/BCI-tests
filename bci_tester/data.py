@@ -332,7 +332,7 @@ RUST_CONTAINERS = [
     create_BCI(
         build_tag=f"bci/rust:{rust_version}", available_versions=["15.4"]
     )
-    for rust_version in ("1.67", "1.68")
+    for rust_version in ("1.68", "1.69")
 ]
 
 INIT_CONTAINER = create_BCI(
