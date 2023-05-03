@@ -384,7 +384,7 @@ POSTGRESQL_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=5432)],
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
-    for pg_ver in (10, 12, 13, 14)
+    for pg_ver in (14, 15)
 ]
 
 REPOCLOSURE_CONTAINER = DerivedContainer(
@@ -476,8 +476,9 @@ L3_CONTAINERS = (
     ]
     + GOLANG_CONTAINERS
     + RUST_CONTAINERS
-    + POSTGRESQL_CONTAINERS
 )
+
+ACC_CONTAINERS = POSTGRESQL_CONTAINERS
 
 #: Containers that are directly pulled from registry.suse.de
 ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER
