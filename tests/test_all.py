@@ -111,11 +111,15 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     BCI repo by running :command:`zypper -n dup` and checking that there are no
     downgrades or arch changes.
 
+    As of 2023-05 the container and the SLE_BCI repositories are released independently
+    so we frequently get downgrades in this test. allow --allow-downgrade therefore
+    but still test that there wouldn't be conflicts with what is available in SLE_BCI
+
     """
     container_per_test.connection.run_expect(
         [0],
-        "timeout 1m zypper -n dup -l -d -D "
-        "--no-allow-vendor-change --no-allow-downgrade --no-allow-arch-change",
+        "timeout 1m zypper -n dup --from SLE_BCI -l -d -D "
+        "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
     )
 
 
