@@ -286,6 +286,13 @@ jobs:
           -----END PGP PUBLIC KEY BLOCK-----
           EOF
 
+      - name: Add /etc/host entries
+        run: |
+          # precache dns entries to avoid timeouts in the runs later
+          for host in updates.suse.com registry.suse.com registry.opensuse.org; do
+            echo -e "$(getent ahostsv4 $host | grep STREAM | cut -d' ' -f1 | head -n 1)\t$host"  | sudo tee -a /etc/hosts
+          done
+
       - name: Run tox job
         run: sudo --preserve-env tox -e ${{ matrix.toxenv }} -- -n auto --reruns 3
         env:
