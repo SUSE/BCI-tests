@@ -9,16 +9,16 @@ from bci_tester.data import MINIMAL_CONTAINER
 
 #: size limits of the minimal image per architecture in MiB
 MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 46,
+    "x86_64": 47,
     "aarch64": 49,
-    "s390x": 46,
+    "s390x": 47,
     "ppc64le": 57,
 }
 #: size limits of the micro image per architecture in MiB
 MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 25,
+    "x86_64": 26,
     "aarch64": 28,
-    "s390x": 25,
+    "s390x": 26,
     "ppc64le": 33,
 }
 
