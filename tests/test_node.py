@@ -39,10 +39,6 @@ def test_node_version(auto_container):
                 build_command="npm ci && npm test",
             ),
             GitRepositoryBuild(
-                repository_url="https://github.com/chalk/chalk.git",
-                build_command="npm install && npm test",
-            ),
-            GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
                 build_command="npm ci && npm test && npm run lint",
             ),
@@ -93,8 +89,6 @@ def test_popular_npm_repos(
          - build command
        * - `Lodash <https://github.com/lodash/lodash.git>`_
          - :command:`npm ci && npm test`
-       * - `chalk <https://github.com/chalk/chalk.git>`_
-         - :command:`npm install && npm test`
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
          - :command:`npm ci && npm test && npm run lint`
        * - `Express <https://github.com/expressjs/express.git>`_
@@ -108,8 +102,6 @@ def test_popular_npm_repos(
     node_version = auto_container_per_test.connection.run_expect(
         [0], "echo $NODE_VERSION"
     ).stdout.strip()
-    if (node_version == "12") and ("chalk" in container_git_clone.repo_name):
-        pytest.skip("Chalk does not work with nodejs 12 anymore")
     auto_container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )
