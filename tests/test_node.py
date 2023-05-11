@@ -41,6 +41,7 @@ def test_node_version(auto_container):
             GitRepositoryBuild(
                 repository_url="https://github.com/chalk/chalk.git",
                 build_command="npm install && npm test",
+                marks=pytest.mark.xfail(reason="fails to build as of 2023/05"),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
@@ -108,8 +109,6 @@ def test_popular_npm_repos(
     node_version = auto_container_per_test.connection.run_expect(
         [0], "echo $NODE_VERSION"
     ).stdout.strip()
-    if (node_version == "12") and ("chalk" in container_git_clone.repo_name):
-        pytest.skip("Chalk does not work with nodejs 12 anymore")
     auto_container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )
