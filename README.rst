@@ -1,3 +1,8 @@
+|CI|
+
+.. |CI| image:: https://github.com/SUSE/BCI-tests/actions/workflows/ci.yaml/badge.svg?branch=main
+   :target: https://github.com/SUSE/BCI-tests/actions/workflows/ci.yaml
+
 BCI tests
 =========
 
