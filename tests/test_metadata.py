@@ -27,6 +27,7 @@ from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS
+from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
@@ -124,6 +125,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (pg_container, "postgres", ImageType.APPLICATION)
         for pg_container in POSTGRESQL_CONTAINERS
+    ]
+    + [
+        (DISTRIBUTION_CONTAINER, "registry", ImageType.APPLICATION),
     ]
     + (
         [
@@ -240,10 +244,12 @@ def test_general_labels(
         if container_type != ImageType.APPLICATION:
             assert "BCI" in labels[f"{prefix}.title"]
 
-        assert (
-            "based on the SLE Base Container Image."
-            in labels[f"{prefix}.description"]
-        )
+        # distribution images differ in the descrition label
+        if "registry" not in container_name:
+            assert (
+                "based on the SLE Base Container Image."
+                in labels[f"{prefix}.description"]
+            )
 
         if version == "latest":
             assert OS_VERSION in labels[f"{prefix}.version"]
