@@ -7,6 +7,10 @@ on:
   pull_request:
   repository_dispatch:
 
+concurrency:
+  group: integration-tests-${{ github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   format:
     name: Ensure code is black formatted
