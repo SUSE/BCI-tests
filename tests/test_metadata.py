@@ -244,12 +244,10 @@ def test_general_labels(
         if container_type != ImageType.APPLICATION:
             assert "BCI" in labels[f"{prefix}.title"]
 
-        # distribution images differ in the descrition label
-        if "registry" not in container_name:
-            assert (
-                "based on the SLE Base Container Image."
-                in labels[f"{prefix}.description"]
-            )
+        assert (
+            "based on the SLE Base Container Image."
+            in labels[f"{prefix}.description"]
+        )
 
         if version == "latest":
             assert OS_VERSION in labels[f"{prefix}.version"]
