@@ -255,6 +255,7 @@ def test_general_labels(
         assert labels[f"{prefix}.vendor"] == VENDOR
 
     assert labels["com.suse.lifecycle-url"] in (
+        "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
         "https://www.suse.com/lifecycle",
         "https://www.suse.com/lifecycle/",
     )
