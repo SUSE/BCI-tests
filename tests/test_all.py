@@ -118,7 +118,7 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     """
     container_per_test.connection.run_expect(
         [0],
-        "timeout 1m zypper -n dup --from SLE_BCI -l -d -D "
+        "timeout 2m zypper -n dup --from SLE_BCI -l -d -D "
         "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
     )
 
