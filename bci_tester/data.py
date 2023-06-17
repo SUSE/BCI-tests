@@ -53,9 +53,10 @@ OS_PRETTY_NAME = os.getenv(
 )
 
 
-assert (
-    OS_MAJOR_VERSION == 15
-), f"The tests are created for SLE 15 base images only, but got a request for SLE {OS_MAJOR_VERSION}"
+assert OS_MAJOR_VERSION == 15, (
+    "The tests are created for SLE 15 base images only, "
+    f"but got a request for SLE {OS_MAJOR_VERSION}"
+)
 
 
 #: value of the environment variable ``TARGET`` which defines whether we are
@@ -103,7 +104,8 @@ def create_container_version_mark(
         ), f"invalid version {ver} specified in {available_versions}"
     return pytest.mark.skipif(
         OS_VERSION not in available_versions,
-        reason=f"This container is not available for {OS_VERSION}, only for {', '.join(available_versions)}",
+        reason=f"This container is not available for {OS_VERSION}, only for "
+        + ", ".join(available_versions),
     )
 
 
@@ -245,8 +247,14 @@ BUSYBOX_CONTAINER = create_BCI(
 )
 
 GOLANG_CONTAINERS = [
-    create_BCI(build_tag=f"bci/golang:{golang_version}")
-    for golang_version in ("1.19", "1.20")
+    create_BCI(
+        build_tag=f"bci/golang:{golang_version}",
+        extra_marks=[pytest.mark.__getattr__(f"bci/golang_{stability}")],
+    )
+    for golang_version, stability in (
+        ("1.19", "oldstable"),
+        ("1.20", "stable"),
+    )
 ]
 
 OPENJDK_11_CONTAINER = create_BCI(
@@ -328,9 +336,11 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 
 RUST_CONTAINERS = [
     create_BCI(
-        build_tag=f"bci/rust:{rust_version}", available_versions=["15.4"]
+        build_tag=f"bci/rust:{rust_version}",
+        available_versions=["15.4", "15.5"],
+        extra_marks=[pytest.mark.__getattr__(f"bci/rust_{stability}")],
     )
-    for rust_version in ("1.68", "1.69")
+    for rust_version, stability in (("1.68", "oldstable"), ("1.69", "stable"))
 ]
 
 INIT_CONTAINER = create_BCI(
