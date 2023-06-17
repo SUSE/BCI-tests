@@ -53,9 +53,10 @@ OS_PRETTY_NAME = os.getenv(
 )
 
 
-assert (
-    OS_MAJOR_VERSION == 15
-), f"The tests are created for SLE 15 base images only, but got a request for SLE {OS_MAJOR_VERSION}"
+assert OS_MAJOR_VERSION == 15, (
+    "The tests are created for SLE 15 base images only, "
+    f"but got a request for SLE {OS_MAJOR_VERSION}"
+)
 
 
 #: value of the environment variable ``TARGET`` which defines whether we are
@@ -103,7 +104,8 @@ def create_container_version_mark(
         ), f"invalid version {ver} specified in {available_versions}"
     return pytest.mark.skipif(
         OS_VERSION not in available_versions,
-        reason=f"This container is not available for {OS_VERSION}, only for {', '.join(available_versions)}",
+        reason=f"This container is not available for {OS_VERSION}, only for "
+        + ", ".join(available_versions),
     )
 
 
