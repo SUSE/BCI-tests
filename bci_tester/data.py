@@ -245,8 +245,14 @@ BUSYBOX_CONTAINER = create_BCI(
 )
 
 GOLANG_CONTAINERS = [
-    create_BCI(build_tag=f"bci/golang:{golang_version}")
-    for golang_version in ("1.19", "1.20")
+    create_BCI(
+        build_tag=f"bci/golang:{golang_version}",
+        extra_marks=[pytest.mark.__getattr__(f"bci/golang_{stability}")],
+    )
+    for golang_version, stability in (
+        ("1.19", "oldstable"),
+        ("1.20", "stable"),
+    )
 ]
 
 OPENJDK_11_CONTAINER = create_BCI(
@@ -328,9 +334,11 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 
 RUST_CONTAINERS = [
     create_BCI(
-        build_tag=f"bci/rust:{rust_version}", available_versions=["15.4"]
+        build_tag=f"bci/rust:{rust_version}",
+        available_versions=["15.4", "15.5"],
+        extra_marks=[pytest.mark.__getattr__(f"bci/rust_{stability}")],
     )
-    for rust_version in ("1.68", "1.69")
+    for rust_version, stability in (("1.68", "oldstable"), ("1.69", "stable"))
 ]
 
 INIT_CONTAINER = create_BCI(
