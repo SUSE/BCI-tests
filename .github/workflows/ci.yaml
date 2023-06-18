@@ -100,7 +100,7 @@ jobs:
           - DOCKER
           - PODMAN
         os_version:
-          - 15.4
+          - 15.5
         include:
           - toxenv: build
             container_runtime: DOCKER
@@ -132,28 +132,36 @@ jobs:
           - toxenv: repository
             container_runtime: PODMAN
             os_version: 15.3
+          - toxenv: build
+            container_runtime: DOCKER
+            os_version: 15.4
+          - toxenv: build
+            container_runtime: PODMAN
+            os_version: 15.4
           - toxenv: base
             container_runtime: DOCKER
-            os_version: 15.5
-            experimental: true
+            os_version: 15.4
           - toxenv: base
             container_runtime: PODMAN
-            os_version: 15.5
-            experimental: true
+            os_version: 15.4
           - toxenv: metadata
             container_runtime: DOCKER
-            os_version: 15.5
-            experimental: true
+            os_version: 15.4
           - toxenv: metadata
             container_runtime: PODMAN
-            os_version: 15.5
-            experimental: true
-          - toxenv: python
+            os_version: 15.4
+          - toxenv: all
             container_runtime: DOCKER
-            os_version: 15.5
-          - toxenv: python
+            os_version: 15.4
+          - toxenv: all
             container_runtime: PODMAN
-            os_version: 15.5
+            os_version: 15.4
+          - toxenv: repository
+            container_runtime: DOCKER
+            os_version: 15.4
+          - toxenv: repository
+            container_runtime: PODMAN
+            os_version: 15.4
 
     steps:
       - name: checkout source code
