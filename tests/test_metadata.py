@@ -26,7 +26,8 @@ from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
-from bci_tester.data import CONTAINER_389DS
+from bci_tester.data import CONTAINER_389DS_2_0
+from bci_tester.data import CONTAINER_389DS_2_2
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
@@ -84,6 +85,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
+        (CONTAINER_389DS_2_2, "389-ds", ImageType.APPLICATION),
     ]
     + [
         (rust_container, "rust", ImageType.LANGUAGE_STACK)
@@ -113,7 +115,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PYTHON311_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
-        (CONTAINER_389DS, "389-ds", ImageType.APPLICATION),
+        (CONTAINER_389DS_2_0, "389-ds", ImageType.APPLICATION),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
@@ -193,6 +195,14 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = (
             ),
         ),
         pytest.param(
+            *IMAGES_AND_NAMES[2],
+            marks=(
+                pytest.mark.xfail(
+                    reason=("The 389 2.2 container is unreleased")
+                )
+            ),
+        ),
+        pytest.param(
             *IMAGES_AND_NAMES[3],
             marks=(
                 pytest.mark.xfail(
@@ -201,8 +211,8 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = (
             ),
         ),
     ]
-    + [IMAGES_AND_NAMES[2]]
-    + IMAGES_AND_NAMES[4:]
+    + [IMAGES_AND_NAMES[3]]
+    + IMAGES_AND_NAMES[5:]
 )
 
 

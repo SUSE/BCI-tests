@@ -24,6 +24,10 @@ def test_container_build_and_repo(container_per_test, host):
     If the host is registered, then we check that there are more than one
     repository present.
 
+    Additionally, check if the ``SLE_BCI_debug`` and ``SLE_BCI_source`` repos
+    are either both present or both absent. If both are present, enable them to
+    check that the URIs are valid.
+
     """
     # container-suseconnect will inject the correct repositories on registered
     # SLES hosts
@@ -36,6 +40,7 @@ def test_container_build_and_repo(container_per_test, host):
     )
 
     repos = get_repos_from_connection(container_per_test.connection)
+    repo_names = {repo.name for repo in repos}
 
     if suseconnect_injects_repos:
         for _ in range(5):
@@ -48,7 +53,14 @@ def test_container_build_and_repo(container_per_test, host):
             len(repos) > 1
         ), "On a registered host, we must have more than one repository on the host"
     else:
-        assert len(repos) in (1, 2)
+        # SLE_BCI (optionally SLE_BCI_debug, SLE_BCI_source & MS .Net repo)
+        assert len(repos) <= 4
+        assert not repo_names - {
+            "SLE_BCI",
+            "SLE_BCI_debug",
+            "SLE_BCI_source",
+            "packages-microsoft-com-prod",
+        }
 
     sle_bci_repo_candidates = [
         repo for repo in repos if repo.name == "SLE_BCI"
@@ -59,6 +71,25 @@ def test_container_build_and_repo(container_per_test, host):
     assert sle_bci_repo.name == "SLE_BCI"
     assert sle_bci_repo.url == BCI_DEVEL_REPO
 
+    # find the debug and source repositories in the repo list, enable them so
+    # that we will check their url in the zypper ref call at the end
+    for repo_name in "SLE_BCI_debug", "SLE_BCI_source":
+        candidates = [repo for repo in repos if repo.name == repo_name]
+        assert len(candidates) in (0, 1)
+
+        if candidates:
+            container_per_test.connection.run_expect(
+                [0], f"zypper modifyrepo --enable {candidates[0].alias}"
+            )
+
+    assert (
+        "SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names
+    ) or (
+        "SLE_BCI_debug" not in repo_names
+        and "SLE_BCI_source" not in repo_names
+    ), "repos SLE_BCI_source and SLE_BCI_debug must either both be present or both missing"
+
+    # check that all enabled repos are valid and can be refreshed
     container_per_test.connection.run_expect([0], "zypper -n ref")
 
 

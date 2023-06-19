@@ -29,7 +29,7 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
-OS_VERSION = os.getenv("OS_VERSION", "15.4")
+OS_VERSION = os.getenv("OS_VERSION", "15.5")
 
 ALLOWED_OS_VERSIONS = ("15.3", "15.4", "15.5")
 _LANGUAGE_APPLICATION_STACK_OS_VERSIONS = ("15.4", "15.5")
@@ -257,24 +257,12 @@ GOLANG_CONTAINERS = [
     )
 ]
 
-OPENJDK_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:11", available_versions=["15.4"]
-)
-OPENJDK_DEVEL_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:11", available_versions=["15.4"]
-)
-OPENJDK_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:17", available_versions=["15.4"]
-)
-OPENJDK_DEVEL_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:17", available_versions=["15.4"]
-)
-NODEJS_16_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:16", available_versions=["15.4"]
-)
-NODEJS_18_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:18", available_versions=["15.4"]
-)
+OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
+OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
+OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
+OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
+NODEJS_16_CONTAINER = create_BCI(build_tag="bci/nodejs:16")
+NODEJS_18_CONTAINER = create_BCI(build_tag="bci/nodejs:18")
 
 PYTHON36_CONTAINER = create_BCI(build_tag="bci/python:3.6")
 PYTHON310_CONTAINER = create_BCI(
@@ -337,7 +325,6 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 RUST_CONTAINERS = [
     create_BCI(
         build_tag=f"bci/rust:{rust_version}",
-        available_versions=["15.4", "15.5"],
         extra_marks=[pytest.mark.__getattr__(f"bci/rust_{stability}")],
     )
     for rust_version, stability in (("1.68", "oldstable"), ("1.69", "stable"))
@@ -357,7 +344,6 @@ INIT_CONTAINER = create_BCI(
 
 PCP_CONTAINER = create_BCI(
     build_tag="suse/pcp:5",
-    available_versions=["15.4"],
     extra_marks=[
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
@@ -367,20 +353,21 @@ PCP_CONTAINER = create_BCI(
     bci_type=ImageType.APPLICATION,
 )
 
-CONTAINER_389DS = create_BCI(
-    build_tag="suse/389-ds:2.0",
-    bci_type=ImageType.APPLICATION,
-    available_versions=["15.4"],
-    healthcheck_timeout=timedelta(seconds=240),
-    extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
-    forwarded_ports=[PortForwarding(container_port=3389)],
-)
+CONTAINER_389DS_2_0, CONTAINER_389DS_2_2 = [
+    create_BCI(
+        build_tag=f"suse/389-ds:{ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=[os_ver],
+        healthcheck_timeout=timedelta(seconds=240),
+        extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
+        forwarded_ports=[PortForwarding(container_port=3389)],
+    )
+    for ver, os_ver in (("2.0", "15.4"), ("2.2", "15.5"))
+]
 
-PHP_8_CLI = create_BCI(build_tag="bci/php:8", available_versions=["15.4"])
-PHP_8_APACHE = create_BCI(
-    build_tag="bci/php-apache:8", available_versions=["15.4"]
-)
-PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8", available_versions=["15.4"])
+PHP_8_CLI = create_BCI(build_tag="bci/php:8")
+PHP_8_APACHE = create_BCI(build_tag="bci/php-apache:8")
+PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
 
 POSTGRES_PASSWORD = "n0ts3cr3t"
 
@@ -388,7 +375,6 @@ POSTGRESQL_CONTAINERS = [
     create_BCI(
         build_tag=f"suse/postgres:{pg_ver}",
         bci_type=ImageType.APPLICATION,
-        available_versions=["15.4"],
         forwarded_ports=[PortForwarding(container_port=5432)],
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
@@ -414,7 +400,6 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 DISTRIBUTION_CONTAINER = create_BCI(
     build_tag="suse/registry:2.8",
     image_type="kiwi",
-    available_versions=["15.4"],
     forwarded_ports=[PortForwarding(container_port=5000)],
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
@@ -442,7 +427,8 @@ CONTAINERS_WITH_ZYPPER = (
         PCP_CONTAINER,
         RUBY_25_CONTAINER,
         INIT_CONTAINER,
-        CONTAINER_389DS,
+        CONTAINER_389DS_2_0,
+        CONTAINER_389DS_2_2,
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
@@ -476,7 +462,8 @@ L3_CONTAINERS = (
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_DEVEL_17_CONTAINER,
         RUBY_25_CONTAINER,
-        CONTAINER_389DS,
+        CONTAINER_389DS_2_0,
+        CONTAINER_389DS_2_2,
         DISTRIBUTION_CONTAINER,
         PCP_CONTAINER,
     ]
