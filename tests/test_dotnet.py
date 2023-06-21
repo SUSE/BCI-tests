@@ -9,14 +9,11 @@ from typing import List
 import pytest
 from pytest_container import GitRepositoryBuild
 
-from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
 from bci_tester.data import DOTNET_CONTAINERS
-from bci_tester.data import DOTNET_RUNTIME_3_1_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
 from bci_tester.util import get_repos_from_connection
@@ -29,7 +26,6 @@ MS_REPO_NAME = "packages-microsoft-com-prod"
 @pytest.mark.parametrize(
     "container,sdk_version",
     [
-        (DOTNET_SDK_3_1_CONTAINER, "3.1"),
         (DOTNET_SDK_6_0_CONTAINER, "6.0"),
         (DOTNET_SDK_7_0_CONTAINER, "7.0"),
     ],
@@ -49,7 +45,6 @@ def test_dotnet_sdk_version(container, sdk_version):
 @pytest.mark.parametrize(
     "container,runtime_version",
     [
-        (DOTNET_ASPNET_3_1_CONTAINER, "3.1"),
         (DOTNET_ASPNET_6_0_CONTAINER, "6.0"),
         (DOTNET_ASPNET_7_0_CONTAINER, "7.0"),
     ],
@@ -71,7 +66,6 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
 @pytest.mark.parametrize(
     "container,runtime_version",
     [
-        (DOTNET_RUNTIME_3_1_CONTAINER, "3.1"),
         (DOTNET_RUNTIME_6_0_CONTAINER, "6.0"),
         (DOTNET_RUNTIME_7_0_CONTAINER, "7.0"),
     ],
@@ -91,7 +85,6 @@ def test_dotnet_runtime_present(container, runtime_version):
 @pytest.mark.parametrize(
     "container_per_test,msg",
     [
-        (DOTNET_SDK_3_1_CONTAINER, "Hello World!"),
         (DOTNET_SDK_6_0_CONTAINER, "Hello, World!"),
         (DOTNET_SDK_7_0_CONTAINER, "Hello, World!"),
     ],
@@ -146,7 +139,6 @@ def test_popular_web_apps(container_per_test, container_git_clone):
 @pytest.mark.parametrize(
     "container_per_test",
     [
-        DOTNET_SDK_3_1_CONTAINER,
         DOTNET_SDK_6_0_CONTAINER,
         DOTNET_SDK_7_0_CONTAINER,
     ],

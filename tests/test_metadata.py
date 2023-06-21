@@ -29,13 +29,10 @@ from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_2_0
 from bci_tester.data import CONTAINER_389DS_2_2
 from bci_tester.data import DISTRIBUTION_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_3_1_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_3_1_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_3_1_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
@@ -133,14 +130,8 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     ]
     + (
         [
-            (DOTNET_SDK_3_1_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_7_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
-            (
-                DOTNET_ASPNET_3_1_CONTAINER,
-                "dotnet.aspnet",
-                ImageType.LANGUAGE_STACK,
-            ),
             (
                 DOTNET_ASPNET_6_0_CONTAINER,
                 "dotnet.aspnet",
@@ -149,11 +140,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             (
                 DOTNET_ASPNET_7_0_CONTAINER,
                 "dotnet.aspnet",
-                ImageType.LANGUAGE_STACK,
-            ),
-            (
-                DOTNET_RUNTIME_3_1_CONTAINER,
-                "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
             ),
             (
