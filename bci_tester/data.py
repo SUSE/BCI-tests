@@ -31,18 +31,32 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 #: places
 OS_VERSION = os.getenv("OS_VERSION", "15.5")
 
-ALLOWED_OS_VERSIONS = ("15.3", "15.4", "15.5")
-_LANGUAGE_APPLICATION_STACK_OS_VERSIONS = ("15.4", "15.5")
+# Allowed os versions for base (non lang/non-app) containers
+ALLOWED_BASE_OS_VERSIONS = ("15.3", "15.4", "15.5")
 
-assert sorted(ALLOWED_OS_VERSIONS) == list(
-    ALLOWED_OS_VERSIONS
-), f"list ALLOWED_OS_VERSIONS must be sorted, but got {ALLOWED_OS_VERSIONS}"
+# Allowed os versions for Language and Application containers
+ALLOWED_NONBASE_OS_VERSIONS = ("15.4", "15.5")
 
-if OS_VERSION not in ALLOWED_OS_VERSIONS:
+# Test Language and Application containers by default for these versions
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.5",)
+
+assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(
+    ALLOWED_BASE_OS_VERSIONS
+), f"list ALLOWED_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
+
+assert sorted(ALLOWED_NONBASE_OS_VERSIONS) == list(
+    ALLOWED_NONBASE_OS_VERSIONS
+), f"list ALLOWED_NONOS_VERSIONS must be sorted, but got {ALLOWED_NONBASE_OS_VERSIONS}"
+
+if not (
+    OS_VERSION in ALLOWED_BASE_OS_VERSIONS
+    or OS_VERSION in ALLOWED_NONBASE_OS_VERSIONS
+):
     raise ValueError(
         f"Invalid OS_VERSION: {OS_VERSION}, allowed values are: "
-        + ", ".join(ALLOWED_OS_VERSIONS)
+        + ", ".join(ALLOWED_BASE_OS_VERSIONS)
     )
+
 
 OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
 
@@ -193,16 +207,14 @@ def create_BCI(
     if bci_type != ImageType.OS:
         if available_versions:
             for ver in available_versions:
-                if ver not in _LANGUAGE_APPLICATION_STACK_OS_VERSIONS:
+                if ver not in ALLOWED_NONBASE_OS_VERSIONS:
                     raise ValueError(
                         f"Invalid os version for a language or application stack container: {ver}"
                     )
             marks.append(create_container_version_mark(available_versions))
         else:
             marks.append(
-                create_container_version_mark(
-                    _LANGUAGE_APPLICATION_STACK_OS_VERSIONS
-                )
+                create_container_version_mark(_DEFAULT_NONBASE_OS_VERSIONS)
             )
 
     elif available_versions is not None:
