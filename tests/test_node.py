@@ -41,7 +41,6 @@ def test_node_version(auto_container):
             GitRepositoryBuild(
                 repository_url="https://github.com/chalk/chalk.git",
                 build_command="npm install && npm test",
-                marks=pytest.mark.xfail(reason="fails to build as of 2023/05"),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
