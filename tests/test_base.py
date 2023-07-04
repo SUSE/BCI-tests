@@ -10,6 +10,7 @@ from pytest_container.container import container_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import OS_VERSION
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import target_fips_enforced

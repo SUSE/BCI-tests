@@ -269,7 +269,9 @@ def test_tensorf(container_per_test):
     assert container_per_test.connection.file(bcdir + appdir + appl1).is_file
 
     # collect CPU flags of the system
-    cpuflg = container_per_test.connection.run_expect([0], "lscpu").stdout
+    cpuflg = container_per_test.connection.run_expect(
+        [0], "cat /proc/cpuinfo"
+    ).stdout
 
     # In precompiled Tensorflow library by default 'sse4' cpu flag expected
     assert "sse4" in cpuflg

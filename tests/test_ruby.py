@@ -1,10 +1,10 @@
 import pytest
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import RUBY_25_CONTAINER
+from bci_tester.data import RUBY_CONTAINERS
 
 
-CONTAINER_IMAGES = [RUBY_25_CONTAINER]
+CONTAINER_IMAGES = RUBY_CONTAINERS
 
 
 _NON_X86_64_OR_AARCH64_SKIP = pytest.mark.skipif(
@@ -19,7 +19,7 @@ def test_ruby_version(auto_container):
 
     """
     rb_ver = auto_container.connection.run_expect(
-        [0], 'rpm -q --qf "%{VERSION}" ruby2.5'
+        [0], "ruby -e 'puts RUBY_VERSION'"
     ).stdout.strip()
     assert (
         auto_container.connection.run_expect(

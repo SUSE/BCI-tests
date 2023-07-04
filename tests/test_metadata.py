@@ -28,6 +28,7 @@ from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_2_0
 from bci_tester.data import CONTAINER_389DS_2_2
+from bci_tester.data import CONTAINER_389DS_2_4
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
@@ -43,6 +44,7 @@ from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NODEJS_16_CONTAINER
 from bci_tester.data import NODEJS_18_CONTAINER
+from bci_tester.data import NODEJS_20_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
@@ -58,6 +60,7 @@ from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON311_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
+from bci_tester.data import RUBY_32_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
 
 
@@ -71,6 +74,8 @@ URL = "https://www.suse.com/products/server/"
 def _get_container_label_prefix(
     container_name: str, container_type: ImageType
 ) -> str:
+    if OS_VERSION == "tumbleweed":
+        return f"org.opensuse.{container_type}.{container_name}"
     return f"com.suse.{container_type}.{container_name}"
 
 
@@ -107,12 +112,15 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         ),
         (NODEJS_16_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (NODEJS_18_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
+        (NODEJS_20_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (PYTHON36_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (PYTHON311_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
+        (RUBY_32_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
         (CONTAINER_389DS_2_0, "389-ds", ImageType.APPLICATION),
+        (CONTAINER_389DS_2_4, "389-ds", ImageType.APPLICATION),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
@@ -240,12 +248,18 @@ def test_general_labels(
         if container_type != ImageType.APPLICATION:
             assert "BCI" in labels[f"{prefix}.title"]
 
-        assert (
-            "based on the SLE Base Container Image."
-            in labels[f"{prefix}.description"]
-        )
+        if OS_VERSION == "tumbleweed":
+            assert (
+                "based on the openSUSE Tumbleweed Container Image."
+                in labels[f"{prefix}.description"]
+            )
+        else:
+            assert (
+                "based on the SLE Base Container Image."
+                in labels[f"{prefix}.description"]
+            )
 
-        if version == "latest":
+        if version == "tumbleweed":
             assert OS_VERSION in labels[f"{prefix}.version"]
         assert labels[f"{prefix}.url"] == URL
         assert labels[f"{prefix}.vendor"] == VENDOR
@@ -286,16 +300,19 @@ def test_disturl(
         ]
     )
 
-    if "opensuse.org" in container.container.get_base().url:
-        assert (
-            f"obs://build.opensuse.org/devel:BCI:SLE-15-SP{OS_SP_VERSION}"
-            in disturl
-        )
+    if OS_VERSION == "tumbleweed":
+        assert f"obs://build.opensuse.org/devel:BCI:Tumbleweed" in disturl
     else:
-        assert (
-            f"obs://build.suse.de/SUSE:SLE-15-SP{OS_SP_VERSION}:Update"
-            in disturl
-        )
+        if "opensuse.org" in container.container.get_base().url:
+            assert (
+                f"obs://build.opensuse.org/devel:BCI:SLE-15-SP{OS_SP_VERSION}"
+                in disturl
+            )
+        else:
+            assert (
+                f"obs://build.suse.de/SUSE:SLE-15-SP{OS_SP_VERSION}:Update"
+                in disturl
+            )
 
 
 @pytest.mark.skipif(
@@ -321,6 +338,10 @@ def test_disturl_can_be_checked_out(
     check_output(["osc", "co", disturl], cwd=tmp_path)
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="no image-type labels on openSUSE containers",
+)
 @pytest.mark.parametrize(
     "container,container_type",
     [
@@ -349,6 +370,10 @@ def test_image_type_label(
         ), "sle-bci images must be marked as such"
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="no supportlevel labels on openSUSE containers",
+)
 @pytest.mark.parametrize(
     "container",
     [
@@ -369,6 +394,10 @@ def test_techpreview_label(container: ContainerData):
     ), "images must be marked as techpreview"
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="no supportlevel labels on openSUSE containers",
+)
 @pytest.mark.parametrize(
     "container",
     [cont for cont in ACC_CONTAINERS],
@@ -384,6 +413,10 @@ def test_acc_label(container: ContainerData):
     ), "acc images must be marked as acc"
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="no supportlevel labels on openSUSE containers",
+)
 @pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label
@@ -411,7 +444,7 @@ def test_reference(
     :command:`podman` or :command:`docker`.
 
     We check that both values are equal, that the container name is correct in
-    the reference and that the reference begins with ``registry.suse.com/bci/``.
+    the reference and that the reference begins with the expected registry.
 
     """
     labels = container.inspect.config.labels
@@ -425,10 +458,13 @@ def test_reference(
     )
     assert container_name.replace(".", "-") in reference
 
-    if container_type == ImageType.APPLICATION:
-        assert reference[:23] == "registry.suse.com/suse/"
+    if OS_VERSION == "tumbleweed":
+        assert reference.startswith("registry.opensuse.org/")
     else:
-        assert reference[:22] == "registry.suse.com/bci/"
+        if container_type == ImageType.APPLICATION:
+            assert reference[:23] == "registry.suse.com/suse/"
+        else:
+            assert reference[:22] == "registry.suse.com/bci/"
 
     # for the OS versioned containers we'll get a reference that contains the
     # current full version + release, which has not yet been published to the

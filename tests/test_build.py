@@ -10,6 +10,7 @@ import pytest
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
+from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
 
 
@@ -42,6 +43,24 @@ def test_container_build_and_repo(container_per_test, host):
     repos = get_repos_from_connection(container_per_test.connection)
     repo_names = {repo.name for repo in repos}
 
+    expected_repos = (
+        {
+            "openSUSE-Tumbleweed-Debug",
+            "openSUSE-Tumbleweed-Non-Oss",
+            "openSUSE-Tumbleweed-Oss",
+            "openSUSE-Tumbleweed-Source",
+            "openSUSE-Tumbleweed-Update",
+            "Open H.264 Codec (openSUSE Tumbleweed)",
+        }
+        if OS_VERSION == "tumbleweed"
+        else {
+            "SLE_BCI",
+            "SLE_BCI_debug",
+            "SLE_BCI_source",
+            "packages-microsoft-com-prod",
+        }
+    )
+
     if suseconnect_injects_repos:
         for _ in range(5):
             if len(repos) > 1:
@@ -53,41 +72,42 @@ def test_container_build_and_repo(container_per_test, host):
             len(repos) > 1
         ), "On a registered host, we must have more than one repository on the host"
     else:
-        # SLE_BCI (optionally SLE_BCI_debug, SLE_BCI_source & MS .Net repo)
-        assert len(repos) <= 4
-        assert not repo_names - {
-            "SLE_BCI",
-            "SLE_BCI_debug",
-            "SLE_BCI_source",
-            "packages-microsoft-com-prod",
-        }
+        assert len(repos) <= len(expected_repos)
+        assert not repo_names - expected_repos
 
-    sle_bci_repo_candidates = [
-        repo for repo in repos if repo.name == "SLE_BCI"
-    ]
-    assert len(sle_bci_repo_candidates) == 1
-    sle_bci_repo = sle_bci_repo_candidates[0]
+        if OS_VERSION == "tumbleweed":
+            for repo_name in "repo-debug", "repo-source":
+                container_per_test.connection.run_expect(
+                    [0], f"zypper modifyrepo --enable {repo_name}"
+                )
 
-    assert sle_bci_repo.name == "SLE_BCI"
-    assert sle_bci_repo.url == BCI_DEVEL_REPO
+    if OS_VERSION != "tumbleweed":
+        sle_bci_repo_candidates = [
+            repo for repo in repos if repo.name == "SLE_BCI"
+        ]
+        assert len(sle_bci_repo_candidates) == 1
+        sle_bci_repo = sle_bci_repo_candidates[0]
 
-    # find the debug and source repositories in the repo list, enable them so
-    # that we will check their url in the zypper ref call at the end
-    for repo_name in "SLE_BCI_debug", "SLE_BCI_source":
-        candidates = [repo for repo in repos if repo.name == repo_name]
-        assert len(candidates) in (0, 1)
+        assert sle_bci_repo.name == "SLE_BCI"
+        assert sle_bci_repo.url == BCI_DEVEL_REPO
 
-        if candidates:
-            container_per_test.connection.run_expect(
-                [0], f"zypper modifyrepo --enable {candidates[0].alias}"
-            )
+        # find the debug and source repositories in the repo list, enable them so
+        # that we will check their url in the zypper ref call at the end
+        for repo_name in "SLE_BCI_debug", "SLE_BCI_source":
+            candidates = [repo for repo in repos if repo.name == repo_name]
+            assert len(candidates) in (0, 1)
 
-    assert (
-        "SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names
-    ) or (
-        "SLE_BCI_debug" not in repo_names
-        and "SLE_BCI_source" not in repo_names
-    ), "repos SLE_BCI_source and SLE_BCI_debug must either both be present or both missing"
+            if candidates:
+                container_per_test.connection.run_expect(
+                    [0], f"zypper modifyrepo --enable {candidates[0].alias}"
+                )
+
+        assert (
+            "SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names
+        ) or (
+            "SLE_BCI_debug" not in repo_names
+            and "SLE_BCI_source" not in repo_names
+        ), "repos SLE_BCI_source and SLE_BCI_debug must either both be present or both missing"
 
     # check that all enabled repos are valid and can be refreshed
     container_per_test.connection.run_expect([0], "zypper -n ref")

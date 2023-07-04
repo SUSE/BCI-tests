@@ -4,13 +4,9 @@ import pytest
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
 
-from bci_tester.data import NODEJS_16_CONTAINER
-from bci_tester.data import NODEJS_18_CONTAINER
+from bci_tester.data import NODEJS_CONTAINERS
 
-CONTAINER_IMAGES = [
-    NODEJS_16_CONTAINER,
-    NODEJS_18_CONTAINER,
-]
+CONTAINER_IMAGES = NODEJS_CONTAINERS
 
 
 def test_node_version(auto_container):
