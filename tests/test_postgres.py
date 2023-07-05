@@ -52,14 +52,6 @@ def _generate_test_matrix() -> List[ParameterSet]:
             if pg_user:
                 env["POSTGRES_USER"] = pg_user
 
-            # postgres on RHEL7 is too ancient to support scram-sha-256 and only
-            # works with md5 auth
-            if (
-                LOCALHOST.system_info.distribution == "rhel"
-                and LOCALHOST.system_info.release.startswith("7.")
-            ):
-                env["POSTGRES_HOST_AUTH_METHOD"] = "md5"
-
             params.append(
                 pytest.param(
                     DerivedContainer(
