@@ -107,14 +107,14 @@ if TARGET not in ("obs", "ibs", "ibs-cr", "dso"):
         BASEURL = BASEURL[:-1]
 else:
     if OS_VERSION == "tumbleweed":
-        distname = "tumbleweed"
+        DISTNAME = "tumbleweed"
     else:
-        distname = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
+        DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
     BASEURL = {
-        "obs": f"registry.opensuse.org/devel/bci/{distname}",
-        "ibs": f"registry.suse.de/suse/{distname}/update/bci",
+        "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
+        "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
         "dso": "registry1.dso.mil/ironbank/suse",
-        "ibs-cr": f"registry.suse.de/suse/{distname}/update/cr/totest",
+        "ibs-cr": f"registry.suse.de/suse/{DISTNAME}/update/cr/totest",
     }[TARGET]
 
 
@@ -419,7 +419,7 @@ PCP_CONTAINER = create_BCI(
     bci_type=ImageType.APPLICATION,
 )
 
-CONTAINER_389DS_2_0, CONTAINER_389DS_2_2, CONTAINER_389DS_2_4 = [
+CONTAINER_389DS_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/389-ds:{ver}",
         bci_type=ImageType.APPLICATION,
@@ -495,13 +495,11 @@ CONTAINERS_WITH_ZYPPER = (
         NODEJS_20_CONTAINER,
         PCP_CONTAINER,
         INIT_CONTAINER,
-        CONTAINER_389DS_2_0,
-        CONTAINER_389DS_2_2,
-        CONTAINER_389DS_2_4,
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
     ]
+    + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
     + GOLANG_CONTAINERS
@@ -529,11 +527,10 @@ L3_CONTAINERS = (
         OPENJDK_17_CONTAINER,
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_DEVEL_17_CONTAINER,
-        CONTAINER_389DS_2_0,
-        CONTAINER_389DS_2_2,
         DISTRIBUTION_CONTAINER,
         PCP_CONTAINER,
     ]
+    + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
     + GOLANG_CONTAINERS

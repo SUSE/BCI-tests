@@ -26,9 +26,7 @@ from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
-from bci_tester.data import CONTAINER_389DS_2_0
-from bci_tester.data import CONTAINER_389DS_2_2
-from bci_tester.data import CONTAINER_389DS_2_4
+from bci_tester.data import CONTAINER_389DS_CONTAINERS
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
@@ -65,10 +63,20 @@ from bci_tester.data import RUST_CONTAINERS
 
 
 #: The official vendor name
-VENDOR = "SUSE LLC"
+VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"
 
 #: URL to the product's home page
-URL = "https://www.suse.com/products/server/"
+URL = (
+    "https://www.opensuse.org"
+    if OS_VERSION == "tumbleweed"
+    else "https://www.suse.com/products/server/"
+)
+
+
+SKIP_IF_TW_MARK = pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="no supportlevel labels on openSUSE containers",
+)
 
 
 def _get_container_label_prefix(
@@ -87,11 +95,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
-        (CONTAINER_389DS_2_2, "389-ds", ImageType.APPLICATION),
-    ]
-    + [
-        (rust_container, "rust", ImageType.LANGUAGE_STACK)
-        for rust_container in RUST_CONTAINERS
     ]
     # all other containers
     + [
@@ -119,11 +122,17 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (RUBY_32_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
-        (CONTAINER_389DS_2_0, "389-ds", ImageType.APPLICATION),
-        (CONTAINER_389DS_2_4, "389-ds", ImageType.APPLICATION),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
+    ]
+    + [
+        (container_389ds, "389-ds", ImageType.APPLICATION)
+        for container_389ds in CONTAINER_389DS_CONTAINERS
+    ]
+    + [
+        (rust_container, "rust", ImageType.LANGUAGE_STACK)
+        for rust_container in RUST_CONTAINERS
     ]
     + [
         (golang_container, "golang", ImageType.LANGUAGE_STACK)
@@ -166,49 +175,26 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     )
 ]
 
-IMAGES_AND_NAMES_WITH_BASE_XFAIL = (
-    [
-        pytest.param(
-            *IMAGES_AND_NAMES[0],
-            marks=(
-                pytest.mark.xfail(
-                    reason=(
-                        "The base container has no com.suse.bci.base labels yet"
-                        if OS_VERSION == "15.3"
-                        else "https://bugzilla.suse.com/show_bug.cgi?id=1200373"
-                    )
+IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
+    pytest.param(
+        *IMAGES_AND_NAMES[0],
+        marks=(
+            pytest.mark.xfail(
+                reason=(
+                    "The base container has no com.suse.bci.base labels yet"
+                    if OS_VERSION == "15.3"
+                    else "https://bugzilla.suse.com/show_bug.cgi?id=1200373"
                 )
-            ),
+            )
         ),
-        pytest.param(
-            *IMAGES_AND_NAMES[1],
-            marks=(
-                pytest.mark.xfail(
-                    reason=("The PCP 5.2.5 container is unreleased")
-                )
-            ),
+    ),
+    pytest.param(
+        *IMAGES_AND_NAMES[1],
+        marks=(
+            pytest.mark.xfail(reason=("The PCP 5.2.5 container is unreleased"))
         ),
-        pytest.param(
-            *IMAGES_AND_NAMES[2],
-            marks=(
-                pytest.mark.xfail(
-                    reason=("The 389 2.2 container is unreleased")
-                )
-            ),
-        ),
-        pytest.param(
-            *IMAGES_AND_NAMES[3],
-            marks=(
-                pytest.mark.xfail(
-                    reason=("The Rust 1.68 container is unreleased")
-                )
-            ),
-        ),
-    ]
-    + [IMAGES_AND_NAMES[3]]
-    + IMAGES_AND_NAMES[5:]
-)
-
+    ),
+] + IMAGES_AND_NAMES[2:]
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES
@@ -250,7 +236,7 @@ def test_general_labels(
 
         if OS_VERSION == "tumbleweed":
             assert (
-                "based on the openSUSE Tumbleweed Container Image."
+                "based on the openSUSE Tumbleweed Base Container Image."
                 in labels[f"{prefix}.description"]
             )
         else:
@@ -264,12 +250,17 @@ def test_general_labels(
         assert labels[f"{prefix}.url"] == URL
         assert labels[f"{prefix}.vendor"] == VENDOR
 
-    assert labels["com.suse.lifecycle-url"] in (
-        "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
-        "https://www.suse.com/lifecycle",
-        "https://www.suse.com/lifecycle/",
-    )
-    assert labels["com.suse.eula"] == "sle-bci"
+    if OS_VERSION == "tumbleweed":
+        assert labels["org.opensuse.lifecycle-url"] in (
+            "https://en.opensuse.org/Lifetime",
+        )
+        # no EULA for openSUSE images
+    else:
+        assert labels["com.suse.lifecycle-url"] in (
+            "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
+        )
+        assert labels["com.suse.eula"] == "sle-bci"
+    pass
 
 
 @pytest.mark.parametrize(
@@ -338,10 +329,7 @@ def test_disturl_can_be_checked_out(
     check_output(["osc", "co", disturl], cwd=tmp_path)
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no image-type labels on openSUSE containers",
-)
+@SKIP_IF_TW_MARK
 @pytest.mark.parametrize(
     "container,container_type",
     [
@@ -370,10 +358,7 @@ def test_image_type_label(
         ), "sle-bci images must be marked as such"
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no supportlevel labels on openSUSE containers",
-)
+@SKIP_IF_TW_MARK
 @pytest.mark.parametrize(
     "container",
     [
@@ -394,10 +379,7 @@ def test_techpreview_label(container: ContainerData):
     ), "images must be marked as techpreview"
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no supportlevel labels on openSUSE containers",
-)
+@SKIP_IF_TW_MARK
 @pytest.mark.parametrize(
     "container",
     [cont for cont in ACC_CONTAINERS],
@@ -413,10 +395,7 @@ def test_acc_label(container: ContainerData):
     ), "acc images must be marked as acc"
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no supportlevel labels on openSUSE containers",
-)
+@SKIP_IF_TW_MARK
 @pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label

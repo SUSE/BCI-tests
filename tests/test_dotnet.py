@@ -23,11 +23,12 @@ from bci_tester.util import get_repos_from_connection
 #: Name and alias of the microsoft .Net repository
 MS_REPO_NAME = "packages-microsoft-com-prod"
 
-
-@pytest.mark.skipif(
+pytestmark = pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
     reason="no Tumbleweed dotnet containers",
 )
+
+
 @pytest.mark.parametrize(
     "container,sdk_version",
     [
@@ -72,10 +73,6 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     assert "Microsoft.NETCore.App " + runtime_version in runtimes
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no Tumbleweed dotnet containers",
-)
 @pytest.mark.parametrize(
     "container,runtime_version",
     [
@@ -95,10 +92,6 @@ def test_dotnet_runtime_present(container, runtime_version):
     assert "Microsoft.NETCore.App " + runtime_version in runtimes[0]
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no Tumbleweed dotnet containers",
-)
 @pytest.mark.parametrize(
     "container_per_test,msg",
     [
@@ -125,10 +118,6 @@ def test_dotnet_hello_world(container_per_test, msg):
     )
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no Tumbleweed dotnet containers",
-)
 @pytest.mark.parametrize(
     "container_per_test",
     [DOTNET_SDK_7_0_CONTAINER],

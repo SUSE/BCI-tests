@@ -246,7 +246,7 @@ def test_environment_variables(
     - ``COMPOSER_VERSION``
     - ``PHP_INI_DIR``
 
-    and for the php-apache variant additionally:
+    and specific to php-apache variant:
     - ``APACHE_CONFDIR``
     - ``APACHE_ENVVARS``
     """
