@@ -444,7 +444,7 @@ def test_reference(
     :command:`podman` or :command:`docker`.
 
     We check that both values are equal, that the container name is correct in
-    the reference and that the reference begins with the expected registry.
+    the reference and that the reference begins with the expected registry url.
 
     """
     labels = container.inspect.config.labels
