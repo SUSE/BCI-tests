@@ -265,7 +265,7 @@ def create_BCI(
 
 if OS_VERSION == "tumbleweed":
     BASE_CONTAINER = create_BCI(
-        build_tag=f"tumbleweed:latest",
+        build_tag="tumbleweed:latest",
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
