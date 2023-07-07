@@ -67,7 +67,7 @@ if OS_VERSION == "tumbleweed":
     #: The Tumbleweed pretty name (from /etc/os-release)
     OS_PRETTY_NAME = os.getenv(
         "OS_PRETTY_NAME",
-        f"openSUSE Tumbleweed",
+        "openSUSE Tumbleweed",
     )
 
 else:
