@@ -278,19 +278,19 @@ else:
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"bci/bci-minimal:{OS_CONTAINER_TAG}",
     image_type="kiwi",
-    available_versions=["15.4", "15.5", "tumbleweed"],
+    available_versions=ALLOWED_BASE_OS_VERSIONS,
     bci_type=ImageType.OS,
 )
 MICRO_CONTAINER = create_BCI(
     build_tag=f"bci/bci-micro:{OS_CONTAINER_TAG}",
     image_type="kiwi",
-    available_versions=["15.4", "15.5"],
+    available_versions=ALLOWED_BASE_OS_VERSIONS,
     bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
     build_tag=f"bci/bci-busybox:{OS_CONTAINER_TAG}",
     image_type="kiwi",
-    available_versions=["15.4", "15.5"],
+    available_versions=["15.4", "15.5", "tumbleweed"],
     custom_entry_point="/bin/sh",
     bci_type=ImageType.OS,
 )
@@ -398,7 +398,8 @@ RUST_CONTAINERS = [
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"bci/bci-init:{OS_CONTAINER_TAG}",
-    available_versions=["15.4", "15.5"],
+    available_versions=["15.4", "15.5", "tumbleweed"],
+    bci_type=ImageType.OS,
     healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
         pytest.mark.skipif(
