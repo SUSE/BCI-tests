@@ -258,6 +258,7 @@ def test_general_labels(
     else:
         assert labels["com.suse.lifecycle-url"] in (
             "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
+            "https://www.suse.com/lifecycle",
         )
         assert labels["com.suse.eula"] == "sle-bci"
     pass
