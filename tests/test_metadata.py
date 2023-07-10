@@ -191,7 +191,7 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
     pytest.param(
         *IMAGES_AND_NAMES[1],
         marks=(
-            pytest.mark.xfail(reason=("The PCP 5.2.5 container is unreleased"))
+            pytest.mark.xfail(reason="The PCP 5.2.5 container is unreleased")
         ),
     ),
 ] + IMAGES_AND_NAMES[2:]
@@ -261,7 +261,6 @@ def test_general_labels(
             "https://www.suse.com/lifecycle",
         )
         assert labels["com.suse.eula"] == "sle-bci"
-    pass
 
 
 @pytest.mark.parametrize(
@@ -383,7 +382,7 @@ def test_techpreview_label(container: ContainerData):
 @SKIP_IF_TW_MARK
 @pytest.mark.parametrize(
     "container",
-    [cont for cont in ACC_CONTAINERS],
+    list(ACC_CONTAINERS),
     indirect=True,
 )
 def test_acc_label(container: ContainerData):

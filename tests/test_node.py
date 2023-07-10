@@ -101,9 +101,6 @@ def test_popular_npm_repos(
          - :command:`npm install && npm run unit`
 
     """
-    node_version = auto_container_per_test.connection.run_expect(
-        [0], "echo $NODE_VERSION"
-    ).stdout.strip()
     auto_container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )
