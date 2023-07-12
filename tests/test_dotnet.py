@@ -48,10 +48,6 @@ def test_dotnet_sdk_version(container, sdk_version):
     assert "Microsoft.NETCore.App " + sdk_version in runtimes
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="no Tumbleweed dotnet containers",
-)
 @pytest.mark.parametrize(
     "container,runtime_version",
     [
