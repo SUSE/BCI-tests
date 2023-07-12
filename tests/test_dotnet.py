@@ -16,11 +16,17 @@ from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
+from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
 
 
 #: Name and alias of the microsoft .Net repository
 MS_REPO_NAME = "packages-microsoft-com-prod"
+
+pytestmark = pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="no Tumbleweed dotnet containers",
+)
 
 
 @pytest.mark.parametrize(

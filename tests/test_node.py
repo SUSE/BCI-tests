@@ -4,13 +4,9 @@ import pytest
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
 
-from bci_tester.data import NODEJS_16_CONTAINER
-from bci_tester.data import NODEJS_18_CONTAINER
+from bci_tester.data import NODEJS_CONTAINERS
 
-CONTAINER_IMAGES = [
-    NODEJS_16_CONTAINER,
-    NODEJS_18_CONTAINER,
-]
+CONTAINER_IMAGES = NODEJS_CONTAINERS
 
 
 def test_node_version(auto_container):
@@ -105,9 +101,6 @@ def test_popular_npm_repos(
          - :command:`npm install && npm run unit`
 
     """
-    node_version = auto_container_per_test.connection.run_expect(
-        [0], "echo $NODE_VERSION"
-    ).stdout.strip()
     auto_container_per_test.connection.run_expect(
         [0], container_git_clone.test_command
     )

@@ -32,13 +32,13 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 OS_VERSION = os.getenv("OS_VERSION", "15.5")
 
 # Allowed os versions for base (non lang/non-app) containers
-ALLOWED_BASE_OS_VERSIONS = ("15.3", "15.4", "15.5")
+ALLOWED_BASE_OS_VERSIONS = ("15.3", "15.4", "15.5", "tumbleweed")
 
 # Allowed os versions for Language and Application containers
-ALLOWED_NONBASE_OS_VERSIONS = ("15.4", "15.5")
+ALLOWED_NONBASE_OS_VERSIONS = ("15.4", "15.5", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.5",)
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.5", "tumbleweed")
 
 assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(
     ALLOWED_BASE_OS_VERSIONS
@@ -58,19 +58,36 @@ if not (
     )
 
 
-OS_MAJOR_VERSION, OS_SP_VERSION = (int(ver) for ver in OS_VERSION.split("."))
+if OS_VERSION == "tumbleweed":
+    OS_MAJOR_VERSION = 17
+    OS_SP_VERSION = 0
+    OS_CONTAINER_TAG = "latest"
+    APP_CONTAINER_PREFIX = "opensuse"
 
-#: The SLES 15 pretty name (from /etc/os-release)
-OS_PRETTY_NAME = os.getenv(
-    "OS_PRETTY_NAME",
-    f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION} SP{OS_SP_VERSION}",
-)
+    #: The Tumbleweed pretty name (from /etc/os-release)
+    OS_PRETTY_NAME = os.getenv(
+        "OS_PRETTY_NAME",
+        "openSUSE Tumbleweed",
+    )
 
+else:
+    APP_CONTAINER_PREFIX = "suse"
+    OS_CONTAINER_TAG = OS_VERSION
 
-assert OS_MAJOR_VERSION == 15, (
-    "The tests are created for SLE 15 base images only, "
-    f"but got a request for SLE {OS_MAJOR_VERSION}"
-)
+    OS_MAJOR_VERSION, OS_SP_VERSION = (
+        int(ver) for ver in OS_VERSION.split(".")
+    )
+
+    #: The SLES 15 pretty name (from /etc/os-release)
+    OS_PRETTY_NAME = os.getenv(
+        "OS_PRETTY_NAME",
+        f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION} SP{OS_SP_VERSION}",
+    )
+
+    assert OS_MAJOR_VERSION == 15, (
+        "The tests are created for SLE 15 base images only, "
+        f"but got a request for SLE {OS_MAJOR_VERSION}"
+    )
 
 
 #: value of the environment variable ``TARGET`` which defines whether we are
@@ -89,12 +106,15 @@ if TARGET not in ("obs", "ibs", "ibs-cr", "dso"):
     if BASEURL.endswith("/"):
         BASEURL = BASEURL[:-1]
 else:
-    _SLE_SP = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
+    if OS_VERSION == "tumbleweed":
+        DISTNAME = "tumbleweed"
+    else:
+        DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
     BASEURL = {
-        "obs": f"registry.opensuse.org/devel/bci/{_SLE_SP}",
-        "ibs": f"registry.suse.de/suse/{_SLE_SP}/update/bci",
+        "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
+        "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
         "dso": "registry1.dso.mil/ironbank/suse",
-        "ibs-cr": f"registry.suse.de/suse/{_SLE_SP}/update/cr/totest",
+        "ibs-cr": f"registry.suse.de/suse/{DISTNAME}/update/cr/totest",
     }[TARGET]
 
 
@@ -111,11 +131,12 @@ def create_container_version_mark(
         ``15.3`` for SLE 15 SP3 and so on
     """
     for ver in available_versions:
-        assert (
-            ver[:2] == str(OS_MAJOR_VERSION)
-            and len(ver.split(".")) == 2
-            and int(ver.split(".")[1]) >= 3
-        ), f"invalid version {ver} specified in {available_versions}"
+        if ver[:2] == str(OS_MAJOR_VERSION):
+            assert (
+                ver[:2] == str(OS_MAJOR_VERSION)
+                and len(ver.split(".")) == 2
+                and int(ver.split(".")[1]) >= 3
+            ), f"invalid version {ver} specified in {available_versions}"
     return pytest.mark.skipif(
         OS_VERSION not in available_versions,
         reason=f"This container is not available for {OS_VERSION}, only for "
@@ -194,12 +215,13 @@ def create_BCI(
 
         bci_type: Defines whether this is a language, application or OS
             container. Language and application containers are automatically
-            restricted to the latest OS versions.
+            restricted to the tumbleweed OS versions.
 
         **kwargs: additional keyword arguments are forwarded to the constructor
             of the :py:class:`~pytest_container.DerivedContainer`
     """
-    marks = [pytest.mark.__getattr__(build_tag.replace(":", "_"))]
+    build_tag_base = build_tag.rpartition("/")[2]
+    marks = [pytest.mark.__getattr__(build_tag_base.replace(":", "_"))]
     if extra_marks:
         for m in extra_marks:
             marks.append(m)
@@ -220,7 +242,15 @@ def create_BCI(
     elif available_versions is not None:
         marks.append(create_container_version_mark(available_versions))
 
-    baseurl = f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
+    if OS_VERSION == "tumbleweed":
+        if bci_type == ImageType.APPLICATION:
+            baseurl = (
+                f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
+            )
+        else:
+            baseurl = f"{BASEURL}/{_get_repository_name(image_type)}opensuse/{build_tag}"
+    else:
+        baseurl = f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
 
     return pytest.param(
         DerivedContainer(
@@ -233,27 +263,34 @@ def create_BCI(
     )
 
 
-BASE_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-base:{OS_VERSION}",
-    image_type="kiwi",
-    bci_type=ImageType.OS,
-)
+if OS_VERSION == "tumbleweed":
+    BASE_CONTAINER = create_BCI(
+        build_tag="tumbleweed:latest",
+        image_type="kiwi",
+        bci_type=ImageType.OS,
+    )
+else:
+    BASE_CONTAINER = create_BCI(
+        build_tag=f"bci/bci-base:{OS_CONTAINER_TAG}",
+        image_type="kiwi",
+        bci_type=ImageType.OS,
+    )
 MINIMAL_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-minimal:{OS_VERSION}",
+    build_tag=f"bci/bci-minimal:{OS_CONTAINER_TAG}",
     image_type="kiwi",
-    available_versions=["15.4", "15.5"],
+    available_versions=ALLOWED_BASE_OS_VERSIONS,
     bci_type=ImageType.OS,
 )
 MICRO_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-micro:{OS_VERSION}",
+    build_tag=f"bci/bci-micro:{OS_CONTAINER_TAG}",
     image_type="kiwi",
-    available_versions=["15.4", "15.5"],
+    available_versions=ALLOWED_BASE_OS_VERSIONS,
     bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-busybox:{OS_VERSION}",
+    build_tag=f"bci/bci-busybox:{OS_CONTAINER_TAG}",
     image_type="kiwi",
-    available_versions=["15.4", "15.5"],
+    available_versions=["15.4", "15.5", "tumbleweed"],
     custom_entry_point="/bin/sh",
     bci_type=ImageType.OS,
 )
@@ -261,7 +298,7 @@ BUSYBOX_CONTAINER = create_BCI(
 GOLANG_CONTAINERS = [
     create_BCI(
         build_tag=f"bci/golang:{golang_version}",
-        extra_marks=[pytest.mark.__getattr__(f"bci/golang_{stability}")],
+        extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
     )
     for golang_version, stability in (
         ("1.19", "oldstable"),
@@ -273,12 +310,27 @@ OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
 OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
-NODEJS_16_CONTAINER = create_BCI(build_tag="bci/nodejs:16")
-NODEJS_18_CONTAINER = create_BCI(build_tag="bci/nodejs:18")
+NODEJS_16_CONTAINER = create_BCI(
+    build_tag="bci/nodejs:16", available_versions=["15.5"]
+)
+NODEJS_18_CONTAINER = create_BCI(
+    build_tag="bci/nodejs:18", available_versions=["15.5"]
+)
+NODEJS_20_CONTAINER = create_BCI(
+    build_tag="bci/nodejs:20", available_versions=["tumbleweed"]
+)
 
-PYTHON36_CONTAINER = create_BCI(build_tag="bci/python:3.6")
+NODEJS_CONTAINERS = [
+    NODEJS_16_CONTAINER,
+    NODEJS_18_CONTAINER,
+    NODEJS_20_CONTAINER,
+]
+
+PYTHON36_CONTAINER = create_BCI(
+    build_tag="bci/python:3.6", available_versions=["15.5"]
+)
 PYTHON310_CONTAINER = create_BCI(
-    build_tag="bci/python:3.10", available_versions=["15.4"]
+    build_tag="bci/python:3.10", available_versions=["15.4", "tumbleweed"]
 )
 PYTHON311_CONTAINER = create_BCI(build_tag="bci/python:3.11")
 
@@ -288,7 +340,15 @@ PYTHON_CONTAINERS = [
     PYTHON311_CONTAINER,
 ]
 
-RUBY_25_CONTAINER = create_BCI(build_tag="bci/ruby:2.5")
+RUBY_25_CONTAINER = create_BCI(
+    build_tag="bci/ruby:2.5", available_versions=["15.5"]
+)
+
+RUBY_32_CONTAINER = create_BCI(
+    build_tag="bci/ruby:3.2", available_versions=["tumbleweed"]
+)
+
+RUBY_CONTAINERS = [RUBY_25_CONTAINER, RUBY_32_CONTAINER]
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
@@ -297,42 +357,49 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
 
 DOTNET_SDK_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:6.0",
+    available_versions=["15.5"],
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:7.0",
+    available_versions=["15.5"],
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
 DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:6.0",
+    available_versions=["15.5"],
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:7.0",
+    available_versions=["15.5"],
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:6.0",
+    available_versions=["15.5"],
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:7.0",
+    available_versions=["15.5"],
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
 RUST_CONTAINERS = [
     create_BCI(
         build_tag=f"bci/rust:{rust_version}",
-        extra_marks=[pytest.mark.__getattr__(f"bci/rust_{stability}")],
+        extra_marks=[pytest.mark.__getattr__(f"rust_{stability}")],
     )
     for rust_version, stability in (("1.69", "oldstable"), ("1.70", "stable"))
 ]
 
 INIT_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-init:{OS_VERSION}",
-    available_versions=["15.4", "15.5"],
+    build_tag=f"bci/bci-init:{OS_CONTAINER_TAG}",
+    available_versions=["15.4", "15.5", "tumbleweed"],
+    bci_type=ImageType.OS,
     healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
         pytest.mark.skipif(
@@ -343,7 +410,7 @@ INIT_CONTAINER = create_BCI(
 )
 
 PCP_CONTAINER = create_BCI(
-    build_tag="suse/pcp:5",
+    build_tag=f"{APP_CONTAINER_PREFIX}/pcp:5",
     extra_marks=[
         pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
     ],
@@ -353,16 +420,20 @@ PCP_CONTAINER = create_BCI(
     bci_type=ImageType.APPLICATION,
 )
 
-CONTAINER_389DS_2_0, CONTAINER_389DS_2_2 = [
+CONTAINER_389DS_CONTAINERS = [
     create_BCI(
-        build_tag=f"suse/389-ds:{ver}",
+        build_tag=f"{APP_CONTAINER_PREFIX}/389-ds:{ver}",
         bci_type=ImageType.APPLICATION,
         available_versions=[os_ver],
         healthcheck_timeout=timedelta(seconds=240),
         extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
         forwarded_ports=[PortForwarding(container_port=3389)],
     )
-    for ver, os_ver in (("2.0", "15.4"), ("2.2", "15.5"))
+    for ver, os_ver in (
+        ("2.0", "15.4"),
+        ("2.2", "15.5"),
+        ("2.4", "tumbleweed"),
+    )
 ]
 
 PHP_8_CLI = create_BCI(build_tag="bci/php:8")
@@ -373,7 +444,7 @@ POSTGRES_PASSWORD = "n0ts3cr3t"
 
 POSTGRESQL_CONTAINERS = [
     create_BCI(
-        build_tag=f"suse/postgres:{pg_ver}",
+        build_tag=f"{APP_CONTAINER_PREFIX}/postgres:{pg_ver}",
         bci_type=ImageType.APPLICATION,
         forwarded_ports=[PortForwarding(container_port=5432)],
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
@@ -398,7 +469,8 @@ priority=100' > /etc/yum.repos.d/SLE_BCI.repo
 
 
 DISTRIBUTION_CONTAINER = create_BCI(
-    build_tag="suse/registry:2.8",
+    build_tag=f"{APP_CONTAINER_PREFIX}/registry:2.8",
+    bci_type=ImageType.APPLICATION,
     image_type="kiwi",
     forwarded_ports=[PortForwarding(container_port=5000)],
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
@@ -421,16 +493,16 @@ CONTAINERS_WITH_ZYPPER = (
         OPENJDK_DEVEL_17_CONTAINER,
         NODEJS_16_CONTAINER,
         NODEJS_18_CONTAINER,
+        NODEJS_20_CONTAINER,
         PCP_CONTAINER,
-        RUBY_25_CONTAINER,
         INIT_CONTAINER,
-        CONTAINER_389DS_2_0,
-        CONTAINER_389DS_2_2,
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
     ]
+    + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
+    + RUBY_CONTAINERS
     + GOLANG_CONTAINERS
     + RUST_CONTAINERS
     + POSTGRESQL_CONTAINERS
@@ -452,20 +524,18 @@ L3_CONTAINERS = (
         MICRO_CONTAINER,
         INIT_CONTAINER,
         BUSYBOX_CONTAINER,
-        NODEJS_16_CONTAINER,
-        NODEJS_18_CONTAINER,
         OPENJDK_11_CONTAINER,
         OPENJDK_17_CONTAINER,
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_DEVEL_17_CONTAINER,
-        RUBY_25_CONTAINER,
-        CONTAINER_389DS_2_0,
-        CONTAINER_389DS_2_2,
         DISTRIBUTION_CONTAINER,
         PCP_CONTAINER,
     ]
+    + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
+    + RUBY_CONTAINERS
     + GOLANG_CONTAINERS
+    + NODEJS_CONTAINERS
     + RUST_CONTAINERS
 )
 

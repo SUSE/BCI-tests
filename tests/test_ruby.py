@@ -1,10 +1,11 @@
 import pytest
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import RUBY_25_CONTAINER
+from bci_tester.data import OS_VERSION
+from bci_tester.data import RUBY_CONTAINERS
 
 
-CONTAINER_IMAGES = [RUBY_25_CONTAINER]
+CONTAINER_IMAGES = RUBY_CONTAINERS
 
 
 _NON_X86_64_OR_AARCH64_SKIP = pytest.mark.skipif(
@@ -19,7 +20,7 @@ def test_ruby_version(auto_container):
 
     """
     rb_ver = auto_container.connection.run_expect(
-        [0], 'rpm -q --qf "%{VERSION}" ruby2.5'
+        [0], "ruby -e 'puts RUBY_VERSION'"
     ).stdout.strip()
     assert (
         auto_container.connection.run_expect(
@@ -45,10 +46,6 @@ def test_lang_set(auto_container):
     "gem",
     [
         "ffi",
-        pytest.param(
-            "rails -v '<7.0'",
-            marks=pytest.mark.xfail(reason="rails 6 is not installable"),
-        ),
         pytest.param("sqlite3", marks=_NON_X86_64_OR_AARCH64_SKIP),
         "rspec-expectations",
         "diff-lcs",
@@ -67,7 +64,6 @@ def test_install_gems(auto_container_per_test, gem):
     `<https://rubygems.org/search?query=downloads%3A+%3E400000>`_):
 
     - ffi
-    - rails < 7.0
     - sqlite3
     - rspec-expectations
     - diff-lcs
@@ -78,25 +74,29 @@ def test_install_gems(auto_container_per_test, gem):
     - rack
     - rake
     - i18n
-
     """
     auto_container_per_test.connection.run_expect([0], f"gem install {gem}")
 
 
-@pytest.mark.xfail(reason="rails 6 is not installable")
+@pytest.mark.skipif(
+    OS_VERSION != "tumbleweed", reason="no yarn (needed by rails) in SLE"
+)
 def test_rails_hello_world(auto_container_per_test):
+    auto_container_per_test.connection.run_expect([0], "gem install 'rails'")
+
+    # Rails asset pipeline needs Node.js and yarn
     auto_container_per_test.connection.run_expect(
-        [0], "gem install rails -v '<7.0'"
+        [0], "zypper -n in nodejs-default yarn"
     )
     auto_container_per_test.connection.run_expect(
         [0], "rails new /hello/ --minimal"
     )
 
 
-@pytest.mark.xfail(reason="rails 6 is not installable")
+@pytest.mark.skipif(OS_VERSION != "tumbleweed", reason="no rails for ruby 2.5")
 def test_rails_template(auto_container_per_test):
     auto_container_per_test.connection.run_expect(
-        [0], "gem install rails -v '<7.0'"
+        [0], "gem install 'rails:~> 7.0'"
     )
     # auto_container_per_test.connection.run_expect([0], "zypper -n in npm nodejs")
     # auto_container_per_test.connection.run_expect([0], "npm -g install yarn")
@@ -104,9 +104,10 @@ def test_rails_template(auto_container_per_test):
         [0], "rails new /hello/ --minimal"
     )
 
+    # https://railsbytes.com/public/templates/x7msKX
     add_template = auto_container_per_test.connection.run_expect(
         [0, 1],
-        "cd /hello/ && rails app:template LOCATION='https://railsbytes.com/script/x9Qsqx'",
+        "cd /hello/ && rails app:template LOCATION='https://railsbytes.com/script/x7msKX'",
     )
     if (
         add_template.rc == 1
@@ -117,7 +118,7 @@ def test_rails_template(auto_container_per_test):
 
     curl_localhost = auto_container_per_test.connection.run_expect(
         [0],
-        "cd /hello/ && (rails server > /dev/null &) && curl http://localhost:3000",
+        "cd /hello/ && (rails server > /dev/null &) && curl --retry 5 --retry-connrefused  http://localhost:3000",
     )
 
     assert "Ruby on Rails" in curl_localhost.stdout.strip()

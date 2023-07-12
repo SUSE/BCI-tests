@@ -1,10 +1,9 @@
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import CONTAINER_389DS_2_0
-from bci_tester.data import CONTAINER_389DS_2_2
+from bci_tester.data import CONTAINER_389DS_CONTAINERS
 
 
-CONTAINER_IMAGES = [CONTAINER_389DS_2_0, CONTAINER_389DS_2_2]
+CONTAINER_IMAGES = CONTAINER_389DS_CONTAINERS
 
 
 def test_ldapwhoami(auto_container_per_test):

@@ -1,6 +1,8 @@
 """
 This module contains tests that are run for **all** containers.
 """
+import datetime
+
 import pytest
 from _pytest.config import Config
 from pytest_container import Container
@@ -59,6 +61,19 @@ def test_os_release(auto_container):
         ("VERSION_ID", OS_VERSION),
         ("PRETTY_NAME", OS_PRETTY_NAME),
     ):
+        if OS_VERSION == "tumbleweed" and var_name == "VERSION_ID":
+            # on openSUSE Tumbleweed that is the an ever changing snapshot date
+            # just check whether it starts with current year
+            assert (
+                int(
+                    auto_container.connection.run_expect(
+                        [0], f". /etc/os-release && echo ${var_name}"
+                    ).stdout.strip()[:4]
+                )
+                == datetime.datetime.now().year
+            )
+            continue
+
         assert (
             auto_container.connection.run_expect(
                 [0], f". /etc/os-release && echo ${var_name}"
@@ -73,13 +88,26 @@ def test_product(auto_container):
     :file:`/etc/products.d/baseproduct` is a link to it
     """
     assert auto_container.connection.file("/etc/products.d").is_directory
-    assert auto_container.connection.file("/etc/products.d/SLES.prod").is_file
+    product_file = f"/etc/products.d/{'openSUSE.prod' if OS_VERSION == 'tumbleweed' else 'SLES.prod'}"
+
+    assert auto_container.connection.file(product_file).is_file
     assert auto_container.connection.file(
         "/etc/products.d/baseproduct"
     ).is_symlink
     assert (
         auto_container.connection.file("/etc/products.d/baseproduct").linked_to
-        == "/etc/products.d/SLES.prod"
+        == product_file
+    )
+
+
+@pytest.mark.skipif(
+    OS_VERSION != "tumbleweed",
+    reason="product flavors only available for openSUSE",
+)
+def test_opensuse_product_flavor(auto_container):
+    """Checks that this is an appliance-docker flavored product."""
+    auto_container.connection.run_expect(
+        [0], "rpm -q --whatprovides 'flavor(appliance-docker)'"
     )
 
 
@@ -116,9 +144,11 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     but still test that there wouldn't be conflicts with what is available in SLE_BCI
 
     """
+    repo_name = "repo-oss" if OS_VERSION == "tumbleweed" else "SLE_BCI"
+
     container_per_test.connection.run_expect(
         [0],
-        "timeout 2m zypper -n dup --from SLE_BCI -l -d -D "
+        f"timeout 2m zypper -n dup --from {repo_name} -l -d -D "
         "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
     )
 

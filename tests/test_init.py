@@ -3,6 +3,7 @@ systemd pre-installed.
 
 """
 import datetime
+import json
 import re
 from typing import Dict
 
@@ -10,6 +11,7 @@ import pytest
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import INIT_CONTAINER
+from bci_tester.data import OS_VERSION
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 CONTAINER_IMAGES = [INIT_CONTAINER]
@@ -119,15 +121,27 @@ class TestSystemd:
         Ensure :command:`hostnamectl` works correctly by asserting expected values
         """
 
-        hostnamectl = auto_container.connection.run_expect([0], "hostnamectl")
+        hostnamectl = auto_container.connection.run_expect(
+            [0], "hostnamectl --json=short"
+        )
         # Process the printed values to a string map
-        values = TestSystemd._split_values(hostnamectl.stdout)
+        values = json.loads(hostnamectl.stdout)
         assert values["Chassis"] == "container", "Chassis mismatch"
+
+        expected_os = (
+            "openSUSE Tumbleweed"
+            if OS_VERSION == "tumbleweed"
+            else "SUSE Linux Enterprise Server"
+        )
         assert (
-            "SUSE Linux Enterprise Server" in values["Operating System"]
+            expected_os in values["OperatingSystemPrettyName"]
         ), "Missing SUSE tag in Operating system"
+
+        virt_detected = auto_container.connection.run_expect(
+            [0], "systemd-detect-virt -c"
+        )
         assert (
-            values["Virtualization"] == container_runtime.runner_binary
+            virt_detected.stdout.strip() == container_runtime.runner_binary
         ), "Virtualization tag mismatch"
 
     def test_timedatectl(self, auto_container):
@@ -178,14 +192,3 @@ class TestSystemd:
         assert (
             "No sessions" in loginctl.stdout
         ), "Assert no sessions are present failed"
-
-    @staticmethod
-    def _split_values(output: str, sep: str = ":") -> Dict[str, str]:
-        """Auxilliary function to process the given output into a key:value map, one entry by line"""
-        ret = {}
-        for line in output.split("\n"):
-            tmp = line.strip().split(sep)
-            if len(tmp) == 2:
-                name, value = tmp[0].strip(), tmp[1].strip()
-                ret[name] = value
-        return ret
