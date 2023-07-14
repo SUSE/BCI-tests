@@ -39,7 +39,7 @@ jobs:
         run: sudo apt update && sudo apt install jo tox
       - id: setmatrix
         run: |
-          stringified_matrix=$(tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d' | jo -a)
+          stringified_matrix=$(tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' | jo -a)
           echo "matrix=$stringified_matrix" >> $GITHUB_OUTPUT
 
   unit-tests:
