@@ -229,6 +229,10 @@ def test_jdk_cassandra(container_per_test):
 
     logs = "/var/log/cassandra.log"
 
+    container_per_test.connection.run_expect(
+        [0], f"zypper --non-interactive install util-linux"
+    )
+
     cassandra_versions = container_per_test.connection.check_output(
         "git ls-remote --tags https://gitbox.apache.org/repos/asf/cassandra.git"
     )
