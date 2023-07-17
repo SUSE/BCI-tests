@@ -51,8 +51,13 @@ without_fips = pytest.mark.skipif(
 
 def test_gost_digest_disable(auto_container):
     """Checks that the gost message digest is not known to openssl."""
+    openssl_error_message = (
+        "Invalid command 'gost'"
+        if OS_VERSION == "tumbleweed"
+        else "gost is not a known digest"
+    )
     assert (
-        "gost is not a known digest"
+        openssl_error_message
         in auto_container.connection.run_expect(
             [1], "openssl gost /dev/null"
         ).stderr.strip()
