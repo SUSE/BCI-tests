@@ -9,6 +9,7 @@ import pytest
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import OS_SP_VERSION
+from bci_tester.data import OS_VERSION
 from bci_tester.data import REPOCLOSURE_CONTAINER
 
 
@@ -166,5 +167,22 @@ def test_package_installation(container_per_test, pkg):
     install all packages from :py:const:`REPOCLOSURE_FALSE_POSITIVES`, ensuring
     that they are not accidentally not installable.
 
+    """
+    container_per_test.connection.run_expect([0], f"zypper -n in {pkg}")
+
+
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
+)
+@pytest.mark.parametrize(
+    "pkg",
+    [
+        "libsnmp30",  # bsc#1209442
+    ],
+)
+@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+def test_sle15_packages(container_per_test, pkg):
+    """Test that packages that we received reports by users for as missing/broken
+    remain installable and available.
     """
     container_per_test.connection.run_expect([0], f"zypper -n in {pkg}")
