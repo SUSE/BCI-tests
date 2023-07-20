@@ -98,7 +98,14 @@ TARGET = os.getenv("TARGET", "obs")
 #: via this variable instead
 BASEURL = os.getenv("BASEURL")
 
-if TARGET not in ("obs", "ibs", "ibs-cr", "dso", "factory-totest"):
+if TARGET not in (
+    "obs",
+    "ibs",
+    "ibs-cr",
+    "dso",
+    "factory-totest",
+    "ibs-released",
+):
     if BASEURL is None:
         raise ValueError(
             f"Unknown target {TARGET} specified and BASEURL is not set, cannot continue"
@@ -116,6 +123,7 @@ else:
         "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
         "dso": "registry1.dso.mil/ironbank/suse",
         "ibs-cr": f"registry.suse.de/suse/{DISTNAME}/update/cr/totest",
+        "ibs-released": f"registry.suse.com",
     }[TARGET]
 
 
@@ -158,7 +166,7 @@ _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 
 
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
-    if TARGET == "dso":
+    if TARGET in ("dso", "ibs-released"):
         return ""
     if TARGET == "ibs-cr":
         return "images/"
