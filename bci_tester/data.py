@@ -404,7 +404,7 @@ RUST_CONTAINERS = [
         build_tag=f"bci/rust:{rust_version}",
         extra_marks=[pytest.mark.__getattr__(f"rust_{stability}")],
     )
-    for rust_version, stability in (("1.69", "oldstable"), ("1.70", "stable"))
+    for rust_version, stability in (("1.70", "oldstable"), ("1.71", "stable"))
 ]
 
 INIT_CONTAINER = create_BCI(
