@@ -72,7 +72,7 @@ def test_cargo_version(auto_container):
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/serde-rs/serde",
-                build_command="pushd serde && cargo build --features rc && cargo build --no-default-features && popd && pushd serde_test && cargo build && cargo test --features serde/derive,serde/rc",
+                build_command="pushd serde && cargo build --features rc && cargo build --no-default-features && popd && pushd test_suite && cargo build && cargo test --features serde/derive,serde/rc",
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/bitflags/bitflags",
