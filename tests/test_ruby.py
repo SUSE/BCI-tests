@@ -118,7 +118,7 @@ def test_rails_template(auto_container_per_test):
 
     curl_localhost = auto_container_per_test.connection.run_expect(
         [0],
-        "cd /hello/ && (rails server > /dev/null &) && curl --retry 5 --retry-connrefused  http://localhost:3000",
+        "cd /hello/ && (rails server > /dev/null &) && curl -sf --retry 5 --retry-connrefused  http://localhost:3000",
     )
 
     assert "Ruby on Rails" in curl_localhost.stdout.strip()

@@ -23,7 +23,7 @@ def test_registry_service(
 
     out = json.loads(
         host.check_output(
-            f"curl -sb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
+            f"curl -sfb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
         )
     )
     assert str(out) == "{'repositories': []}"
@@ -50,7 +50,7 @@ def test_registry_service(
     host.run_expect([0], f"{engine} push {force_http_mode} {container_path}")
     out = json.loads(
         host.check_output(
-            f"curl -sb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
+            f"curl -sfb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
         )
     )
     assert str(out) == "{'repositories': ['test_container']}"
