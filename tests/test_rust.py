@@ -1,3 +1,7 @@
+"""Tests for the Rust development container (the container including rust and
+cargo).
+
+"""
 import pytest
 from pytest_container import GitRepositoryBuild
 

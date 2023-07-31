@@ -487,6 +487,25 @@ DISTRIBUTION_CONTAINER = create_BCI(
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
+GIT_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/git:latest",
+    bci_type=ImageType.APPLICATION,
+    image_type="kiwi",
+)
+
+HELM_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/helm:latest",
+    bci_type=ImageType.APPLICATION,
+    custom_entry_point="/bin/sh",
+    image_type="kiwi",
+)
+
+NGINX_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/nginx:latest",
+    bci_type=ImageType.APPLICATION,
+    forwarded_ports=[PortForwarding(container_port=80)],
+)
+
 DOTNET_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
     DOTNET_SDK_7_0_CONTAINER,
@@ -502,6 +521,7 @@ CONTAINERS_WITH_ZYPPER = (
         OPENJDK_DEVEL_11_CONTAINER,
         OPENJDK_17_CONTAINER,
         OPENJDK_DEVEL_17_CONTAINER,
+        NGINX_CONTAINER,
         NODEJS_16_CONTAINER,
         NODEJS_18_CONTAINER,
         NODEJS_20_CONTAINER,
@@ -524,6 +544,8 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,
     MICRO_CONTAINER,
     BUSYBOX_CONTAINER,
+    HELM_CONTAINER,
+    GIT_CONTAINER,
     DISTRIBUTION_CONTAINER,
 ]
 
@@ -533,6 +555,7 @@ L3_CONTAINERS = (
         BASE_CONTAINER,
         MINIMAL_CONTAINER,
         MICRO_CONTAINER,
+        GIT_CONTAINER,
         INIT_CONTAINER,
         BUSYBOX_CONTAINER,
         OPENJDK_11_CONTAINER,

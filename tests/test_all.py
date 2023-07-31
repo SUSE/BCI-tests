@@ -43,6 +43,7 @@ COPY main.go .
 RUN go build main.go
 
 FROM $runner
+ENTRYPOINT []
 WORKDIR /fetcher/
 COPY --from=builder /src/main .
 CMD ["/fetcher/main"]
@@ -195,7 +196,7 @@ def test_certificates_are_present(
     """This is a multistage container build, verifying that the certificates are
     correctly set up in the containers.
 
-    In the first step, we build a very simple go binary from
+    In the first step, we build a go binary from
     :py:const:`FETCH_SUSE_DOT_COM` in the golang container. We copy the
     resulting binary into the container under test and execute it in that
     container.
