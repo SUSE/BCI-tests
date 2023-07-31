@@ -56,7 +56,7 @@ def test_call_pmproxy(auto_container_per_test):
     if LOCALHOST.exists("curl"):
         assert LOCALHOST.run_expect(
             [0],
-            f"curl -s http://localhost:{port}/metrics?names=mem.physmem",
+            f"curl -sf http://localhost:{port}/metrics?names=mem.physmem",
         )
 
 

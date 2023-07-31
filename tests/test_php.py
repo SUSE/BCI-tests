@@ -48,7 +48,7 @@ RUN set -e; zypper -n in $PHPIZE_DEPS oniguruma-devel libicu-devel gcc-c++ php8-
 
 RUN set -euo pipefail; \
     zypper -n in tar; \
-    curl -OLf "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
+    curl -sfOL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
     tar xvzf "mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
     rm "mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
     pushd "mediawiki-${MEDIAWIKI_VERSION}/"; mv * ..; popd; rmdir "mediawiki-${MEDIAWIKI_VERSION}"; \
@@ -56,7 +56,7 @@ RUN set -euo pipefail; \
     chown --recursive wwwrun data; \
     zypper -n clean; rm -rf /var/log/{zypp*,suseconnect*}
 
-HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl --fail http://localhost
+HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localhost
 EXPOSE 80
 """,
 )
@@ -109,8 +109,8 @@ RUN set -eux; \
 # MediaWiki setup
 RUN set -eux; \
     zypper -n in dirmngr gzip; \
-        curl -fSL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz" -o mediawiki.tar.gz; \
-        curl -fSL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz.sig" -o mediawiki.tar.gz.sig; \
+        curl -sfSL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz" -o mediawiki.tar.gz; \
+        curl -sfSL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz.sig" -o mediawiki.tar.gz.sig; \
         export GNUPGHOME="$(mktemp -d)"; \
         # gpg key from https://www.mediawiki.org/keys/keys.txt
         gpg --batch --keyserver keyserver.ubuntu.com --recv-keys \
@@ -323,7 +323,7 @@ def test_mediawiki_php_apache(
     """
     host.run_expect(
         [0],
-        f"curl --fail http://localhost:{container_per_test.forwarded_ports[0].host_port}",
+        f"curl -sf http://localhost:{container_per_test.forwarded_ports[0].host_port}",
     )
 
 
@@ -343,5 +343,5 @@ def test_mediawiki_fpm_build(
     """
     host.run_expect(
         [0],
-        f"curl --fail http://localhost:{pod_per_test.forwarded_ports[0].host_port}",
+        f"curl -sf http://localhost:{pod_per_test.forwarded_ports[0].host_port}",
     )

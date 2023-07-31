@@ -249,7 +249,7 @@ def test_jdk_cassandra(container_per_test):
 
     container_per_test.connection.run_expect(
         [0],
-        f"curl -fOL https://downloads.apache.org/cassandra/{cassandra_version}/apache-cassandra-{cassandra_version}-bin.tar.gz",
+        f"curl -sfOL https://downloads.apache.org/cassandra/{cassandra_version}/apache-cassandra-{cassandra_version}-bin.tar.gz",
     )
 
     container_per_test.connection.run_expect(
