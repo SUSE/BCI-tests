@@ -92,10 +92,12 @@ def test_entrypoint(container, java_version, host, container_runtime):
     :command:`jshell`.
 
     """
-    intro = host.run_expect(
+    cmd = host.run_expect(
         [0],
         f"{container_runtime.runner_binary} run --rm {container.image_url_or_id}",
-    ).stdout
+    )
+    # openjdk 17 prints the "jshell>" to stderr
+    intro = cmd.stdout + cmd.stderr
 
     assert "jshell>" in intro
     assert f"Welcome to JShell -- Version {java_version}" in intro
