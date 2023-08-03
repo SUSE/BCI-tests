@@ -119,11 +119,11 @@ else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
-        "factory-totest": f"registry.opensuse.org/opensuse/factory/totest",
+        "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
         "dso": "registry1.dso.mil/ironbank/suse",
         "ibs-cr": f"registry.suse.de/suse/{DISTNAME}/update/cr/totest",
-        "ibs-released": f"registry.suse.com",
+        "ibs-released": "registry.suse.com",
     }[TARGET]
 
 

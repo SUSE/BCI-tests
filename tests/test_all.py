@@ -212,7 +212,7 @@ def test_certificates_are_present(
     )
     multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
 
-    with open(tmp_path / "main.go", "w") as main_go:
+    with open(tmp_path / "main.go", "wt") as main_go:
         main_go.write(FETCH_SUSE_DOT_COM)
 
     cmd = host.run_expect(
