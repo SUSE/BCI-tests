@@ -97,7 +97,8 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     for cont, name, img_type in [
         # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
-        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
+        (GIT_CONTAINER, "git", ImageType.APPLICATION),
+        (HELM_CONTAINER, "helm", ImageType.APPLICATION),
     ]
     # all other containers
     + [
@@ -128,8 +129,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
-        (GIT_CONTAINER, "git", ImageType.APPLICATION),
-        (HELM_CONTAINER, "helm", ImageType.APPLICATION),
+        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
     + [
@@ -196,11 +196,13 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
     ),
     pytest.param(
         *IMAGES_AND_NAMES[1],
-        marks=(
-            pytest.mark.xfail(reason="The PCP 5.2.5 container is unreleased")
-        ),
+        marks=(pytest.mark.xfail(reason="The git container is unreleased")),
     ),
-] + IMAGES_AND_NAMES[2:]
+    pytest.param(
+        *IMAGES_AND_NAMES[2],
+        marks=(pytest.mark.xfail(reason="The helm container is unreleased")),
+    ),
+] + IMAGES_AND_NAMES[3:]
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES
