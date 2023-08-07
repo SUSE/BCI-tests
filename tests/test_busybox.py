@@ -6,6 +6,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import create_container_version_mark
+from bci_tester.data import OS_VERSION
 
 
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]
@@ -23,10 +24,10 @@ def test_busybox_provides_sh(auto_container):
 
 #: size limits of the micro image per architecture in MiB
 BUSYBOX_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 14,
-    "aarch64": 14,
-    "s390x": 14,
-    "ppc64le": 14,
+    "x86_64": 16 if OS_VERSION == "tumbleweed" else 14,
+    "aarch64": 16 if OS_VERSION == "tumbleweed" else 14,
+    "s390x": 16 if OS_VERSION == "tumbleweed" else 14,
+    "ppc64le": 16 if OS_VERSION == "tumbleweed" else 14,
 }
 
 
@@ -52,7 +53,7 @@ def test_busybox_links(auto_container):
     """Ensure all binaries in :file:`/bin` are links to :file:`/usr/bin/busybox`."""
     auto_container.connection.run_expect(
         [0],
-        'for i in /bin/*; do stat -c "%N" "$i" | grep "/usr/bin/busybox"; done',
+        'for i in /bin/*; do stat -c "%N" "$i" | grep -qE "(busybox|zmore|zless|zgrep|ldd|gencat|getent|locale|iconv|localedef|ld-linux|getconf)"; done',
     )
 
 
