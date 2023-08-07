@@ -88,9 +88,11 @@ def test_all_openssl_hashes_known(auto_container):
         .stdout.strip()
         .split()
     )
+    EXPECTED_DIGEST_LIST = ALL_DIGESTS
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
-    EXPECTED_DIGEST_LIST = ALL_DIGESTS + ("gost",)
+    if OS_VERSION != "tumbleweed":
+        EXPECTED_DIGEST_LIST += ("gost",)
     assert len(hashes) == len(EXPECTED_DIGEST_LIST)
     assert set(hashes) == set(EXPECTED_DIGEST_LIST)
 

@@ -1,16 +1,14 @@
 """Module containing utility functions & constants for FIPS compliant digests."""
 import os
 
+from bci_tester.data import OS_VERSION
+
 #: openssl digests that are not FIPS compliant
-NONFIPS_DIGESTS = (
-    "blake2b512",
-    "blake2s256",
-    "md4",
-    "md5",
-    "mdc2",
-    "rmd160",
-    "sm3",
-)
+NONFIPS_DIGESTS = ("blake2b512", "blake2s256", "md5", "rmd160", "sm3")
+
+# OpenSSL 3.x in Tumbleweed dropped those as they're beyond deprecated
+if OS_VERSION != "tumbleweed":
+    NONFIPS_DIGESTS += ("md4", "mdc2")
 
 #: FIPS compliant openssl digests
 FIPS_DIGESTS = (
@@ -31,6 +29,8 @@ FIPS_DIGESTS = (
 
 #: all digests supported by openssl
 ALL_DIGESTS = NONFIPS_DIGESTS + FIPS_DIGESTS
+
+assert len(set(ALL_DIGESTS)) == len(ALL_DIGESTS)
 
 
 def host_fips_supported(
