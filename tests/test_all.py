@@ -105,9 +105,10 @@ def test_product(auto_container):
     OS_VERSION != "tumbleweed",
     reason="product flavors only available for openSUSE",
 )
-def test_opensuse_product_flavor(auto_container):
+@pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
+def test_opensuse_product_flavor(container):
     """Checks that this is an appliance-docker flavored product."""
-    auto_container.connection.run_expect(
+    container.connection.run_expect(
         [0], "rpm -q --whatprovides 'flavor(appliance-docker)'"
     )
 
