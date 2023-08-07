@@ -5,7 +5,6 @@ systemd pre-installed.
 import datetime
 import json
 import re
-from typing import Dict
 
 import pytest
 from pytest_container.runtime import LOCALHOST

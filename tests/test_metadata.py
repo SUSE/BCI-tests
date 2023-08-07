@@ -34,12 +34,15 @@ from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
+from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
+from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.data import NGINX_CONTAINER
 from bci_tester.data import NODEJS_16_CONTAINER
 from bci_tester.data import NODEJS_18_CONTAINER
 from bci_tester.data import NODEJS_20_CONTAINER
@@ -94,7 +97,8 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     for cont, name, img_type in [
         # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
-        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
+        (GIT_CONTAINER, "git", ImageType.APPLICATION),
+        (HELM_CONTAINER, "helm", ImageType.APPLICATION),
     ]
     # all other containers
     + [
@@ -125,6 +129,8 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
+        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
+        (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
     + [
         (container_389ds, "389-ds", ImageType.APPLICATION)
@@ -190,11 +196,13 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
     ),
     pytest.param(
         *IMAGES_AND_NAMES[1],
-        marks=(
-            pytest.mark.xfail(reason="The PCP 5.2.5 container is unreleased")
-        ),
+        marks=(pytest.mark.xfail(reason="The git container is unreleased")),
     ),
-] + IMAGES_AND_NAMES[2:]
+    pytest.param(
+        *IMAGES_AND_NAMES[2],
+        marks=(pytest.mark.xfail(reason="The helm container is unreleased")),
+    ),
+] + IMAGES_AND_NAMES[3:]
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES

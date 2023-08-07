@@ -7,9 +7,9 @@ from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerData
 
-import tests.test_openjdk as test_openjdk
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
+from tests import test_openjdk as test_openjdk
 
 CONTAINER_TEST_DIR = "/tmp/"
 HOST_TEST_DIR = "tests/trainers/java/"
