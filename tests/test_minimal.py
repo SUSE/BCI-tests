@@ -7,29 +7,55 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.data import OS_VERSION
 
 
 #: size limits of the minimal image per architecture in MiB
-MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
+SLE_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
     "x86_64": 47,
     "aarch64": 49,
     "s390x": 47,
     "ppc64le": 57,
 }
+
+TW_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
+    "x86_64": 51,
+    "aarch64": 51,
+    "s390x": 49,
+    "ppc64le": 59,
+}
+
 #: size limits of the micro image per architecture in MiB
-MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
+SLE_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
     "x86_64": 26,
     "aarch64": 28,
     "s390x": 26,
     "ppc64le": 33,
 }
 
+TW_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
+    "x86_64": 32,
+    "aarch64": 34,
+    "s390x": 32,
+    "ppc64le": 39,
+}
+
 
 @pytest.mark.parametrize(
     "container,size",
     [
-        (MINIMAL_CONTAINER, MINIMAL_IMAGE_MAX_SIZE),
-        (MICRO_CONTAINER, MICRO_IMAGE_MAX_SIZE),
+        (
+            MINIMAL_CONTAINER,
+            TW_MINIMAL_IMAGE_MAX_SIZE
+            if OS_VERSION == "tumbleweed"
+            else SLE_MINIMAL_IMAGE_MAX_SIZE,
+        ),
+        (
+            MICRO_CONTAINER,
+            TW_MICRO_IMAGE_MAX_SIZE
+            if OS_VERSION == "tumbleweed"
+            else SLE_MICRO_IMAGE_MAX_SIZE,
+        ),
     ],
     indirect=["container"],
 )
