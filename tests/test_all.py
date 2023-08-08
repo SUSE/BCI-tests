@@ -212,14 +212,19 @@ def test_certificates_are_present(
     )
     multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
 
-    with open(tmp_path / "main.go", "wt") as main_go:
+    with open(tmp_path / "main.go", "wt", encoding="utf-8") as main_go:
         main_go.write(FETCH_SUSE_DOT_COM)
 
-    cmd = host.run_expect(
+    # FIXME: ugly duplication of pytest_container internals :-/
+    # see: https://github.com/dcermak/pytest_container/issues/149
+    iidfile = tmp_path / "iid"
+    host.run_expect(
         [0],
-        f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} {tmp_path}",
+        f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} "
+        f"--iidfile={iidfile} {tmp_path}",
     )
-    img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
+    with open(iidfile, "r", encoding="utf-8") as id_f:
+        _, img_id = id_f.read().strip().split(":")
 
     host.run_expect(
         [0],

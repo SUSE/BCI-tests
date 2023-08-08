@@ -301,7 +301,8 @@ def test_cli_entry_point(
         "PHP_BINARY"
         in host.run_expect(
             [0],
-            f"{container_runtime.runner_binary} run --rm {container_image.container_id} -r 'print_r(get_defined_constants());'",
+            f"{container_runtime.runner_binary} run --rm "
+            f"{container_image.url or container_image.container_id} -r 'print_r(get_defined_constants());'",
         ).stdout
     )
 
