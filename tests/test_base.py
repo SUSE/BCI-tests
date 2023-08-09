@@ -51,8 +51,13 @@ without_fips = pytest.mark.skipif(
 
 def test_gost_digest_disable(auto_container):
     """Checks that the gost message digest is not known to openssl."""
+    openssl_error_message = (
+        "Invalid command 'gost'"
+        if OS_VERSION == "tumbleweed"
+        else "gost is not a known digest"
+    )
     assert (
-        "gost is not a known digest"
+        openssl_error_message
         in auto_container.connection.run_expect(
             [1], "openssl gost /dev/null"
         ).stderr.strip()
@@ -83,9 +88,11 @@ def test_all_openssl_hashes_known(auto_container):
         .stdout.strip()
         .split()
     )
+    EXPECTED_DIGEST_LIST = ALL_DIGESTS
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
-    EXPECTED_DIGEST_LIST = ALL_DIGESTS + ("gost",)
+    if OS_VERSION != "tumbleweed":
+        EXPECTED_DIGEST_LIST += ("gost",)
     assert len(hashes) == len(EXPECTED_DIGEST_LIST)
     assert set(hashes) == set(EXPECTED_DIGEST_LIST)
 

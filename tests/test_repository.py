@@ -78,6 +78,9 @@ def package_name_filter_func(
     return f
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
+)
 @pytest.mark.parametrize(
     "container_per_test", [REPOCLOSURE_CONTAINER], indirect=True
 )
@@ -103,10 +106,13 @@ def test_repoclosure(container_per_test):
         )
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
+)
 @pytest.mark.parametrize(
     "container_per_test", [REPOCLOSURE_CONTAINER], indirect=True
 )
-def test_forbidden_packages(container_per_test):
+def test_sle_bci_forbidden_packages(container_per_test):
     """Regression test that no packages containing the following strings are in the
     ``SLE_BCI`` repository:
 
