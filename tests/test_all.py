@@ -224,8 +224,7 @@ def test_certificates_are_present(
         f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} "
         f"--iidfile={iidfile} {tmp_path}",
     )
-    with open(iidfile, "r", encoding="utf-8") as id_f:
-        _, img_id = id_f.read().strip().split(":")
+    img_id = container_runtime.get_image_id_from_iidfile(iidfile)
 
     host.run_expect(
         [0],
