@@ -207,6 +207,20 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
         assert not container.connection.package("systemd").is_installed
 
 
+@pytest.mark.parametrize(
+    "container",
+    ALL_CONTAINERS,
+    indirect=True,
+)
+def test_no_compat_packages(container):
+    """Ensure that no host-compatibility packages are installed in the containers"""
+    # we cannot check for an existing package if rpm is not installed
+    if container.connection.exists("rpm"):
+        assert not container.connection.package(
+            "compat-usrmerge-tools"
+        ).is_installed
+
+
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
 def test_certificates_are_present(
     host, tmp_path, container_runtime, runner: Container, pytestconfig: Config
