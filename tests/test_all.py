@@ -14,6 +14,7 @@ from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
 from pytest_container.container import ContainerData
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
@@ -27,6 +28,8 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINER
+from bci_tester.data import TARGET
+from bci_tester.runtime_choice import DOCKER_SELECTED
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -323,6 +326,34 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
         in container.connection.check_output(
             "timeout 5m env LC_ALL=C zypper --no-refresh -n verify -D"
         )
+    )
+
+
+@pytest.mark.skipif(
+    DOCKER_SELECTED, reason="Trivy-Scan images only with podman"
+)
+@pytest.mark.skipif(
+    LOCALHOST.system_info.arch not in ("x86_64",)
+    or TARGET in ("ibs-released",),
+    reason=f"{LOCALHOST.system_info.arch} is not supported to run trivy",
+)
+def test_trivy_image_scan(host, auto_container: ContainerData) -> None:
+    """Check that trivy image is able to scan the container."""
+
+    trivy_container = "docker.io/aquasec/trivy:latest"
+    baseurl = auto_container.container.baseurl
+    if not baseurl:
+        pytest.skip(
+            reason=f"container {auto_container.container} has no baseurl"
+        )
+
+    host.run_expect(
+        [0],
+        (
+            f"podman run -v trivy:/root {trivy_container} image {baseurl} "
+            "--exit-code 1 --exit-on-eol 2 -f template "
+            "--template '@contrib/sarif.tpl'"
+        ),
     )
 
 
