@@ -162,8 +162,6 @@ def test_zypper_verify_passes(container_per_test: ContainerData) -> None:
     """Check that there are no packages missing according to zypper verify so that
     users of the container would not get excessive dependencies installed.
     """
-    repo_name = "repo-oss" if OS_VERSION == "tumbleweed" else "SLE_BCI"
-
     assert (
         "Dependencies of all installed packages are satisfied."
         in container_per_test.connection.run_expect(
