@@ -312,8 +312,8 @@ GOLANG_CONTAINERS = [
         extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
     )
     for golang_version, stability in (
-        ("1.19", "oldstable"),
-        ("1.20", "stable"),
+        ("1.20", "oldstable"),
+        ("1.21", "stable"),
     )
 ]
 
