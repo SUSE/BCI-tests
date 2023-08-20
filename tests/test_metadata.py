@@ -446,12 +446,15 @@ def test_reference(
     assert container_name.replace(".", "-") in reference
 
     if OS_VERSION == "tumbleweed":
-        assert reference.startswith("registry.opensuse.org/")
+        if container_type == ImageType.APPLICATION:
+            assert reference.startswith("registry.opensuse.org/opensuse/")
+        else:
+            assert reference.startswith("registry.opensuse.org/opensuse/bci/")
     else:
         if container_type == ImageType.APPLICATION:
-            assert reference[:23] == "registry.suse.com/suse/"
+            assert reference.startswith("registry.suse.com/suse/")
         else:
-            assert reference[:22] == "registry.suse.com/bci/"
+            assert reference.startswith("registry.suse.com/bci/")
 
     # only test if our testing target is released - otherwise we'll just fail on
     # containers that are not yet ever released
@@ -466,7 +469,11 @@ def test_reference(
     # version of the OS for this container
     name, version_release = reference.split(":")
     if container_type == ImageType.OS:
-        ref = f"{name}:{OS_VERSION}"
+        ref = (
+            f"{name}:latest"
+            if OS_VERSION == "tumbleweed"
+            else f"{name}:{OS_VERSION}"
+        )
     else:
         version, _ = version_release.split("-")
         ref = f"{name}:{version}"

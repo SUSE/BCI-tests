@@ -43,7 +43,7 @@ RUN set -e; zypper -n in $PHPIZE_DEPS oniguruma-devel libicu-devel gcc-c++ php8-
         docker-php-ext-install $ext; \
     done \
     && docker-php-source delete \
-    && zypper -n rm $PHPIZE_DEPS oniguruma-devel libicu-devel gcc-c++ \
+    && zypper -n rm oniguruma-devel libicu-devel gcc-c++ \
     && zypper -n clean && rm -rf /var/log/{zypp*,suseconnect*}
 
 RUN set -euo pipefail; \
