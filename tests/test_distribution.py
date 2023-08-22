@@ -1,7 +1,7 @@
 """ Tests for the distribution container """
-import json
 import textwrap
 
+import requests
 from pytest_container import OciRuntimeBase
 
 from bci_tester.data import DISTRIBUTION_CONTAINER
@@ -21,12 +21,14 @@ def test_registry_service(
     """
     )
 
-    out = json.loads(
-        host.check_output(
-            f"curl -sfb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
+    def _fetch_catalog():
+        resp = requests.get(
+            f"http://localhost:{host_port}/v2/_catalog", timeout=30
         )
-    )
-    assert str(out) == "{'repositories': []}"
+        resp.raise_for_status()
+        return resp.json()
+
+    assert str(_fetch_catalog()) == "{'repositories': []}"
 
     container_tag = "test_container"
     container_path = f"localhost:{host_port}/{container_tag}"
@@ -48,12 +50,8 @@ def test_registry_service(
         force_http_mode = "--tls-verify=false"
 
     host.run_expect([0], f"{engine} push {force_http_mode} {container_path}")
-    out = json.loads(
-        host.check_output(
-            f"curl -sfb -H 'Accept: application/json' http://localhost:{host_port}/v2/_catalog"
-        )
-    )
-    assert str(out) == "{'repositories': ['test_container']}"
+
+    assert str(_fetch_catalog()) == "{'repositories': ['test_container']}"
 
     host.run_expect([0], f"{engine} rmi {container_path}")
     host.run_expect([0], f"{engine} pull {force_http_mode} {container_path}")

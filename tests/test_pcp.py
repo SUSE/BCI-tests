@@ -2,7 +2,7 @@
 """
 import time
 
-from pytest_container.runtime import LOCALHOST
+import requests
 
 from bci_tester.data import PCP_CONTAINER
 
@@ -53,11 +53,11 @@ def test_call_pmproxy(auto_container_per_test):
             auto_container_per_test, service
         ), f"Timed out waiting for {service} to start"
 
-    if LOCALHOST.exists("curl"):
-        assert LOCALHOST.run_expect(
-            [0],
-            f"curl -sf http://localhost:{port}/metrics?names=mem.physmem",
-        )
+    resp = requests.get(
+        f"http://localhost:{port}/metrics?names=mem.physmem", timeout=30
+    )
+    resp.raise_for_status()
+    assert "mem_physmem" in resp.text
 
 
 def wait_for_service(con, service):

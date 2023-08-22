@@ -13,6 +13,7 @@ from pytest_container.container import ImageFormat
 from pytest_container.container import PortForwarding
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
+import requests
 
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
@@ -312,37 +313,35 @@ def test_cli_entry_point(
     [MEDIAWIKI_APACHE_CONTAINER],
     indirect=["container_per_test"],
 )
-def test_mediawiki_php_apache(
-    container_per_test: ContainerData,
-    host,
-) -> None:
+def test_mediawiki_php_apache(container_per_test: ContainerData) -> None:
     """Application test of the php-apache variant.
 
     This test builds mediawiki deployed via mod_php. The test itself just checks
-    if the container is reachable using curl.
+    if the container is reachable using requests.
 
     """
-    host.run_expect(
-        [0],
-        f"curl -sf http://localhost:{container_per_test.forwarded_ports[0].host_port}",
+
+    resp = requests.get(
+        f"http://localhost:{container_per_test.forwarded_ports[0].host_port}",
+        timeout=30,
+        # we will get redirected to https://localhost, which will not resolve, so forbid that
+        allow_redirects=False,
     )
+    resp.raise_for_status()
 
 
 @pytest.mark.parametrize(
     "pod_per_test", [MEDIAWIKI_FPM_POD], indirect=["pod_per_test"]
 )
-def test_mediawiki_fpm_build(
-    pod_per_test: PodData,
-    host,
-) -> None:
+def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
     """Application test of the php-fpm variant.
 
     This test builds mediawiki deployed via fpm with a nginx proxy infront of
     it, both deployed via two containers in a podman pod.  The test itself just
-    checks if the pod is reachable using curl.
+    checks if the pod is reachable using requests.
 
     """
-    host.run_expect(
-        [0],
-        f"curl -sf http://localhost:{pod_per_test.forwarded_ports[0].host_port}",
+    resp = requests.get(
+        f"http://localhost:{pod_per_test.forwarded_ports[0].host_port}"
     )
+    resp.raise_for_status()
