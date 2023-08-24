@@ -456,13 +456,6 @@ def test_reference(
         else:
             assert reference.startswith("registry.suse.com/bci/")
 
-    # only test if our testing target is released - otherwise we'll just fail on
-    # containers that are not yet ever released
-    if not container.container.baseurl.startswith(reference.partition(":")[0]):
-        pytest.skip(
-            f"reference {reference} not checked for in TARGET={container.container.baseurl}"
-        )
-
     # for the OS versioned containers we'll get a reference that contains the
     # current full version + release, which has not yet been published to the
     # registry (obviously). So instead we just try to fetch the current major
@@ -475,7 +468,7 @@ def test_reference(
             else f"{name}:{OS_VERSION}"
         )
     else:
-        version, _ = version_release.split("-")
+        version = list(version_release.split("-"))[0]
         ref = f"{name}:{version}"
 
     LOCALHOST.run_expect(
