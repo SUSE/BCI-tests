@@ -32,13 +32,13 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 OS_VERSION = os.getenv("OS_VERSION", "15.5")
 
 # Allowed os versions for base (non lang/non-app) containers
-ALLOWED_BASE_OS_VERSIONS = ("15.3", "15.4", "15.5", "tumbleweed")
+ALLOWED_BASE_OS_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "tumbleweed")
 
 # Allowed os versions for Language and Application containers
-ALLOWED_NONBASE_OS_VERSIONS = ("15.4", "15.5", "tumbleweed")
+ALLOWED_NONBASE_OS_VERSIONS = ("15.4", "15.5", "15.6", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.5", "tumbleweed")
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(
     ALLOWED_BASE_OS_VERSIONS
@@ -490,21 +490,27 @@ DISTRIBUTION_CONTAINER = create_BCI(
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
+_GIT_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "2.35"
+
 GIT_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/git:latest",
+    build_tag=f"{APP_CONTAINER_PREFIX}/git:{_GIT_APP_VERSION}",
     bci_type=ImageType.APPLICATION,
     image_type="kiwi",
 )
 
+_HELM_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "3.11"
+
 HELM_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/helm:latest",
+    build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_HELM_APP_VERSION}",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
     image_type="kiwi",
 )
 
+_NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
+
 NGINX_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/nginx:latest",
+    build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
     bci_type=ImageType.APPLICATION,
     forwarded_ports=[PortForwarding(container_port=80)],
 )
