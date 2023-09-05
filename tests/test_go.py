@@ -44,6 +44,10 @@ def test_go_version(auto_container):
             repository_url="https://github.com/weaveworks/kured.git",
             repository_tag="1.13.2",
             build_command="make bootstrap-tools kured && go test -race ./...",
+            marks=pytest.mark.xfail(
+                condition=LOCALHOST.system_info.arch != "x86_64",
+                reason="Currently broken on arch != x86_64 (https://github.com/kubereboot/kured/issues/823)",
+            ),
         ).to_pytest_param(),
     ],
     indirect=["container_git_clone"],
