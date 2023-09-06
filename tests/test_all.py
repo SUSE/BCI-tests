@@ -2,6 +2,7 @@
 This module contains tests that are run for **all** containers.
 """
 import datetime
+import xml.etree.ElementTree as ET
 
 import pytest
 from _pytest.config import Config
@@ -139,7 +140,9 @@ def test_glibc_present(auto_container):
 def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     """Check that there are no packages installed that we wouldn't find in SLE
     BCI repo by running :command:`zypper -n dup` and checking that there are no
-    downgrades or arch changes.
+    downgrades or arch changes. Then validate that SLE_BCI provides all the packages
+    that are installed in the container as well except for the known intentional
+    breakages (sles-release, skelcd-EULA-bci).
 
     As of 2023-05 the container and the SLE_BCI repositories are released independently
     so we frequently get downgrades in this test. allow --allow-downgrade therefore
@@ -150,9 +153,36 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
 
     container_per_test.connection.run_expect(
         [0],
-        f"timeout 2m zypper -n dup --from {repo_name} -l -d -D "
+        f"timeout 2m zypper -n dup --from {repo_name} -l "
         "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
     )
+
+    searchresult = ET.fromstring(
+        container_per_test.connection.run_expect(
+            [0], f"zypper -x -n search -t package -v -i '*'"
+        ).stdout
+    )
+
+    orphaned_packages = {
+        child.attrib["name"]
+        for child in searchresult.iterfind(
+            'search-result/solvable-list/solvable[@repository="(System Packages)"]'
+        )
+    }
+
+    # kubic-locale-archive should be replaced by glibc-locale-base in the containers
+    # but that is a few bytes larger so we accept it as an exception
+    known_orphaned_packages = {
+        "kubic-locale-archive",
+        "skelcd-EULA-bci",
+        "sles-release",
+        "nodejs16",  # only supported until 2023-12-31, inherited from SP4
+        "npm16",  # only supported until 2023-12-31, inherited from SP4
+        "postgresql14",  # only supported until 2023-12-31, inherited from SP4
+        "postgresql14-server",  # only supported until 2023-12-31, inherited from SP4
+    }
+
+    assert not orphaned_packages.difference(known_orphaned_packages)
 
 
 @pytest.mark.parametrize(
