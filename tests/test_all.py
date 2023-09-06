@@ -59,38 +59,47 @@ def test_os_release(auto_container):
     """
     assert auto_container.connection.file("/etc/os-release").exists
 
-    for var_name, value in (
+    for var_name, expected_value in (
         ("VERSION_ID", OS_VERSION),
         ("PRETTY_NAME", OS_PRETTY_NAME),
     ):
-        if OS_VERSION == "tumbleweed" and var_name == "VERSION_ID":
-            # on openSUSE Tumbleweed that is the an ever changing snapshot date
-            # just check whether it starts with current year
-            assert (
-                int(
-                    auto_container.connection.run_expect(
-                        [0], f". /etc/os-release && echo ${var_name}"
-                    ).stdout.strip()[:4]
+        if var_name == "VERSION_ID":
+            if OS_VERSION == "basalt":
+                # Current basalt version number
+                expected_value = "0.1"
+            elif OS_VERSION == "tumbleweed":
+                # on openSUSE Tumbleweed that is the an ever changing snapshot date
+                # just check whether it starts with current year
+                assert (
+                    int(
+                        auto_container.connection.run_expect(
+                            [0], f". /etc/os-release && echo ${var_name}"
+                        ).stdout.strip()[:4]
+                    )
+                    == datetime.datetime.now().year
                 )
-                == datetime.datetime.now().year
-            )
-            continue
+                continue
 
         assert (
             auto_container.connection.run_expect(
                 [0], f". /etc/os-release && echo ${var_name}"
             ).stdout.strip()
-            == value
+            == expected_value
         )
 
 
 def test_product(auto_container):
     """
-    check that :file:`/etc/products.d/SLES.prod` exists and
+    check that :file:`/etc/products.d/$BASEPRODUCT.prod` exists and
     :file:`/etc/products.d/baseproduct` is a link to it
     """
     assert auto_container.connection.file("/etc/products.d").is_directory
-    product_file = f"/etc/products.d/{'openSUSE.prod' if OS_VERSION == 'tumbleweed' else 'SLES.prod'}"
+    prodfname = "SLES"
+    if OS_VERSION == "tumbleweed":
+        prodfname = "openSUSE"
+    if OS_VERSION == "basalt":
+        prodfname = "ALP"
+    product_file = f"/etc/products.d/{prodfname}.prod"
 
     assert auto_container.connection.file(product_file).is_file
     assert auto_container.connection.file(
@@ -149,7 +158,11 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     so we frequently get downgrades in this test. allow --allow-downgrade therefore
     but still test that there wouldn't be conflicts with what is available in SLE_BCI.
     """
-    repo_name = "repo-oss" if OS_VERSION == "tumbleweed" else "SLE_BCI"
+    repo_name = "SLE_BCI"
+    if OS_VERSION == "tumbleweed":
+        repo_name = "repo-oss"
+    if OS_VERSION == "basalt":
+        repo_name = "alp-micro"
 
     container_per_test.connection.run_expect(
         [0],
