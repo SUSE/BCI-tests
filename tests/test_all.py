@@ -140,20 +140,20 @@ def test_glibc_present(auto_container):
 def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     """Check that there are no packages installed that we wouldn't find in SLE
     BCI repo by running :command:`zypper -n dup` and checking that there are no
-    downgrades or arch changes. Then validate that SLE_BCI provides all the packages
-    that are installed in the container as well except for the known intentional
-    breakages (sles-release, skelcd-EULA-bci).
+    conflicts or arch changes and we can update to the state in SLE_BCI repos.
+    Then validate that SLE_BCI provides all the packages that are afterwards
+    in the container as well except for the known intentional breakages
+    (sles-release, skelcd-EULA-bci).
 
     As of 2023-05 the container and the SLE_BCI repositories are released independently
     so we frequently get downgrades in this test. allow --allow-downgrade therefore
-    but still test that there wouldn't be conflicts with what is available in SLE_BCI
-
+    but still test that there wouldn't be conflicts with what is available in SLE_BCI.
     """
     repo_name = "repo-oss" if OS_VERSION == "tumbleweed" else "SLE_BCI"
 
     container_per_test.connection.run_expect(
         [0],
-        f"timeout 2m zypper -n dup --from {repo_name} -l "
+        f"timeout 5m zypper -n dup --from {repo_name} -l "
         "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
     )
 
