@@ -159,7 +159,7 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
 
     searchresult = ET.fromstring(
         container_per_test.connection.run_expect(
-            [0], f"zypper -x -n search -t package -v -i '*'"
+            [0], "zypper -x -n search -t package -v -i '*'"
         ).stdout
     )
 
@@ -192,12 +192,10 @@ def test_zypper_verify_passes(container_per_test: ContainerData) -> None:
     """Check that there are no packages missing according to zypper verify so that
     users of the container would not get excessive dependencies installed.
     """
-    repo_name = "repo-oss" if OS_VERSION == "tumbleweed" else "SLE_BCI"
-
     assert (
         "Dependencies of all installed packages are satisfied."
         in container_per_test.connection.run_expect(
-            [0], f"timeout 5m env LC_ALL=C zypper -n verify -D"
+            [0], "timeout 5m env LC_ALL=C zypper -n verify -D"
         ).stdout.strip()
     )
 
