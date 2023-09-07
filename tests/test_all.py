@@ -69,15 +69,16 @@ def test_os_release(auto_container):
                 expected_value = "0.1"
             elif OS_VERSION == "tumbleweed":
                 # on openSUSE Tumbleweed that is the an ever changing snapshot date
-                # just check whether it starts with current year
+                # just check whether it is less than 10 days old
                 assert (
-                    int(
+                    datetime.datetime.now()
+                    - datetime.datetime.strptime(
                         auto_container.connection.run_expect(
                             [0], f". /etc/os-release && echo ${var_name}"
-                        ).stdout.strip()[:4]
+                        ).stdout.strip(),
+                        "%Y%m%d",
                     )
-                    == datetime.datetime.now().year
-                )
+                ).days < 10
                 continue
 
         assert (
