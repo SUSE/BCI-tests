@@ -62,6 +62,27 @@ def test_build_kured(auto_container_per_test, container_git_clone):
     )
 
 
+@pytest.mark.parametrize(
+    "container_git_clone",
+    [
+        GitRepositoryBuild(
+            repository_url="https://github.com/helm/helm.git",
+            repository_tag="v3.12.3",
+            build_command="make build test-unit",
+        ).to_pytest_param(),
+    ],
+    indirect=["container_git_clone"],
+)
+def test_build_helm(auto_container_per_test, container_git_clone):
+    """Try to build `helm <https://github.com/helm/helm.git>`_ inside the
+    container with :command:`make` pre-installed.
+
+    """
+    auto_container_per_test.connection.run_expect(
+        [0], container_git_clone.test_command
+    )
+
+
 def test_go_get_binary_in_path(auto_container_per_test):
     """Check that binaries installed via ``go install`` can be invoked (i.e. are in
     the ``$PATH``).
