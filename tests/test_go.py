@@ -43,11 +43,7 @@ def test_go_version(auto_container):
         GitRepositoryBuild(
             repository_url="https://github.com/weaveworks/kured.git",
             repository_tag="1.13.2",
-            build_command="make bootstrap-tools kured && go test -race ./...",
-            marks=pytest.mark.xfail(
-                condition=LOCALHOST.system_info.arch != "x86_64",
-                reason="Currently broken on arch != x86_64 (https://github.com/kubereboot/kured/issues/823)",
-            ),
+            build_command="go run ./cmd/kured -h && go test -race ./...",
         ).to_pytest_param(),
     ],
     indirect=["container_git_clone"],
@@ -55,6 +51,10 @@ def test_go_version(auto_container):
 def test_build_kured(auto_container_per_test, container_git_clone):
     """Try to build `kured <https://github.com/weaveworks/kured.git>`_ inside the
     container with :command:`make` pre-installed.
+
+    The documented way to build kured is `make bootstrap-tools kured` however
+    that requires goreleaser which isn't available on all the architectures that
+    we care about. So we hardcode a specific version and build it directly.
 
     """
     auto_container_per_test.connection.run_expect(
