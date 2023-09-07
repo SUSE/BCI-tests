@@ -19,6 +19,7 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
+from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import POSTGRESQL_CONTAINERS
 
@@ -60,14 +61,11 @@ def test_os_release(auto_container):
     assert auto_container.connection.file("/etc/os-release").exists
 
     for var_name, expected_value in (
-        ("VERSION_ID", OS_VERSION),
+        ("VERSION_ID", OS_VERSION_ID),
         ("PRETTY_NAME", OS_PRETTY_NAME),
     ):
         if var_name == "VERSION_ID":
-            if OS_VERSION == "basalt":
-                # Current basalt version number
-                expected_value = "0.1"
-            elif OS_VERSION == "tumbleweed":
+            if OS_VERSION == "tumbleweed":
                 # on openSUSE Tumbleweed that is the an ever changing snapshot date
                 # just check whether it is less than 10 days old
                 assert (
@@ -163,7 +161,7 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     if OS_VERSION == "tumbleweed":
         repo_name = "repo-oss"
     if OS_VERSION == "basalt":
-        repo_name = "alp-micro"
+        repo_name = "repo-basalt"
 
     container_per_test.connection.run_expect(
         [0],
@@ -190,6 +188,7 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
         "kubic-locale-archive",
         "skelcd-EULA-bci",
         "sles-release",
+        "ALP-dummy-release",
     }
 
     assert not orphaned_packages.difference(known_orphaned_packages)

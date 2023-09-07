@@ -83,6 +83,7 @@ elif OS_VERSION == "basalt":
     OS_CONTAINER_TAG = "latest"
     APP_CONTAINER_PREFIX = "basalt"
     BCI_CONTAINER_PREFIX = "alp/bci"
+    OS_VERSION_ID = "0.1"
 
     #: The Basalt pretty name (from /etc/os-release)
     OS_PRETTY_NAME = os.getenv(
@@ -93,6 +94,7 @@ else:
     APP_CONTAINER_PREFIX = "suse"
     BCI_CONTAINER_PREFIX = "bci"
     OS_CONTAINER_TAG = OS_VERSION
+    OS_VERSION_ID = OS_VERSION
 
     OS_MAJOR_VERSION, OS_SP_VERSION = (
         int(ver) for ver in OS_VERSION.split(".")
