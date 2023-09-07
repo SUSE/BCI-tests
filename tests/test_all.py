@@ -176,10 +176,6 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
         "kubic-locale-archive",
         "skelcd-EULA-bci",
         "sles-release",
-        "nodejs16",  # only supported until 2023-12-31, inherited from SP4
-        "npm16",  # only supported until 2023-12-31, inherited from SP4
-        "postgresql14",  # only supported until 2023-12-31, inherited from SP4
-        "postgresql14-server",  # only supported until 2023-12-31, inherited from SP4
     }
 
     assert not orphaned_packages.difference(known_orphaned_packages)

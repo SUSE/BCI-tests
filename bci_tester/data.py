@@ -324,8 +324,9 @@ OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
 OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
+
 NODEJS_16_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:16", available_versions=["15.5"]
+    build_tag="bci/nodejs:16", available_versions=["15.4"]
 )
 NODEJS_18_CONTAINER = create_BCI(
     build_tag="bci/nodejs:18", available_versions=["15.5"]
@@ -460,10 +461,14 @@ POSTGRESQL_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/postgres:{pg_ver}",
         bci_type=ImageType.APPLICATION,
+        available_versions=pg_versions,
         forwarded_ports=[PortForwarding(container_port=5432)],
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
-    for pg_ver in (14, 15)
+    for pg_ver, pg_versions in (
+        (14, ["15.4"]),
+        (15, ["15.5", "15.6", "tumbleweed"]),
+    )
 ]
 
 REPOCLOSURE_CONTAINER = DerivedContainer(
