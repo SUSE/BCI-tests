@@ -342,6 +342,7 @@ def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
 
     """
     resp = requests.get(
-        f"http://localhost:{pod_per_test.forwarded_ports[0].host_port}"
+        f"http://localhost:{pod_per_test.forwarded_ports[0].host_port}",
+        timeout=30,
     )
     resp.raise_for_status()
