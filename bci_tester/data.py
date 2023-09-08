@@ -324,7 +324,8 @@ GOLANG_CONTAINERS = [
     )
     for golang_version, stability in (
         ("1.20", "oldstable"),
-        ("1.20-openssl", "oldstable"),
+        ("oldstable-openssl", "oldstable"),
+        ("stable-openssl", "stable"),
         ("1.21", "stable"),
         # does not exist yet (as of 2023/08/15)
         # ("1.21-openssl", "stable"),
