@@ -237,6 +237,17 @@ def create_BCI(
         for m in extra_marks:
             marks.append(m)
 
+    # Ironbank currently has only the "bci-base" image and nothing else, so
+    # skip all other tests
+    if TARGET == "dso" and (
+        bci_type != ImageType.OS or "bci-base" not in build_tag
+    ):
+        marks.append(
+            pytest.mark.skip(
+                reason=f"This container is not available on Ironbank",
+            )
+        )
+
     if bci_type != ImageType.OS:
         if available_versions:
             for ver in available_versions:
