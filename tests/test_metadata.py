@@ -194,15 +194,7 @@ IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
             )
         ),
     ),
-    pytest.param(
-        *IMAGES_AND_NAMES[1],
-        marks=(pytest.mark.xfail(reason="The git container is unreleased")),
-    ),
-    pytest.param(
-        *IMAGES_AND_NAMES[2],
-        marks=(pytest.mark.xfail(reason="The helm container is unreleased")),
-    ),
-] + IMAGES_AND_NAMES[3:]
+] + IMAGES_AND_NAMES[1:]
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES

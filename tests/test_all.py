@@ -202,20 +202,6 @@ def test_zypper_verify_passes(container_per_test: ContainerData) -> None:
         c
         for c in ALL_CONTAINERS
         if (c not in [INIT_CONTAINER, PCP_CONTAINER] + POSTGRESQL_CONTAINERS)
-    ]
-    + [
-        pytest.param(
-            container_from_pytest_param(pg_cont),
-            marks=(
-                pg_cont.marks
-                + [
-                    pytest.mark.xfail(
-                        reason="systemd is in the postgresql containers, bsc#1209208"
-                    )
-                ]
-            ),
-        )
-        for pg_cont in POSTGRESQL_CONTAINERS
     ],
     indirect=True,
 )
