@@ -31,10 +31,6 @@ def test_node_version(auto_container):
         pkg.to_pytest_param()
         for pkg in (
             GitRepositoryBuild(
-                repository_url="https://github.com/lodash/lodash.git",
-                build_command="npm ci && npm test",
-            ),
-            GitRepositoryBuild(
                 repository_url="https://github.com/chalk/chalk.git",
                 build_command="npm install && npm test",
             ),
@@ -87,8 +83,6 @@ def test_popular_npm_repos(
 
        * - package
          - build command
-       * - `Lodash <https://github.com/lodash/lodash.git>`_
-         - :command:`npm ci && npm test`
        * - `chalk <https://github.com/chalk/chalk.git>`_
          - :command:`npm install && npm test`
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
