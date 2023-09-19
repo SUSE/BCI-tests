@@ -1,3 +1,4 @@
+"""Tests for the Node.js base container images."""
 from textwrap import dedent
 
 import pytest

@@ -7,6 +7,7 @@ CONTAINER_IMAGES = (HELM_CONTAINER,)
 
 
 def test_helm_version(auto_container, host, container_runtime):
+    """Test that we can invoke `helm version` successfully."""
     assert (
         "GitTreeState"
         in host.run_expect(

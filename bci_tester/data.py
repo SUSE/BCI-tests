@@ -266,7 +266,7 @@ def create_BCI(
     ):
         marks.append(
             pytest.mark.skip(
-                reason=f"This container is not available on Ironbank",
+                reason="This container is not available on Ironbank",
             )
         )
 

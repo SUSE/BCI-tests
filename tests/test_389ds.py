@@ -1,3 +1,4 @@
+"""Basic tests for the 389-ds Application container image."""
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
