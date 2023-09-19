@@ -194,6 +194,10 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
+@pytest.mark.xfail(
+    OS_VERSION == "basalt",
+    reason="currently waiting for filesystem/libsolv fixes",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
 )
