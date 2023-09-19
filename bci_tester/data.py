@@ -32,7 +32,14 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 OS_VERSION = os.getenv("OS_VERSION", "15.5")
 
 # Allowed os versions for base (non lang/non-app) containers
-ALLOWED_BASE_OS_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "tumbleweed")
+ALLOWED_BASE_OS_VERSIONS = (
+    "15.3",
+    "15.4",
+    "15.5",
+    "15.6",
+    "basalt",
+    "tumbleweed",
+)
 
 # Allowed os versions for Language and Application containers
 ALLOWED_NONBASE_OS_VERSIONS = ("15.4", "15.5", "15.6", "tumbleweed")
@@ -63,16 +70,31 @@ if OS_VERSION == "tumbleweed":
     OS_SP_VERSION = 0
     OS_CONTAINER_TAG = "latest"
     APP_CONTAINER_PREFIX = "opensuse"
+    BCI_CONTAINER_PREFIX = "bci"
 
     #: The Tumbleweed pretty name (from /etc/os-release)
     OS_PRETTY_NAME = os.getenv(
         "OS_PRETTY_NAME",
         "openSUSE Tumbleweed",
     )
+elif OS_VERSION == "basalt":
+    OS_MAJOR_VERSION = 16
+    OS_SP_VERSION = 0
+    OS_CONTAINER_TAG = "latest"
+    APP_CONTAINER_PREFIX = "basalt"
+    BCI_CONTAINER_PREFIX = "alp/bci"
+    OS_VERSION_ID = "0.1"
 
+    #: The Basalt pretty name (from /etc/os-release)
+    OS_PRETTY_NAME = os.getenv(
+        "OS_PRETTY_NAME",
+        "ALP",
+    )
 else:
     APP_CONTAINER_PREFIX = "suse"
+    BCI_CONTAINER_PREFIX = "bci"
     OS_CONTAINER_TAG = OS_VERSION
+    OS_VERSION_ID = OS_VERSION
 
     OS_MAJOR_VERSION, OS_SP_VERSION = (
         int(ver) for ver in OS_VERSION.split(".")
@@ -113,8 +135,8 @@ if TARGET not in (
     if BASEURL.endswith("/"):
         BASEURL = BASEURL[:-1]
 else:
-    if OS_VERSION == "tumbleweed":
-        DISTNAME = "tumbleweed"
+    if OS_VERSION in ("basalt", "tumbleweed"):
+        DISTNAME = OS_VERSION
     else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
     BASEURL = {
@@ -244,7 +266,7 @@ def create_BCI(
     ):
         marks.append(
             pytest.mark.skip(
-                reason=f"This container is not available on Ironbank",
+                reason="This container is not available on Ironbank",
             )
         )
 
@@ -293,24 +315,24 @@ if OS_VERSION == "tumbleweed":
     )
 else:
     BASE_CONTAINER = create_BCI(
-        build_tag=f"bci/bci-base:{OS_CONTAINER_TAG}",
+        build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
 MINIMAL_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-minimal:{OS_CONTAINER_TAG}",
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-minimal:{OS_CONTAINER_TAG}",
     image_type="kiwi",
     available_versions=ALLOWED_BASE_OS_VERSIONS,
     bci_type=ImageType.OS,
 )
 MICRO_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-micro:{OS_CONTAINER_TAG}",
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-micro:{OS_CONTAINER_TAG}",
     image_type="kiwi",
     available_versions=ALLOWED_BASE_OS_VERSIONS,
     bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-busybox:{OS_CONTAINER_TAG}",
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-busybox:{OS_CONTAINER_TAG}",
     image_type="kiwi",
     available_versions=["15.4", "15.5", "tumbleweed"],
     custom_entry_point="/bin/sh",
@@ -319,7 +341,7 @@ BUSYBOX_CONTAINER = create_BCI(
 
 GOLANG_CONTAINERS = [
     create_BCI(
-        build_tag=f"bci/golang:{golang_version}",
+        build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
         extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
     )
     for golang_version, stability in (
@@ -417,14 +439,14 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 
 RUST_CONTAINERS = [
     create_BCI(
-        build_tag=f"bci/rust:{rust_version}",
+        build_tag=f"{BCI_CONTAINER_PREFIX}/rust:{rust_version}",
         extra_marks=[pytest.mark.__getattr__(f"rust_{stability}")],
     )
     for rust_version, stability in (("1.70", "oldstable"), ("1.71", "stable"))
 ]
 
 INIT_CONTAINER = create_BCI(
-    build_tag=f"bci/bci-init:{OS_CONTAINER_TAG}",
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-init:{OS_CONTAINER_TAG}",
     available_versions=["15.4", "15.5", "tumbleweed"],
     bci_type=ImageType.OS,
     healthcheck_timeout=timedelta(seconds=240),

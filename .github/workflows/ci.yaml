@@ -102,6 +102,18 @@ jobs:
         os_version:
           - 15.5
         include:
+          - toxenv: base
+            container_runtime: DOCKER
+            os_version: basalt
+          - toxenv: base
+            container_runtime: PODMAN
+            os_version: basalt
+          - toxenv: all
+            container_runtime: DOCKER
+            os_version: basalt
+          - toxenv: all
+            container_runtime: PODMAN
+            os_version: basalt
           - toxenv: build
             container_runtime: DOCKER
             os_version: 15.3

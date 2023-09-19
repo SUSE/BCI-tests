@@ -6,7 +6,7 @@ from bci_tester.data import GIT_CONTAINER
 CONTAINER_IMAGES = (GIT_CONTAINER,)
 
 
-def test_git_version(auto_container, host):
+def test_git_version(auto_container):
     assert (
         "git version 2."
         in auto_container.connection.run_expect(

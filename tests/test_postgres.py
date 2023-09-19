@@ -1,3 +1,4 @@
+"""Tests for the PostgreSQL related application container images."""
 from itertools import product
 from typing import List
 from typing import Optional

@@ -1,3 +1,4 @@
+"""Basic tests for the Ruby base container images."""
 import pytest
 from pytest_container.runtime import LOCALHOST
 

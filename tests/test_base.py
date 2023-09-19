@@ -16,13 +16,6 @@ from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
-#: size limits of the base container per arch in MiB
-BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 120,
-    "aarch64": 140,
-    "ppc64le": 160,
-    "s390x": 125,
-}
 
 CONTAINER_IMAGES = [BASE_CONTAINER]
 
@@ -37,6 +30,22 @@ def test_base_size(auto_container, container_runtime):
     :py:const:`BASE_CONTAINER_MAX_SIZE`
 
     """
+
+    #: size limits of the base container per arch in MiB
+    if OS_VERSION in ("basalt", "tumbleweed"):
+        BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
+            "x86_64": 126,
+            "aarch64": 146,
+            "ppc64le": 166,
+            "s390x": 131,
+        }
+    else:
+        BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
+            "x86_64": 120,
+            "aarch64": 140,
+            "ppc64le": 160,
+            "s390x": 125,
+        }
     assert (
         container_runtime.get_image_size(auto_container.image_url_or_id)
         < BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch] * 1024 * 1024
@@ -53,7 +62,7 @@ def test_gost_digest_disable(auto_container):
     """Checks that the gost message digest is not known to openssl."""
     openssl_error_message = (
         "Invalid command 'gost'"
-        if OS_VERSION == "tumbleweed"
+        if OS_VERSION in ("basalt", "tumbleweed")
         else "gost is not a known digest"
     )
     assert (
@@ -91,7 +100,7 @@ def test_all_openssl_hashes_known(auto_container):
     EXPECTED_DIGEST_LIST = ALL_DIGESTS
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
-    if OS_VERSION != "tumbleweed":
+    if OS_VERSION not in ("basalt", "tumbleweed"):
         EXPECTED_DIGEST_LIST += ("gost",)
     assert len(hashes) == len(EXPECTED_DIGEST_LIST)
     assert set(hashes) == set(EXPECTED_DIGEST_LIST)

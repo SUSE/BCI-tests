@@ -19,6 +19,7 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
+from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import POSTGRESQL_CONTAINERS
 
@@ -59,38 +60,45 @@ def test_os_release(auto_container):
     """
     assert auto_container.connection.file("/etc/os-release").exists
 
-    for var_name, value in (
-        ("VERSION_ID", OS_VERSION),
+    for var_name, expected_value in (
+        ("VERSION_ID", OS_VERSION_ID),
         ("PRETTY_NAME", OS_PRETTY_NAME),
     ):
-        if OS_VERSION == "tumbleweed" and var_name == "VERSION_ID":
-            # on openSUSE Tumbleweed that is the an ever changing snapshot date
-            # just check whether it starts with current year
-            assert (
-                int(
-                    auto_container.connection.run_expect(
-                        [0], f". /etc/os-release && echo ${var_name}"
-                    ).stdout.strip()[:4]
-                )
-                == datetime.datetime.now().year
-            )
-            continue
+        if var_name == "VERSION_ID":
+            if OS_VERSION == "tumbleweed":
+                # on openSUSE Tumbleweed that is the an ever changing snapshot date
+                # just check whether it is less than 10 days old
+                assert (
+                    datetime.datetime.now()
+                    - datetime.datetime.strptime(
+                        auto_container.connection.run_expect(
+                            [0], f". /etc/os-release && echo ${var_name}"
+                        ).stdout.strip(),
+                        "%Y%m%d",
+                    )
+                ).days < 10
+                continue
 
         assert (
             auto_container.connection.run_expect(
                 [0], f". /etc/os-release && echo ${var_name}"
             ).stdout.strip()
-            == value
+            == expected_value
         )
 
 
 def test_product(auto_container):
     """
-    check that :file:`/etc/products.d/SLES.prod` exists and
+    check that :file:`/etc/products.d/$BASEPRODUCT.prod` exists and
     :file:`/etc/products.d/baseproduct` is a link to it
     """
     assert auto_container.connection.file("/etc/products.d").is_directory
-    product_file = f"/etc/products.d/{'openSUSE.prod' if OS_VERSION == 'tumbleweed' else 'SLES.prod'}"
+    prodfname = "SLES"
+    if OS_VERSION == "tumbleweed":
+        prodfname = "openSUSE"
+    if OS_VERSION == "basalt":
+        prodfname = "ALP"
+    product_file = f"/etc/products.d/{prodfname}.prod"
 
     assert auto_container.connection.file(product_file).is_file
     assert auto_container.connection.file(
@@ -149,7 +157,11 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     so we frequently get downgrades in this test. allow --allow-downgrade therefore
     but still test that there wouldn't be conflicts with what is available in SLE_BCI.
     """
-    repo_name = "repo-oss" if OS_VERSION == "tumbleweed" else "SLE_BCI"
+    repo_name = "SLE_BCI"
+    if OS_VERSION == "tumbleweed":
+        repo_name = "repo-oss"
+    if OS_VERSION == "basalt":
+        repo_name = "repo-basalt"
 
     container_per_test.connection.run_expect(
         [0],
@@ -176,11 +188,16 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
         "kubic-locale-archive",
         "skelcd-EULA-bci",
         "sles-release",
+        "ALP-dummy-release",
     }
 
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
+@pytest.mark.xfail(
+    OS_VERSION == "basalt",
+    reason="currently waiting for filesystem/libsolv fixes",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
 )
