@@ -419,8 +419,8 @@ def test_reference(
     container_runtime: OciRuntimeBase,
 ):
     """The ``reference`` label (available via ``org.opensuse.reference`` and
-    ``com.suse.bci.$name.reference``) is a url that can be pulled via
-    :command:`podman` or :command:`docker`.
+    ``com.suse.bci.$name.reference``) is pointing to a manifest that can be
+    inspected via :command:`podman` or :command:`docker`.
 
     We check that both values are equal, that the container name is correct in
     the reference and that the reference begins with the expected registry url.
@@ -462,6 +462,13 @@ def test_reference(
     else:
         version = list(version_release.split("-"))[0]
         ref = f"{name}:{version}"
+
+    # only test if our testing target is released - otherwise we'll just fail on
+    # containers that are not yet ever released
+    if not container.container.baseurl.startswith(ref.partition(":")[0]):
+        pytest.skip(
+            f"reference {ref} not checked in TARGET={container.container.baseurl}"
+        )
 
     LOCALHOST.run_expect(
         [0], f"{container_runtime.runner_binary} manifest inspect {ref}"
