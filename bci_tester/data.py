@@ -440,9 +440,8 @@ DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
 RUST_CONTAINERS = [
     create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/rust:{rust_version}",
-        extra_marks=[pytest.mark.__getattr__(f"rust_{stability}")],
     )
-    for rust_version, stability in (("1.70", "oldstable"), ("1.71", "stable"))
+    for rust_version in ("oldstable", "stable")
 ]
 
 INIT_CONTAINER = create_BCI(
