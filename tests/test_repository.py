@@ -25,9 +25,11 @@ REPOCLOSURE_FALSE_POSITIVES = [
     "podman",
     "salt-minion",
     "suse-module-tools",
+    "typelib-1_0-Gtk-3_0",
 ] + (
     [
         "qml-autoreqprov",
+        "typelib-1_0-Gtk-4_0",
     ]
     if OS_SP_VERSION >= 4
     else []
