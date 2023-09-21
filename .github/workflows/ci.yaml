@@ -102,6 +102,10 @@ jobs:
         os_version:
           - 15.5
         include:
+          - toxenv: repository
+            container_runtime: PODMAN
+            testing_target: ibs-released
+            os_version: 15.5
           - toxenv: base
             container_runtime: DOCKER
             os_version: basalt
@@ -325,3 +329,4 @@ jobs:
         env:
           CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
           OS_VERSION: ${{ matrix.os_version }}
+          TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
