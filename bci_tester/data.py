@@ -358,6 +358,21 @@ OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
 OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
+OPENJDK_21_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:21", available_versions=["tumbleweed"]
+)
+OPENJDK_DEVEL_21_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:21", available_versions=["tumbleweed"]
+)
+
+OPENJDK_CONTAINERS = [
+    OPENJDK_11_CONTAINER,
+    OPENJDK_DEVEL_11_CONTAINER,
+    OPENJDK_17_CONTAINER,
+    OPENJDK_DEVEL_17_CONTAINER,
+    OPENJDK_21_CONTAINER,
+    OPENJDK_DEVEL_21_CONTAINER,
+]
 
 NODEJS_16_CONTAINER = create_BCI(
     build_tag="bci/nodejs:16", available_versions=["15.4"]
@@ -565,10 +580,6 @@ DOTNET_CONTAINERS = [
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
-        OPENJDK_11_CONTAINER,
-        OPENJDK_DEVEL_11_CONTAINER,
-        OPENJDK_17_CONTAINER,
-        OPENJDK_DEVEL_17_CONTAINER,
         NGINX_CONTAINER,
         NODEJS_16_CONTAINER,
         NODEJS_18_CONTAINER,
@@ -584,6 +595,7 @@ CONTAINERS_WITH_ZYPPER = (
     + RUBY_CONTAINERS
     + GOLANG_CONTAINERS
     + RUST_CONTAINERS
+    + OPENJDK_CONTAINERS
     + POSTGRESQL_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
@@ -606,10 +618,6 @@ L3_CONTAINERS = (
         GIT_CONTAINER,
         INIT_CONTAINER,
         BUSYBOX_CONTAINER,
-        OPENJDK_11_CONTAINER,
-        OPENJDK_17_CONTAINER,
-        OPENJDK_DEVEL_11_CONTAINER,
-        OPENJDK_DEVEL_17_CONTAINER,
         DISTRIBUTION_CONTAINER,
         PCP_CONTAINER,
     ]
@@ -619,6 +627,7 @@ L3_CONTAINERS = (
     + GOLANG_CONTAINERS
     + NODEJS_CONTAINERS
     + RUST_CONTAINERS
+    + OPENJDK_CONTAINERS
 )
 
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS
