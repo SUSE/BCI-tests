@@ -76,6 +76,7 @@ markers = [
     'php-fpm_8',
     'postgres_14',
     'postgres_15',
+    'postgres_16',
     'python_3.10',
     'python_3.11',
     'python_3.6',
