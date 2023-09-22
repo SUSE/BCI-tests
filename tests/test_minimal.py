@@ -34,10 +34,10 @@ SLE_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
 }
 
 TW_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 32,
-    "aarch64": 34,
-    "s390x": 32,
-    "ppc64le": 39,
+    "x86_64": 34,
+    "aarch64": 36,
+    "s390x": 34,
+    "ppc64le": 41,
 }
 
 
