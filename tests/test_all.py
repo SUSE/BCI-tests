@@ -7,7 +7,6 @@ import xml.etree.ElementTree as ET
 import pytest
 from _pytest.config import Config
 from pytest_container import Container
-from pytest_container import container_from_pytest_param
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
