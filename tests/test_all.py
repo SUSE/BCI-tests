@@ -2,6 +2,7 @@
 This module contains tests that are run for **all** containers.
 """
 import datetime
+import fnmatch
 import xml.etree.ElementTree as ET
 
 import pytest
@@ -107,6 +108,51 @@ def test_product(auto_container):
         auto_container.connection.file("/etc/products.d/baseproduct").linked_to
         == product_file
     )
+
+
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="lifecycle data only available for SLE",
+)
+def test_lifecycle(auto_container):
+    """
+    If the container provides lifecycle information, test that we do
+    not have unsupported packages installed.
+    """
+
+    lifecycle_dir = "/usr/share/lifecycle/data"
+    if not auto_container.connection.file(lifecycle_dir).exists:
+        return
+
+    assert auto_container.connection.file(f"{lifecycle_dir}/").is_directory
+
+    if "rust" in auto_container.container.get_base().url:
+        pytest.skip("bsc#1215834")
+
+    rpmqpack = auto_container.connection.run_expect(
+        [0], "rpm -qa --qf '%{NAME},%{VERSION}\n'"
+    ).stdout.split()
+    installed_binaries = {}
+    for pack in rpmqpack:
+        rpm_name, _, rpm_version = pack.partition(",")
+        installed_binaries[rpm_name] = rpm_version
+
+    for entry in auto_container.connection.run_expect(
+        [0], f"cat {lifecycle_dir}/*.lifecycle"
+    ).stdout.split():
+        entry = entry.partition("#")[0]
+        if not entry.strip() or "," not in entry:
+            continue
+
+        entry_name, entry_version, entry_date = entry.split(",")
+        if entry_name in installed_binaries:
+            if fnmatch.fnmatch(installed_binaries[entry_name], entry_version):
+                support_end = datetime.datetime.strptime(
+                    entry_date, "%Y-%m-%d"
+                )
+                assert (
+                    datetime.datetime.now() < support_end
+                ), f"{entry_name} = {installed_binaries[entry_name]} installed but out of support since {entry_date}"
 
 
 @pytest.mark.skipif(
