@@ -131,7 +131,7 @@ def test_lifecycle(auto_container):
 
     rpmqpack = auto_container.connection.run_expect(
         [0], "rpm -qa --qf '%{NAME},%{VERSION}\n'"
-    ).stdout.split()
+    ).stdout.splitlines()
     installed_binaries = {}
     for pack in rpmqpack:
         rpm_name, _, rpm_version = pack.partition(",")
@@ -139,7 +139,7 @@ def test_lifecycle(auto_container):
 
     for entry in auto_container.connection.run_expect(
         [0], f"cat {lifecycle_dir}/*.lifecycle"
-    ).stdout.split():
+    ).stdout.splitlines():
         entry = entry.partition("#")[0]
         if not entry.strip() or "," not in entry:
             continue
