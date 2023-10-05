@@ -608,6 +608,12 @@ NGINX_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=80)],
 )
 
+KERNEL_MODULE_CONTAINER = create_BCI(
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
+    available_versions=["15.5", "15.6"],
+    bci_type=ImageType.OS,
+)
+
 DOTNET_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
     DOTNET_SDK_7_0_CONTAINER,
@@ -627,6 +633,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
+        KERNEL_MODULE_CONTAINER,
     ]
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS

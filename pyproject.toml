@@ -93,6 +93,8 @@ markers = [
     'rust_oldstable',
     'rust_stable',
     'tumbleweed_latest',
+    'bci-sle15-kernel-module-devel_15.5',
+    'bci-sle15-kernel-module-devel_15.6',
 ]
 
 [tool.black]

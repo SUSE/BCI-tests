@@ -39,6 +39,7 @@ from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
+from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
@@ -110,6 +111,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
+        (KERNEL_MODULE_CONTAINER, "sle15-kernel-module-devel", ImageType.OS),
         (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
         (
             OPENJDK_DEVEL_11_CONTAINER,
