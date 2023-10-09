@@ -187,6 +187,10 @@ def test_glibc_present(auto_container):
         assert auto_container.connection.exists(binary)
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "basalt",
+    reason="Basalt repos are known to be out of sync with IBS state",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
 )
