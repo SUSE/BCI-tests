@@ -1,6 +1,6 @@
-"""Tests for the Rust development container (the container including rust and
-cargo).
+"""Tests for the Rust development container.
 
+Rust development containers include rust and cargo.
 """
 import pytest
 from pytest_container import GitRepositoryBuild
@@ -68,7 +68,12 @@ def test_cargo_version(auto_container):
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/dtolnay/proc-macro2",
-                build_command="cargo test && cargo test --no-default-features && cargo test --features span-locations && RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo test && RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo test --no-default-features",
+                build_command=(
+                    "cargo test && cargo test --no-default-features && "
+                    "cargo test --features span-locations && "
+                    "RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo test && "
+                    "RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo test --no-default-features"
+                ),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/unicode-rs/unicode-xid",
