@@ -126,7 +126,7 @@ def test_lifecycle(auto_container):
 
     assert auto_container.connection.file(f"{lifecycle_dir}/").is_directory
 
-    if "rust" in auto_container.container.get_base().url:
+    if "rust:oldstable" in auto_container.container.get_base().url:
         pytest.skip("bsc#1215834")
 
     rpmqpack = auto_container.connection.run_expect(
