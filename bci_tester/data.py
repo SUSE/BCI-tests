@@ -270,7 +270,7 @@ def create_BCI(
             of the :py:class:`~pytest_container.DerivedContainer`
     """
     build_tag_base = build_tag.rpartition("/")[2]
-    marks = [pytest.mark.__getattr__(build_tag_base.replace(":", "_"))]
+    marks = []
     if extra_marks:
         for m in extra_marks:
             marks.append(m)
@@ -293,14 +293,17 @@ def create_BCI(
                     raise ValueError(
                         f"Invalid os version for a language or application stack container: {ver}"
                     )
-            marks.append(create_container_version_mark(available_versions))
         else:
-            marks.append(
-                create_container_version_mark(_DEFAULT_NONBASE_OS_VERSIONS)
-            )
+            available_versions = list(_DEFAULT_NONBASE_OS_VERSIONS)
 
-    elif available_versions is not None:
+    if available_versions:
         marks.append(create_container_version_mark(available_versions))
+
+    # only try to grab the mark from the build tag for containers that are
+    # available for this os version, otherwise we get bogus errors for missing
+    # marks
+    if OS_VERSION in (available_versions or []):
+        marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
 
     if OS_VERSION == "tumbleweed":
         if bci_type == ImageType.APPLICATION:
