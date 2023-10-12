@@ -183,6 +183,8 @@ jobs:
             os_version: 15.6
 
     steps:
+      - name: Clean up disk space to maximize available space
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL && sudo docker image prune --all --force
       - name: checkout source code
         uses: actions/checkout@v4
       - name: Install tox
