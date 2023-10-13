@@ -6,6 +6,7 @@ from typing import Callable
 from typing import List
 
 import pytest
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import OS_SP_VERSION
@@ -144,6 +145,11 @@ def test_sle_bci_forbidden_packages(container_per_test):
         "nfs-kernel-server",
         "texlive-l3kernel.noarch",
         "purge-kernels-service.noarch",
+        f"kernel-azure-devel.{LOCALHOST.system_info.arch}",
+        "kernel-devel-azure.noarch",
+        "kernel-macros.noarch",
+        "kernel-source-azure.noarch",
+        f"kernel-syms-azure.{LOCALHOST.system_info.arch}",
     ]
 
     FORBIDDEN_PACKAGE_NAMES = ["kernel", "yast", "kvm", "xen"]
