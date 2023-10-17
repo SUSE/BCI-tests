@@ -233,6 +233,7 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     known_orphaned_packages = {
         "kubic-locale-archive",
         "skelcd-EULA-bci",
+        "sles-ltss-release",
         "sles-release",
         "ALP-dummy-release",
     }
