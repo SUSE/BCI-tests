@@ -22,6 +22,7 @@ from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import POSTGRESQL_CONTAINERS
+from bci_tester.data import TARGET
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -184,6 +185,10 @@ def test_glibc_present(auto_container):
         assert auto_container.connection.exists(binary)
 
 
+@pytest.mark.skipif(
+    TARGET == "ibs-released" and OS_VERSION == "15.3",
+    reason="LTSS containers are known to be non-functional with BCI_repo ",
+)
 @pytest.mark.skipif(
     OS_VERSION == "basalt",
     reason="Basalt repos are known to be out of sync with IBS state",
