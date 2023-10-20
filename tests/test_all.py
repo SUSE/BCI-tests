@@ -198,6 +198,10 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     Then validate that SLE_BCI provides all the packages that are afterwards
     in the container as well except for the known intentional breakages
     (sles-release, skelcd-EULA-bci).
+
+    As of 2023-05 the container and the SLE_BCI repositories are released independently
+    so we frequently get downgrades in this test. allow --allow-downgrade therefore
+    but still test that there wouldn't be conflicts with what is available in SLE_BCI.
     """
     repo_name = "SLE_BCI"
     if OS_VERSION == "tumbleweed":
@@ -208,7 +212,7 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     container_per_test.connection.run_expect(
         [0],
         f"timeout 5m zypper -n dup --from {repo_name} -l "
-        "--no-allow-vendor-change --no-allow-downgrade --no-allow-arch-change",
+        "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
     )
 
     searchresult = ET.fromstring(
