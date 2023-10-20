@@ -107,6 +107,14 @@ jobs:
             testing_target: ibs-released
             os_version: 15.5
           - toxenv: base
+            container_runtime: PODMAN
+            testing_target: ibs-released
+            os_version: 15.3
+          - toxenv: all
+            container_runtime: PODMAN
+            testing_target: ibs-released
+            os_version: 15.3
+          - toxenv: base
             container_runtime: DOCKER
             os_version: basalt
           - toxenv: base
@@ -318,6 +326,16 @@ jobs:
           =Klfs
           -----END PGP PUBLIC KEY BLOCK-----
           EOF
+
+      - name: Login to the registry if needed
+        run: |
+          if [ "$TARGET" = "ibs-released" ]; then
+            echo $REGISTRY_LOGIN_PASSWORD | podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+          fi
+        env:
+          REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
+          REGISTRY_LOGIN_PASSWORD: ${{ secrets.REGISTRY_LOGIN_PASSWORD }}
+          TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
 
       - name: Add /etc/host entries
         run: |

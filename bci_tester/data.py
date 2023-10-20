@@ -212,8 +212,11 @@ class ImageType(enum.Enum):
     LANGUAGE_STACK = enum.auto()
     APPLICATION = enum.auto()
     OS = enum.auto()
+    OS_LTSS = enum.auto()
 
     def __str__(self) -> str:
+        if self.value == ImageType.OS_LTSS:
+            return "suse/ltss"
         return (
             "application"
             if self.value == ImageType.APPLICATION.value
@@ -270,7 +273,7 @@ def create_BCI(
             )
         )
 
-    if bci_type != ImageType.OS:
+    if bci_type not in (ImageType.OS, ImageType.OS_LTSS):
         if available_versions:
             for ver in available_versions:
                 if ver not in ALLOWED_NONBASE_OS_VERSIONS:
@@ -307,6 +310,8 @@ def create_BCI(
     )
 
 
+LTSS_CONTAINERS = []
+
 if OS_VERSION == "tumbleweed":
     BASE_CONTAINER = create_BCI(
         build_tag="tumbleweed:latest",
@@ -319,6 +324,23 @@ else:
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
+    if TARGET == "ibs-released":
+        if False:  # not yet released
+            LTSS_CONTAINERS.append(
+                create_BCI(
+                    build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base:{OS_CONTAINER_TAG}",
+                    available_versions=["15.3"],
+                    bci_type=ImageType.OS_LTSS,
+                )
+            )
+        LTSS_CONTAINERS.append(
+            create_BCI(
+                build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base-fips:{OS_CONTAINER_TAG}",
+                available_versions=["15.3"],
+                bci_type=ImageType.OS_LTSS,
+            )
+        )
+
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-minimal:{OS_CONTAINER_TAG}",
     image_type="kiwi",
@@ -590,6 +612,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_CLI,
         PHP_8_FPM,
     ]
+    + LTSS_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
@@ -621,6 +644,7 @@ L3_CONTAINERS = (
         DISTRIBUTION_CONTAINER,
         PCP_CONTAINER,
     ]
+    + LTSS_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
