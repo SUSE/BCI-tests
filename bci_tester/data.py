@@ -552,7 +552,7 @@ GIT_CONTAINER = create_BCI(
     image_type="kiwi",
 )
 
-_HELM_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "3.11"
+_HELM_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "3.13"
 
 HELM_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_HELM_APP_VERSION}",
