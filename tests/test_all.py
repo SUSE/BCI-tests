@@ -3,8 +3,10 @@ This module contains tests that are run for **all** containers.
 """
 import datetime
 import fnmatch
+import json
 import xml.etree.ElementTree as ET
 
+import packaging.version
 import pytest
 from _pytest.config import Config
 from pytest_container import Container
@@ -218,32 +220,79 @@ def test_glibc_present(auto_container):
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
+@pytest.mark.skipif(
+    OS_VERSION == "basalt",
+    reason="Basalt repos are known to be out of sync with IBS state",
+)
+@pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
+def test_no_downgrade_on_install(container: ContainerData) -> None:
+    """Check that we can install any additional pacakage in the container.
+
+    Check that installing any additional package would not cause a downgrade
+    of any package already installed in the container as that would throw
+    a question to the user and break the builds.
+    """
+
+    conn = container.connection
+
+    conn.run_expect([0], "timeout 2m zypper ref")
+    system_solv = json.loads(
+        conn.check_output("dumpsolv -j /var/cache/zypp/solv/@System/solv")
+    )
+    bci_solv = json.loads(
+        conn.check_output(
+            f"dumpsolv -j /var/cache/zypp/solv/{BCI_REPO_NAME}/solv"
+        )
+    )
+    installed_pkgs = {
+        solvable["solvable:name"]: solvable["solvable:evr"]
+        for solvable in system_solv["repositories"][0]["solvables"]
+    }
+    bci_pkgs = {}
+    for solvable in bci_solv["repositories"][0]["solvables"]:
+        bci_pkgs[solvable["solvable:name"]] = solvable["solvable:evr"]
+        if solvable["solvable:name"] in installed_pkgs:
+            continue
+        for req in solvable.get("solvable:requires", ()):
+            # Skip boolean dependencies or unversioned ones
+            if "(" in req or " = " not in req:
+                continue
+            name, _, version = req.partition(" = ")
+            if name in installed_pkgs:
+                installed_version, _, installed_release = installed_pkgs[
+                    name
+                ].partition("-")
+                version, _, release = version.partition("-")
+                if installed_version == version and release:
+                    assert packaging.version.parse(
+                        installed_release
+                    ) <= packaging.version.parse(release), (
+                        f"Installed {name} = {installed_release} is newer than "
+                        f"what {solvable['solvable:name']} requires (= {release})"
+                    )
+
+
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="LTSS containers are known to be non-functional with BCI_repo ",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
 )
-def test_zypper_dup_works(container_per_test: ContainerData) -> None:
-    """Check that there are no packages installed that we wouldn't find in SLE
-    BCI repo by running :command:`zypper -n dup` and checking that there are no
-    conflicts or arch changes and we can update to the state in SLE_BCI repos.
-    Then validate that SLE_BCI provides all the packages that are afterwards
-    in the container as well except for the known intentional breakages
-    (sles-release, skelcd-EULA-bci).
-
-    As of 2023-05 the container and the SLE_BCI repositories are released independently
-    so we frequently get downgrades in this test. allow --allow-downgrade therefore
-    but still test that there wouldn't be conflicts with what is available in SLE_BCI.
+def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
+    """Check that containers do not contain any package that isn't also
+    available via repositories.
     """
 
-    container_per_test.connection.run_expect(
-        [0],
+    container_per_test.connection.check_output(
         f"timeout 5m zypper -n dup --from {BCI_REPO_NAME} -l "
-        "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
+        "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change"
     )
 
     searchresult = ET.fromstring(
-        container_per_test.connection.run_expect(
-            [0], "zypper -x -n search -t package -v -i '*'"
-        ).stdout
+        container_per_test.connection.check_output(
+            "zypper -x -n search -t package -v -i '*'"
+        )
     )
 
     orphaned_packages = {
@@ -252,7 +301,6 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
             'search-result/solvable-list/solvable[@repository="(System Packages)"]'
         )
     }
-
     # kubic-locale-archive should be replaced by glibc-locale-base in the containers
     # but that is a few bytes larger so we accept it as an exception
     known_orphaned_packages = {
@@ -262,21 +310,18 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
         "sles-release",
         "ALP-dummy-release",
     }
-
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
-@pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
-)
-def test_zypper_verify_passes(container_per_test: ContainerData) -> None:
+@pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
+def test_zypper_verify_passes(container: ContainerData) -> None:
     """Check that there are no packages missing according to zypper verify so that
     users of the container would not get excessive dependencies installed.
     """
     assert (
         "Dependencies of all installed packages are satisfied."
-        in container_per_test.connection.check_output(
-            "timeout 5m env LC_ALL=C zypper -n verify -D"
+        in container.connection.check_output(
+            "timeout 5m env LC_ALL=C zypper --no-refresh -n verify -D"
         )
     )
 
