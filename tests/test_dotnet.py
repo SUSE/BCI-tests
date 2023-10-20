@@ -107,9 +107,7 @@ def test_dotnet_hello_world(container_per_test, msg):
         [0], "dotnet new console -o MyApp"
     )
     assert (
-        container_per_test.connection.run_expect(
-            [0], "cd MyApp && dotnet run"
-        ).stdout.strip()
+        container_per_test.connection.check_output("cd MyApp && dotnet run")
         == msg
     )
 
@@ -159,9 +157,9 @@ def test_dotnet_sdk_telemetry_deactivated(container_per_test):
     notice is present in the output of :command:`dotnet help`.
 
     """
-    dotnet_new_stdout = container_per_test.connection.run_expect(
-        [0], "dotnet help"
-    ).stdout.strip()
+    dotnet_new_stdout = container_per_test.connection.check_output(
+        "dotnet help"
+    )
     assert not re.search(r"telemetry", dotnet_new_stdout, re.IGNORECASE)
 
 
@@ -183,9 +181,9 @@ def test_microsoft_dotnet_repository(container_per_test):
 
     def get_pkg_list(extra_search_flags: str = "") -> List[str]:
         zypper_xml_out = ET.fromstring(
-            container_per_test.connection.run_expect(
-                [0], f"zypper -x se {extra_search_flags} -r {MS_REPO_NAME}"
-            ).stdout.strip()
+            container_per_test.connection.check_output(
+                f"zypper -x se {extra_search_flags} -r {MS_REPO_NAME}"
+            )
         )
         solvable_list = list(
             [

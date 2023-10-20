@@ -20,27 +20,21 @@ def test_ruby_version(auto_container):
     match the version of Ruby in the container.
 
     """
-    rb_ver = auto_container.connection.run_expect(
-        [0], "ruby -e 'puts RUBY_VERSION'"
-    ).stdout.strip()
+    rb_ver = auto_container.connection.check_output(
+        "ruby -e 'puts RUBY_VERSION'"
+    )
     assert (
-        auto_container.connection.run_expect(
-            [0], "echo $RUBY_VERSION"
-        ).stdout.strip()
-        == rb_ver
+        auto_container.connection.check_output("echo $RUBY_VERSION") == rb_ver
     )
 
-    assert auto_container.connection.run_expect(
-        [0], "echo $RUBY_MAJOR"
-    ).stdout.strip() == ".".join(rb_ver.split(".")[:-1])
+    assert auto_container.connection.check_output(
+        "echo $RUBY_MAJOR"
+    ) == ".".join(rb_ver.split(".")[:-1])
 
 
 def test_lang_set(auto_container):
     """Assert that the environment variable ``LANG`` is set to ``C.UTF-8``."""
-    assert (
-        auto_container.connection.run_expect([0], "echo $LANG").stdout.strip()
-        == "C.UTF-8"
-    )
+    assert auto_container.connection.check_output("echo $LANG") == "C.UTF-8"
 
 
 @pytest.mark.parametrize(

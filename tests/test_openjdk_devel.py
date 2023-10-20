@@ -67,10 +67,7 @@ def test_jdk_version(container, java_version: str):
     )
 
     assert (
-        container.connection.run_expect(
-            [0], "echo $JAVA_VERSION"
-        ).stdout.strip()
-        == java_version
+        container.connection.check_output("echo $JAVA_VERSION") == java_version
     )
 
 

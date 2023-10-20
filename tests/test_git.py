@@ -7,9 +7,6 @@ CONTAINER_IMAGES = (GIT_CONTAINER,)
 
 
 def test_git_version(auto_container):
-    assert (
-        "git version 2."
-        in auto_container.connection.run_expect(
-            [0], "git --version"
-        ).stdout.strip()
+    assert "git version 2." in auto_container.connection.check_output(
+        "git --version"
     )

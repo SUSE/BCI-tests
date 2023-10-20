@@ -17,12 +17,8 @@ def test_rust_version(auto_container):
 
     """
     assert (
-        auto_container.connection.run_expect(
-            [0], "echo $RUST_VERSION"
-        ).stdout.strip()
-        == auto_container.connection.run_expect([0], "rustc --version")
-        .stdout.strip()
-        .split()[1]
+        auto_container.connection.check_output("echo $RUST_VERSION")
+        == auto_container.connection.check_output("rustc --version").split()[1]
     )
 
 
@@ -32,12 +28,8 @@ def test_cargo_version(auto_container):
 
     """
     assert (
-        auto_container.connection.run_expect(
-            [0], "echo $CARGO_VERSION"
-        ).stdout.strip()
-        == auto_container.connection.run_expect([0], "cargo --version")
-        .stdout.strip()
-        .split()[1]
+        auto_container.connection.check_output("echo $CARGO_VERSION")
+        == auto_container.connection.check_output("cargo --version").split()[1]
     )
 
 

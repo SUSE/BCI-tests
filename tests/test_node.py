@@ -15,14 +15,10 @@ def test_node_version(auto_container):
     version of the installed :command:`node` binary.
 
     """
-    assert (
-        auto_container.connection.run_expect([0], "node -v")
-        .stdout.strip()
-        .replace("v", "")
-        .split(".")[0]
-        == auto_container.connection.run_expect(
-            [0], "echo $NODE_VERSION"
-        ).stdout.strip()
+    assert auto_container.connection.check_output("node -v").replace(
+        "v", ""
+    ).split(".")[0] == auto_container.connection.check_output(
+        "echo $NODE_VERSION"
     )
 
 

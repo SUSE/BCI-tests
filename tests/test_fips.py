@@ -139,9 +139,9 @@ def test_openssl_fips_hashes(container_per_test):
         assert FIPS_ERR_MSG in cmd.stderr
 
     for digest in FIPS_DIGESTS:
-        dev_null_digest = container_per_test.connection.run_expect(
-            [0], f"openssl {digest} /dev/null"
-        ).stdout
+        dev_null_digest = container_per_test.connection.check_output(
+            f"openssl {digest} /dev/null"
+        )
         assert (
             f"{digest.upper()}(/dev/null)= " in dev_null_digest
         ), f"unexpected digest of hash {digest}: {dev_null_digest}"

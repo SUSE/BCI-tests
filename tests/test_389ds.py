@@ -37,9 +37,8 @@ def test_ldapwhoami(auto_container_per_test):
     host_port = auto_container_per_test.forwarded_ports[0].host_port
     if LOCALHOST.exists("ldapwhoami"):
         assert (
-            LOCALHOST.run_expect(
-                [0],
+            LOCALHOST.check_output(
                 f"ldapwhoami -H ldap://127.0.0.1:{host_port} -x -D 'uid=demo_user,ou=people,dc=example,dc=com' -w password",
-            ).stdout.strip()
+            )
             == "dn: uid=demo_user,ou=people,dc=example,dc=com"
         )

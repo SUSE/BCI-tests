@@ -176,9 +176,8 @@ def test_install_php_extension_via_script(
         [0], f"docker-php-ext-install {extension}"
     )
 
-    assert (
-        extension
-        in auto_container_per_test.connection.run_expect([0], "php -m").stdout
+    assert extension in auto_container_per_test.connection.check_output(
+        "php -m"
     )
 
 
@@ -221,16 +220,13 @@ def test_zypper_install_php_extensions(
     """
     assert (
         extension_name
-        not in auto_container_per_test.connection.run_expect(
-            [0], "php -m"
-        ).stdout
+        not in auto_container_per_test.connection.check_output("php -m")
     )
     auto_container_per_test.connection.run_expect(
         [0], f"zypper -n in php{_PHP_MAJOR_VERSION}-{extension_name}"
     )
-    assert (
-        extension_name
-        in auto_container_per_test.connection.run_expect([0], "php -m").stdout
+    assert extension_name in auto_container_per_test.connection.check_output(
+        "php -m"
     )
 
 
@@ -253,9 +249,7 @@ def test_environment_variables(
     """
 
     def get_env_var(env_var: str) -> str:
-        return container_per_test.connection.run_expect(
-            [0], f"echo ${env_var}"
-        ).stdout.strip()
+        return container_per_test.connection.check_output(f"echo ${env_var}")
 
     php_pkg_version = container_per_test.connection.package(
         f"php{_PHP_MAJOR_VERSION}"
@@ -298,13 +292,9 @@ def test_cli_entry_point(
     """
     container_image.prepare_container(pytestconfig.rootpath)
 
-    assert (
-        "PHP_BINARY"
-        in host.run_expect(
-            [0],
-            f"{container_runtime.runner_binary} run --rm "
-            f"{container_image.url or container_image.container_id} -r 'print_r(get_defined_constants());'",
-        ).stdout
+    assert "PHP_BINARY" in host.check_output(
+        f"{container_runtime.runner_binary} run --rm "
+        f"{container_image.url or container_image.container_id} -r 'print_r(get_defined_constants());'",
     )
 
 
