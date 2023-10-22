@@ -21,6 +21,7 @@ from bci_tester.data import REPOCLOSURE_CONTAINER
 #: installed in :py:func:`test_package_installation`.
 REPOCLOSURE_FALSE_POSITIVES = [
     "multipath-tools",
+    "open-vm-tools",
     "patterns-base-fips",
     "patterns-base-minimal_base",
     "podman",
