@@ -19,22 +19,29 @@ from bci_tester.data import REPOCLOSURE_CONTAINER
 #: This is caused by these packages having boolean requires on the kernel, which
 #: is not present in the SLE_BCI repository. We check that these packages can be
 #: installed in :py:func:`test_package_installation`.
-REPOCLOSURE_FALSE_POSITIVES = [
-    "multipath-tools",
-    "open-vm-tools",
-    "patterns-base-fips",
-    "patterns-base-minimal_base",
-    "podman",
-    "salt-minion",
-    "suse-module-tools",
-    "typelib-1_0-Gtk-3_0",
-] + (
+REPOCLOSURE_FALSE_POSITIVES = (
     [
-        "qml-autoreqprov",
-        "typelib-1_0-Gtk-4_0",
+        "multipath-tools",
+        "patterns-base-fips",
+        "patterns-base-minimal_base",
+        "podman",
+        "salt-minion",
+        "suse-module-tools",
+        "typelib-1_0-Gtk-3_0",
     ]
-    if OS_SP_VERSION >= 4
-    else []
+    + (
+        [
+            "qml-autoreqprov",
+            "typelib-1_0-Gtk-4_0",
+        ]
+        if OS_SP_VERSION >= 4
+        else []
+    )
+    + (
+        ["open-vm-tools"]
+        if LOCALHOST.system_info.arch in ("aarch64", "x86_64")
+        else []
+    )
 )
 
 #: Packages that have broken dependencies by intention and should be excluded
