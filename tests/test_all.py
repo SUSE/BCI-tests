@@ -72,18 +72,18 @@ def test_os_release(auto_container):
                 assert (
                     datetime.datetime.now()
                     - datetime.datetime.strptime(
-                        auto_container.connection.run_expect(
-                            [0], f". /etc/os-release && echo ${var_name}"
-                        ).stdout.strip(),
+                        auto_container.connection.check_output(
+                            f". /etc/os-release && echo ${var_name}"
+                        ),
                         "%Y%m%d",
                     )
                 ).days < 10
                 continue
 
         assert (
-            auto_container.connection.run_expect(
-                [0], f". /etc/os-release && echo ${var_name}"
-            ).stdout.strip()
+            auto_container.connection.check_output(
+                f". /etc/os-release && echo ${var_name}"
+            )
             == expected_value
         )
 
@@ -127,17 +127,17 @@ def test_lifecycle(auto_container):
 
     assert auto_container.connection.file(f"{lifecycle_dir}/").is_directory
 
-    rpmqpack = auto_container.connection.run_expect(
-        [0], "rpm -qa --qf '%{NAME},%{VERSION}\n'"
-    ).stdout.splitlines()
+    rpmqpack = auto_container.connection.check_output(
+        "rpm -qa --qf '%{NAME},%{VERSION}\n'"
+    ).splitlines()
     installed_binaries = {}
     for pack in rpmqpack:
         rpm_name, _, rpm_version = pack.partition(",")
         installed_binaries[rpm_name] = rpm_version
 
-    for entry in auto_container.connection.run_expect(
-        [0], f"cat {lifecycle_dir}/*.lifecycle"
-    ).stdout.splitlines():
+    for entry in auto_container.connection.check_output(
+        f"cat {lifecycle_dir}/*.lifecycle"
+    ).splitlines():
         entry = entry.partition("#")[0]
         if not entry.strip() or "," not in entry:
             continue
@@ -255,9 +255,9 @@ def test_zypper_verify_passes(container_per_test: ContainerData) -> None:
     """
     assert (
         "Dependencies of all installed packages are satisfied."
-        in container_per_test.connection.run_expect(
-            [0], "timeout 5m env LC_ALL=C zypper -n verify -D"
-        ).stdout.strip()
+        in container_per_test.connection.check_output(
+            "timeout 5m env LC_ALL=C zypper -n verify -D"
+        )
     )
 
 

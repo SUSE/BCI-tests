@@ -103,9 +103,9 @@ def test_postgres_db_env_vars(
     assert pgdata_f.user == "postgres"
     assert pgdata_f.mode == 0o700
 
-    assert container_per_test.connection.run_expect(
-        [0], "id -un"
-    ).stdout.strip() == (username or "root")
+    assert container_per_test.connection.check_output("id -un") == (
+        username or "root"
+    )
 
     try:
         conn = psycopg2.connect(

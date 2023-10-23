@@ -11,10 +11,7 @@ def get_host_go_version(host) -> Version:
     # output of go version:
     # go version go1.19.1 linux/amd64
     return Version.parse(
-        host.run_expect([0], "go version")
-        .stdout.strip()
-        .split()[2]
-        .replace("go", "")
+        host.check_output("go version").split()[2].replace("go", "")
     )
 
 
@@ -69,6 +66,4 @@ def get_repos_from_zypper_xmlout(zypper_xmlout: str) -> List[Repository]:
 
 def get_repos_from_connection(con) -> List[Repository]:
     """Gets the list of repositories given a testinfra connection."""
-    return get_repos_from_zypper_xmlout(
-        con.run_expect([0], "zypper -x repos").stdout
-    )
+    return get_repos_from_zypper_xmlout(con.check_output("zypper -x repos"))

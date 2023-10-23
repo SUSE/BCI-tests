@@ -76,12 +76,12 @@ def test_python_version(auto_container):
     ``PYTHON_VERSION``.
 
     """
-    reported_version = auto_container.connection.run_expect(
-        [0], "python3 --version"
-    ).stdout.strip()
-    version_from_env = auto_container.connection.run_expect(
-        [0], "echo $PYTHON_VERSION"
-    ).stdout.strip()
+    reported_version = auto_container.connection.check_output(
+        "python3 --version"
+    )
+    version_from_env = auto_container.connection.check_output(
+        "echo $PYTHON_VERSION"
+    )
 
     assert reported_version == f"Python {version_from_env}"
 
@@ -92,12 +92,10 @@ def test_pip(auto_container):
 
     """
     assert auto_container.connection.pip.check().rc == 0
-    reported_version = auto_container.connection.run_expect(
-        [0], "pip --version"
-    ).stdout
-    version_from_env = auto_container.connection.run_expect(
-        [0], "echo $PIP_VERSION"
-    ).stdout.strip()
+    reported_version = auto_container.connection.check_output("pip --version")
+    version_from_env = auto_container.connection.check_output(
+        "echo $PIP_VERSION"
+    )
 
     assert f"pip {version_from_env}" in reported_version
 
@@ -110,9 +108,9 @@ def test_tox(auto_container):
 def test_pip_install_source_cryptography(auto_container_per_test):
     """Check that cryptography python module can be installed from source so that
     it is built against the SLE BCI FIPS enabled libopenssl."""
-    version = auto_container_per_test.connection.run_expect(
-        [0], "echo $PYTHON_VERSION"
-    ).stdout.strip()
+    version = auto_container_per_test.connection.check_output(
+        "echo $PYTHON_VERSION"
+    )
 
     if packaging.version.Version(version) < packaging.version.Version("3.8"):
         pytest.skip("cryptography tests only supported on >= 3.8")
@@ -240,10 +238,9 @@ def test_python_webserver_2(
     assert not container_per_test.connection.file(destdir + xfilename).exists
 
     # execution of the python module in the container
-    bci_python_wget = container_per_test.connection.run_expect(
-        [0],
+    bci_python_wget = container_per_test.connection.check_output(
         f"timeout --preserve-status 120s python3 {appdir + appl2} {url} {destdir}",
-    ).stdout
+    )
 
     # run the test in the container and check expected keyword from the module
     assert "PASS" in bci_python_wget
@@ -269,9 +266,7 @@ def test_tensorf(container_per_test):
     assert container_per_test.connection.file(bcdir + appdir + appl1).is_file
 
     # collect CPU flags of the system
-    cpuflg = container_per_test.connection.run_expect(
-        [0], "cat /proc/cpuinfo"
-    ).stdout
+    cpuflg = container_per_test.connection.file("/proc/cpuinfo").content_string
 
     # In precompiled Tensorflow library by default 'sse4' cpu flag expected
     assert "sse4" in cpuflg

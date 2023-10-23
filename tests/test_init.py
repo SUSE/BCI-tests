@@ -94,9 +94,7 @@ class TestSystemd:
         """
         Ensure :command:`systemd-detect-virt` detects the container runtime
         """
-        output = auto_container.connection.run_expect(
-            [0], "systemd-detect-virt"
-        ).stdout
+        output = auto_container.connection.check_output("systemd-detect-virt")
         runtime = container_runtime.runner_binary
         assert (
             runtime in output
@@ -147,9 +145,7 @@ class TestSystemd:
         """
         Ensure :command:`timedatectl` works as expected and the container timezone is UTC
         """
-        output = auto_container.connection.run_expect(
-            [0], "timedatectl"
-        ).stdout
+        output = auto_container.connection.check_output("timedatectl")
         assert re.search(
             r"Time zone:.*(Etc/UTC|UTC)", output
         ), "Time zone not set to UTC"

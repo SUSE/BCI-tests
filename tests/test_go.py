@@ -91,11 +91,8 @@ def test_go_get_binary_in_path(auto_container_per_test):
     auto_container_per_test.connection.run_expect(
         [0], "go install github.com/tylertreat/comcast@latest"
     )
-    assert (
-        "Comcast"
-        in auto_container_per_test.connection.run_expect(
-            [0], "comcast -version"
-        ).stdout
+    assert "Comcast" in auto_container_per_test.connection.check_output(
+        "comcast -version"
     )
 
 
@@ -105,12 +102,8 @@ def test_base_PATH_present(auto_container, container):
     present in he base container in the golang containers.
 
     """
-    path_in_go_container = auto_container.connection.run_expect(
-        [0], "echo $PATH"
-    ).stdout.strip()
-    path_in_base_container = container.connection.run_expect(
-        [0], "echo $PATH"
-    ).stdout.strip()
+    path_in_go_container = auto_container.connection.check_output("echo $PATH")
+    path_in_base_container = container.connection.check_output("echo $PATH")
     assert path_in_base_container in path_in_go_container
 
 

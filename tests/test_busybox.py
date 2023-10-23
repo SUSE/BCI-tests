@@ -77,22 +77,16 @@ def test_echo_cat_grep_pipes(auto_container):
 
 def test_ps(auto_container):
     """Check if the `ps` command yields some output"""
-    assert "root" in auto_container.connection.run_expect([0], "ps").stdout
+    assert "root" in auto_container.connection.check_output("ps")
 
 
 def test_base32_64(auto_container):
     """Ensure the base32 and base64 commands are returning the correct result for a given "test" string"""
-    assert (
-        "ORSXG5AK"
-        in auto_container.connection.run_expect(
-            [0], "echo test | base32"
-        ).stdout
+    assert "ORSXG5AK" in auto_container.connection.check_output(
+        "echo test | base32"
     )
-    assert (
-        "dGVzdAo="
-        in auto_container.connection.run_expect(
-            [0], "echo test | base64"
-        ).stdout
+    assert "dGVzdAo=" in auto_container.connection.check_output(
+        "echo test | base64"
     )
 
 
