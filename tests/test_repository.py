@@ -39,7 +39,13 @@ REPOCLOSURE_FALSE_POSITIVES = (
     )
     + (
         ["open-vm-tools"]
-        if LOCALHOST.system_info.arch in ("aarch64", "x86_64")
+        if OS_SP_VERSION >= 5
+        and LOCALHOST.system_info.arch in ("aarch64", "x86_64")
+        else []
+    )
+    + (
+        ["open-vm-tools"]
+        if OS_SP_VERSION in (3, 4) and LOCALHOST.system_info.arch in ("x86_64")
         else []
     )
 )
