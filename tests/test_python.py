@@ -103,7 +103,7 @@ def test_pip(auto_container):
 
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
-    reason="pip --user not working properly with PEP 668",
+    reason="pip --user not working due to PEP 668",
 )
 def test_tox(auto_container):
     """Ensure we can use :command:`pip` to install :command:`tox`."""
@@ -112,7 +112,7 @@ def test_tox(auto_container):
 
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
-    reason="pip --user not working properly with PEP 668",
+    reason="pip --user not working due to PEP 668",
 )
 def test_pip_install_source_cryptography(auto_container_per_test):
     """Check that cryptography python module can be installed from source so that
@@ -204,7 +204,7 @@ def test_python_webserver_1(
 
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
-    reason="pip --user not working properly with PEP 668",
+    reason="pip --user not working due to PEP 668",
 )
 @pytest.mark.parametrize(
     "container_per_test", CONTAINER_IMAGES_T2, indirect=["container_per_test"]
@@ -264,7 +264,7 @@ def test_python_webserver_2(
 
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
-    reason="pip --user not working properly with PEP 668",
+    reason="pip --user not working due to PEP 668",
 )
 @pytest.mark.skipif(
     # skip test if architecture is not x86.
