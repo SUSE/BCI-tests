@@ -149,6 +149,13 @@ else:
     }[TARGET]
 
 
+BCI_REPO_NAME = "SLE_BCI"
+if OS_VERSION == "tumbleweed":
+    BCI_REPO_NAME = "repo-oss"
+if OS_VERSION == "basalt":
+    BCI_REPO_NAME = "repo-basalt"
+
+
 def create_container_version_mark(
     available_versions: Iterable[str],
 ) -> MarkDecorator:
@@ -181,7 +188,7 @@ if BCI_DEVEL_REPO is None:
     BCI_DEVEL_REPO = f"https://updates.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
     _BCI_CONTAINERFILE = ""
 else:
-    _BCI_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/SLE_BCI.repo"
+    _BCI_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
 
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
@@ -543,17 +550,14 @@ POSTGRESQL_CONTAINERS = [
 
 REPOCLOSURE_CONTAINER = DerivedContainer(
     base="registry.fedoraproject.org/fedora:latest",
-    containerfile=r"""RUN dnf -y install 'dnf-command(repoclosure)'
+    containerfile=rf"""RUN dnf -y install 'dnf-command(repoclosure)'
 RUN rm -f /etc/yum.repos.d/*repo
-RUN echo $'[SLE_BCI] \n\
-enabled=1 \n\
-name="SLE BCI" \n\
-autorefresh=0 \n\
-baseurl="""
-    + BCI_DEVEL_REPO
-    + r""" \n\
-priority=100' > /etc/yum.repos.d/SLE_BCI.repo
-""",
+RUN printf '[{BCI_REPO_NAME}]\n\
+enabled=1\n\
+name="SLE BCI"\n\
+autorefresh=0\n\
+baseurl={BCI_DEVEL_REPO}\n\
+priority=100\n' > /etc/yum.repos.d/{BCI_REPO_NAME}.repo""",
 )
 
 

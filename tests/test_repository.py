@@ -9,10 +9,15 @@ import pytest
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import REPOCLOSURE_CONTAINER
 
+
+_RM_ZYPPSERVICE = (
+    "rm -v /usr/lib/zypp/plugins/services/container-suseconnect-zypp"
+)
 
 #: Packages that can be installed, but are reported as having dependency issues
 #: by :command:`dnf repoclosure`.
@@ -65,14 +70,9 @@ def get_package_list(con) -> List[str]:
     given a container connection.
 
     """
-    package_list = (
-        con.run_expect(
-            [0],
-            "dnf list --available|grep SLE_BCI|awk '{print $1}'",
-        )
-        .stdout.strip()
-        .split("\n")
-    )
+    package_list = con.check_output(
+        f"dnf list --available|grep -F '{BCI_REPO_NAME}' | cut -d' ' -f1",
+    ).splitlines()
     assert len(package_list) > 3000
     return package_list
 
@@ -196,7 +196,10 @@ def test_package_installation(container_per_test, pkg):
     that they are not accidentally not installable.
 
     """
-    container_per_test.connection.run_expect([0], f"zypper -n in {pkg}")
+
+    container_per_test.connection.check_output(
+        f"{_RM_ZYPPSERVICE}; zypper -n in -r {BCI_REPO_NAME} {pkg}"
+    )
 
 
 @pytest.mark.skipif(
@@ -213,4 +216,6 @@ def test_sle15_packages(container_per_test, pkg):
     """Test that packages that we received reports by users for as missing/broken
     remain installable and available.
     """
-    container_per_test.connection.run_expect([0], f"zypper -n in {pkg}")
+    container_per_test.connection.check_output(
+        f"{_RM_ZYPPSERVICE}; zypper -n in -r {BCI_REPO_NAME} {pkg}"
+    )
