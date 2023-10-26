@@ -14,6 +14,7 @@ from pytest_container import MultiStageBuild
 from pytest_container.container import ContainerData
 
 from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import INIT_CONTAINER
@@ -211,15 +212,10 @@ def test_zypper_dup_works(container_per_test: ContainerData) -> None:
     so we frequently get downgrades in this test. allow --allow-downgrade therefore
     but still test that there wouldn't be conflicts with what is available in SLE_BCI.
     """
-    repo_name = "SLE_BCI"
-    if OS_VERSION == "tumbleweed":
-        repo_name = "repo-oss"
-    if OS_VERSION == "basalt":
-        repo_name = "repo-basalt"
 
     container_per_test.connection.run_expect(
         [0],
-        f"timeout 5m zypper -n dup --from {repo_name} -l "
+        f"timeout 5m zypper -n dup --from {BCI_REPO_NAME} -l "
         "--no-allow-vendor-change --allow-downgrade --no-allow-arch-change",
     )
 
