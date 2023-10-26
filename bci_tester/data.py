@@ -515,7 +515,6 @@ CONTAINER_389DS_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3389)],
     )
     for ver, os_ver in (
-        ("2.0", "15.4"),
         ("2.2", "15.5"),
         ("2.4", "tumbleweed"),
     )
