@@ -194,7 +194,7 @@ def test_package_installation(container_per_test, pkg):
     :command:`curl` and :command:`unzip`) can be installed. Additionally, try to
     install all packages from :py:const:`REPOCLOSURE_FALSE_POSITIVES`, ensuring
     that they are not accidentally not installable.
-
+    We additionally have to remove the ``container-suseconnect`` zypper service before running the test to ensure that no SLES repositories are added on registered hosts thereby skewing our results.
     """
 
     container_per_test.connection.check_output(
