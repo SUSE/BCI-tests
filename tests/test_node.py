@@ -28,8 +28,8 @@ def test_node_version(auto_container):
         pkg.to_pytest_param()
         for pkg in (
             GitRepositoryBuild(
-                repository_url="https://github.com/chalk/chalk.git",
-                build_command="npm install && npm test",
+                repository_url="https://github.com/Microsoft/TypeScript",
+                build_command="npm ci && npm test",
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
