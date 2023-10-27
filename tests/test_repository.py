@@ -38,6 +38,8 @@ REPOCLOSURE_FALSE_POSITIVES = (
         [
             "qml-autoreqprov",
             "typelib-1_0-Gtk-4_0",
+            "python311-aiohttp",
+            "python311-libcst",
         ]
         if OS_SP_VERSION >= 4
         else []
