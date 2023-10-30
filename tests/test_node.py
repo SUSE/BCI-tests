@@ -33,7 +33,7 @@ def test_node_version(auto_container):
                 build_command="npm ci && npm test",
             )
             if LOCALHOST.system_info.arch in ("x86_64",)
-            else (),
+            else None,
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
                 build_command="npm ci && npm test && npm run lint",
@@ -69,6 +69,7 @@ def test_node_version(auto_container):
                 build_command="npm install && npm run unit",
             ),
         )
+        if pkg is not None
     ],
     indirect=["container_git_clone"],
 )
