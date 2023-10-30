@@ -81,7 +81,7 @@ def test_rails_hello_world(auto_container_per_test):
 
     # Rails asset pipeline needs Node.js and yarn
     auto_container_per_test.connection.run_expect(
-        [0], "zypper -n in nodejs-default yarn"
+        [0], "zypper -n in nodejs-default yarn libyaml-devel"
     )
     auto_container_per_test.connection.run_expect(
         [0], "rails new /hello/ --minimal"
@@ -90,6 +90,11 @@ def test_rails_hello_world(auto_container_per_test):
 
 @pytest.mark.skipif(OS_VERSION != "tumbleweed", reason="no rails for ruby 2.5")
 def test_rails_template(auto_container_per_test):
+    # Rails asset pipeline needs Node.js and yarn
+    auto_container_per_test.connection.run_expect(
+        [0], "zypper -n in nodejs-default yarn libyaml-devel"
+    )
+
     auto_container_per_test.connection.run_expect(
         [0], "gem install 'rails:~> 7.0'"
     )
@@ -111,9 +116,6 @@ def test_rails_template(auto_container_per_test):
     ):
         pytest.xfail("timezone data are not in the container")
 
-    curl_localhost = auto_container_per_test.connection.run_expect(
-        [0],
+    assert "Ruby on Rails" in auto_container_per_test.connection.check_output(
         "cd /hello/ && (rails server > /dev/null &) && curl -sf --retry 5 --retry-connrefused  http://localhost:3000",
     )
-
-    assert "Ruby on Rails" in curl_localhost.stdout.strip()

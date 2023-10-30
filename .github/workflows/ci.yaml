@@ -101,6 +101,7 @@ jobs:
           - PODMAN
         os_version:
           - 15.5
+          - "tumbleweed"
         include:
           - toxenv: repository
             container_runtime: PODMAN

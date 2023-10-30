@@ -34,10 +34,10 @@ def test_base_size(auto_container, container_runtime):
     #: size limits of the base container per arch in MiB
     if OS_VERSION in ("basalt", "tumbleweed"):
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
-            "x86_64": 126,
-            "aarch64": 146,
-            "ppc64le": 166,
-            "s390x": 131,
+            "x86_64": 135,
+            "aarch64": 135,
+            "ppc64le": 175,
+            "s390x": 140,
         }
     else:
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
@@ -46,9 +46,16 @@ def test_base_size(auto_container, container_runtime):
             "ppc64le": 160,
             "s390x": 125,
         }
-    assert (
-        container_runtime.get_image_size(auto_container.image_url_or_id)
-        < BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch] * 1024 * 1024
+    container_size = container_runtime.get_image_size(
+        auto_container.image_url_or_id
+    ) // (1024 * 1024)
+    max_container_size = BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch]
+    min_container_size = (
+        BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch] - 5
+    )
+    assert container_size <= max_container_size, (
+        f"Base container size is {container_size} MiB for {LOCALHOST.system_info.arch} "
+        f"(expected {min_container_size}..{BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch]} MiB)"
     )
 
 

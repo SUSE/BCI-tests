@@ -12,6 +12,7 @@ from pytest_container.runtime import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import Version
 
+from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
@@ -100,11 +101,19 @@ def test_pip(auto_container):
     assert f"pip {version_from_env}" in reported_version
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="pip --user not working due to PEP 668",
+)
 def test_tox(auto_container):
     """Ensure we can use :command:`pip` to install :command:`tox`."""
     auto_container.connection.run_expect([0], "pip install --user tox")
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="pip --user not working due to PEP 668",
+)
 def test_pip_install_source_cryptography(auto_container_per_test):
     """Check that cryptography python module can be installed from source so that
     it is built against the SLE BCI FIPS enabled libopenssl."""
@@ -193,6 +202,10 @@ def test_python_webserver_1(
     )
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="pip --user not working due to PEP 668",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINER_IMAGES_T2, indirect=["container_per_test"]
 )
@@ -250,6 +263,10 @@ def test_python_webserver_2(
 
 
 @pytest.mark.skipif(
+    OS_VERSION == "tumbleweed",
+    reason="pip --user not working due to PEP 668",
+)
+@pytest.mark.skipif(
     # skip test if architecture is not x86.
     LOCALHOST.system_info.arch != "x86_64",
     reason="Tensorflow python library tested on x86_64",
@@ -272,7 +289,10 @@ def test_tensorf(container_per_test):
     assert "sse4" in cpuflg
 
     # install TF module for python
-    if container_per_test.connection.run("pip install tensorflow").rc != 0:
+    if (
+        container_per_test.connection.run("pip install --user tensorflow").rc
+        != 0
+    ):
         pytest.xfail(
             "pip install failure: check tensorflow requirements or update pip"
         )

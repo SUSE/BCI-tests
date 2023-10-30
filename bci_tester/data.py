@@ -71,6 +71,7 @@ if OS_VERSION == "tumbleweed":
     OS_CONTAINER_TAG = "latest"
     APP_CONTAINER_PREFIX = "opensuse"
     BCI_CONTAINER_PREFIX = "bci"
+    OS_VERSION_ID = None
 
     #: The Tumbleweed pretty name (from /etc/os-release)
     OS_PRETTY_NAME = os.getenv(
@@ -368,18 +369,26 @@ BUSYBOX_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
+# The very last container in this list needs to be available for all
+# tested OSes
 GOLANG_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
+        extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
+        available_versions=["15.5", "15.6"],
+    )
+    for golang_version, stability in (
+        ("oldstable-openssl", "oldstable"),
+        ("stable-openssl", "stable"),
+    )
+] + [
     create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
         extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
     )
     for golang_version, stability in (
         ("1.20", "oldstable"),
-        ("oldstable-openssl", "oldstable"),
-        ("stable-openssl", "stable"),
         ("1.21", "stable"),
-        # does not exist yet (as of 2023/08/15)
-        # ("1.21-openssl", "stable"),
     )
 ]
 

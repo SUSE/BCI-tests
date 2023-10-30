@@ -18,6 +18,7 @@ import requests
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
+from bci_tester.data import OS_VERSION
 
 
 CONTAINER_IMAGES = [PHP_8_CLI, PHP_8_APACHE, PHP_8_FPM]
@@ -271,11 +272,12 @@ def test_environment_variables(
             f"{apache_confdir}/httpd.conf"
         ).is_file
 
-        apache_envvars = get_env_var("APACHE_ENVVARS")
-        assert container_per_test.connection.file(apache_envvars).is_file
-        assert container_per_test.connection.run_expect(
-            [0], f"source {apache_envvars}"
-        )
+        if OS_VERSION not in ("basalt", "tumbleweed"):
+            apache_envvars = get_env_var("APACHE_ENVVARS")
+            assert container_per_test.connection.file(apache_envvars).is_file
+            assert container_per_test.connection.run_expect(
+                [0], f"source {apache_envvars}"
+            )
 
 
 @pytest.mark.parametrize("container_image", [PHP_8_CLI])

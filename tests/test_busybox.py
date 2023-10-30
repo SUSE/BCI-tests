@@ -24,10 +24,10 @@ def test_busybox_provides_sh(auto_container):
 
 #: size limits of the micro image per architecture in MiB
 BUSYBOX_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 16 if OS_VERSION == "tumbleweed" else 14,
-    "aarch64": 16 if OS_VERSION == "tumbleweed" else 14,
-    "s390x": 16 if OS_VERSION == "tumbleweed" else 14,
-    "ppc64le": 16 if OS_VERSION == "tumbleweed" else 14,
+    "x86_64": 16 if OS_VERSION == "tumbleweed" else 13,
+    "aarch64": 16 if OS_VERSION == "tumbleweed" else 13,
+    "s390x": 16 if OS_VERSION == "tumbleweed" else 13,
+    "ppc64le": 16 if OS_VERSION == "tumbleweed" else 13,
 }
 
 
@@ -43,9 +43,14 @@ def test_busybox_image_size(
     specified in :py:const:`BUSYBOX_IMAGE_MAX_SIZE`.
 
     """
-    assert (
-        container_runtime.get_image_size(container.image_url_or_id)
-        < size[LOCALHOST.system_info.arch] * 1024 * 1024
+    container_size = container_runtime.get_image_size(
+        container.image_url_or_id
+    ) // (1024 * 1024)
+    min_container_size = size[LOCALHOST.system_info.arch] - 5
+    max_container_size = size[LOCALHOST.system_info.arch]
+    assert container_size <= max_container_size, (
+        f"Base container size is {container_size} MiB for {LOCALHOST.system_info.arch} "
+        f"(expected {min_container_size}..{max_container_size} MiB)"
     )
 
 
