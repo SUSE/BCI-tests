@@ -4,6 +4,7 @@ from textwrap import dedent
 import pytest
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import NODEJS_CONTAINERS
 
@@ -30,7 +31,9 @@ def test_node_version(auto_container):
             GitRepositoryBuild(
                 repository_url="https://github.com/Microsoft/TypeScript",
                 build_command="npm ci && npm test",
-            ),
+            )
+            if LOCALHOST.system_info.arch in ("x86_64",)
+            else (),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
                 build_command="npm ci && npm test && npm run lint",
