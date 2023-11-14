@@ -41,7 +41,7 @@ FIPS_ERR_MSG = (
 #: :py:const:`FIPS_TEST_DOT_C` using gcc and copies it, ``libcrypto``, ``libssl``
 #: and ``libz`` into the deployment image. The libraries must be copied, as they
 #: are not available in the minimal container images.
-DOCKERFILE = """FROM $builder as builder
+DOCKERFILE = f"""FROM $builder as builder
 
 WORKDIR /src/
 COPY fips-test.c /src/
@@ -53,7 +53,7 @@ FROM $runner
 COPY --from=builder /src/fips-test /bin/fips-test
 COPY --from=builder /usr/lib64/libcrypto.so.1.1 /usr/lib64/
 COPY --from=builder /usr/lib64/libssl.so.1.1 /usr/lib64/
-COPY --from=builder /lib64/libz.so.1 /usr/lib64/
+COPY --from=builder {'/usr' if OS_VERSION not in ('15.3', '15.4') else ''}/lib64/libz.so.1 /usr/lib64/
 COPY --from=builder /usr/lib64/engines-1.1 /usr/lib64/engines-1.1
 COPY --from=builder /usr/lib64/.libcrypto.so.1.1.hmac /usr/lib64/
 COPY --from=builder /usr/lib64/.libssl.so.1.1.hmac /usr/lib64/
