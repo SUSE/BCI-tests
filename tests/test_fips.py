@@ -31,12 +31,6 @@ if "sphinx" not in sys.modules:
     ), "The host must run in FIPS mode for the FIPS test suite"
 
 
-#: Error message from OpenSSL when a non-FIPS digest is selected in FIPS mode
-FIPS_ERR_MSG = (
-    "not a known digest" if OS_VERSION == "15.3" else "Error setting digest"
-)
-
-
 #: multistage :file:`Dockerfile` that builds the program from
 #: :py:const:`FIPS_TEST_DOT_C` using gcc and copies it, ``libcrypto``, ``libssl``
 #: and ``libz`` into the deployment image. The libraries must be copied, as they
@@ -132,7 +126,7 @@ def test_openssl_fips_hashes(container_per_test):
     for digest in NONFIPS_DIGESTS:
         cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
         assert cmd.rc != 0
-        assert FIPS_ERR_MSG in cmd.stderr
+        assert "Error setting digest" in cmd.stderr
 
     for digest in FIPS_DIGESTS:
         dev_null_digest = container_per_test.connection.check_output(
