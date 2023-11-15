@@ -85,7 +85,6 @@ def test_openssl_binary(
         containers={"builder": BASE_CONTAINER, "runner": runner},
         containerfile_template=DOCKERFILE,
     )
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
 
     shutil.copy(
         os.path.join(
@@ -94,15 +93,12 @@ def test_openssl_binary(
         tmp_path / "fips-test.c",
     )
 
-    cmd = host.run_expect(
-        [0],
-        " ".join(
-            container_runtime.build_command
-            + get_extra_build_args(pytestconfig)
-            + [str(tmp_path)]
-        ),
+    img_id = multi_stage_build.build(
+        tmp_path,
+        pytestconfig,
+        container_runtime,
+        extra_build_args=get_extra_build_args(pytestconfig),
     )
-    img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     exec_cmd = " ".join(
         [container_runtime.runner_binary, "run", "--rm"]
