@@ -31,17 +31,11 @@ if "sphinx" not in sys.modules:
     ), "The host must run in FIPS mode for the FIPS test suite"
 
 
-#: Error message from OpenSSL when a non-FIPS digest is selected in FIPS mode
-FIPS_ERR_MSG = (
-    "not a known digest" if OS_VERSION == "15.3" else "Error setting digest"
-)
-
-
 #: multistage :file:`Dockerfile` that builds the program from
 #: :py:const:`FIPS_TEST_DOT_C` using gcc and copies it, ``libcrypto``, ``libssl``
 #: and ``libz`` into the deployment image. The libraries must be copied, as they
 #: are not available in the minimal container images.
-DOCKERFILE = """FROM $builder as builder
+DOCKERFILE = f"""FROM $builder as builder
 
 WORKDIR /src/
 COPY fips-test.c /src/
@@ -53,7 +47,7 @@ FROM $runner
 COPY --from=builder /src/fips-test /bin/fips-test
 COPY --from=builder /usr/lib64/libcrypto.so.1.1 /usr/lib64/
 COPY --from=builder /usr/lib64/libssl.so.1.1 /usr/lib64/
-COPY --from=builder /lib64/libz.so.1 /usr/lib64/
+COPY --from=builder {'/usr' if OS_VERSION not in ('15.3', '15.4') else ''}/lib64/libz.so.1 /usr/lib64/
 COPY --from=builder /usr/lib64/engines-1.1 /usr/lib64/engines-1.1
 COPY --from=builder /usr/lib64/.libcrypto.so.1.1.hmac /usr/lib64/
 COPY --from=builder /usr/lib64/.libssl.so.1.1.hmac /usr/lib64/
@@ -85,7 +79,6 @@ def test_openssl_binary(
         containers={"builder": BASE_CONTAINER, "runner": runner},
         containerfile_template=DOCKERFILE,
     )
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
 
     shutil.copy(
         os.path.join(
@@ -94,15 +87,12 @@ def test_openssl_binary(
         tmp_path / "fips-test.c",
     )
 
-    cmd = host.run_expect(
-        [0],
-        " ".join(
-            container_runtime.build_command
-            + get_extra_build_args(pytestconfig)
-            + [str(tmp_path)]
-        ),
+    img_id = multi_stage_build.build(
+        tmp_path,
+        pytestconfig,
+        container_runtime,
+        extra_build_args=get_extra_build_args(pytestconfig),
     )
-    img_id = container_runtime.get_image_id_from_stdout(cmd.stdout)
 
     exec_cmd = " ".join(
         [container_runtime.runner_binary, "run", "--rm"]
@@ -118,10 +108,7 @@ def test_openssl_binary(
             [1], f"{exec_cmd} /bin/fips-test {digest}"
         ).stderr
 
-        if Version.parse(OS_VERSION) <= Version(15, 3):
-            assert f"Unknown message digest {digest}" in err_msg
-        else:
-            assert "disabled for FIPS" in err_msg
+        assert f"Unknown message digest {digest}" in err_msg
 
 
 @pytest.mark.parametrize(
@@ -136,7 +123,7 @@ def test_openssl_fips_hashes(container_per_test):
     for digest in NONFIPS_DIGESTS:
         cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
         assert cmd.rc != 0
-        assert FIPS_ERR_MSG in cmd.stderr
+        assert "is not a known digest" in cmd.stderr
 
     for digest in FIPS_DIGESTS:
         dev_null_digest = container_per_test.connection.check_output(
