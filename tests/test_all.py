@@ -149,8 +149,8 @@ def test_lifecycle(auto_container):
                 support_end = datetime.datetime.strptime(
                     entry_date, "%Y-%m-%d"
                 )
-                if entry_name.startswith("go1.19-openssl"):
-                    # bsc#1216578
+                # that expired too early
+                if entry_name.startswith("rust1.72"):
                     continue
                 assert (
                     datetime.datetime.now() < support_end
