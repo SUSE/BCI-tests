@@ -553,7 +553,7 @@ POSTGRESQL_CONTAINERS = [
     for pg_ver, pg_versions in (
         (14, ["15.4"]),
         (15, ["15.5", "15.6", "tumbleweed"]),
-        (16, ["tumbleweed"]),
+        (16, ["15.5", "15.6", "tumbleweed"]),
     )
 ]
 
