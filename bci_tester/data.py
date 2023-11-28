@@ -71,6 +71,7 @@ if OS_VERSION == "tumbleweed":
     OS_CONTAINER_TAG = "latest"
     APP_CONTAINER_PREFIX = "opensuse"
     BCI_CONTAINER_PREFIX = "bci"
+    BCI_LTSS_CONTAINER_PREFIX = BCI_CONTAINER_PREFIX
     OS_VERSION_ID = None
 
     #: The Tumbleweed pretty name (from /etc/os-release)
@@ -85,6 +86,7 @@ elif OS_VERSION == "basalt":
     APP_CONTAINER_PREFIX = "basalt"
     BCI_CONTAINER_PREFIX = "alp/bci"
     OS_VERSION_ID = "0.1"
+    BCI_LTSS_CONTAINER_PREFIX = BCI_CONTAINER_PREFIX
 
     #: The Basalt pretty name (from /etc/os-release)
     OS_PRETTY_NAME = os.getenv(
@@ -100,6 +102,7 @@ else:
     OS_MAJOR_VERSION, OS_SP_VERSION = (
         int(ver) for ver in OS_VERSION.split(".")
     )
+    BCI_LTSS_CONTAINER_PREFIX = f"suse/ltss/sle15.{OS_SP_VERSION}"
 
     #: The SLES 15 pretty name (from /etc/os-release)
     OS_PRETTY_NAME = os.getenv(
@@ -332,22 +335,20 @@ else:
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
-    if TARGET == "ibs-released":
-        if False:  # not yet released
-            LTSS_CONTAINERS.append(
-                create_BCI(
-                    build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base:{OS_CONTAINER_TAG}",
-                    available_versions=["15.3"],
-                    bci_type=ImageType.OS_LTSS,
-                )
-            )
-        LTSS_CONTAINERS.append(
-            create_BCI(
-                build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base-fips:{OS_CONTAINER_TAG}",
-                available_versions=["15.3"],
-                bci_type=ImageType.OS_LTSS,
-            )
+    LTSS_CONTAINERS.append(
+        create_BCI(
+            build_tag=f"{BCI_LTSS_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
+            available_versions=["15.3"],
+            bci_type=ImageType.OS_LTSS,
         )
+    )
+    LTSS_CONTAINERS.append(
+        create_BCI(
+            build_tag=f"{BCI_LTSS_CONTAINER_PREFIX}/bci-base-fips:{OS_CONTAINER_TAG}",
+            available_versions=["15.3"],
+            bci_type=ImageType.OS_LTSS,
+        )
+    )
 
 MINIMAL_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-minimal:{OS_CONTAINER_TAG}",

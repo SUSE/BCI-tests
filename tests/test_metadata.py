@@ -40,6 +40,7 @@ from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
+from bci_tester.data import LTSS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
@@ -139,6 +140,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
+    ]
+    + [
+        (ltss_container, "bci-base", ImageType.OS)
+        for ltss_container in LTSS_CONTAINERS
     ]
     + [
         (container_389ds, "389-ds", ImageType.APPLICATION)
