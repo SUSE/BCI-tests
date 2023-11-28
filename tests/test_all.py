@@ -149,9 +149,6 @@ def test_lifecycle(auto_container):
                 support_end = datetime.datetime.strptime(
                     entry_date, "%Y-%m-%d"
                 )
-                # that expired too early
-                if entry_name.startswith("rust1.72"):
-                    continue
                 assert (
                     datetime.datetime.now() < support_end
                 ), f"{entry_name} = {installed_binaries[entry_name]} installed but out of support since {entry_date}"
