@@ -113,6 +113,19 @@ class TestSystemd:
             "Reached target Multi-User System" in journal.stdout
         ), "Multi-User target was not reached"
 
+    def test_systemd_groups(self, auto_container):
+        """
+        Ensure the expected systemd groups are being created
+        """
+        # Check that all the groups are there
+        for group in (
+            "systemd-journal",
+            "systemd-timesync",
+        ):
+            assert group in auto_container.connection.check_output(
+                f"getent group {group}"
+            ), f"group {group} is missing"
+
     def test_hostnamectl(self, auto_container, container_runtime):
         """
         Ensure :command:`hostnamectl` works correctly by asserting expected values
