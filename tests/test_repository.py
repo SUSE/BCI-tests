@@ -40,6 +40,7 @@ REPOCLOSURE_FALSE_POSITIVES = (
             "typelib-1_0-Gtk-4_0",
             "python311-aiohttp",
             "python311-libcst",
+            "kernel-default-devel",
         ]
         if OS_SP_VERSION >= 4
         else []
@@ -60,10 +61,11 @@ REPOCLOSURE_FALSE_POSITIVES = (
 #: Packages that have broken dependencies by intention and should be excluded
 #: from the repoclosure checks
 KNOWN_BROKEN = [
-    #: aaa_base requires 'distribution-release', which is provided by `sles-release`.
+    #: aaa_base and kernel-rt_debug require 'distribution-release', which is
+    #: provided by `sles-release`.
     #: However, `sles-release` is not in the repository, as we do not want
     #: people to be able to build their own SLES from the SLE_BCI repo alone.
-    "aaa_base"
+    "aaa_base",
 ]
 
 
@@ -164,6 +166,9 @@ def test_sle_bci_forbidden_packages(container_per_test):
         f"kernel-azure-devel.{LOCALHOST.system_info.arch}",
         "kernel-devel-azure.noarch",
         "kernel-macros.noarch",
+        f"kernel-default-devel.{LOCALHOST.system_info.arch}",
+        "kernel-devel.noarch",
+        f"kernel-syms.{LOCALHOST.system_info.arch}",
         f"kernel-syms-azure.{LOCALHOST.system_info.arch}",
     ]
 
