@@ -332,15 +332,17 @@ else:
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
-    if TARGET == "ibs-released":
-        if False:  # not yet released
-            LTSS_CONTAINERS.append(
-                create_BCI(
-                    build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base:{OS_CONTAINER_TAG}",
-                    available_versions=["15.3"],
-                    bci_type=ImageType.OS_LTSS,
-                )
+    if TARGET in ("ibs", "ibs-cr", "ibs-released"):
+        LTSS_CONTAINERS.extend(
+            create_BCI(
+                build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle{sp}/bci-base:{OS_CONTAINER_TAG}",
+                available_versions=[sp],
+                image_type="kiwi",
+                extra_marks=[pytest.mark.__getattr__(f"bci-base_{sp}-ltss")],
+                bci_type=ImageType.OS_LTSS,
             )
+            for sp in ("15.3", "15.4")
+        )
         LTSS_CONTAINERS.append(
             create_BCI(
                 build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base-fips:{OS_CONTAINER_TAG}",
