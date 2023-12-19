@@ -164,7 +164,6 @@ def test_sle_bci_forbidden_packages(container_per_test):
         f"kernel-azure-devel.{LOCALHOST.system_info.arch}",
         "kernel-devel-azure.noarch",
         "kernel-macros.noarch",
-        "kernel-source-azure.noarch",
         f"kernel-syms-azure.{LOCALHOST.system_info.arch}",
     ]
 
