@@ -187,7 +187,8 @@ def test_glibc_present(auto_container):
 
 
 @pytest.mark.skipif(
-    TARGET == "ibs-released" and OS_VERSION == "15.3",
+    TARGET in ("ibs", "ibs-cr", "ibs-released")
+    and OS_VERSION in ("15.3", "15.4"),
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
 @pytest.mark.skipif(
