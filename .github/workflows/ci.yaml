@@ -116,6 +116,18 @@ jobs:
             testing_target: ibs-released
             os_version: 15.3
           - toxenv: base
+            container_runtime: PODMAN
+            testing_target: ibs-released
+            os_version: 15.4
+          - toxenv: all
+            container_runtime: PODMAN
+            testing_target: ibs-released
+            os_version: 15.4
+          - toxenv: metadata
+            container_runtime: PODMAN
+            testing_target: ibs-released
+            os_version: 15.4
+          - toxenv: base
             container_runtime: DOCKER
             os_version: basalt
           - toxenv: base
