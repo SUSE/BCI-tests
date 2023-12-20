@@ -40,6 +40,7 @@ from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
+from bci_tester.data import LTSS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
@@ -187,6 +188,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         if LOCALHOST.system_info.arch == "x86_64"
         else []
     )
+    + [(cont, "base", ImageType.OS_LTSS) for cont in LTSS_CONTAINERS]
 ]
 
 IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
