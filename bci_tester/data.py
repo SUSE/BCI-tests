@@ -589,7 +589,12 @@ DISTRIBUTION_CONTAINER = create_BCI(
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
-_GIT_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "2.35"
+if OS_VERSION in ("15.6", "basalt"):
+    _GIT_APP_VERSION = "2.43"
+elif OS_VERSION in ("15.5", "15.4"):
+    _GIT_APP_VERSION = "2.35"
+else:
+    _GIT_APP_VERSION = "latest"
 
 GIT_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/git:{_GIT_APP_VERSION}",
