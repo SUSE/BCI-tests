@@ -58,6 +58,7 @@ markers = [
     'dotnet-sdk_7.0',
     'dotnet-sdk_8.0',
     'git_2.35',
+    'git_2.43',
     'git_latest',
     'helm_3.13',
     'helm_latest',
