@@ -34,6 +34,12 @@ class TestSystemd:
         assert auto_container.connection.file("/etc/machine-id").exists
         assert auto_container.connection.run_expect([0], "systemctl status")
 
+    def test_systemd_no_udev_present(self, auto_container):
+        """https://jira.suse.com/browse/SLE-21856 - check that systemd is not pulling in
+        udev.
+        """
+        assert not auto_container.connection.package("udev").is_installed
+
     def test_systemd_boottime(self, auto_container):
         """Ensure the container startup time is below 5 seconds"""
 
