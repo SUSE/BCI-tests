@@ -344,12 +344,15 @@ jobs:
 
       - name: Login to the registry if needed
         run: |
-          if [ "$TARGET" = "ibs-released" ]; then
-            echo $REGISTRY_LOGIN_PASSWORD | podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
-          fi
+          echo "logging in with 15.3 credentials"
+          echo $REGISTRY_LOGIN_15SP3_PASSWORD | podman login -u $REGISTRY_LOGIN_15SP3_USERNAME --password-stdin registry.suse.com/suse/ltss/sle15.3
+          echo "logging in with 15.4 credentials"
+          echo $REGISTRY_LOGIN_15SP4_PASSWORD | podman login -u $REGISTRY_LOGIN_15SP4_USERNAME --password-stdin registry.suse.com/suse/ltss/sle15.4
         env:
-          REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
-          REGISTRY_LOGIN_PASSWORD: ${{ secrets.REGISTRY_LOGIN_PASSWORD }}
+          REGISTRY_LOGIN_15SP3_USERNAME: ${{ secrets.REGISTRY_LOGIN_15SP3_USERNAME }}
+          REGISTRY_LOGIN_15SP3_PASSWORD: ${{ secrets.REGISTRY_LOGIN_15SP3_PASSWORD }}
+          REGISTRY_LOGIN_15SP4_USERNAME: ${{ secrets.REGISTRY_LOGIN_15SP4_USERNAME }}
+          REGISTRY_LOGIN_15SP4_PASSWORD: ${{ secrets.REGISTRY_LOGIN_15SP4_PASSWORD }}
           TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
 
       - name: Add /etc/host entries
