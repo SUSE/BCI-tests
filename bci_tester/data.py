@@ -188,11 +188,13 @@ def create_container_version_mark(
 
 #: URL to the SLE_BCI repository
 BCI_DEVEL_REPO = os.getenv("BCI_DEVEL_REPO")
+
+
 if BCI_DEVEL_REPO is None:
     BCI_DEVEL_REPO = f"https://updates.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
-    _BCI_CONTAINERFILE = ""
+    _BCI_REPLACE_REPO_CONTAINERFILE = ""
 else:
-    _BCI_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
+    _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
 
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
@@ -313,7 +315,9 @@ def create_BCI(
     return pytest.param(
         DerivedContainer(
             base=baseurl,
-            containerfile=_BCI_CONTAINERFILE,
+            containerfile=""
+            if bci_type == ImageType.OS_LTSS
+            else _BCI_REPLACE_REPO_CONTAINERFILE,
             **kwargs,
         ),
         marks=marks,
