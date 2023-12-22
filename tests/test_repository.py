@@ -8,6 +8,7 @@ from typing import List
 import pytest
 from pytest_container.runtime import LOCALHOST
 
+from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import OS_SP_VERSION
@@ -191,6 +192,10 @@ def test_sle_bci_forbidden_packages(container_per_test):
     ), f"package_list must not contain any forbidden packages, but found {', '.join(forbidden_packages)}"
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason=f"no included BCI repository - can't test",
+)
 @pytest.mark.parametrize(
     "pkg", ["git", "curl", "wget", "unzip"] + REPOCLOSURE_FALSE_POSITIVES
 )
@@ -208,6 +213,10 @@ def test_package_installation(container_per_test, pkg):
     )
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason=f"no included BCI repository - can't test",
+)
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
 )
