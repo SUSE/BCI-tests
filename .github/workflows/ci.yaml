@@ -330,15 +330,18 @@ jobs:
           -----END PGP PUBLIC KEY BLOCK-----
           EOF
 
-      - name: Login to the registry if needed
+      - name: Login to registry.suse.com as CI user
         run: |
-          if [ "$TARGET" = "ibs-released" ]; then
+          if [ "$CONTAINER_RUNTIME" = "DOCKER" ]; then
+            echo $REGISTRY_LOGIN_PASSWORD | docker login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+          fi
+          if [ "$CONTAINER_RUNTIME" = "PODMAN" ]; then
             echo $REGISTRY_LOGIN_PASSWORD | podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
           fi
         env:
           REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
           REGISTRY_LOGIN_PASSWORD: ${{ secrets.REGISTRY_LOGIN_PASSWORD }}
-          TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
+          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
 
       - name: Add /etc/host entries
         run: |
