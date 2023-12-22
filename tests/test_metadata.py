@@ -40,6 +40,8 @@ from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import L3_CONTAINERS
+from bci_tester.data import LTSS_BASE_CONTAINERS
+from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
@@ -89,6 +91,8 @@ def _get_container_label_prefix(
 ) -> str:
     if OS_VERSION == "tumbleweed":
         return f"org.opensuse.{container_type}.{container_name}"
+    if container_type == ImageType.OS_LTSS:
+        return f"com.suse.sle.{container_name}"
     return f"com.suse.{container_type}.{container_name}"
 
 
@@ -187,6 +191,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         if LOCALHOST.system_info.arch == "x86_64"
         else []
     )
+    + [(cont, "base", ImageType.OS_LTSS) for cont in LTSS_BASE_CONTAINERS]
+    + [
+        (cont, "base-fips", ImageType.OS_LTSS)
+        for cont in LTSS_BASE_FIPS_CONTAINERS
+    ]
 ]
 
 IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
@@ -239,12 +248,17 @@ def test_general_labels(
         _get_container_label_prefix(container_name, container_type),
         "org.opencontainers.image",
     ):
-        if container_type != ImageType.APPLICATION:
+        if container_type not in (ImageType.APPLICATION, ImageType.OS_LTSS):
             assert "BCI" in labels[f"{prefix}.title"]
 
         if OS_VERSION == "tumbleweed":
             assert (
                 "based on the openSUSE Tumbleweed Base Container Image."
+                in labels[f"{prefix}.description"]
+            )
+        elif container_type == ImageType.OS_LTSS:
+            assert (
+                "based on SUSE Linux Enterprise Server 15"
                 in labels[f"{prefix}.description"]
             )
         else:
@@ -268,7 +282,10 @@ def test_general_labels(
             "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
             "https://www.suse.com/lifecycle",
         )
-        assert labels["com.suse.eula"] == "sle-bci"
+        if container_type == ImageType.OS_LTSS:
+            assert labels["com.suse.eula"] == "sle-eula"
+        else:
+            assert labels["com.suse.eula"] == "sle-bci"
 
 
 @pytest.mark.parametrize(
@@ -443,7 +460,8 @@ def test_reference(
         ]
         == reference
     )
-    assert container_name.replace(".", "-") in reference
+    if container_type != ImageType.OS_LTSS:
+        assert container_name.replace(".", "-") in reference
 
     if OS_VERSION == "tumbleweed":
         if container_type == ImageType.APPLICATION:
@@ -453,6 +471,8 @@ def test_reference(
     else:
         if container_type == ImageType.APPLICATION:
             assert reference.startswith("registry.suse.com/suse/")
+        elif container_type == ImageType.OS_LTSS:
+            assert reference.startswith("registry.suse.com/suse/ltss/sle15")
         else:
             assert reference.startswith("registry.suse.com/bci/")
 

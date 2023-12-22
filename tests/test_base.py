@@ -10,7 +10,7 @@ from pytest_container.container import container_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import LTSS_CONTAINERS
+from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import OS_VERSION
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import host_fips_enabled
@@ -18,7 +18,7 @@ from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 
-CONTAINER_IMAGES = [BASE_CONTAINER, *LTSS_CONTAINERS]
+CONTAINER_IMAGES = [BASE_CONTAINER, *LTSS_BASE_CONTAINERS]
 
 
 def test_passwd_present(auto_container):

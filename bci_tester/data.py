@@ -318,7 +318,8 @@ def create_BCI(
     )
 
 
-LTSS_CONTAINERS = []
+LTSS_BASE_CONTAINERS = []
+LTSS_BASE_FIPS_CONTAINERS = []
 
 if OS_VERSION == "tumbleweed":
     BASE_CONTAINER = create_BCI(
@@ -333,7 +334,7 @@ else:
         bci_type=ImageType.OS,
     )
     if TARGET in ("ibs", "ibs-cr", "ibs-released"):
-        LTSS_CONTAINERS.extend(
+        LTSS_BASE_CONTAINERS.extend(
             create_BCI(
                 build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle{sp}/bci-base:{OS_CONTAINER_TAG}",
                 available_versions=[sp],
@@ -343,7 +344,7 @@ else:
             )
             for sp in ("15.3", "15.4")
         )
-        LTSS_CONTAINERS.append(
+        LTSS_BASE_FIPS_CONTAINERS.append(
             create_BCI(
                 build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base-fips:{OS_CONTAINER_TAG}",
                 available_versions=["15.3"],
@@ -626,7 +627,8 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_CLI,
         PHP_8_FPM,
     ]
-    + LTSS_CONTAINERS
+    + LTSS_BASE_CONTAINERS
+    + LTSS_BASE_FIPS_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
@@ -658,7 +660,8 @@ L3_CONTAINERS = (
         DISTRIBUTION_CONTAINER,
         PCP_CONTAINER,
     ]
-    + LTSS_CONTAINERS
+    + LTSS_BASE_CONTAINERS
+    + LTSS_BASE_FIPS_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
