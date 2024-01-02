@@ -270,7 +270,7 @@ def create_BCI(
             of the :py:class:`~pytest_container.DerivedContainer`
     """
     build_tag_base = build_tag.rpartition("/")[2]
-    marks = [pytest.mark.__getattr__(build_tag_base.replace(":", "_"))]
+    marks = []
     if extra_marks:
         for m in extra_marks:
             marks.append(m)
@@ -293,14 +293,17 @@ def create_BCI(
                     raise ValueError(
                         f"Invalid os version for a language or application stack container: {ver}"
                     )
-            marks.append(create_container_version_mark(available_versions))
         else:
-            marks.append(
-                create_container_version_mark(_DEFAULT_NONBASE_OS_VERSIONS)
-            )
+            available_versions = list(_DEFAULT_NONBASE_OS_VERSIONS)
 
-    elif available_versions is not None:
+    if available_versions:
         marks.append(create_container_version_mark(available_versions))
+
+    # only try to grab the mark from the build tag for containers that are
+    # available for this os version, otherwise we get bogus errors for missing
+    # marks
+    if OS_VERSION in (available_versions or []):
+        marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
 
     if OS_VERSION == "tumbleweed":
         if bci_type == ImageType.APPLICATION:
@@ -608,6 +611,12 @@ NGINX_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=80)],
 )
 
+KERNEL_MODULE_CONTAINER = create_BCI(
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
+    available_versions=["15.5", "15.6"],
+    bci_type=ImageType.OS,
+)
+
 DOTNET_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
     DOTNET_SDK_7_0_CONTAINER,
@@ -627,6 +636,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
+        KERNEL_MODULE_CONTAINER,
     ]
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
