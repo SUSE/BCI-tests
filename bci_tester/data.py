@@ -42,7 +42,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 )
 
 # Allowed os versions for Language and Application containers
-ALLOWED_NONBASE_OS_VERSIONS = ("15.4", "15.5", "15.6", "tumbleweed")
+ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 # Allowed os versions for SLE_BCI repo checks
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
@@ -422,9 +422,6 @@ OPENJDK_CONTAINERS = [
     OPENJDK_DEVEL_21_CONTAINER,
 ]
 
-NODEJS_16_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:16", available_versions=["15.4"]
-)
 NODEJS_18_CONTAINER = create_BCI(
     build_tag="bci/nodejs:18", available_versions=["15.5"]
 )
@@ -433,7 +430,6 @@ NODEJS_20_CONTAINER = create_BCI(
 )
 
 NODEJS_CONTAINERS = [
-    NODEJS_16_CONTAINER,
     NODEJS_18_CONTAINER,
     NODEJS_20_CONTAINER,
 ]
@@ -442,7 +438,7 @@ PYTHON36_CONTAINER = create_BCI(
     build_tag="bci/python:3.6", available_versions=["15.5"]
 )
 PYTHON310_CONTAINER = create_BCI(
-    build_tag="bci/python:3.10", available_versions=["15.4", "tumbleweed"]
+    build_tag="bci/python:3.10", available_versions=["tumbleweed"]
 )
 PYTHON311_CONTAINER = create_BCI(build_tag="bci/python:3.11")
 
@@ -561,7 +557,6 @@ POSTGRESQL_CONTAINERS = [
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
     for pg_ver, pg_versions in (
-        (14, ["15.4"]),
         (15, ["15.5", "15.6", "tumbleweed"]),
         (16, ["15.5", "15.6", "tumbleweed"]),
     )
@@ -625,7 +620,6 @@ CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
         NGINX_CONTAINER,
-        NODEJS_16_CONTAINER,
         NODEJS_18_CONTAINER,
         NODEJS_20_CONTAINER,
         PCP_CONTAINER,
