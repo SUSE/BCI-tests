@@ -1,10 +1,16 @@
+"""Tests for the SLE15 kernel-module container."""
 import pytest
 from pytest_container import container_from_pytest_param
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerData
 
 from bci_tester.data import KERNEL_MODULE_CONTAINER
+from bci_tester.data import OS_VERSION
 
+pytestmark = pytest.mark.skipif(
+    OS_VERSION in ("tumbleweed", "basalt"),
+    reason="no kernel-module containers for Tumbleweed and Basalt",
+)
 
 _DRBD_VERSION = "9.2.5"
 
@@ -39,6 +45,7 @@ RUN set -euxo pipefail; \
 
 @pytest.mark.parametrize("container", [DRBD_CONTAINER], indirect=True)
 def test_drbd_builds(container: ContainerData) -> None:
+    """Test that the DRBD kernel module builds."""
     assert container.connection.file(
         f"/src/drbd-{_DRBD_VERSION}/drbd/drbd.ko"
     ).exists
@@ -46,6 +53,7 @@ def test_drbd_builds(container: ContainerData) -> None:
 
 @pytest.mark.parametrize("container", [DPDK_CONTAINER], indirect=True)
 def test_dpdk_builds(container: ContainerData) -> None:
+    """Test that the DPDK kernel module builds."""
     assert container.connection.file(
         f"/src/dpdk-{_DPDK_VERSION}/build/kernel/linux/kni/rte_kni.ko"
     ).exists
