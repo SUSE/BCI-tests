@@ -5,13 +5,10 @@ import pytest
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BUSYBOX_CONTAINER
-from bci_tester.data import create_container_version_mark
 from bci_tester.data import OS_VERSION
 
 
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]
-
-pytestmark = create_container_version_mark(["15.4", "15.5", "tumbleweed"])
 
 
 def test_busybox_provides_sh(auto_container):
