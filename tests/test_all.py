@@ -14,6 +14,7 @@ from pytest_container import MultiStageBuild
 from pytest_container.container import ContainerData
 
 from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
@@ -216,13 +217,8 @@ def test_glibc_present(auto_container):
 
 
 @pytest.mark.skipif(
-    TARGET in ("ibs", "ibs-cr", "ibs-released")
-    and OS_VERSION in ("15.3", "15.4"),
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
-)
-@pytest.mark.skipif(
-    OS_VERSION == "basalt",
-    reason="Basalt repos are known to be out of sync with IBS state",
 )
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
