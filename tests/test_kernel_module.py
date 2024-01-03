@@ -14,7 +14,7 @@ pytestmark = pytest.mark.skipif(
     reason="no kernel-module containers for Tumbleweed and Basalt",
 )
 
-_DRBD_VERSION = "9.2.5"
+_DRBD_VERSION = "9.2.7"
 
 
 def create_kernel_test(containerfile: str) -> pytest.param:
