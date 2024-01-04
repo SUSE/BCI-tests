@@ -7,17 +7,29 @@ from pytest_container.container import ContainerData
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import OS_VERSION
 
+CONTAINER_IMAGES = [KERNEL_MODULE_CONTAINER]
+
 pytestmark = pytest.mark.skipif(
     OS_VERSION in ("tumbleweed", "basalt"),
     reason="no kernel-module containers for Tumbleweed and Basalt",
 )
 
-_DRBD_VERSION = "9.2.5"
+_DRBD_VERSION = "9.2.7"
 
 
-DRBD_CONTAINER = DerivedContainer(
-    base=container_from_pytest_param(KERNEL_MODULE_CONTAINER),
-    containerfile=rf"""WORKDIR /src/
+def create_kernel_test(containerfile: str) -> pytest.param:
+    return pytest.param(
+        DerivedContainer(
+            base=container_from_pytest_param(KERNEL_MODULE_CONTAINER),
+            containerfile=containerfile,
+        ),
+        marks=KERNEL_MODULE_CONTAINER.marks,
+        id=KERNEL_MODULE_CONTAINER.id,
+    )
+
+
+DRBD_CONTAINER = create_kernel_test(
+    rf"""WORKDIR /src/
 RUN zypper -n in coccinelle tar
 
 RUN set -euxo pipefail; \
@@ -27,19 +39,17 @@ RUN set -euxo pipefail; \
 """,
 )
 
-
 _DPDK_VERSION = "23.07"
 
-DPDK_CONTAINER = DerivedContainer(
-    base=container_from_pytest_param(KERNEL_MODULE_CONTAINER),
-    containerfile=rf"""WORKDIR /src/
+DPDK_CONTAINER = create_kernel_test(
+    rf"""WORKDIR /src/
 RUN zypper -n in meson python3-pip libnuma-devel && pip install pyelftools
 
 RUN set -euxo pipefail; \
     curl -Lsf -o - https://fast.dpdk.org/rel/dpdk-{_DPDK_VERSION}.tar.gz | tar xzf - ; cd dpdk-{_DPDK_VERSION}; \
     meson --prefix=/usr --includedir=/usr/include/ -Ddefault_library=shared -Denable_docs=false -Db_lto=false -Dplatform="$(uname -m)" -Dcpu_instruction_set=generic -Denable_kmods=true -Dkernel_dir="/usr/src/linux-obj/$(uname -m)/default" build; \
     meson compile -C build
-""",
+"""
 )
 
 
