@@ -9,12 +9,6 @@ from bci_tester.data import RUBY_CONTAINERS
 CONTAINER_IMAGES = RUBY_CONTAINERS
 
 
-_NON_X86_64_OR_AARCH64_SKIP = pytest.mark.skipif(
-    LOCALHOST.system_info.arch in ("x86_64", "aarch64"),
-    reason="The sqlite3 gem is not installable on x86_64 and aarch64, bsc#1203692",
-)
-
-
 def test_ruby_version(auto_container):
     """Verify that the environment variable ``RUBY_VERSION`` and ``RUBY_MAJOR``
     match the version of Ruby in the container.
@@ -41,7 +35,7 @@ def test_lang_set(auto_container):
     "gem",
     [
         "ffi",
-        pytest.param("sqlite3", marks=_NON_X86_64_OR_AARCH64_SKIP),
+        "sqlite3 -v 1.4.0",  # bsc#1203692
         "rspec-expectations",
         "diff-lcs",
         "rspec-mocks",
