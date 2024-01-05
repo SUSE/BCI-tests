@@ -14,6 +14,7 @@ from pytest_container.runtime import Version
 
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON_CONTAINERS
+from bci_tester.data import PYTHON_WITH_PIPX_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
 bcdir = "/tmp/"
@@ -85,6 +86,27 @@ def test_python_version(auto_container):
     )
 
     assert reported_version == f"Python {version_from_env}"
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    PYTHON_WITH_PIPX_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_pipx(container_per_test):
+    """Test that we can install xkcdpass via :command:`pipx`."""
+    container_per_test.connection.check_output("pipx install xkcdpass")
+    assert "xkcdpass" in container_per_test.connection.check_output(
+        "pipx list --short"
+    )
+    run1 = container_per_test.connection.check_output("xkcdpass")
+    run2 = container_per_test.connection.check_output("xkcdpass")
+    assert (
+        len(run1) > 20 and len(run2) > 20
+    ), "xkcdpass should output a passphrase with more than 20 characters"
+    assert (
+        run1 != run2
+    ), "xkcdpass should output a different passphrase each time"
 
 
 def test_pip(auto_container):
