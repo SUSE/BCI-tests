@@ -3,6 +3,7 @@ import pytest
 from pytest_container import container_from_pytest_param
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerData
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import OS_VERSION
@@ -47,7 +48,7 @@ RUN zypper -n in meson python3-pip libnuma-devel && pip install pyelftools
 
 RUN set -euxo pipefail; \
     curl -Lsf -o - https://fast.dpdk.org/rel/dpdk-{_DPDK_VERSION}.tar.gz | tar xzf - ; cd dpdk-{_DPDK_VERSION}; \
-    meson --prefix=/usr --includedir=/usr/include/ -Ddefault_library=shared -Denable_docs=false -Db_lto=false -Dplatform="$(uname -m)" -Dcpu_instruction_set=generic -Denable_kmods=true -Dkernel_dir="/usr/src/linux-obj/$(uname -m)/default" build; \
+    meson --prefix=/usr --includedir=/usr/include/ -Ddefault_library=shared -Denable_docs=false -Db_lto=false -Dplatform="generic" -Dcpu_instruction_set=generic -Denable_kmods=true -Dkernel_dir="/usr/src/linux-obj/$(uname -m)/default" build; \
     meson compile -C build
 """
 )
@@ -61,6 +62,10 @@ def test_drbd_builds(container: ContainerData) -> None:
     ).exists
 
 
+@pytest.mark.skipif(
+    LOCALHOST.system_info.arch not in ("x86_64", "aarch64", "ppc64le"),
+    reason="DPDK is not supported on this architecture",
+)
 @pytest.mark.parametrize("container", [DPDK_CONTAINER], indirect=True)
 def test_dpdk_builds(container: ContainerData) -> None:
     """Test that the DPDK kernel module builds."""
