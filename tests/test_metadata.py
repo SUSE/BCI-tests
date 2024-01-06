@@ -63,6 +63,7 @@ from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON311_CONTAINER
+from bci_tester.data import PYTHON312_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUBY_32_CONTAINER
@@ -135,6 +136,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PYTHON36_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (PYTHON311_CONTAINER, "python", ImageType.LANGUAGE_STACK),
+        (PYTHON312_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (RUBY_32_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),

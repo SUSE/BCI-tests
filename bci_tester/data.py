@@ -448,10 +448,15 @@ PYTHON310_CONTAINER = create_BCI(
 )
 PYTHON311_CONTAINER = create_BCI(build_tag="bci/python:3.11")
 
+PYTHON312_CONTAINER = create_BCI(
+    build_tag="bci/python:3.12", available_versions=["15.6"]
+)
+
 PYTHON_CONTAINERS = [
     PYTHON36_CONTAINER,
     PYTHON310_CONTAINER,
     PYTHON311_CONTAINER,
+    PYTHON312_CONTAINER,
 ]
 
 RUBY_25_CONTAINER = create_BCI(
