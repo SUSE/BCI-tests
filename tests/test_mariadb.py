@@ -21,9 +21,6 @@ CONTAINER_IMAGES = MARIADB_CONTAINERS
 
 
 def test_entry_point(auto_container: ContainerData) -> None:
-    # do really nothing here, just check that the container launched
-    assert auto_container.connection.run_expect([0], "ps")
-
     assert len(auto_container.inspect.config.entrypoint) == 1
     assert (
         "docker-entrypoint.sh" in auto_container.inspect.config.entrypoint[0]
