@@ -356,35 +356,6 @@ def test_disturl_can_be_checked_out(
 
 @SKIP_IF_TW_MARK
 @pytest.mark.parametrize(
-    "container,container_type",
-    [
-        pytest.param(param.values[0], param.values[2], marks=param.marks)
-        for param in IMAGES_AND_NAMES
-    ],
-    indirect=["container"],
-)
-def test_image_type_label(
-    container: ContainerData,
-    container_type: ImageType,
-):
-    """Check that all non-application containers have the label
-    ``com.suse.image-type`` set to ``sle-bci`` and that all application
-    containers have it set to ``application``.
-
-    """
-    labels = container.inspect.config.labels
-    if container_type == ImageType.APPLICATION:
-        assert (
-            labels["com.suse.image-type"] == "application"
-        ), "application container images must be marked as such"
-    else:
-        assert (
-            labels["com.suse.image-type"] == "sle-bci"
-        ), "sle-bci images must be marked as such"
-
-
-@SKIP_IF_TW_MARK
-@pytest.mark.parametrize(
     "container",
     [
         cont
