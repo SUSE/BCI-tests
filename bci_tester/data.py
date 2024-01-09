@@ -552,6 +552,25 @@ PHP_8_CLI = create_BCI(build_tag="bci/php:8")
 PHP_8_APACHE = create_BCI(build_tag="bci/php-apache:8")
 PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
 
+MARIADB_ROOT_PASSWORD = "n0ts3cr3t"
+
+MARIADB_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/mariadb:{mariadb_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=maria_versions,
+        forwarded_ports=[PortForwarding(container_port=3306)],
+        extra_environment_variables={
+            "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD
+        },
+    )
+    for mariadb_ver, maria_versions in (
+        ("10.6", ("15.5", "15.6")),
+        ("11.2", ("tumbleweed",)),
+    )
+]
+
+
 POSTGRES_PASSWORD = "n0ts3cr3t"
 
 POSTGRESQL_CONTAINERS = [
@@ -649,6 +668,7 @@ CONTAINERS_WITH_ZYPPER = (
     + GOLANG_CONTAINERS
     + RUST_CONTAINERS
     + OPENJDK_CONTAINERS
+    + MARIADB_CONTAINERS
     + POSTGRESQL_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )

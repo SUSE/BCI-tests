@@ -43,6 +43,7 @@ from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
+from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
@@ -155,6 +156,16 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (golang_container, "golang", ImageType.LANGUAGE_STACK)
         for golang_container in GOLANG_CONTAINERS
+    ]
+    + [
+        (
+            mariab_container,
+            "mariadb"
+            if OS_VERSION in ("basalt", "tumbleweed")
+            else "rmt-mariadb",
+            ImageType.APPLICATION,
+        )
+        for mariab_container in MARIADB_CONTAINERS
     ]
     + [
         (pg_container, "postgres", ImageType.APPLICATION)
