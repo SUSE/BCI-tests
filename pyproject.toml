@@ -70,6 +70,8 @@ markers = [
     'golang_stable-openssl',
     'mariadb_10.6',
     'mariadb_11.2',
+    'mariadb-client_10.6',
+    'mariadb-client_11.2',
     'nodejs_16',
     'nodejs_18',
     'nodejs_20',
