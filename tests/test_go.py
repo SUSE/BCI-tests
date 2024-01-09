@@ -8,6 +8,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
+from bci_tester.data import OS_VERSION
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: Maximum go container size in Bytes
@@ -181,6 +182,13 @@ def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
     if not go_version.startswith(from_line.group("go_ver")):
         pytest.skip(
             f"Dapper is only supported on {from_line.group('go_ver')}, got {go_version}"
+        )
+
+    # on Tumbleweed pip will refuse to install system packages unless you pass
+    # the `--break-system-packages` flag
+    if OS_VERSION in ("tumbleweed",):
+        contents = contents.replace(
+            "pip install", "pip install --break-system-packages"
         )
 
     with open(
