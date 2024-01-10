@@ -39,11 +39,15 @@ REPOCLOSURE_FALSE_POSITIVES = (
         [
             "qml-autoreqprov",
             "typelib-1_0-Gtk-4_0",
-            "python311-aiohttp",
-            "python311-libcst",
             "kernel-default-devel",
         ]
         if OS_SP_VERSION >= 4
+        else []
+    )
+    + (
+        # these packages are no longer in SLE 15 SP6
+        ["python311-aiohttp", "python311-libcst"]
+        if OS_SP_VERSION in (4, 5)
         else []
     )
     + (
