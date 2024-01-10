@@ -454,6 +454,11 @@ PYTHON_CONTAINERS = [
     PYTHON311_CONTAINER,
 ]
 
+PYTHON_WITH_PIPX_CONTAINERS = [
+    PYTHON310_CONTAINER,
+    PYTHON311_CONTAINER,
+]
+
 RUBY_25_CONTAINER = create_BCI(
     build_tag="bci/ruby:2.5", available_versions=["15.5"]
 )
