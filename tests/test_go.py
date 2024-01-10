@@ -148,7 +148,7 @@ def test_build_generics_cache(
     not DOCKER_SELECTED, reason="Dapper only works with docker"
 )
 @pytest.mark.skipif(
-    LOCALHOST.system_info.arch not in ("x86_64", "aarch64", "s390x"),
+    LOCALHOST.system_info.arch not in ("x86_64", "aarch64"),
     reason=f"{LOCALHOST.system_info.arch} is not supported to build rancher",
 )
 def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
