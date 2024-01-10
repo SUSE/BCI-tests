@@ -90,6 +90,7 @@ markers = [
     'postgres_16',
     'python_3.10',
     'python_3.11',
+    'python_3.12',
     'python_3.6',
     'registry_2.8',
     'ruby_2.5',
