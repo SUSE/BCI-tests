@@ -563,18 +563,30 @@ MARIADB_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/mariadb:{mariadb_ver}",
         bci_type=ImageType.APPLICATION,
-        available_versions=maria_versions,
+        available_versions=os_versions,
         forwarded_ports=[PortForwarding(container_port=3306)],
         extra_environment_variables={
             "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD
         },
     )
-    for mariadb_ver, maria_versions in (
+    for mariadb_ver, os_versions in (
         ("10.6", ("15.5", "15.6")),
         ("11.2", ("tumbleweed",)),
     )
 ]
 
+MARIADB_CLIENT_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/mariadb-client:{mariadb_client_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=os_versions,
+        custom_entry_point="/bin/sh",
+    )
+    for mariadb_client_ver, os_versions in (
+        ("10.6", ("15.5", "15.6")),
+        ("11.2", ("tumbleweed",)),
+    )
+]
 
 POSTGRES_PASSWORD = "n0ts3cr3t"
 

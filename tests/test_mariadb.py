@@ -13,6 +13,7 @@ from tenacity import retry
 from tenacity import stop_after_attempt
 from tenacity import wait_exponential
 
+from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MARIADB_ROOT_PASSWORD
 
@@ -136,3 +137,14 @@ def test_mariadb_db_env_vars(
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM test;")
             assert cur.fetchone() == (1, 100, "abc'def")
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    MARIADB_CLIENT_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_mariadb_client(container_per_test: ContainerData) -> None:
+    assert "MariaDB" in container_per_test.connection.check_output(
+        "mysql --version"
+    )
