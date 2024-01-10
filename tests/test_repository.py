@@ -46,6 +46,8 @@ REPOCLOSURE_FALSE_POSITIVES = (
         if OS_SP_VERSION >= 4
         else []
     )
+    # has a boolean dependency on NetworkManager
+    + (["jeos-firstboot"] if OS_SP_VERSION >= 6 else [])
     + (
         ["open-vm-tools"]
         if OS_SP_VERSION >= 5
