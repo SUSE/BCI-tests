@@ -48,6 +48,9 @@ ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
+
+# Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(
@@ -390,7 +393,7 @@ GOLANG_CONTAINERS = [
     create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
         extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
-        available_versions=["15.5", "15.6"],
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     )
     for golang_version, stability in (
         ("oldstable-openssl", "oldstable"),
@@ -432,7 +435,7 @@ NODEJS_18_CONTAINER = create_BCI(
 )
 NODEJS_20_CONTAINER = create_BCI(
     build_tag="bci/nodejs:20",
-    available_versions=["15.5", "15.6", "tumbleweed"],
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
 
 NODEJS_CONTAINERS = [
@@ -481,34 +484,47 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
 
 DOTNET_SDK_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:6.0",
-    available_versions=["15.5"],
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:7.0",
-    available_versions=["15.5"],
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-
+DOTNET_SDK_8_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-sdk:8.0",
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
 DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:6.0",
-    available_versions=["15.5"],
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:7.0",
-    available_versions=["15.5"],
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-
+DOTNET_ASPNET_8_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-aspnet:8.0",
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:6.0",
-    available_versions=["15.5"],
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:7.0",
-    available_versions=["15.5"],
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_RUNTIME_8_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-runtime:8.0",
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
@@ -664,10 +680,13 @@ KERNEL_MODULE_CONTAINER = create_BCI(
 DOTNET_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
     DOTNET_SDK_7_0_CONTAINER,
+    DOTNET_SDK_8_0_CONTAINER,
     DOTNET_ASPNET_6_0_CONTAINER,
     DOTNET_ASPNET_7_0_CONTAINER,
+    DOTNET_ASPNET_8_0_CONTAINER,
     DOTNET_RUNTIME_6_0_CONTAINER,
     DOTNET_RUNTIME_7_0_CONTAINER,
+    DOTNET_RUNTIME_8_0_CONTAINER,
 ]
 CONTAINERS_WITH_ZYPPER = (
     [

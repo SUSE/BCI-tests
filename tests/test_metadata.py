@@ -30,10 +30,13 @@ from bci_tester.data import CONTAINER_389DS_CONTAINERS
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
@@ -180,6 +183,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         [
             (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_7_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
+            (DOTNET_SDK_8_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (
                 DOTNET_ASPNET_6_0_CONTAINER,
                 "dotnet.aspnet",
@@ -191,12 +195,22 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
                 ImageType.LANGUAGE_STACK,
             ),
             (
+                DOTNET_ASPNET_8_0_CONTAINER,
+                "dotnet.aspnet",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
                 DOTNET_RUNTIME_6_0_CONTAINER,
                 "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
             ),
             (
                 DOTNET_RUNTIME_7_0_CONTAINER,
+                "dotnet.runtime",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_RUNTIME_8_0_CONTAINER,
                 "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
             ),

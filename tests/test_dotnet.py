@@ -11,11 +11,14 @@ from pytest_container import GitRepositoryBuild
 
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
 from bci_tester.data import DOTNET_CONTAINERS
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
 
@@ -34,6 +37,7 @@ pytestmark = pytest.mark.skipif(
     [
         (DOTNET_SDK_6_0_CONTAINER, "6.0"),
         (DOTNET_SDK_7_0_CONTAINER, "7.0"),
+        (DOTNET_SDK_8_0_CONTAINER, "8.0"),
     ],
     indirect=["container"],
 )
@@ -53,6 +57,7 @@ def test_dotnet_sdk_version(container, sdk_version):
     [
         (DOTNET_ASPNET_6_0_CONTAINER, "6.0"),
         (DOTNET_ASPNET_7_0_CONTAINER, "7.0"),
+        (DOTNET_ASPNET_8_0_CONTAINER, "8.0"),
     ],
     indirect=["container"],
 )
@@ -74,6 +79,7 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     [
         (DOTNET_RUNTIME_6_0_CONTAINER, "6.0"),
         (DOTNET_RUNTIME_7_0_CONTAINER, "7.0"),
+        (DOTNET_RUNTIME_8_0_CONTAINER, "8.0"),
     ],
     indirect=["container"],
 )
@@ -93,6 +99,7 @@ def test_dotnet_runtime_present(container, runtime_version):
     [
         (DOTNET_SDK_6_0_CONTAINER, "Hello, World!"),
         (DOTNET_SDK_7_0_CONTAINER, "Hello, World!"),
+        (DOTNET_SDK_8_0_CONTAINER, "Hello, World!"),
     ],
     indirect=["container_per_test"],
 )
@@ -122,7 +129,7 @@ def test_dotnet_hello_world(container_per_test, msg):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/nopSolutions/nopCommerce.git",
-            repository_tag="release-4.60.2",
+            repository_tag="release-4.60.5",
             build_command="dotnet build ./src/NopCommerce.sln",
         )
     ],
@@ -132,7 +139,7 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     """Test the build of a popular web application:
 
     - Build `nopCommerce <https://github.com/nopSolutions/nopCommerce.git>`_
-      release ``4.60.2`` via :command:`dotnet build ./src/NopCommerce.sln`
+      release ``4.60.5`` via :command:`dotnet build ./src/NopCommerce.sln`
 
     """
     container_per_test.connection.run_expect(
@@ -145,6 +152,7 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     [
         DOTNET_SDK_6_0_CONTAINER,
         DOTNET_SDK_7_0_CONTAINER,
+        DOTNET_SDK_8_0_CONTAINER,
     ],
     indirect=True,
 )
