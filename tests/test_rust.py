@@ -71,11 +71,10 @@ def test_cargo_version(auto_container):
                 repository_url="https://github.com/unicode-rs/unicode-xid",
                 build_command="cargo build && cargo test",
             ),
-            # no longer compatible with rust 1.73 which we unfortunately still ship :(
-            # GitRepositoryBuild(
-            #     repository_url="https://github.com/serde-rs/serde",
-            #     build_command="cargo build --features rc && cargo build --no-default-features && pushd test_suite && cargo build && cargo test --features serde/derive,serde/rc",
-            # ),
+            GitRepositoryBuild(
+                repository_url="https://github.com/serde-rs/serde",
+                build_command="pushd serde && cargo build --features rc && cargo build --no-default-features && popd && pushd test_suite && cargo build && cargo test --features serde/derive,serde/rc",
+            ),
             GitRepositoryBuild(
                 repository_url="https://github.com/bitflags/bitflags",
                 build_command="cargo test --features example_generated",
