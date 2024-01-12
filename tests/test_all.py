@@ -27,7 +27,6 @@ from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINER
 from bci_tester.data import POSTGRESQL_CONTAINERS
-from bci_tester.data import TARGET
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
