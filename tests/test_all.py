@@ -296,7 +296,6 @@ def test_zypper_verify_passes(container_per_test: ContainerData) -> None:
                 # kernel-module-container contains systemd due to pesign,
                 # fixes are pending
                 KERNEL_MODULE_CONTAINER,
-                *POSTGRESQL_CONTAINERS,
                 *MARIADB_CONTAINERS,
             ]
         )
