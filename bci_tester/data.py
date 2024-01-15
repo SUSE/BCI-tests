@@ -421,15 +421,23 @@ GOLANG_CONTAINERS = (
     ]
 )
 
-OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
-OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
-OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
-OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
+OPENJDK_11_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:11", available_versions=["15.5", "tumbleweed"]
+)
+OPENJDK_DEVEL_11_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:11", available_versions=["15.5", "tumbleweed"]
+)
+OPENJDK_17_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:17", available_versions=["15.5", "tumbleweed"]
+)
+OPENJDK_DEVEL_17_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:17", available_versions=["15.5", "tumbleweed"]
+)
 OPENJDK_21_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:21", available_versions=["tumbleweed"]
+    build_tag="bci/openjdk:21", available_versions=["15.6", "tumbleweed"]
 )
 OPENJDK_DEVEL_21_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:21", available_versions=["tumbleweed"]
+    build_tag="bci/openjdk-devel:21", available_versions=["15.6", "tumbleweed"]
 )
 
 OPENJDK_CONTAINERS = [
