@@ -602,7 +602,8 @@ MARIADB_CONTAINERS = [
         },
     )
     for mariadb_ver, os_versions in (
-        ("10.6", ("15.5", "15.6")),
+        ("10.11", ("15.6",)),
+        ("10.6", ("15.5",)),
         ("11.2", ("tumbleweed",)),
     )
 ]
@@ -615,7 +616,8 @@ MARIADB_CLIENT_CONTAINERS = [
         custom_entry_point="/bin/sh",
     )
     for mariadb_client_ver, os_versions in (
-        ("10.6", ("15.5", "15.6")),
+        ("10.11", ("15.6",)),
+        ("10.6", ("15.5",)),
         ("11.2", ("tumbleweed",)),
     )
 ]
