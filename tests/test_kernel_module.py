@@ -42,9 +42,13 @@ RUN set -euxo pipefail; \
 
 _DPDK_VERSION = "23.07"
 
+_DPDK_MESON_SETUP = "meson python3-pip"
+if OS_VERSION in ("15.6",):
+    _DPDK_MESON_SETUP = "meson python311-pip"
+
 DPDK_CONTAINER = create_kernel_test(
     rf"""WORKDIR /src/
-RUN zypper -n in meson python3-pip libnuma-devel && pip install pyelftools
+RUN zypper -n in libnuma-devel {_DPDK_MESON_SETUP} && pip install pyelftools
 
 RUN set -euxo pipefail; \
     curl -Lsf -o - https://fast.dpdk.org/rel/dpdk-{_DPDK_VERSION}.tar.gz | tar xzf - ; cd dpdk-{_DPDK_VERSION}; \
