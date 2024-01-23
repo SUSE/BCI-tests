@@ -641,7 +641,7 @@ POSTGRESQL_CONTAINERS = [
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
     for pg_ver, pg_versions in (
-        (15, ["15.5", "15.6", "tumbleweed"]),
+        (15, ["15.5", "tumbleweed"]),
         (16, ["15.5", "15.6", "tumbleweed"]),
     )
 ]
