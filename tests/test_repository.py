@@ -194,7 +194,7 @@ def test_sle_bci_forbidden_packages(container_per_test):
 
 @pytest.mark.skipif(
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
-    reason=f"no included BCI repository - can't test",
+    reason="no included BCI repository - can't test",
 )
 @pytest.mark.parametrize(
     "pkg", ["git", "curl", "wget", "unzip"] + REPOCLOSURE_FALSE_POSITIVES
@@ -215,7 +215,7 @@ def test_package_installation(container_per_test, pkg):
 
 @pytest.mark.skipif(
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
-    reason=f"no included BCI repository - can't test",
+    reason="no included BCI repository - can't test",
 )
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"

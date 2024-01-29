@@ -9,7 +9,6 @@ import sys
 import pytest
 from _pytest.config import Config
 from _pytest.mark.structures import ParameterSet
-from pytest_container import Version
 from pytest_container.build import MultiStageBuild
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
