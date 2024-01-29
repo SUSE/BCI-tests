@@ -1,6 +1,5 @@
 """Basic tests for the Ruby base container images."""
 import pytest
-from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import OS_VERSION
 from bci_tester.data import RUBY_CONTAINERS

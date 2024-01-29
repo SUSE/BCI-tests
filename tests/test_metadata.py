@@ -71,7 +71,7 @@ from bci_tester.data import PYTHON311_CONTAINER
 from bci_tester.data import PYTHON312_CONTAINER
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
-from bci_tester.data import RUBY_32_CONTAINER
+from bci_tester.data import RUBY_33_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
 
 
@@ -143,7 +143,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PYTHON311_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (PYTHON312_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
-        (RUBY_32_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
+        (RUBY_33_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
