@@ -310,6 +310,12 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "sles-release",
         "ALP-dummy-release",
     }
+    # bsc#1219115
+    if OS_VERSION == "15.6":
+        known_orphaned_packages.update(
+            {"java-11-openjdk", "java-11-openjdk-headless"}
+        )
+
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
