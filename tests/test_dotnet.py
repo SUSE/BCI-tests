@@ -23,6 +23,12 @@ from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
 
 
+DOTNET_SDK_CONTAINERS = [
+    DOTNET_SDK_6_0_CONTAINER,
+    DOTNET_SDK_7_0_CONTAINER,
+    DOTNET_SDK_8_0_CONTAINER,
+]
+
 #: Name and alias of the microsoft .Net repository
 MS_REPO_NAME = "packages-microsoft-com-prod"
 
@@ -95,15 +101,11 @@ def test_dotnet_runtime_present(container, runtime_version):
 
 
 @pytest.mark.parametrize(
-    "container_per_test,msg",
-    [
-        (DOTNET_SDK_6_0_CONTAINER, "Hello, World!"),
-        (DOTNET_SDK_7_0_CONTAINER, "Hello, World!"),
-        (DOTNET_SDK_8_0_CONTAINER, "Hello, World!"),
-    ],
+    "container_per_test",
+    DOTNET_SDK_CONTAINERS,
     indirect=["container_per_test"],
 )
-def test_dotnet_hello_world(container_per_test, msg):
+def test_dotnet_hello_world(container_per_test):
     """Test the build of a hello world .Net console application by running:
 
     - :command:`dotnet new console -o MyApp`
@@ -115,7 +117,7 @@ def test_dotnet_hello_world(container_per_test, msg):
     )
     assert (
         container_per_test.connection.check_output("cd MyApp && dotnet run")
-        == msg
+        == "Hello, World!"
     )
 
 
@@ -149,11 +151,7 @@ def test_popular_web_apps(container_per_test, container_git_clone):
 
 @pytest.mark.parametrize(
     "container_per_test",
-    [
-        DOTNET_SDK_6_0_CONTAINER,
-        DOTNET_SDK_7_0_CONTAINER,
-        DOTNET_SDK_8_0_CONTAINER,
-    ],
+    DOTNET_SDK_CONTAINERS,
     indirect=True,
 )
 def test_dotnet_sdk_telemetry_deactivated(container_per_test):
