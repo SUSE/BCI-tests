@@ -170,7 +170,7 @@ def test_dotnet_sdk_telemetry_deactivated(container_per_test):
 
 
 @pytest.mark.parametrize(
-    "container_per_test", DOTNET_CONTAINERS, indirect=True
+    "container_per_test", DOTNET_SDK_CONTAINERS, indirect=True
 )
 def test_microsoft_dotnet_repository(container_per_test):
     """Check that we have correctly added and configured the Microsoft .Net
