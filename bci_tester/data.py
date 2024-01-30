@@ -389,26 +389,37 @@ BUSYBOX_CONTAINER = create_BCI(
 
 # The very last container in this list needs to be available for all
 # tested OSes
-GOLANG_CONTAINERS = [
-    create_BCI(
-        build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
-        extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
-    )
-    for golang_version, stability in (
-        ("oldstable-openssl", "oldstable"),
-        ("stable-openssl", "stable"),
-    )
-] + [
-    create_BCI(
-        build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
-        extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
-    )
-    for golang_version, stability in (
-        ("1.20", "oldstable"),
-        ("1.21", "stable"),
-    )
-]
+GOLANG_CONTAINERS = (
+    [
+        create_BCI(
+            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
+            extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
+            available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        )
+        for golang_version, stability in (
+            ("oldstable-openssl", "oldstable"),
+            ("stable-openssl", "stable"),
+        )
+    ]
+    + [
+        create_BCI(
+            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
+            extra_marks=[pytest.mark.__getattr__(f"golang_{golang_version}")],
+            available_versions=["tumbleweed"],
+        )
+        for golang_version in ("unstable",)
+    ]
+    + [
+        create_BCI(
+            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
+            extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
+        )
+        for golang_version, stability in (
+            ("1.20", "oldstable"),
+            ("1.21", "stable"),
+        )
+    ]
+)
 
 OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
