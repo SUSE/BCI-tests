@@ -226,7 +226,7 @@ def test_glibc_present(auto_container):
 )
 @pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
 def test_no_downgrade_on_install(container: ContainerData) -> None:
-    """Check that we can install any additional pacakage in the container.
+    """Check that we can install any additional package in the container.
 
     Check that installing any additional package would not cause a downgrade
     of any package already installed in the container as that would throw
