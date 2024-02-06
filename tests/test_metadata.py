@@ -82,7 +82,11 @@ VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"
 URL = (
     "https://www.opensuse.org"
     if OS_VERSION == "tumbleweed"
-    else "https://www.suse.com/products/server/"
+    else (
+        "https://www.suse.com/products/server/"
+        if OS_VERSION in ("15.3", "15.4")
+        else "https://www.suse.com/products/base-container-images/"
+    )
 )
 
 
