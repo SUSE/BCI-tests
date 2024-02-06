@@ -13,7 +13,7 @@ xfail_strict = true
 addopts = "--strict-markers"
 markers = [
     '389-ds_2.2',
-    '389-ds_2.4',
+    '389-ds_3.0',
     'bci-base_15.3',
     'bci-base_15.3-ltss',
     'bci-base_15.4',
