@@ -8,6 +8,8 @@ from _pytest.mark import ParameterSet
 from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
+from pytest_container.pod import Pod
+from pytest_container.pod import PodData
 from tenacity import retry
 from tenacity import stop_after_attempt
 from tenacity import wait_exponential
@@ -147,3 +149,62 @@ def test_mariadb_client(container_per_test: ContainerData) -> None:
     assert "MariaDB" in container_per_test.connection.check_output(
         "mysql --version"
     )
+
+
+MARIADB_PODS = [
+    pytest.param(
+        Pod(
+            containers=[
+                container_from_pytest_param(client_db_cont),
+                DerivedContainer(
+                    base=container_from_pytest_param(db_cont),
+                    extra_environment_variables={
+                        "MARIADB_USER": _other_db_user,
+                        "MARIADB_PASSWORD": _other_db_pw,
+                        "MARIADB_DATABASE": _test_db,
+                        "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD,
+                    },
+                ),
+            ]
+        ),
+        marks=[*db_cont.marks, *client_db_cont.marks],
+    )
+    for db_cont, client_db_cont in zip(
+        MARIADB_CONTAINERS, MARIADB_CLIENT_CONTAINERS
+    )
+]
+
+
+@pytest.mark.parametrize(
+    "pod_per_test", MARIADB_PODS, indirect=["pod_per_test"]
+)
+def test_mariadb_client_in_pod(pod_per_test: PodData) -> None:
+    client_con = pod_per_test.container_data[0].connection
+    client_con.check_output("mariadb --version")
+
+    mariadb_cmd = f"mariadb --user={_other_db_user} --password={_other_db_pw} --host=0.0.0.0 {_test_db}"
+
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(5),
+    )
+    def wait_for_server():
+        client_con.check_output(mariadb_cmd)
+
+    wait_for_server()
+
+    client_con.check_output(
+        f'echo "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar(32));" | {mariadb_cmd}'
+    )
+    client_con.check_output(
+        f"echo 'INSERT INTO test (num, data) VALUES (100, \"abcdef\")' | {mariadb_cmd}"
+    )
+    rows = (
+        client_con.check_output(f'echo "SELECT * FROM test;" | {mariadb_cmd}')
+        .strip()
+        .splitlines()
+    )
+
+    assert rows and len(rows) == 2
+    _, num, data = rows[-1].split()
+    assert num == "100" and data == "abcdef"
