@@ -411,13 +411,9 @@ GOLANG_CONTAINERS = (
     ]
     + [
         create_BCI(
-            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
-            extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
+            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{stability}",
         )
-        for golang_version, stability in (
-            ("1.20", "oldstable"),
-            ("1.21", "stable"),
-        )
+        for stability in ("oldstable", "stable")
     ]
 )
 
