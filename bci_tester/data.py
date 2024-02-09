@@ -421,15 +421,23 @@ GOLANG_CONTAINERS = (
     ]
 )
 
-OPENJDK_11_CONTAINER = create_BCI(build_tag="bci/openjdk:11")
-OPENJDK_DEVEL_11_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:11")
-OPENJDK_17_CONTAINER = create_BCI(build_tag="bci/openjdk:17")
-OPENJDK_DEVEL_17_CONTAINER = create_BCI(build_tag="bci/openjdk-devel:17")
+OPENJDK_11_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:11", available_versions=["15.5", "tumbleweed"]
+)
+OPENJDK_DEVEL_11_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:11", available_versions=["15.5", "tumbleweed"]
+)
+OPENJDK_17_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:17", available_versions=["15.5", "tumbleweed"]
+)
+OPENJDK_DEVEL_17_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:17", available_versions=["15.5", "tumbleweed"]
+)
 OPENJDK_21_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:21", available_versions=["tumbleweed"]
+    build_tag="bci/openjdk:21", available_versions=["15.6", "tumbleweed"]
 )
 OPENJDK_DEVEL_21_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:21", available_versions=["tumbleweed"]
+    build_tag="bci/openjdk-devel:21", available_versions=["15.6", "tumbleweed"]
 )
 
 OPENJDK_CONTAINERS = [
@@ -602,7 +610,8 @@ MARIADB_CONTAINERS = [
         },
     )
     for mariadb_ver, os_versions in (
-        ("10.6", ("15.5", "15.6")),
+        ("10.11", ("15.6",)),
+        ("10.6", ("15.5",)),
         ("11.2", ("tumbleweed",)),
     )
 ]
@@ -615,7 +624,8 @@ MARIADB_CLIENT_CONTAINERS = [
         custom_entry_point="/bin/sh",
     )
     for mariadb_client_ver, os_versions in (
-        ("10.6", ("15.5", "15.6")),
+        ("10.11", ("15.6",)),
+        ("10.6", ("15.5",)),
         ("11.2", ("tumbleweed",)),
     )
 ]
@@ -631,7 +641,7 @@ POSTGRESQL_CONTAINERS = [
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
     for pg_ver, pg_versions in (
-        (15, ["15.5", "15.6", "tumbleweed"]),
+        (15, ["15.5", "tumbleweed"]),
         (16, ["15.5", "15.6", "tumbleweed"]),
     )
 ]
@@ -657,7 +667,12 @@ DISTRIBUTION_CONTAINER = create_BCI(
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
-_GIT_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "2.35"
+if OS_VERSION in ("15.6", "basalt"):
+    _GIT_APP_VERSION = "2.43"
+elif OS_VERSION in ("15.5", "15.4"):
+    _GIT_APP_VERSION = "2.35"
+else:
+    _GIT_APP_VERSION = "latest"
 
 GIT_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/git:{_GIT_APP_VERSION}",
