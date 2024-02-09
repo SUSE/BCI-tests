@@ -18,7 +18,7 @@ from bci_tester.data import OS_VERSION
 
 
 #: maven version that is being build in the multistage test build
-MAVEN_VERSION = "3.8.6"
+MAVEN_VERSION = "3.9.6"
 
 #: Dockerfile template to build `amidst
 #: <https://github.com/toolbox4minecraft/amidst>`_
