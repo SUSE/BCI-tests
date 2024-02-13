@@ -5,14 +5,16 @@ Microsoft's binaries.
 import re
 import xml.etree.ElementTree as ET
 from typing import List
+from typing import Tuple
 
 import pytest
+from _pytest.mark import ParameterSet
+from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import GitRepositoryBuild
 
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
-from bci_tester.data import DOTNET_CONTAINERS
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
@@ -38,13 +40,25 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+def _generate_ctr_ver_param(ctr_ver: Tuple[ParameterSet, str]) -> ParameterSet:
+    """Converts a `(Container, Version)` tuple into a `pytest.param` that
+    contains the exact same values but has the marks of the container.
+
+    """
+    ctr, marks = container_and_marks_from_pytest_param(ctr_ver[0])
+    return pytest.param(ctr, ctr_ver[1], marks=marks or ())
+
+
 @pytest.mark.parametrize(
     "container,sdk_version",
-    [
-        (DOTNET_SDK_6_0_CONTAINER, "6.0"),
-        (DOTNET_SDK_7_0_CONTAINER, "7.0"),
-        (DOTNET_SDK_8_0_CONTAINER, "8.0"),
-    ],
+    map(
+        _generate_ctr_ver_param,
+        (
+            (DOTNET_SDK_6_0_CONTAINER, "6.0"),
+            (DOTNET_SDK_7_0_CONTAINER, "7.0"),
+            (DOTNET_SDK_8_0_CONTAINER, "8.0"),
+        ),
+    ),
     indirect=["container"],
 )
 def test_dotnet_sdk_version(container, sdk_version):
@@ -60,11 +74,14 @@ def test_dotnet_sdk_version(container, sdk_version):
 
 @pytest.mark.parametrize(
     "container,runtime_version",
-    [
-        (DOTNET_ASPNET_6_0_CONTAINER, "6.0"),
-        (DOTNET_ASPNET_7_0_CONTAINER, "7.0"),
-        (DOTNET_ASPNET_8_0_CONTAINER, "8.0"),
-    ],
+    map(
+        _generate_ctr_ver_param,
+        (
+            (DOTNET_ASPNET_6_0_CONTAINER, "6.0"),
+            (DOTNET_ASPNET_7_0_CONTAINER, "7.0"),
+            (DOTNET_ASPNET_8_0_CONTAINER, "8.0"),
+        ),
+    ),
     indirect=["container"],
 )
 def test_dotnet_aspnet_runtime_versions(container, runtime_version):
@@ -82,11 +99,14 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
 
 @pytest.mark.parametrize(
     "container,runtime_version",
-    [
-        (DOTNET_RUNTIME_6_0_CONTAINER, "6.0"),
-        (DOTNET_RUNTIME_7_0_CONTAINER, "7.0"),
-        (DOTNET_RUNTIME_8_0_CONTAINER, "8.0"),
-    ],
+    map(
+        _generate_ctr_ver_param,
+        (
+            (DOTNET_RUNTIME_6_0_CONTAINER, "6.0"),
+            (DOTNET_RUNTIME_7_0_CONTAINER, "7.0"),
+            (DOTNET_RUNTIME_8_0_CONTAINER, "8.0"),
+        ),
+    ),
     indirect=["container"],
 )
 def test_dotnet_runtime_present(container, runtime_version):
