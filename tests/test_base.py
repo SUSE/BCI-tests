@@ -33,7 +33,7 @@ def test_base_size(auto_container, container_runtime):
     """
 
     #: size limits of the base container per arch in MiB
-    if OS_VERSION in ("basalt", "tumbleweed"):
+    if OS_VERSION in ("basalt", "tumbleweed", "15.6"):
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
             "x86_64": 135,
             "aarch64": 135,
@@ -70,7 +70,7 @@ def test_gost_digest_disable(auto_container):
     """Checks that the gost message digest is not known to openssl."""
     openssl_error_message = (
         "Invalid command 'gost'"
-        if OS_VERSION in ("basalt", "tumbleweed")
+        if OS_VERSION in ("basalt", "tumbleweed", "15.6")
         else "gost is not a known digest"
     )
     assert (
@@ -108,7 +108,7 @@ def test_all_openssl_hashes_known(auto_container):
     EXPECTED_DIGEST_LIST = ALL_DIGESTS
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
-    if OS_VERSION not in ("basalt", "tumbleweed"):
+    if OS_VERSION not in ("basalt", "tumbleweed", "15.6"):
         EXPECTED_DIGEST_LIST += ("gost",)
     assert len(hashes) == len(EXPECTED_DIGEST_LIST)
     assert set(hashes) == set(EXPECTED_DIGEST_LIST)
