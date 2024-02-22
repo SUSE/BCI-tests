@@ -7,6 +7,7 @@ from typing import Dict
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
+from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
@@ -31,14 +32,22 @@ def test_passwd_present(auto_container):
     assert auto_container.connection.file("/etc/passwd").exists
 
 
-def test_base_size(auto_container, container_runtime):
+def test_base_size(auto_container: ContainerData, container_runtime):
     """Ensure that the container's size is below the limits specified in
     :py:const:`BASE_CONTAINER_MAX_SIZE`
 
     """
 
+    # the FIPS container is bigger too than the 15 SP3 base image
+    is_fips_ctr = (
+        auto_container.container.baseurl
+        and auto_container.container.baseurl.rpartition("/")[2].startswith(
+            "bci-base-fips"
+        )
+    )
+
     #: size limits of the base container per arch in MiB
-    if OS_VERSION in ("basalt", "tumbleweed", "15.6"):
+    if OS_VERSION in ("basalt", "tumbleweed", "15.6") or is_fips_ctr:
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
             "x86_64": 135,
             "aarch64": 135,
