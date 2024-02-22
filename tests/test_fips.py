@@ -4,7 +4,6 @@ FIPS mode.
 """
 import os.path
 import shutil
-import sys
 
 import pytest
 from _pytest.config import Config
@@ -23,11 +22,10 @@ from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
 
 
-# building the documentation will fail on a non-FIPS host otherwise
-if "sphinx" not in sys.modules:
-    assert (
-        host_fips_enabled()
-    ), "The host must run in FIPS mode for the FIPS test suite"
+pytestmark = pytest.mark.skipif(
+    not host_fips_enabled(),
+    reason="The host must run in FIPS mode for the FIPS test suite",
+)
 
 
 #: multistage :file:`Dockerfile` that builds the program from
