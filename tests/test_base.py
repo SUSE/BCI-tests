@@ -18,6 +18,7 @@ from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
+from tests.test_fips import openssl_fips_hashes_test_fnct
 
 
 CONTAINER_IMAGES = [
@@ -96,15 +97,25 @@ def test_gost_digest_disable(auto_container):
 
 
 @without_fips
-def test_openssl_hashes(auto_container):
+@pytest.mark.parametrize(
+    "container",
+    [c for c in CONTAINER_IMAGES if c not in LTSS_BASE_FIPS_CONTAINERS],
+    indirect=True,
+)
+def test_openssl_hashes(container):
     """If the host is not running in fips mode, then we check that all hash
     algorithms work via :command:`openssl $digest /dev/null`.
 
     """
     for digest in ALL_DIGESTS:
-        auto_container.connection.run_expect(
-            [0], f"openssl {digest} /dev/null"
-        )
+        container.connection.run_expect([0], f"openssl {digest} /dev/null")
+
+
+@pytest.mark.parametrize(
+    "container_per_test", [*LTSS_BASE_FIPS_CONTAINERS], indirect=True
+)
+def test_openssl_fips_hashes(container_per_test):
+    openssl_fips_hashes_test_fnct(container_per_test)
 
 
 def test_all_openssl_hashes_known(auto_container):
