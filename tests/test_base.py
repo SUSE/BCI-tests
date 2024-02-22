@@ -7,18 +7,25 @@ from typing import Dict
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
+from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import LTSS_BASE_CONTAINERS
+from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
+from tests.test_fips import openssl_fips_hashes_test_fnct
 
 
-CONTAINER_IMAGES = [BASE_CONTAINER, *LTSS_BASE_CONTAINERS]
+CONTAINER_IMAGES = [
+    BASE_CONTAINER,
+    *LTSS_BASE_CONTAINERS,
+    *LTSS_BASE_FIPS_CONTAINERS,
+]
 
 
 def test_passwd_present(auto_container):
@@ -26,14 +33,22 @@ def test_passwd_present(auto_container):
     assert auto_container.connection.file("/etc/passwd").exists
 
 
-def test_base_size(auto_container, container_runtime):
+def test_base_size(auto_container: ContainerData, container_runtime):
     """Ensure that the container's size is below the limits specified in
     :py:const:`BASE_CONTAINER_MAX_SIZE`
 
     """
 
+    # the FIPS container is bigger too than the 15 SP3 base image
+    is_fips_ctr = (
+        auto_container.container.baseurl
+        and auto_container.container.baseurl.rpartition("/")[2].startswith(
+            "bci-base-fips"
+        )
+    )
+
     #: size limits of the base container per arch in MiB
-    if OS_VERSION in ("basalt", "tumbleweed", "15.6"):
+    if OS_VERSION in ("basalt", "tumbleweed", "15.6") or is_fips_ctr:
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
             "x86_64": 135,
             "aarch64": 135,
@@ -82,15 +97,25 @@ def test_gost_digest_disable(auto_container):
 
 
 @without_fips
-def test_openssl_hashes(auto_container):
+@pytest.mark.parametrize(
+    "container",
+    [c for c in CONTAINER_IMAGES if c not in LTSS_BASE_FIPS_CONTAINERS],
+    indirect=True,
+)
+def test_openssl_hashes(container):
     """If the host is not running in fips mode, then we check that all hash
     algorithms work via :command:`openssl $digest /dev/null`.
 
     """
     for digest in ALL_DIGESTS:
-        auto_container.connection.run_expect(
-            [0], f"openssl {digest} /dev/null"
-        )
+        container.connection.run_expect([0], f"openssl {digest} /dev/null")
+
+
+@pytest.mark.parametrize(
+    "container_per_test", [*LTSS_BASE_FIPS_CONTAINERS], indirect=True
+)
+def test_openssl_fips_hashes(container_per_test):
+    openssl_fips_hashes_test_fnct(container_per_test)
 
 
 def test_all_openssl_hashes_known(auto_container):

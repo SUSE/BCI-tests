@@ -4,12 +4,12 @@ FIPS mode.
 """
 import os.path
 import shutil
-import sys
 
 import pytest
 from _pytest.config import Config
 from _pytest.mark.structures import ParameterSet
 from pytest_container.build import MultiStageBuild
+from pytest_container.container import ContainerData
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
 from pytest_container.runtime import OciRuntimeBase
@@ -23,11 +23,10 @@ from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
 
 
-# building the documentation will fail on a non-FIPS host otherwise
-if "sphinx" not in sys.modules:
-    assert (
-        host_fips_enabled()
-    ), "The host must run in FIPS mode for the FIPS test suite"
+pytestmark = pytest.mark.skipif(
+    not host_fips_enabled(),
+    reason="The host must run in FIPS mode for the FIPS test suite",
+)
 
 
 #: multistage :file:`Dockerfile` that builds the program from
@@ -110,10 +109,7 @@ def test_openssl_binary(
         assert f"Unknown message digest {digest}" in err_msg
 
 
-@pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
-)
-def test_openssl_fips_hashes(container_per_test):
+def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     """If the host is running in FIPS mode, then we check that all fips certified
     hash algorithms can be invoked via :command:`openssl $digest /dev/null` and
     all non-fips hash algorithms fail.
@@ -131,3 +127,10 @@ def test_openssl_fips_hashes(container_per_test):
         assert (
             f"{digest.upper()}(/dev/null)= " in dev_null_digest
         ), f"unexpected digest of hash {digest}: {dev_null_digest}"
+
+
+@pytest.mark.parametrize(
+    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
+)
+def test_openssl_fips_hashes(container_per_test: ContainerData):
+    openssl_fips_hashes_test_fnct(container_per_test)
