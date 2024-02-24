@@ -349,7 +349,7 @@ jobs:
           done
 
       - name: Run tox job
-        run: sudo --preserve-env tox -e ${{ matrix.toxenv }} -- -n auto --reruns 3
+        run: sudo --preserve-env -H tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3
         env:
           CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
           OS_VERSION: ${{ matrix.os_version }}
