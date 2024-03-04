@@ -330,11 +330,13 @@ jobs:
 
       - name: Login to registry.suse.com as CI user
         run: |
-          if [ "$CONTAINER_RUNTIME" = "DOCKER" ]; then
-            echo $REGISTRY_LOGIN_PASSWORD | docker login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
-          fi
-          if [ "$CONTAINER_RUNTIME" = "PODMAN" ]; then
-            echo $REGISTRY_LOGIN_PASSWORD | podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+          if [ -n "${REGISTRY_LOGIN_PASSWORD}" ]; then
+            if [ "$CONTAINER_RUNTIME" = "DOCKER" ]; then
+              echo $REGISTRY_LOGIN_PASSWORD | docker login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+            fi
+            if [ "$CONTAINER_RUNTIME" = "PODMAN" ]; then
+              echo $REGISTRY_LOGIN_PASSWORD | podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+            fi
           fi
         env:
           REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
