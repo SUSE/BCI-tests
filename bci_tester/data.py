@@ -382,7 +382,7 @@ MICRO_CONTAINER = create_BCI(
 BUSYBOX_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-busybox:{OS_CONTAINER_TAG}",
     image_type="kiwi",
-    available_versions=["15.4", "15.5", "tumbleweed"],
+    available_versions=["15.4", "15.5", "15.6", "tumbleweed"],
     custom_entry_point="/bin/sh",
     bci_type=ImageType.OS,
 )
@@ -552,7 +552,7 @@ RUST_CONTAINERS = [
 
 INIT_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-init:{OS_CONTAINER_TAG}",
-    available_versions=["15.4", "15.5", "tumbleweed"],
+    available_versions=["15.4", "15.5", "15.6", "tumbleweed"],
     bci_type=ImageType.OS,
     healthcheck_timeout=timedelta(seconds=240),
     extra_marks=[
