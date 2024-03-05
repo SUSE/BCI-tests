@@ -15,6 +15,7 @@ from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
 from bci_tester.fips import ALL_DIGESTS
+from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
@@ -131,6 +132,12 @@ def test_all_openssl_hashes_known(auto_container):
         .split()
     )
     EXPECTED_DIGEST_LIST = ALL_DIGESTS
+    # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
+
+    if OS_VERSION in ("basalt", "tumbleweed", "15.6"):
+        if host_fips_enabled() or target_fips_enforced():
+            EXPECTED_DIGEST_LIST = FIPS_DIGESTS
+
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
     if OS_VERSION not in ("basalt", "tumbleweed", "15.6"):
