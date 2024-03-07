@@ -150,3 +150,11 @@ Tests of the git container
 .. automodule:: tests.test_git
    :members:
    :undoc-members:
+
+
+Tests of the Tomcat containers
+------------------------------
+
+.. automodule:: tests.test_tomcat
+   :members:
+   :undoc-members:

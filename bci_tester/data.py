@@ -708,6 +708,16 @@ KERNEL_MODULE_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
+TOMCAT_9_CONTAINER, TOMCAT_10_CONTAINER = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/tomcat:{tomcat_ver}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=8080)],
+    )
+    for tomcat_ver in (9, 10)
+]
+TOMCAT_CONTAINERS = [TOMCAT_9_CONTAINER, TOMCAT_10_CONTAINER]
+
 DOTNET_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
     DOTNET_SDK_7_0_CONTAINER,
@@ -743,6 +753,7 @@ CONTAINERS_WITH_ZYPPER = (
     + MARIADB_CONTAINERS
     + MARIADB_CLIENT_CONTAINERS
     + POSTGRESQL_CONTAINERS
+    + TOMCAT_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
 
