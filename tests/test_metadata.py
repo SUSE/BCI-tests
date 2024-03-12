@@ -302,6 +302,8 @@ def test_general_labels(
             assert (
                 "based on SUSE Linux Enterprise Server 15"
                 in labels[f"{prefix}.description"]
+                or "based on the SLE LTSS Base Container Image"
+                in labels[f"{prefix}.description"]
             )
         else:
             assert (
