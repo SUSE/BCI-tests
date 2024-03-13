@@ -348,10 +348,19 @@ jobs:
             echo -e "$(getent ahostsv4 $host | grep STREAM | cut -d' ' -f1 | head -n 1)\t$host"  | sudo tee -a /etc/hosts
           done
 
-      - name: Run tox job
-        run: sudo --preserve-env -H tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3
+      - name: Run the tests
+        run: tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
           OS_VERSION: ${{ matrix.os_version }}
           TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
           PULL_ALWAYS: 0
+
+      - name: Run tests as root for podman
+        run: sudo --preserve-env -H tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --pytest-container-log-level=debug
+        env:
+          CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
+          OS_VERSION: ${{ matrix.os_version }}
+          TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
+          PULL_ALWAYS: 0
+        if: ${{ matrix.container_runtime == 'podman' }}
