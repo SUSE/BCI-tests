@@ -63,6 +63,17 @@ def container_git_clone(request: SubRequest, tmp_path):
             f"{container_fixture.container_id}:/{git_repo_build.repo_name}",
         ]
     )
+    # fix file permissions for the git copied git repo
+    check_output(
+        [
+            runtime.runner_binary,
+            "exec",
+            container_fixture.container_id,
+            "/bin/sh",
+            "-c",
+            f"chown --recursive $(id -u):$(id -g) {git_repo_build.repo_name}",
+        ]
+    )
     yield git_repo_build
 
 
