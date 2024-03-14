@@ -67,7 +67,7 @@ def test_build_kured(auto_container_per_test, container_git_clone):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/helm/helm.git",
-            repository_tag="v3.14.2",
+            repository_tag="v3.14.3",
             build_command="make build test-unit",
         ).to_pytest_param(),
     ],
