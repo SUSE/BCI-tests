@@ -3,12 +3,13 @@ JRE).
 
 """
 import pytest
+from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
-from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerData
 
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
+from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
 from tests import test_openjdk as test_openjdk
 
 CONTAINER_TEST_DIR = "/tmp/"
@@ -17,6 +18,7 @@ HOST_TEST_DIR = "tests/trainers/java/"
 CONTAINER_IMAGES = [
     OPENJDK_DEVEL_11_CONTAINER,
     OPENJDK_DEVEL_17_CONTAINER,
+    OPENJDK_DEVEL_21_CONTAINER,
 ]
 
 DOCKERF_EXTENDED = f"""
@@ -27,7 +29,7 @@ COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 CONTAINER_IMAGES_EXTENDED = [
     pytest.param(
         DerivedContainer(
-            base=container_from_pytest_param(container),
+            base=container_and_marks_from_pytest_param(container)[0],
             containerfile=DOCKERF_EXTENDED,
         ),
         marks=container.marks,
@@ -37,7 +39,7 @@ CONTAINER_IMAGES_EXTENDED = [
 
 CONTAINER_IMAGES_WITH_VERSION = [
     pytest.param(container, version, marks=container.marks)
-    for container, version in zip(CONTAINER_IMAGES, ("11", "17"))
+    for container, version in zip(CONTAINER_IMAGES, ("11", "17", "21"))
 ]
 
 
@@ -109,25 +111,16 @@ def test_compile(container, java_file: str):
     :command:`jshell`.
 
     """
-    container.connection.run_expect(
-        [0],
-        f"ls {CONTAINER_TEST_DIR}{java_file}.java",
+    container.connection.check_output(
+        f"ls {CONTAINER_TEST_DIR}{java_file}.java"
     )
-    container.connection.run_expect(
-        [0],
-        "javac --version",
+    container.connection.check_output("javac --version")
+    container.connection.check_output("java --version")
+    container.connection.check_output(
+        f"javac {CONTAINER_TEST_DIR}{java_file}.java"
     )
-    container.connection.run_expect(
-        [0],
-        "java --version",
-    )
-    container.connection.run_expect(
-        [0],
-        f"javac {CONTAINER_TEST_DIR}{java_file}.java",
-    )
-    container.connection.run_expect(
-        [0],
-        f"java -cp {CONTAINER_TEST_DIR} {java_file}",
+    container.connection.check_output(
+        f"java -cp {CONTAINER_TEST_DIR} {java_file}"
     )
 
 
