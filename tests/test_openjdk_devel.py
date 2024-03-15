@@ -111,25 +111,16 @@ def test_compile(container, java_file: str):
     :command:`jshell`.
 
     """
-    container.connection.run_expect(
-        [0],
-        f"ls {CONTAINER_TEST_DIR}{java_file}.java",
+    container.connection.check_output(
+        f"ls {CONTAINER_TEST_DIR}{java_file}.java"
     )
-    container.connection.run_expect(
-        [0],
-        "javac --version",
+    container.connection.check_output("javac --version")
+    container.connection.check_output("java --version")
+    container.connection.check_output(
+        f"javac {CONTAINER_TEST_DIR}{java_file}.java"
     )
-    container.connection.run_expect(
-        [0],
-        "java --version",
-    )
-    container.connection.run_expect(
-        [0],
-        f"javac {CONTAINER_TEST_DIR}{java_file}.java",
-    )
-    container.connection.run_expect(
-        [0],
-        f"java -cp {CONTAINER_TEST_DIR} {java_file}",
+    container.connection.check_output(
+        f"java -cp {CONTAINER_TEST_DIR} {java_file}"
     )
 
 
