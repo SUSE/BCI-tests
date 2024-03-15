@@ -57,8 +57,8 @@ def test_build_kured(auto_container_per_test, container_git_clone):
     we care about. So we hardcode a specific version and build it directly.
 
     """
-    auto_container_per_test.connection.run_expect(
-        [0], container_git_clone.test_command
+    auto_container_per_test.connection.check_output(
+        container_git_clone.test_command
     )
 
 
@@ -78,8 +78,8 @@ def test_build_helm(auto_container_per_test, container_git_clone):
     container with :command:`make` pre-installed.
 
     """
-    auto_container_per_test.connection.run_expect(
-        [0], container_git_clone.test_command
+    auto_container_per_test.connection.check_output(
+        container_git_clone.test_command
     )
 
 
@@ -88,8 +88,8 @@ def test_go_get_binary_in_path(auto_container_per_test):
     the ``$PATH``).
 
     """
-    auto_container_per_test.connection.run_expect(
-        [0], "go install github.com/tylertreat/comcast@latest"
+    auto_container_per_test.connection.check_output(
+        "go install github.com/tylertreat/comcast@latest"
     )
     assert "Comcast" in auto_container_per_test.connection.check_output(
         "comcast -version"
@@ -125,8 +125,8 @@ def test_build_generics_cache(
     <https://github.com/Code-Hex/go-generics-cache>`_ inside the
     container.
     """
-    auto_container_per_test.connection.run_expect(
-        [0], container_git_clone.test_command
+    auto_container_per_test.connection.check_output(
+        container_git_clone.test_command
     )
 
 
