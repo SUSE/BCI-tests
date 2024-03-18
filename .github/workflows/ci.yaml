@@ -354,3 +354,4 @@ jobs:
           CONTAINER_RUNTIME: ${{ matrix.container_runtime }}
           OS_VERSION: ${{ matrix.os_version }}
           TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
+          PULL_ALWAYS: 0
