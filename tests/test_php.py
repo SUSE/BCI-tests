@@ -292,7 +292,7 @@ def test_cli_entry_point(
     forwarded to :command:`php`.
 
     """
-    container_image.prepare_container(pytestconfig.rootpath)
+    container_image.prepare_container(container_runtime, pytestconfig.rootpath)
 
     assert "PHP_BINARY" in host.check_output(
         f"{container_runtime.runner_binary} run --rm "
