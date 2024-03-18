@@ -400,7 +400,9 @@ def test_certificates_are_present(
         },
         containerfile_template=MULTISTAGE_DOCKERFILE,
     )
-    multi_stage_build.prepare_build(tmp_path, pytestconfig.rootpath)
+    multi_stage_build.prepare_build(
+        tmp_path, container_runtime, pytestconfig.rootpath
+    )
 
     with open(tmp_path / "main.go", "wt", encoding="utf-8") as main_go:
         main_go.write(FETCH_SUSE_DOT_COM)
