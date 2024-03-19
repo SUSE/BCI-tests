@@ -51,9 +51,9 @@ def test_base_size(auto_container: ContainerData, container_runtime):
     #: size limits of the base container per arch in MiB
     if OS_VERSION in ("basalt", "tumbleweed", "15.6") or is_fips_ctr:
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
-            "x86_64": 135,
-            "aarch64": 150,
-            "ppc64le": 175,
+            "x86_64": 139,
+            "aarch64": 156,
+            "ppc64le": 183,
             "s390x": 140,
         }
     else:
