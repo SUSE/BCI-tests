@@ -2,115 +2,34 @@
 be installed and ensure that we do not accidentally ship forbidden packages.
 
 """
+import xml.etree.ElementTree as ET
 from typing import Callable
 from typing import List
 
 import pytest
-from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_REPO_NAME
-from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
-from bci_tester.data import REPOCLOSURE_CONTAINER
 
 
 _RM_ZYPPSERVICE = (
     "rm -v /usr/lib/zypp/plugins/services/container-suseconnect-zypp"
 )
 
-#: Packages that can be installed, but are reported as having dependency issues
-#: by :command:`dnf repoclosure`.
-#: This is caused by these packages having boolean requires on the kernel, which
-#: is not present in the SLE_BCI repository. We check that these packages can be
-#: installed in :py:func:`test_package_installation`.
-REPOCLOSURE_FALSE_POSITIVES = (
-    [
-        "multipath-tools",
-        "patterns-base-fips",
-        "patterns-base-minimal_base",
-        "podman",
-        "salt-minion",
-        "suse-module-tools",
-        "typelib-1_0-Gtk-3_0",
-    ]
-    + (
-        [
-            "qml-autoreqprov",
-            "typelib-1_0-Gtk-4_0",
-            "python311-aiohttp",
-            "python311-libcst",
-            "kernel-default-devel",
-        ]
-        if OS_SP_VERSION >= 4
-        else []
-    )
-    + (
-        [
-            # boolean dependency: (python311-typing_extensions >= 4.6.0 if python311-base < 3.8)
-            "python311-azure-core",
-        ]
-        # will need to be updated to >= 5 once SP6 BCI repo published
-        if OS_SP_VERSION == 5
-        else []
-    )
-    + (
-        [  # has a boolean dependency on NetworkManager
-            "jeos-firstboot",
-            # has a boolean dependency on the kernel
-            "ecryptfs-utils",
-            # has a boolean dependency on xwayland
-            "at-spi2-core",
-        ]
-        if OS_SP_VERSION >= 6
-        else []
-    )
-    + (  # has a boolean dependency on hwloc which is not part of SLE
-        ["spack"]
-        if (
-            OS_SP_VERSION >= 6
-            and LOCALHOST.system_info.arch in ("aarch64", "x86_64")
-        )
-        else []
-    )
-    + (  # has a boolean dependency on the kernel && only in x86_64
-        ["thermald"]
-        if (OS_SP_VERSION >= 6 and LOCALHOST.system_info.arch == "x86_64")
-        else []
-    )
-    + (
-        ["open-vm-tools"]
-        if OS_SP_VERSION >= 5
-        and LOCALHOST.system_info.arch in ("aarch64", "x86_64")
-        else []
-    )
-    + (
-        ["open-vm-tools"]
-        if OS_SP_VERSION in (3, 4) and LOCALHOST.system_info.arch in ("x86_64")
-        else []
-    )
-)
-
-#: Packages that have broken dependencies by intention and should be excluded
-#: from the repoclosure checks
-KNOWN_BROKEN = [
-    #: aaa_base and kernel-rt_debug require 'distribution-release', which is
-    #: provided by `sles-release`.
-    #: However, `sles-release` is not in the repository, as we do not want
-    #: people to be able to build their own SLES from the SLE_BCI repo alone.
-    "aaa_base",
-]
-
 
 def get_package_list(con) -> List[str]:
-    """This function returns all packages available from the ``SLE_BCI`` repository
-    given a container connection.
+    """This function returns all packages available from the ``SLE_BCI``
+    repository given a container connection.
 
     """
-    package_list = con.check_output(
-        f"dnf list --available|grep -F '{BCI_REPO_NAME}' | cut -d' ' -f1",
-    ).splitlines()
+    zypper_se_xml = ET.fromstring(
+        con.check_output("zypper --xmlout se -r SLE_BCI")
+    )
+    package_list = [
+        s.get("name") for s in zypper_se_xml.findall(".//solvable")
+    ]
     assert len(package_list) > 3000
     return package_list
 
@@ -136,37 +55,23 @@ def package_name_filter_func(
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
 )
-@pytest.mark.parametrize(
-    "container_per_test", [REPOCLOSURE_CONTAINER], indirect=True
-)
-def test_repoclosure(container_per_test):
-    """Run :command:`dnf repoclosure` on all packages in the ``SLE_BCI`` repository
-    excluding the packages in :py:const`REPOCLOSURE_FALSE_POSITIVES`.
-
-    """
-    package_list = list(
-        filter(
-            package_name_filter_func(
-                REPOCLOSURE_FALSE_POSITIVES + KNOWN_BROKEN
-            ),
-            get_package_list(container_per_test.connection),
-        )
+@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+def test_installcheck(container_per_test):
+    """Run installcheck against the SLE_BCI repo + locally installed packages."""
+    # Let zypper fetch the repo data and generate solv files.
+    container_per_test.connection.check_output("zypper ref")
+    # Check that all packages in SLE_BCI can be installed, using already installed
+    # packages (@System) if necessary. It tries to keep rpm installed
+    # but rpm-ndb conflicts with that, so exclude rpm-ndb.
+    container_per_test.connection.check_output(
+        "installcheck $(uname -m) --exclude 'rpm-ndb' /var/cache/zypp/solv/SLE_BCI/solv --nocheck /var/cache/zypp/solv/@System/solv"
     )
-
-    for i in range(len(package_list) // 500):
-        container_per_test.connection.run_expect(
-            [0],
-            "dnf repoclosure --pkg "
-            + " --pkg ".join(package_list[i * 500 : (i + 1) * 500]),
-        )
 
 
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
 )
-@pytest.mark.parametrize(
-    "container_per_test", [REPOCLOSURE_CONTAINER], indirect=True
-)
+@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
 def test_sle_bci_forbidden_packages(container_per_test):
     """Regression test that no packages containing the following strings are in the
     ``SLE_BCI`` repository:
@@ -178,32 +83,39 @@ def test_sle_bci_forbidden_packages(container_per_test):
 
     The following packages contain the above strings, but are ok to be shipped:
 
-    - ``system-group-kvm.noarch``
-    - ``jaxen.noarch``
+    - ``system-group-kvm``
+    - ``jaxen``
     - ``kernelshark``
     - ``librfxencode0``
     - ``nfs-kernel-server``
-    - ``texlive-l3kernel.noarch``
-    - ``purge-kernels-service.noarch``
+    - ``texlive-l3kernel``
+    - ``purge-kernels-service``
+    - ``"kernel-azure-devel``
+    - ``kernel-devel-azure``
+    - ``kernel-macros``
+    - ``kernel-default-devel``
+    - ``kernel-devel``
+    - ``kernel-syms``
+    - ``kernel-syms-azure``
 
     """
     package_list = get_package_list(container_per_test.connection)
 
     ALLOWED_PACKAGES = [
-        "system-group-kvm.noarch",
-        "jaxen.noarch",
+        "system-group-kvm",
+        "jaxen",
         "kernelshark",
         "librfxencode0",
         "nfs-kernel-server",
-        "texlive-l3kernel.noarch",
-        "purge-kernels-service.noarch",
-        f"kernel-azure-devel.{LOCALHOST.system_info.arch}",
-        "kernel-devel-azure.noarch",
-        "kernel-macros.noarch",
-        f"kernel-default-devel.{LOCALHOST.system_info.arch}",
-        "kernel-devel.noarch",
-        f"kernel-syms.{LOCALHOST.system_info.arch}",
-        f"kernel-syms-azure.{LOCALHOST.system_info.arch}",
+        "texlive-l3kernel",
+        "purge-kernels-service",
+        "kernel-azure-devel",
+        "kernel-devel-azure",
+        "kernel-macros",
+        "kernel-default-devel",
+        "kernel-devel",
+        "kernel-syms",
+        "kernel-syms-azure",
     ]
 
     FORBIDDEN_PACKAGE_NAMES = ["kernel", "yast", "kvm", "xen"]
@@ -229,16 +141,14 @@ def test_sle_bci_forbidden_packages(container_per_test):
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="no included BCI repository - can't test",
 )
-@pytest.mark.parametrize(
-    "pkg", ["git", "curl", "wget", "unzip"] + REPOCLOSURE_FALSE_POSITIVES
-)
+@pytest.mark.parametrize("pkg", ("git", "curl", "wget", "unzip"))
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
 def test_package_installation(container_per_test, pkg):
     """Check that some basic packages (:command:`wget`, :command:`git`,
-    :command:`curl` and :command:`unzip`) can be installed. Additionally, try to
-    install all packages from :py:const:`REPOCLOSURE_FALSE_POSITIVES`, ensuring
-    that they are not accidentally not installable.
-    We additionally have to remove the ``container-suseconnect`` zypper service before running the test to ensure that no SLES repositories are added on registered hosts thereby skewing our results.
+    :command:`curl` and :command:`unzip`) can be installed.
+    We additionally have to remove the ``container-suseconnect`` zypper service
+    before running the test to ensure that no SLES repositories are added on
+    registered hosts thereby skewing our results.
     """
 
     container_per_test.connection.check_output(
