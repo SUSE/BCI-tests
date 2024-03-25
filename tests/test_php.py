@@ -272,7 +272,7 @@ def test_environment_variables(
             f"{apache_confdir}/httpd.conf"
         ).is_file
 
-        if OS_VERSION not in ("basalt", "tumbleweed"):
+        if OS_VERSION in ("15.3", "15.4", "15.5"):
             apache_envvars = get_env_var("APACHE_ENVVARS")
             assert container_per_test.connection.file(apache_envvars).is_file
             assert container_per_test.connection.run_expect(
