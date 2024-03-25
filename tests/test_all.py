@@ -10,6 +10,8 @@ import packaging.version
 import pytest
 from _pytest.config import Config
 from pytest_container import Container
+from pytest_container import container_and_marks_from_pytest_param
+from pytest_container import DerivedContainer
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
@@ -28,7 +30,25 @@ from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINER
 
+
 CONTAINER_IMAGES = ALL_CONTAINERS
+
+
+CONTAINERS_WITH_ZYPPER_AS_ROOT = []
+for param in CONTAINERS_WITH_ZYPPER:
+    ctr, marks = container_and_marks_from_pytest_param(param)
+    CONTAINERS_WITH_ZYPPER_AS_ROOT.append(
+        pytest.param(
+            DerivedContainer(
+                base=ctr,
+                extra_launch_args=(
+                    (ctr.extra_launch_args or []) + ["--user", "root"]
+                ),
+            ),
+            marks=marks,
+        )
+    )
+
 
 #: go file to perform a GET request to suse.com and that panics if the request
 #: fails
@@ -224,7 +244,9 @@ def test_glibc_present(auto_container):
     OS_VERSION == "basalt",
     reason="Basalt repos are known to be out of sync with IBS state",
 )
-@pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
+@pytest.mark.parametrize(
+    "container", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
+)
 def test_no_downgrade_on_install(container: ContainerData) -> None:
     """Check that we can install any additional package in the container.
 
@@ -277,7 +299,7 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
+    "container_per_test", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
 )
 def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     """Check that containers do not contain any package that isn't also
@@ -322,7 +344,9 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
-@pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
+@pytest.mark.parametrize(
+    "container", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
+)
 def test_zypper_verify_passes(container: ContainerData) -> None:
     """Check that there are no packages missing according to zypper verify so that
     users of the container would not get excessive dependencies installed.
