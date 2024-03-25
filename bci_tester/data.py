@@ -7,9 +7,12 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 
+from pytest_container import container_and_marks_from_pytest_param
+from pytest_container import DerivedContainer
 from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
+from pytest_container.runtime import LOCALHOST
 
 try:
     from typing import Literal
@@ -21,8 +24,7 @@ except ImportError:
 import pytest
 from _pytest.mark.structures import MarkDecorator
 from _pytest.mark.structures import ParameterSet
-from pytest_container import DerivedContainer
-from pytest_container.runtime import LOCALHOST
+
 
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
@@ -756,6 +758,28 @@ CONTAINERS_WITH_ZYPPER = (
     + TOMCAT_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
+
+#: all containers with zypper and with the flag to launch them as root
+CONTAINERS_WITH_ZYPPER_AS_ROOT = []
+for param in CONTAINERS_WITH_ZYPPER:
+    # only modify the user for containers where `USER` is explicitly set,
+    # atm this is only tomcat
+    if param not in TOMCAT_CONTAINERS:
+        CONTAINERS_WITH_ZYPPER_AS_ROOT.append(param)
+    else:
+        ctr, marks = container_and_marks_from_pytest_param(param)
+        CONTAINERS_WITH_ZYPPER_AS_ROOT.append(
+            pytest.param(
+                DerivedContainer(
+                    base=ctr,
+                    extra_launch_args=(
+                        (ctr.extra_launch_args or []) + ["--user", "root"]
+                    ),
+                ),
+                marks=marks,
+            )
+        )
+
 
 CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,

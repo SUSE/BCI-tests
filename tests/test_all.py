@@ -24,6 +24,7 @@ from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
+from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
@@ -33,7 +34,9 @@ from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 
+
 CONTAINER_IMAGES = ALL_CONTAINERS
+
 
 #: go file to perform a GET request to suse.com and that panics if the request
 #: fails
@@ -226,7 +229,7 @@ def test_glibc_present(auto_container):
 # the host instead of passing it on via stdout which pollutes the logs making
 # them unreadable
 _CONTAINERS_WITH_VOLUME_MOUNT = []
-for param in CONTAINERS_WITH_ZYPPER:
+for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
     ctr, marks = container_and_marks_from_pytest_param(param)
     new_vol_mounts = (ctr.volume_mounts or []) + [BindMount("/solv/")]
     kwargs = {**ctr.__dict__}
@@ -314,10 +317,14 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
 )
 @pytest.mark.parametrize(
     "container_per_test",
-    CONTAINERS_WITH_ZYPPER
+    CONTAINERS_WITH_ZYPPER_AS_ROOT
     if OS_VERSION != "15.6"
     else (
-        [ctr for ctr in CONTAINERS_WITH_ZYPPER if ctr != RUST_CONTAINERS[0]]
+        [
+            ctr
+            for ctr in CONTAINERS_WITH_ZYPPER_AS_ROOT
+            if ctr != RUST_CONTAINERS[0]
+        ]
         + [
             pytest.param(
                 *RUST_CONTAINERS[0].values,
@@ -372,7 +379,9 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
-@pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
+@pytest.mark.parametrize(
+    "container", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
+)
 def test_zypper_verify_passes(container: ContainerData) -> None:
     """Check that there are no packages missing according to zypper verify so that
     users of the container would not get excessive dependencies installed.
