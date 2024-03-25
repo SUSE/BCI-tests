@@ -404,7 +404,7 @@ def test_certificates_are_present(
         tmp_path, container_runtime, pytestconfig.rootpath
     )
 
-    with open(tmp_path / "main.go", "wt", encoding="utf-8") as main_go:
+    with open(tmp_path / "main.go", "w", encoding="utf-8") as main_go:
         main_go.write(FETCH_SUSE_DOT_COM)
 
     # FIXME: ugly duplication of pytest_container internals :-/

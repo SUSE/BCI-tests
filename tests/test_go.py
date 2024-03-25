@@ -164,7 +164,7 @@ def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
     dest, git_repo = host_git_clone
     rancher_dir = dest / git_repo.repo_name
     with open(
-        rancher_dir / "Dockerfile.dapper", "r", encoding="utf-8"
+        rancher_dir / "Dockerfile.dapper", encoding="utf-8"
     ) as dapperfile:
         contents = dapperfile.read(-1)
 
