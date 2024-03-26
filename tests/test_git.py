@@ -4,13 +4,10 @@ import pytest
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import DerivedContainer
 from pytest_container.container import ImageFormat
-from pytest_container.container import PortForwarding
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 
-from bci_tester.data import BCI_CONTAINER_PREFIX
 from bci_tester.data import GIT_CONTAINER
-from bci_tester.data import OS_CONTAINER_TAG
 
 CONTAINER_IMAGES = (GIT_CONTAINER,)
 
@@ -84,7 +81,7 @@ def test_git_clone_https(auto_container_per_test):
 
 
 GIT_SERVER_CONTAINER = DerivedContainer(
-    base=f"{BCI_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
+    base="registry.suse.com/bci/bci-base:latest",
     containerfile=_git_server_containerfile,
     image_format=ImageFormat.DOCKER,
     extra_launch_args=["--cap-add", "AUDIT_WRITE"],
