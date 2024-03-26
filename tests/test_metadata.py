@@ -73,6 +73,7 @@ from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUBY_33_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
+from bci_tester.data import TOMCAT_CONTAINERS
 
 
 #: The official vendor name
@@ -154,6 +155,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
+    ]
+    + [
+        (tomcat_ctr, "tomcat", ImageType.APPLICATION)
+        for tomcat_ctr in TOMCAT_CONTAINERS
     ]
     + [
         (container_389ds, "389-ds", ImageType.APPLICATION)
