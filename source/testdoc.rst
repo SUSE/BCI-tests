@@ -142,3 +142,11 @@ Tests of the 389ds container
 .. automodule:: tests.test_389ds
    :members:
    :undoc-members:
+
+
+Tests of the git container
+--------------------------
+
+.. automodule:: tests.test_git
+   :members:
+   :undoc-members:
