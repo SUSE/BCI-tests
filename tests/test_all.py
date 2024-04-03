@@ -22,6 +22,7 @@ from pytest_container.container import ContainerData
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
@@ -31,10 +32,13 @@ from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIWI_CONTAINERS
+from bci_tester.data import MICRO_CONTAINER
+from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
+from bci_tester.data import RELEASED_SLE_VERSIONS
 from bci_tester.util import get_repos_from_connection
 
 CONTAINER_IMAGES = ALL_CONTAINERS
@@ -431,6 +435,61 @@ def test_no_compat_packages(container):
         assert not container.connection.package(
             "compat-usrmerge-tools"
         ).is_installed
+
+
+@pytest.mark.parametrize(
+    "container",
+    ALL_CONTAINERS,
+    indirect=True,
+)
+def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
+    """Ensure that the BCI EULA exists iff it's not a LTSS container"""
+
+    bci_license = "/usr/share/licenses/product/BCI/license.txt"
+    if (
+        OS_VERSION in ALLOWED_BCI_REPO_OS_VERSIONS
+        and OS_VERSION in RELEASED_SLE_VERSIONS
+    ):
+        assert container.connection.file(bci_license).exists
+        assert (
+            "SUSE Linux Enterprise Base Container Image License"
+            in container.connection.check_output(f"head -n 1 {bci_license}")
+        )
+        return
+
+    # LTSS containers should not have the BCI license, however we currently
+    # are running tests for the bci-* base os containers which are not LTSS
+    # and still contain a BCI license. As they are out of maintenance, we
+    # need to ignore them
+    if OS_VERSION in RELEASED_SLE_VERSIONS and container.container in (
+        BASE_CONTAINER.values[0],
+        INIT_CONTAINER.values[0],
+        MINIMAL_CONTAINER.values[0],
+        MICRO_CONTAINER.values[0],
+    ):
+        pytest.skip("Unmaintained bci-* base os containers are not tested")
+        return
+    assert not container.connection.file(bci_license).exists
+
+
+@pytest.mark.skipif(
+    OS_VERSION in RELEASED_SLE_VERSIONS or OS_VERSION in ("tumbleweed",),
+    reason="BETA EULA not expected",
+)
+@pytest.mark.parametrize(
+    "container",
+    ALL_CONTAINERS,
+    indirect=True,
+)
+def test_sles_beta_eula_exists(container):
+    """Ensure that the SLES Beta eula exists in the container"""
+
+    assert (
+        "SUSE(R) End User License Agreement for Beta Software"
+        in container.connection.check_output(
+            "head -n 1 /usr/share/licenses/product/base/license.txt"
+        )
+    )
 
 
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
