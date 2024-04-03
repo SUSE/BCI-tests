@@ -70,9 +70,11 @@ def test_git_clone_https(auto_container_per_test):
     auto_container_per_test.connection.check_output(
         "git clone https://github.com/github/gemoji.git /gemoji"
     )
-    auto_container_per_test.connection.file("/gemoji/.git/HEAD").exists
-    auto_container_per_test.connection.file("/gemoji/Gemfile").exists
-    auto_container_per_test.connection.file("/gemoji/db/emoji.json").exists
+    assert auto_container_per_test.connection.file("/gemoji/.git/HEAD").exists
+    assert auto_container_per_test.connection.file("/gemoji/Gemfile").exists
+    assert auto_container_per_test.connection.file(
+        "/gemoji/db/emoji.json"
+    ).exists
     out = auto_container_per_test.connection.check_output(
         "git -C /gemoji status"
     )
@@ -118,7 +120,7 @@ def test_git_clone_ssh(pod_per_test: PodData) -> None:
     cli.check_output(
         f"git clone ssh://git@{host}:{_ssh_port}/srv/git/project.git /project"
     )
-    cli.file("/project/.git/HEAD").exists
+    assert cli.file("/project/.git/HEAD").exists
     out = cli.check_output("git -C /project status")
 
     assert "No commits yet" in out
@@ -128,7 +130,7 @@ def test_git_clone_ssh(pod_per_test: PodData) -> None:
 def test_git_init(auto_container_per_test):
     """Test that we can init a repository successfully."""
     auto_container_per_test.connection.check_output("git init -b main /myrepo")
-    auto_container_per_test.connection.file("/myrepo/.git/HEAD").exists
+    assert auto_container_per_test.connection.file("/myrepo/.git/HEAD").exists
     out = auto_container_per_test.connection.check_output(
         "git -C /myrepo status"
     )
