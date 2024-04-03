@@ -51,6 +51,8 @@ REPOCLOSURE_FALSE_POSITIVES = (
             "jeos-firstboot",
             # has a boolean dependency on the kernel
             "ecryptfs-utils",
+            # has a boolean dependency on the kernel
+            "thermald",
             # has a boolean dependency on xwayland
             "at-spi2-core",
         ]
