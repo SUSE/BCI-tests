@@ -55,6 +55,9 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
+# List the released versions of SLE, used for supportabilty and EULA tests
+RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5")
+
 assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(
     ALLOWED_BASE_OS_VERSIONS
 ), f"list ALLOWED_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
