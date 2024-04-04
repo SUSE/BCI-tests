@@ -18,6 +18,10 @@ CONTAINER_IMAGES = POSTGRESQL_CONTAINERS
 
 
 def test_entry_point(auto_container: ContainerData) -> None:
+    """Verifies that the entrypoint of the image contains
+    ``docker-entrypoint.sh``.
+
+    """
     assert len(auto_container.inspect.config.entrypoint) == 1
     assert (
         "docker-entrypoint.sh" in auto_container.inspect.config.entrypoint[0]

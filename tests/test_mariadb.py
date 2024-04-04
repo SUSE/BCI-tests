@@ -23,6 +23,10 @@ CONTAINER_IMAGES = MARIADB_CONTAINERS
 
 
 def test_entry_point(auto_container: ContainerData) -> None:
+    """Verifies that the entrypoint of the image contains
+    ``docker-entrypoint.sh``.
+
+    """
     assert len(auto_container.inspect.config.entrypoint) == 1
     assert (
         "docker-entrypoint.sh" in auto_container.inspect.config.entrypoint[0]
@@ -146,6 +150,10 @@ def test_mariadb_db_env_vars(
     indirect=["container_per_test"],
 )
 def test_mariadb_client(container_per_test: ContainerData) -> None:
+    """Smoke test of the MariaDB Client container, it verifies that the output
+    of :command:`mysql --version` contains the string ``MariaDB``.
+
+    """
     assert "MariaDB" in container_per_test.connection.check_output(
         "mysql --version"
     )
@@ -179,6 +187,14 @@ MARIADB_PODS = [
     "pod_per_test", MARIADB_PODS, indirect=["pod_per_test"]
 )
 def test_mariadb_client_in_pod(pod_per_test: PodData) -> None:
+    """Simple test of the MariaDB Client container in a pod with the MariaDB
+    container.
+
+    The MariaDB Client container is used to connect to the MariaDB server in the
+    MariaDB container. We then create a table, insert a value and check that we
+    obtain the same values back via a ``SELECT``.
+
+    """
     client_con = pod_per_test.container_data[0].connection
     client_con.check_output("mariadb --version")
 
