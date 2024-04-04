@@ -17,26 +17,26 @@ from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTHON_WITH_PIPX_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
-bcdir = "/tmp/"
-orig = "tests/"
-appdir = "trainers/"
-outdir = "output/"
-appl1 = "tensorflow_examples.py"
-port1 = 8123
+BCDIR = "/tmp/"
+ORIG = "tests/"
+APPDIR = "trainers/"
+OUTDIR = "output/"
+APPL1 = "tensorflow_examples.py"
+PORT1 = 8123
 t0 = time.time()
 
 # copy tensorflow module trainer from the local application directory to the container
 DOCKERF_PY_T1 = f"""
-WORKDIR {bcdir}
-EXPOSE {port1}
+WORKDIR {BCDIR}
+EXPOSE {PORT1}
 """
 
 DOCKERF_PY_T2 = f"""
-WORKDIR {bcdir}
-RUN mkdir {appdir}
-RUN mkdir {outdir}
-EXPOSE {port1}
-COPY {orig + appdir}/{appl1}  {appdir}
+WORKDIR {BCDIR}
+RUN mkdir {APPDIR}
+RUN mkdir {OUTDIR}
+EXPOSE {PORT1}
+COPY {ORIG + APPDIR}/{APPL1}  {APPDIR}
 """
 
 #: Base containers under test, input of auto_container fixture
@@ -50,7 +50,7 @@ CONTAINER_IMAGES_T1 = [
         DerivedContainer(
             base=container_from_pytest_param(CONTAINER_T),
             containerfile=DOCKERF_PY_T1,
-            forwarded_ports=[PortForwarding(container_port=port1)],
+            forwarded_ports=[PortForwarding(container_port=PORT1)],
         ),
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
@@ -235,7 +235,7 @@ def test_python_webserver_1(
     "destdir, appl2, url, xfilename",
     [
         (
-            bcdir + outdir,
+            BCDIR + OUTDIR,
             "communication_examples.py",
             "https://www.suse.com/assets/img/suse-white-logo-green.svg",
             "suse-white-logo-green.svg",
@@ -262,19 +262,19 @@ def test_python_webserver_2(
     # container under test
     host.run_expect(
         [0],
-        f"{container_runtime.runner_binary} cp {orig + appdir + appl2} "
-        f"{container_per_test.container_id}:{bcdir + appdir}",
+        f"{container_runtime.runner_binary} cp {ORIG + APPDIR + appl2} "
+        f"{container_per_test.container_id}:{BCDIR + APPDIR}",
     )
 
     # check the test python module is present in the container
-    assert container_per_test.connection.file(bcdir + appdir + appl2).is_file
+    assert container_per_test.connection.file(BCDIR + APPDIR + appl2).is_file
 
     # check expected file not present yet in the destination
     assert not container_per_test.connection.file(destdir + xfilename).exists
 
     # execution of the python module in the container
     bci_python_wget = container_per_test.connection.check_output(
-        f"timeout --preserve-status 120s python3 {appdir + appl2} {url} {destdir}",
+        f"timeout --preserve-status 120s python3 {APPDIR + appl2} {url} {destdir}",
     )
 
     # run the test in the container and check expected keyword from the module
@@ -302,7 +302,7 @@ def test_tensorf(container_per_test):
     """
 
     # check the test python module is present in the container
-    assert container_per_test.connection.file(bcdir + appdir + appl1).is_file
+    assert container_per_test.connection.file(BCDIR + APPDIR + APPL1).is_file
 
     # collect CPU flags of the system
     cpuflg = container_per_test.connection.file("/proc/cpuinfo").content_string
@@ -337,7 +337,7 @@ def test_tensorf(container_per_test):
 
     # Exercise execution running python modules in the container
     testout = container_per_test.connection.run_expect(
-        [0], "python3 " + appdir + appl1
+        [0], "python3 " + APPDIR + APPL1
     )
 
     # keyword search

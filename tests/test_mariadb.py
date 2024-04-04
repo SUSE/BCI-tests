@@ -29,11 +29,11 @@ def test_entry_point(auto_container: ContainerData) -> None:
     )
 
 
-_other_db_user = "foo"
-_other_db_pw = "baz"
+_OTHER_DB_USER = "foo"
+_OTHER_DB_PW = "baz"
 
 # TODO test variants
-_test_db = "bcitest"
+_TEST_DB = "bcitest"
 
 
 def _generate_test_matrix() -> List[ParameterSet]:
@@ -44,12 +44,12 @@ def _generate_test_matrix() -> List[ParameterSet]:
         marks = db_cont_param.marks
         ports = db_cont.forwarded_ports
         for db_user, db_pw in product(
-            ("user", _other_db_user), (MARIADB_ROOT_PASSWORD, _other_db_pw)
+            ("user", _OTHER_DB_USER), (MARIADB_ROOT_PASSWORD, _OTHER_DB_PW)
         ):
             env = {
                 "MARIADB_USER": db_user,
                 "MARIADB_PASSWORD": db_pw,
-                "MARIADB_DATABASE": _test_db,
+                "MARIADB_DATABASE": _TEST_DB,
             }
             env["MARIADB_ROOT_PASSWORD"] = MARIADB_ROOT_PASSWORD
             ### not supported by the container
@@ -108,7 +108,7 @@ def test_mariadb_db_env_vars(
         conn = pymysql.connect(
             user=db_user,
             password=db_password,
-            database=_test_db,
+            database=_TEST_DB,
             host="127.0.0.1",
             port=container_per_test.forwarded_ports[0].host_port,
         )
@@ -121,7 +121,7 @@ def test_mariadb_db_env_vars(
     conn = pymysql.connect(
         user=db_user,
         password=db_password,
-        database=_test_db,
+        database=_TEST_DB,
         host="127.0.0.1",
         port=container_per_test.forwarded_ports[0].host_port,
     )
@@ -159,9 +159,9 @@ MARIADB_PODS = [
                 DerivedContainer(
                     base=container_from_pytest_param(db_cont),
                     extra_environment_variables={
-                        "MARIADB_USER": _other_db_user,
-                        "MARIADB_PASSWORD": _other_db_pw,
-                        "MARIADB_DATABASE": _test_db,
+                        "MARIADB_USER": _OTHER_DB_USER,
+                        "MARIADB_PASSWORD": _OTHER_DB_PW,
+                        "MARIADB_DATABASE": _TEST_DB,
                         "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD,
                     },
                 ),
@@ -182,7 +182,7 @@ def test_mariadb_client_in_pod(pod_per_test: PodData) -> None:
     client_con = pod_per_test.container_data[0].connection
     client_con.check_output("mariadb --version")
 
-    mariadb_cmd = f"mariadb --user={_other_db_user} --password={_other_db_pw} --host=0.0.0.0 {_test_db}"
+    mariadb_cmd = f"mariadb --user={_OTHER_DB_USER} --password={_OTHER_DB_PW} --host=0.0.0.0 {_TEST_DB}"
 
     @retry(
         wait=wait_exponential(multiplier=1, min=4, max=10),
