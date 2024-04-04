@@ -44,12 +44,12 @@ class TestSystemd:
         """Ensure the container startup time is below 5 seconds"""
 
         # Container startup time limit in seconds - aarch64 workers are slow sometimes.
-        STARTUP_LIMIT = (
+        startup_limit = (
             11
             if auto_container.connection.system_info.arch == "aarch64"
             else 5.5
         )
-        TARGET_LIMIT = STARTUP_LIMIT  # Limit for the systemd target to be reached in seconds
+        target_limit = startup_limit  # Limit for the systemd target to be reached in seconds
 
         def extract_time(stdout, prefix):
             """internal helper function to extract the time from systemd-analyze time
@@ -79,10 +79,10 @@ class TestSystemd:
             [0], "systemd-analyze time"
         )
         startup = extract_time(time.stdout, "Startup finished in ")
-        assert startup <= STARTUP_LIMIT, "Startup threshold exceeded"
+        assert startup <= startup_limit, "Startup threshold exceeded"
         target = extract_time(time.stdout, ".target reached after ")
         assert (
-            target <= TARGET_LIMIT
+            target <= target_limit
         ), "Reaching systemd target threshold exceeded"
 
     def test_systemd_nofailed_units(self, auto_container):
