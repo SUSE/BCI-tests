@@ -51,12 +51,15 @@ REPOCLOSURE_FALSE_POSITIVES = (
             "jeos-firstboot",
             # has a boolean dependency on the kernel
             "ecryptfs-utils",
-            # has a boolean dependency on the kernel
-            "thermald",
             # has a boolean dependency on xwayland
             "at-spi2-core",
         ]
         if OS_SP_VERSION >= 6
+        else []
+    )
+    + (  # has a boolean dependency on the kernel && only in x86_64
+        ["thermald"]
+        if (OS_SP_VERSION >= 6 and LOCALHOST.system_info.arch == "x86_64")
         else []
     )
     + (
