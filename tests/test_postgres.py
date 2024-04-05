@@ -18,15 +18,19 @@ CONTAINER_IMAGES = POSTGRESQL_CONTAINERS
 
 
 def test_entry_point(auto_container: ContainerData) -> None:
+    """Verifies that the entrypoint of the image contains
+    ``docker-entrypoint.sh``.
+
+    """
     assert len(auto_container.inspect.config.entrypoint) == 1
     assert (
         "docker-entrypoint.sh" in auto_container.inspect.config.entrypoint[0]
     )
 
 
-_other_pg_user = "foo"
-_other_pg_pw = "baz"
-_postgres_user = "postgres"
+_OTHER_PG_USER = "foo"
+_OTHER_PG_PW = "baz"
+_POSTGRES_USER = "postgres"
 
 
 def _generate_test_matrix() -> List[ParameterSet]:
@@ -41,9 +45,9 @@ def _generate_test_matrix() -> List[ParameterSet]:
         )
 
         for username, pg_user, pw in product(
-            (None, _postgres_user),
-            (None, _other_pg_user),
-            (POSTGRES_PASSWORD, _other_pg_pw),
+            (None, _POSTGRES_USER),
+            (None, _OTHER_PG_USER),
+            (POSTGRES_PASSWORD, _OTHER_PG_PW),
         ):
             env = {"POSTGRES_PASSWORD": pw}
             if pg_user:

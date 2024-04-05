@@ -10,7 +10,7 @@ from pytest_container.container import ContainerData
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
-from tests import test_openjdk as test_openjdk
+from tests import test_openjdk
 
 CONTAINER_TEST_DIR = "/tmp/"
 HOST_TEST_DIR = "tests/trainers/java/"
@@ -44,6 +44,10 @@ CONTAINER_IMAGES_WITH_VERSION = [
 
 
 def test_java_home(auto_container: ContainerData):
+    """performs the same action as
+    :py:func:`~tests.test_openjdk.test_java_home`.
+
+    """
     test_openjdk.test_java_home(auto_container)
 
 

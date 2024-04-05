@@ -60,6 +60,7 @@ HEALTHCHECK --interval=5s --timeout=5s --retries=5 CMD ["/usr/bin/ssh-keyscan", 
 
 
 def test_git_version(auto_container):
+    """Smoke test that the output of :command:`git --version` looks sane."""
     assert "git version 2." in auto_container.connection.check_output(
         "git --version"
     )

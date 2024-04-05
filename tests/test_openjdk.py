@@ -118,8 +118,8 @@ def test_java_home(auto_container: ContainerData):
     assert java_bindir.exists and java_bindir.is_directory
 
     auto_container.connection.file(os.path.join(java_bindir_path, "java"))
-    auto_container.connection.run_expect(
-        [0], f"{os.path.join(java_bindir_path, 'java')} --version"
+    auto_container.connection.check_output(
+        f"{os.path.join(java_bindir_path, 'java')} --version"
     )
 
     java_props_cmd = "java -XshowSettings:properties -version"
@@ -234,8 +234,8 @@ def test_jdk_cassandra(container_per_test):
 
     logs = "/var/log/cassandra.log"
 
-    container_per_test.connection.run_expect(
-        [0], "zypper --non-interactive install util-linux"
+    container_per_test.connection.check_output(
+        "zypper --non-interactive install util-linux"
     )
 
     cassandra_versions = container_per_test.connection.check_output(
@@ -249,21 +249,17 @@ def test_jdk_cassandra(container_per_test):
             cur_ver = Version(
                 int(match.group(1)), int(match.group(2)), int(match.group(3))
             )
-            if cur_ver > cassandra_version:
-                cassandra_version = cur_ver
+            cassandra_version = max(cur_ver, cassandra_version)
 
-    container_per_test.connection.run_expect(
-        [0],
+    container_per_test.connection.check_output(
         f"curl -sfOL https://downloads.apache.org/cassandra/{cassandra_version}/apache-cassandra-{cassandra_version}-bin.tar.gz",
     )
 
-    container_per_test.connection.run_expect(
-        [0],
+    container_per_test.connection.check_output(
         f"tar xzvf apache-cassandra-{cassandra_version}-bin.tar.gz >/dev/null",
     )
 
-    container_per_test.connection.run_expect(
-        [0],
+    container_per_test.connection.check_output(
         f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/ && bin/cassandra -R | tee {logs}",
     )
 
@@ -280,12 +276,10 @@ def test_jdk_cassandra(container_per_test):
 
     assert found, f"{check_str} not found in {logs}"
 
-    container_per_test.connection.run_expect(
-        [0],
+    container_per_test.connection.check_output(
         f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress write n=1",
     )
 
-    container_per_test.connection.run_expect(
-        [0],
+    container_per_test.connection.check_output(
         f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress read n=1",
     )
