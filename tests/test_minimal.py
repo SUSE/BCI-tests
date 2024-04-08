@@ -41,32 +41,39 @@ TW_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
 }
 
 
-@pytest.mark.parametrize(
-    "container,size",
-    [
-        (
-            MINIMAL_CONTAINER,
-            TW_MINIMAL_IMAGE_MAX_SIZE
-            if OS_VERSION == "tumbleweed"
-            else SLE_MINIMAL_IMAGE_MAX_SIZE,
-        ),
-        (
-            MICRO_CONTAINER,
-            TW_MICRO_IMAGE_MAX_SIZE
-            if OS_VERSION == "tumbleweed"
-            else SLE_MICRO_IMAGE_MAX_SIZE,
-        ),
-    ],
-    indirect=["container"],
+@pytest.mark.xfail(
+    OS_VERSION in ("15.5", "15.6"),
+    reason="rpm has too many dependencies in SLE 15.5+",
 )
-def test_minimal_image_size(
-    container, size: Dict[str, int], container_runtime
-):
+@pytest.mark.parametrize("container", [MINIMAL_CONTAINER], indirect=True)
+def test_minimal_image_size(container, container_runtime):
     """Check that the size of the minimal container is below the limits specified in
-    :py:const:`MINIMAL_IMAGE_MAX_SIZE` and that the size of the micro container
-    is below the limits from :py:const:`MICRO_IMAGE_MAX_SIZE`.
+    :py:const:`SLE_MINIMAL_IMAGE_MAX_SIZE`.
 
     """
+    size = (
+        TW_MINIMAL_IMAGE_MAX_SIZE
+        if OS_VERSION == "tumbleweed"
+        else SLE_MINIMAL_IMAGE_MAX_SIZE
+    )
+    container_size = container_runtime.get_image_size(
+        container.image_url_or_id
+    ) // (1024 * 1024)
+    assert container_size < size[LOCALHOST.system_info.arch]
+
+
+@pytest.mark.parametrize("container", [MICRO_CONTAINER], indirect=True)
+def test_micro_image_size(container, container_runtime):
+    """Check that the size of the micro container is below the limits specified in
+    :py:const:`SLE_MICRO_IMAGE_MAX_SIZE`.
+
+    """
+
+    size = (
+        TW_MICRO_IMAGE_MAX_SIZE
+        if OS_VERSION == "tumbleweed"
+        else SLE_MICRO_IMAGE_MAX_SIZE
+    )
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
     ) // (1024 * 1024)
