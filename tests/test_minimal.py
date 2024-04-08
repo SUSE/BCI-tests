@@ -67,10 +67,10 @@ def test_minimal_image_size(
     is below the limits from :py:const:`MICRO_IMAGE_MAX_SIZE`.
 
     """
-    assert (
-        container_runtime.get_image_size(container.image_url_or_id)
-        < size[LOCALHOST.system_info.arch] * 1024 * 1024
-    )
+    container_size = container_runtime.get_image_size(
+        container.image_url_or_id
+    ) // (1024 * 1024)
+    assert container_size < size[LOCALHOST.system_info.arch]
 
 
 @pytest.mark.parametrize(
