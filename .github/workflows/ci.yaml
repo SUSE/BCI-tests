@@ -148,7 +148,8 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install necessary dependencies
+      - name: Install new podman from OBS
+        if: false
         run: |
           sudo mkdir -p /etc/apt/keyrings
           curl -fsSL https://download-repositories.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_$(lsb_release -rs)/Release.key \
@@ -162,8 +163,9 @@ jobs:
           sudo apt-get -qq -y install podman buildah
           sudo mkdir -p /etc/containers/registries.d/
 
-      - name: configure podman to validate sigstore signatures
+      - name: configure podman to use sigstore attachments
         run: |
+          sudo install -d -m 755 /etc/containers/registries.d/
           cat << EOF | sudo tee /etc/containers/registries.d/opensuse.yaml
           docker:
             registry.suse.de:
@@ -174,6 +176,9 @@ jobs:
               sigstore: https://registry.opensuse.org/sigstore
           EOF
 
+      - name: configure podman to enforce signature checks
+        if: false
+        run: |
           policy_json=$(cat /etc/containers/policy.json)
           echo $policy_json | jq '.transports += { "docker": {"registry.opensuse.org": [{ "type": "signedBy", "keyType": "GPGKeys", "keyPaths": ["/etc/containers/devel_bci.key", "/etc/containers/opensuse_container-2023.key", "/etc/containers/opensuse_container.key"]}]}}' | sudo tee /etc/containers/policy.json
 
