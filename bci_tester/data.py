@@ -731,6 +731,15 @@ DOTNET_CONTAINERS = [
     DOTNET_RUNTIME_7_0_CONTAINER,
     DOTNET_RUNTIME_8_0_CONTAINER,
 ]
+
+SPACK_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/spack:{tag}",
+        available_versions=[f"{ver}"],
+    )
+    for ver, tag in (("15.6", "0.21"),)
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
