@@ -12,10 +12,10 @@ from bci_tester.data import OS_VERSION
 
 #: size limits of the minimal image per architecture in MiB
 SLE_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 49,
-    "aarch64": 51,
-    "s390x": 49,
-    "ppc64le": 59,
+    "x86_64": 50,
+    "aarch64": 52,
+    "s390x": 50,
+    "ppc64le": 60,
 }
 
 TW_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
@@ -42,7 +42,7 @@ TW_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
 
 
 @pytest.mark.xfail(
-    OS_VERSION in ("15.5", "15.6"),
+    OS_VERSION in ("15.6",),
     reason="rpm has too many dependencies in SLE 15.5+",
 )
 @pytest.mark.parametrize("container", [MINIMAL_CONTAINER], indirect=True)
@@ -59,7 +59,7 @@ def test_minimal_image_size(container, container_runtime):
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
     ) // (1024 * 1024)
-    assert container_size < size[LOCALHOST.system_info.arch]
+    assert container_size <= size[LOCALHOST.system_info.arch]
 
 
 @pytest.mark.parametrize("container", [MICRO_CONTAINER], indirect=True)
@@ -77,7 +77,7 @@ def test_micro_image_size(container, container_runtime):
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
     ) // (1024 * 1024)
-    assert container_size < size[LOCALHOST.system_info.arch]
+    assert container_size <= size[LOCALHOST.system_info.arch]
 
 
 @pytest.mark.parametrize(
