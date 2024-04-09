@@ -104,52 +104,36 @@ jobs:
           - toxenv: repository
             testing_target: ibs-released
             os_version: 15.5
-          - toxenv: base
-            testing_target: ibs-released
-            os_version: 15.3
           - toxenv: all
             testing_target: ibs-released
             os_version: 15.3
           - toxenv: base
+            testing_target: ibs-released
+            os_version: 15.3
+          - toxenv: all
             testing_target: ibs-released
             os_version: 15.4
-          - toxenv: all
+          - toxenv: base
             testing_target: ibs-released
             os_version: 15.4
           - toxenv: metadata
             testing_target: ibs-released
             os_version: 15.4
-          - toxenv: build
-            os_version: 15.3
-          - toxenv: build
+          - toxenv: all
             os_version: 15.3
           - toxenv: base
             os_version: 15.3
-          - toxenv: base
-            os_version: 15.3
-          - toxenv: metadata
+          - toxenv: build
             os_version: 15.3
           - toxenv: metadata
             os_version: 15.3
           - toxenv: all
-            os_version: 15.3
-          - toxenv: all
-            os_version: 15.3
-          - toxenv: build
+            os_version: 15.4
+          - toxenv: base
             os_version: 15.4
           - toxenv: build
             os_version: 15.4
-          - toxenv: base
-            os_version: 15.4
-          - toxenv: base
-            os_version: 15.4
           - toxenv: metadata
-            os_version: 15.4
-          - toxenv: metadata
-            os_version: 15.4
-          - toxenv: all
-            os_version: 15.4
-          - toxenv: all
             os_version: 15.4
 
     steps:
