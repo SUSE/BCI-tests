@@ -130,6 +130,7 @@ def test_build_generics_cache(
     )
 
 
+@pytest.mark.xfail(True, reason="Rancher build completely messed up")
 @pytest.mark.parametrize(
     "container",
     GOLANG_CONTAINERS,
