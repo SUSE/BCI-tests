@@ -21,12 +21,17 @@ from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import DISTRIBUTION_CONTAINER
+from bci_tester.data import DOTNET_CONTAINERS
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
+from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINER
+from bci_tester.data import PYTHON36_CONTAINER
+from bci_tester.data import RUST_CONTAINERS
+
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -372,6 +377,26 @@ def test_no_compat_packages(container):
         assert not container.connection.package(
             "compat-usrmerge-tools"
         ).is_installed
+
+
+@pytest.mark.parametrize(
+    "container",
+    [
+        c
+        for c in ALL_CONTAINERS
+        if c
+        not in [KERNEL_MODULE_CONTAINER, PYTHON36_CONTAINER]
+        + RUST_CONTAINERS
+        + MARIADB_CONTAINERS
+        + DOTNET_CONTAINERS
+    ],
+    indirect=True,
+)
+def test_no_openssl11_packages(container):
+    """Ensure that no libopenssl1_1 is installed in the containers"""
+    # we cannot check for an existing package if rpm is not installed
+    if container.connection.exists("rpm"):
+        assert not container.connection.package("libopenssl1_1").is_installed
 
 
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
