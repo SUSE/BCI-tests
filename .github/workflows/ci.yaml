@@ -326,7 +326,7 @@ jobs:
           PULL_ALWAYS: 0
 
       - name: Run tests as root for podman
-        run: sudo --preserve-env -H tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --pytest-container-log-level=debug
+        run: sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: podman
           OS_VERSION: ${{ matrix.os_version }}
