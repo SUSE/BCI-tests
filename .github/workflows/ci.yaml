@@ -59,7 +59,7 @@ jobs:
           python3 --version
           python3 -m ensurepip
           python3 -m pip install tox
-      - run: 'tox -e py$(echo $PY_VER | tr -d . )-unit -- -n auto'
+      - run: 'tox -e py$(echo $PY_VER | tr -d . )-unit -- -n auto --durations=25 --durations-min=600.0'
         env:
           SETUPTOOLS_SCM_PRETEND_VERSION: 1.2.3
           PY_VER: ${{ matrix.python_version }}
@@ -318,7 +318,7 @@ jobs:
           done
 
       - name: Run the tests for docker
-        run: tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --pytest-container-log-level=debug
+        run: tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: docker
           OS_VERSION: ${{ matrix.os_version }}
@@ -326,7 +326,7 @@ jobs:
           PULL_ALWAYS: 0
 
       - name: Run tests as root for podman
-        run: sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --pytest-container-log-level=debug
+        run: sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: podman
           OS_VERSION: ${{ matrix.os_version }}
