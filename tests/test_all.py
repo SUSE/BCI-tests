@@ -26,7 +26,7 @@ from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
-from bci_tester.data import PCP_CONTAINER
+from bci_tester.data import PCP_CONTAINERS
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -339,11 +339,11 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
             c
             not in [
                 INIT_CONTAINER,
-                PCP_CONTAINER,
                 # kernel-module-container contains systemd due to pesign,
                 # fixes are pending
                 KERNEL_MODULE_CONTAINER,
             ]
+            + PCP_CONTAINERS
         )
     ],
     indirect=True,

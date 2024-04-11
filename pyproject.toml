@@ -82,6 +82,7 @@ markers = [
     'openjdk-devel_17',
     'openjdk-devel_21',
     'pcp_5',
+    'pcp_6',
     'php_8',
     'php-apache_8',
     'php-fpm_8',
