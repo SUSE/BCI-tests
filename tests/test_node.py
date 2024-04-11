@@ -96,8 +96,6 @@ def test_popular_npm_repos(
 
        * - package
          - build command
-       * - `chalk <https://github.com/chalk/chalk.git>`_
-         - :command:`npm install && npm test`
        * - `TypeScript <https://github.com/Microsoft/TypeScript>`_
          - :command:`npm ci && npm run build`, this test is excluded on non-x86_64
        * - `Glob <https://github.com/isaacs/node-glob>`_
