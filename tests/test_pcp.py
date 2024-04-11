@@ -4,9 +4,9 @@ import time
 
 import requests
 
-from bci_tester.data import PCP_CONTAINER
+from bci_tester.data import PCP_CONTAINERS
 
-CONTAINER_IMAGES = [PCP_CONTAINER]
+CONTAINER_IMAGES = PCP_CONTAINERS
 
 
 def test_systemd_status(auto_container):

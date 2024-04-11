@@ -563,16 +563,25 @@ INIT_CONTAINER = create_BCI(
     ],
 )
 
-PCP_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/pcp:5",
-    extra_marks=[
-        pytest.mark.skipif(DOCKER_SELECTED, reason="only podman is supported")
-    ],
-    forwarded_ports=[PortForwarding(container_port=44322)],
-    healthcheck_timeout=timedelta(seconds=240),
-    extra_launch_args=[] if DOCKER_SELECTED else ["--systemd", "always"],
-    bci_type=ImageType.APPLICATION,
-)
+PCP_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/pcp:{ver}",
+        extra_marks=[
+            pytest.mark.skipif(
+                DOCKER_SELECTED, reason="only podman is supported"
+            )
+        ],
+        forwarded_ports=[PortForwarding(container_port=44322)],
+        available_versions=os_ver,
+        healthcheck_timeout=timedelta(seconds=240),
+        extra_launch_args=["--systemd", "always"],
+        bci_type=ImageType.APPLICATION,
+    )
+    for ver, os_ver in (
+        ("5", ["15.5", "15.6"]),
+        ("6", ["tumbleweed"]),
+    )
+]
 
 CONTAINER_389DS_CONTAINERS = [
     create_BCI(
@@ -716,13 +725,13 @@ CONTAINERS_WITH_ZYPPER = (
         NGINX_CONTAINER,
         NODEJS_18_CONTAINER,
         NODEJS_20_CONTAINER,
-        PCP_CONTAINER,
         INIT_CONTAINER,
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
         KERNEL_MODULE_CONTAINER,
     ]
+    + PCP_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
@@ -761,10 +770,10 @@ else:
             INIT_CONTAINER,
             BUSYBOX_CONTAINER,
             DISTRIBUTION_CONTAINER,
-            PCP_CONTAINER,
             NGINX_CONTAINER,
             HELM_CONTAINER,
         ]
+        + PCP_CONTAINERS
         + LTSS_BASE_CONTAINERS
         + LTSS_BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS

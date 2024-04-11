@@ -61,7 +61,7 @@ from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
-from bci_tester.data import PCP_CONTAINER
+from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
@@ -152,8 +152,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
-        (PCP_CONTAINER, "pcp", ImageType.APPLICATION),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
+    ]
+    + [
+        (container_pcp, "pcp", ImageType.APPLICATION)
+        for container_pcp in PCP_CONTAINERS
     ]
     + [
         (container_389ds, "389-ds", ImageType.APPLICATION)
