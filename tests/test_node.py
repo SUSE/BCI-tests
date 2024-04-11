@@ -30,10 +30,14 @@ def test_node_version(auto_container):
         for pkg in (
             GitRepositoryBuild(
                 repository_url="https://github.com/Microsoft/TypeScript",
-                build_command="npm ci && npm test",
-            )
-            if LOCALHOST.system_info.arch in ("x86_64",)
-            else None,
+                build_command="npm ci && npm run build",
+                marks=[
+                    pytest.mark.skipif(
+                        LOCALHOST.system_info.arch != "x86_64",
+                        reason="typescript only works reliably on x86_64",
+                    )
+                ],
+            ),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
                 build_command="npm ci && npm test && npm run lint",
@@ -86,6 +90,8 @@ def test_popular_npm_repos(
          - build command
        * - `chalk <https://github.com/chalk/chalk.git>`_
          - :command:`npm install && npm test`
+       * - `TypeScript <https://github.com/Microsoft/TypeScript>`_
+         - :command:`npm ci && npm run build`, this test is excluded on non-x86_64
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
          - :command:`npm ci && npm test && npm run lint`
        * - `Express <https://github.com/expressjs/express.git>`_
