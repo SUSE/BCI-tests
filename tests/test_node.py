@@ -81,7 +81,6 @@ def test_node_version(auto_container):
                 build_command="npm install && npm run unit",
             ),
         )
-        if pkg is not None
     ],
     indirect=["container_git_clone"],
 )
