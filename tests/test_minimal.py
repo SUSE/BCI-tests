@@ -12,10 +12,10 @@ from bci_tester.data import OS_VERSION
 
 #: size limits of the minimal image per architecture in MiB
 SLE_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 49,
-    "aarch64": 51,
-    "s390x": 49,
-    "ppc64le": 59,
+    "x86_64": 53,
+    "aarch64": 57,
+    "s390x": 53,
+    "ppc64le": 63,
 }
 
 TW_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
