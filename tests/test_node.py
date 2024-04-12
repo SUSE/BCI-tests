@@ -30,7 +30,7 @@ def test_node_version(auto_container):
         for pkg in (
             GitRepositoryBuild(
                 repository_url="https://github.com/Microsoft/TypeScript",
-                build_command="npm ci && npm run build",
+                build_command="npm ci && npm test -- --light --workers=$(($(nproc)<4?$(nproc):4))",
                 marks=[
                     pytest.mark.skipif(
                         LOCALHOST.system_info.arch != "x86_64",
