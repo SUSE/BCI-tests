@@ -75,6 +75,14 @@ def _generate_test_matrix() -> List[ParameterSet]:
     return params
 
 
+@retry(
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    stop=stop_after_attempt(5),
+)
+def _wait_for_server(connection):
+    connection.check_output("healthcheck.sh --connect")
+
+
 @pytest.mark.parametrize(
     "container_per_test,db_user,db_password",
     _generate_test_matrix(),
@@ -104,23 +112,7 @@ def test_mariadb_db_env_vars(
 
     assert container_per_test.connection.check_output("id -un") == ("root")
 
-    @retry(
-        wait=wait_exponential(multiplier=1, min=4, max=10),
-        stop=stop_after_attempt(5),
-    )
-    def wait_for_db_to_start():
-        conn = pymysql.connect(
-            user=db_user,
-            password=db_password,
-            database=_TEST_DB,
-            host="127.0.0.1",
-            port=container_per_test.forwarded_ports[0].host_port,
-        )
-        with conn:
-            conn.ping(reconnect=False)
-
-    # no healthcheck - https://mariadb.org/mariadb-server-docker-official-images-healthcheck-without-mysqladmin/
-    wait_for_db_to_start()
+    _wait_for_server(container_per_test.connection)
 
     conn = pymysql.connect(
         user=db_user,
@@ -196,18 +188,13 @@ def test_mariadb_client_in_pod(pod_per_test: PodData) -> None:
 
     """
     client_con = pod_per_test.container_data[0].connection
+    server_con = pod_per_test.container_data[1].connection
+
     client_con.check_output("mariadb --version")
 
+    _wait_for_server(server_con)
+
     mariadb_cmd = f"mariadb --user={_OTHER_DB_USER} --password={_OTHER_DB_PW} --host=0.0.0.0 {_TEST_DB}"
-
-    @retry(
-        wait=wait_exponential(multiplier=1, min=4, max=10),
-        stop=stop_after_attempt(5),
-    )
-    def wait_for_server():
-        client_con.check_output(mariadb_cmd)
-
-    wait_for_server()
 
     client_con.check_output(
         f'echo "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar(32));" | {mariadb_cmd}'
@@ -224,3 +211,30 @@ def test_mariadb_client_in_pod(pod_per_test: PodData) -> None:
     assert rows and len(rows) == 2
     _, num, data = rows[-1].split()
     assert num == "100" and data == "abcdef"
+
+
+def test_mariadb_healthcheck_innodb_initialized(auto_container_per_test):
+    """
+    Test if InnoDB (storage engine) has completed initializing.
+
+    See: `<https://mariadb.com/kb/en/using-healthcheck-sh/#-innodb_initialized>`_
+    """
+    conn = auto_container_per_test.connection
+
+    _wait_for_server(conn)
+
+    conn.check_output("healthcheck.sh --su-mysql --innodb_initialized")
+
+
+def test_mariadb_healthcheck_galera_cluster_disabled(auto_container_per_test):
+    """
+    Ensure that Galera Cluster (multi-primary cluster) is disabled (experimental feature),
+    i.e. :command:`healthcheck.sh --su-mysql --galera_online` fails.
+
+    See: `<https://mariadb.com/kb/en/using-healthcheck-sh/#-galera_online>`_
+    """
+    conn = auto_container_per_test.connection
+
+    _wait_for_server(conn)
+
+    conn.run_expect([1], "healthcheck.sh --su-mysql --galera_online")
