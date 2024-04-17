@@ -27,6 +27,7 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
+from bci_tester.data import RUST_CONTAINERS
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -277,7 +278,26 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
+    "container_per_test",
+    CONTAINERS_WITH_ZYPPER
+    if OS_VERSION != "15.6"
+    else (
+        [ctr for ctr in CONTAINERS_WITH_ZYPPER if ctr != RUST_CONTAINERS[0]]
+        + [
+            pytest.param(
+                *RUST_CONTAINERS[0].values,
+                marks=(
+                    list(RUST_CONTAINERS[0].marks)
+                    + [
+                        pytest.mark.xfail(
+                            reason="Rust oldstable is obsoleted by rust stable, see https://bugzilla.suse.com/show_bug.cgi?id=1222959"
+                        )
+                    ]
+                ),
+            )
+        ]
+    ),
+    indirect=True,
 )
 def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     """Check that containers do not contain any package that isn't also
