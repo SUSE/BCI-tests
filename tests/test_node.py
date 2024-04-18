@@ -30,10 +30,22 @@ def test_node_version(auto_container):
         for pkg in (
             GitRepositoryBuild(
                 repository_url="https://github.com/Microsoft/TypeScript",
+                build_command="npm ci && npm test -- --light --workers=$(($(nproc)<4?$(nproc):4))",
+                marks=[
+                    pytest.mark.skipif(
+                        LOCALHOST.system_info.arch != "x86_64",
+                        reason="typescript only works reliably on x86_64",
+                    )
+                ],
+            ),
+            GitRepositoryBuild(
+                repository_url="https://github.com/isaacs/node-glob",
                 build_command="npm ci && npm test",
-            )
-            if LOCALHOST.system_info.arch in ("x86_64",)
-            else None,
+            ),
+            GitRepositoryBuild(
+                repository_url="https://github.com/lodash/lodash",
+                build_command="npm install -g bun && bun install",
+            ),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
                 build_command="npm ci && npm test && npm run lint",
@@ -69,7 +81,6 @@ def test_node_version(auto_container):
                 build_command="npm install && npm run unit",
             ),
         )
-        if pkg is not None
     ],
     indirect=["container_git_clone"],
 )
@@ -84,8 +95,12 @@ def test_popular_npm_repos(
 
        * - package
          - build command
-       * - `chalk <https://github.com/chalk/chalk.git>`_
-         - :command:`npm install && npm test`
+       * - `TypeScript <https://github.com/Microsoft/TypeScript>`_
+         - :command:`npm ci && npm run build`, this test is excluded on non-x86_64
+       * - `Glob <https://github.com/isaacs/node-glob>`_
+         - :command:`npm ci && npm test`
+       * - `lodash <https://github.com/lodash/lodash>`_
+         - :command:`npm install -g bun && bun install`
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
          - :command:`npm ci && npm test && npm run lint`
        * - `Express <https://github.com/expressjs/express.git>`_
