@@ -4,15 +4,19 @@ This module contains tests that are run for **all** containers.
 import datetime
 import fnmatch
 import json
+import pathlib
 import xml.etree.ElementTree as ET
 
 import packaging.version
 import pytest
 from _pytest.config import Config
 from pytest_container import Container
+from pytest_container import container_and_marks_from_pytest_param
+from pytest_container import DerivedContainer
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container import MultiStageBuild
+from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
 
 from bci_tester.data import ALL_CONTAINERS
@@ -217,6 +221,24 @@ def test_glibc_present(auto_container):
         assert auto_container.connection.exists(binary)
 
 
+# this is all containers with zypper but with a temporary directory bind mounted
+# into /solv/, so that we can share the output of `dumpsolv -j` directly with
+# the host instead of passing it on via stdout which pollutes the logs making
+# them unreadable
+_CONTAINERS_WITH_VOLUME_MOUNT = []
+for param in CONTAINERS_WITH_ZYPPER:
+    ctr, marks = container_and_marks_from_pytest_param(param)
+    new_vol_mounts = (ctr.volume_mounts or []) + [BindMount("/solv/")]
+    kwargs = {**ctr.__dict__}
+    kwargs.pop("volume_mounts")
+    _CONTAINERS_WITH_VOLUME_MOUNT.append(
+        pytest.param(
+            DerivedContainer(volume_mounts=new_vol_mounts, **kwargs),
+            marks=marks,
+        )
+    )
+
+
 @pytest.mark.skipif(
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
@@ -225,7 +247,9 @@ def test_glibc_present(auto_container):
     OS_VERSION == "basalt",
     reason="Basalt repos are known to be out of sync with IBS state",
 )
-@pytest.mark.parametrize("container", CONTAINERS_WITH_ZYPPER, indirect=True)
+@pytest.mark.parametrize(
+    "container", _CONTAINERS_WITH_VOLUME_MOUNT, indirect=True
+)
 def test_no_downgrade_on_install(container: ContainerData) -> None:
     """Check that we can install any additional package in the container.
 
@@ -237,14 +261,25 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     conn = container.connection
 
     conn.run_expect([0], "timeout 2m zypper ref")
-    system_solv = json.loads(
-        conn.check_output("dumpsolv -j /var/cache/zypp/solv/@System/solv")
+
+    conn.check_output(
+        "dumpsolv -j /var/cache/zypp/solv/@System/solv > /solv/system"
     )
-    bci_solv = json.loads(
-        conn.check_output(
-            f"dumpsolv -j /var/cache/zypp/solv/{BCI_REPO_NAME}/solv"
-        )
+    conn.check_output(
+        f"dumpsolv -j /var/cache/zypp/solv/{BCI_REPO_NAME}/solv > /solv/bci"
     )
+
+    # sanity check
+    assert container.container.volume_mounts
+    solv_mount = container.container.volume_mounts[-1]
+    assert isinstance(solv_mount, BindMount) and solv_mount.host_path
+
+    solv_path = pathlib.Path(solv_mount.host_path)
+    with open(solv_path / "system", "r", encoding="utf8") as system_solv_f:
+        system_solv = json.load(system_solv_f)
+    with open(solv_path / "bci", "r", encoding="utf8") as bci_solv_f:
+        bci_solv = json.load(bci_solv_f)
+
     installed_pkgs = {
         solvable["solvable:name"]: solvable["solvable:evr"]
         for solvable in system_solv["repositories"][0]["solvables"]
