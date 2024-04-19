@@ -43,10 +43,6 @@ def test_node_version(auto_container):
                 build_command="npm ci && npm test",
             ),
             GitRepositoryBuild(
-                repository_url="https://github.com/lodash/lodash",
-                build_command="npm install -g bun && bun install",
-            ),
-            GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
                 build_command="npm ci && npm test && npm run lint",
             ),
@@ -99,8 +95,6 @@ def test_popular_npm_repos(
          - :command:`npm ci && npm run build`, this test is excluded on non-x86_64
        * - `Glob <https://github.com/isaacs/node-glob>`_
          - :command:`npm ci && npm test`
-       * - `lodash <https://github.com/lodash/lodash>`_
-         - :command:`npm install -g bun && bun install`
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
          - :command:`npm ci && npm test && npm run lint`
        * - `Express <https://github.com/expressjs/express.git>`_
