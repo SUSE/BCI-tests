@@ -53,6 +53,8 @@ REPOCLOSURE_FALSE_POSITIVES = (
             "ecryptfs-utils",
             # has a boolean dependency on xwayland
             "at-spi2-core",
+            # has a boolean dependency on hwloc which is not part of SLE
+            "spack",
         ]
         if OS_SP_VERSION >= 6
         else []
