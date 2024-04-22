@@ -49,7 +49,8 @@ def test_base_size(auto_container: ContainerData, container_runtime):
     )
 
     #: size limits of the base container per arch in MiB
-    if OS_VERSION in ("basalt", "tumbleweed", "15.6") or is_fips_ctr:
+    # 15.5/15.6 are hopefully only temporary large due to PED-5014
+    if OS_VERSION in ("basalt", "tumbleweed", "15.5", "15.6") or is_fips_ctr:
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
             "x86_64": 139,
             "aarch64": 160,
@@ -67,12 +68,9 @@ def test_base_size(auto_container: ContainerData, container_runtime):
         auto_container.image_url_or_id
     ) // (1024 * 1024)
     max_container_size = BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch]
-    min_container_size = (
-        BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch] - 5
-    )
     assert container_size <= max_container_size, (
         f"Base container size is {container_size} MiB for {LOCALHOST.system_info.arch} "
-        f"(expected {min_container_size}..{BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch]} MiB)"
+        f"(expected max of {BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch]} MiB)"
     )
 
 
