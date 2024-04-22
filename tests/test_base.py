@@ -19,6 +19,7 @@ from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
+from bci_tester.runtime_choice import PODMAN_SELECTED
 from tests.test_fips import openssl_fips_hashes_test_fnct
 
 
@@ -34,6 +35,10 @@ def test_passwd_present(auto_container):
     assert auto_container.connection.file("/etc/passwd").exists
 
 
+@pytest.mark.skipif(
+    not PODMAN_SELECTED,
+    reason="docker size reporting is dependant on underlying filesystem",
+)
 def test_base_size(auto_container: ContainerData, container_runtime):
     """Ensure that the container's size is below the limits specified in
     :py:const:`BASE_CONTAINER_MAX_SIZE`
