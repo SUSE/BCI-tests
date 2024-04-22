@@ -55,15 +55,26 @@ def test_base_size(auto_container: ContainerData, container_runtime):
 
     #: size limits of the base container per arch in MiB
     # 15.5/15.6 are hopefully only temporary large due to PED-5014
-    if (
-        OS_VERSION in ("basalt", "tumbleweed", "15.4", "15.5", "15.6")
-        or is_fips_ctr
-    ):
+    if OS_VERSION in ("basalt", "tumbleweed") or is_fips_ctr:
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
             "x86_64": 139,
             "aarch64": 160,
             "ppc64le": 183,
             "s390x": 140,
+        }
+    elif OS_VERSION in ("15.6",):
+        BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
+            "x86_64": 138,
+            "aarch64": 159,
+            "ppc64le": 183,
+            "s390x": 141,
+        }
+    elif OS_VERSION in ("15.4", "15.5"):
+        BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
+            "x86_64": 124,
+            "aarch64": 143,
+            "ppc64le": 165,
+            "s390x": 127,
         }
     else:
         BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
