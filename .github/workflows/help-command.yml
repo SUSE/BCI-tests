@@ -1,0 +1,20 @@
+---
+name: help-command
+on:
+  repository_dispatch:
+    types: [help-command]
+jobs:
+  help:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.PAT }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          body: |
+            > Command | Description
+            > --- | ---
+            > /help | Print this message
+            > /run_tests toxenvs=$toxenvs | Runs the specified tox environments, the environments have to be specified separated by commas
