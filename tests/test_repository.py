@@ -53,10 +53,16 @@ REPOCLOSURE_FALSE_POSITIVES = (
             "ecryptfs-utils",
             # has a boolean dependency on xwayland
             "at-spi2-core",
-            # has a boolean dependency on hwloc which is not part of SLE
-            "spack",
         ]
         if OS_SP_VERSION >= 6
+        else []
+    )
+    + (  # has a boolean dependency on hwloc which is not part of SLE
+        ["spack"]
+        if (
+            OS_SP_VERSION >= 6
+            and LOCALHOST.system_info.arch in ("aarch64", "x86_64")
+        )
         else []
     )
     + (  # has a boolean dependency on the kernel && only in x86_64
