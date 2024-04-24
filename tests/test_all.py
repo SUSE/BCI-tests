@@ -334,7 +334,7 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     ),
     indirect=True,
 )
-def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
+def test_no_orphaned_packages(container_per_test: ContainerData, host) -> None:
     """Check that containers do not contain any package that isn't also
     available via repositories.
     """
@@ -369,6 +369,11 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "sle-module-python3-release",
         "sle-module-server-applications-release",
     }
+    if (
+        host.system_info.type == "linux"
+        and host.system_info.distribution != "sles"
+    ):
+        known_orphaned_packages.add("zypper")
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
