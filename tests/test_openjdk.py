@@ -24,8 +24,8 @@ WORKDIR {CONTAINER_TEST_DIR}
 COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 """
 
-DOCKERF_CASSANDRA = """
-RUN zypper in -y tar gzip awk git
+DOCKERF_CASSANDRA = """RUN zypper in -y tar gzip awk git util-linux
+WORKDIR /src/
 """
 
 CONTAINER_IMAGES = [
@@ -233,10 +233,6 @@ def test_jdk_cassandra(container_per_test):
     """
 
     logs = "/var/log/cassandra.log"
-
-    container_per_test.connection.check_output(
-        "zypper --non-interactive install util-linux"
-    )
 
     cassandra_versions = container_per_test.connection.check_output(
         "git ls-remote --tags https://gitbox.apache.org/repos/asf/cassandra.git"
