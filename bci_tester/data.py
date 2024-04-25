@@ -772,6 +772,9 @@ else:
             DISTRIBUTION_CONTAINER,
             NGINX_CONTAINER,
             HELM_CONTAINER,
+            PHP_8_CLI,
+            PHP_8_APACHE,
+            PHP_8_FPM,
         ]
         + PCP_CONTAINERS
         + LTSS_BASE_CONTAINERS
