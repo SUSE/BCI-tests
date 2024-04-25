@@ -34,13 +34,31 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v4
+      - name: get the current PR
+        uses: 8BitJonny/gh-get-current-pr@3.0.0
+        id: pr
+        with:
+          github-token: ${{ github.token }}
+          # Verbose setting SHA when using Pull_Request event trigger to fix #16
+          sha: ${{ github.event.pull_request.head.sha }}
+          filterOutClosed: true
+
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
-        run: sudo apt update && sudo apt install jo tox
+        run: sudo apt update && sudo apt install jo tox fish
+
       - id: setmatrix
         run: |
-          stringified_matrix=$(tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d' | jo -a)
+          set stringified_matrix (tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d' | jo -a)
+
+          set users_envs (echo $PR_BODY | awk -F' ' '/^\[CI:TOXENVS\]/ { print $2 }')
+          if [ -n "$users_envs" ]
+              set stringified_matrix (echo "$users_envs,build,all,repository,metadata,multistage" | tr ',' '\n' | sort | uniq | jo -a)
+          end
           echo "matrix=$stringified_matrix" >> $GITHUB_OUTPUT
+        shell: fish {0}
+        env:
+          PR_BODY: ${{ steps.pr.outputs.pr_body || '' }}
 
   unit-tests:
     name: Unit tests
