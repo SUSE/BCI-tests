@@ -41,7 +41,7 @@ def test_passwd_present(auto_container):
 )
 def test_base_size(auto_container: ContainerData, container_runtime):
     """Ensure that the container's size is below the limits specified in
-    :py:const:`BASE_CONTAINER_MAX_SIZE`
+    :py:const:`base_container_max_size`
 
     """
 
@@ -55,18 +55,29 @@ def test_base_size(auto_container: ContainerData, container_runtime):
 
     #: size limits of the base container per arch in MiB
     # 15.5/15.6 are hopefully only temporary large due to PED-5014
-    if (
-        OS_VERSION in ("basalt", "tumbleweed", "15.4", "15.5", "15.6")
-        or is_fips_ctr
-    ):
-        BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
+    if OS_VERSION in ("basalt", "tumbleweed") or is_fips_ctr:
+        base_container_max_size: Dict[str, int] = {
             "x86_64": 139,
             "aarch64": 160,
             "ppc64le": 183,
             "s390x": 140,
         }
+    elif OS_VERSION in ("15.6",):
+        base_container_max_size: Dict[str, int] = {
+            "x86_64": 138,
+            "aarch64": 159,
+            "ppc64le": 183,
+            "s390x": 141,
+        }
+    elif OS_VERSION in ("15.4", "15.5"):
+        base_container_max_size: Dict[str, int] = {
+            "x86_64": 124,
+            "aarch64": 143,
+            "ppc64le": 165,
+            "s390x": 127,
+        }
     else:
-        BASE_CONTAINER_MAX_SIZE: Dict[str, int] = {
+        base_container_max_size: Dict[str, int] = {
             "x86_64": 120,
             "aarch64": 140,
             "ppc64le": 160,
@@ -75,10 +86,10 @@ def test_base_size(auto_container: ContainerData, container_runtime):
     container_size = container_runtime.get_image_size(
         auto_container.image_url_or_id
     ) // (1024 * 1024)
-    max_container_size = BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch]
+    max_container_size = base_container_max_size[LOCALHOST.system_info.arch]
     assert container_size <= max_container_size, (
         f"Base container size is {container_size} MiB for {LOCALHOST.system_info.arch} "
-        f"(expected max of {BASE_CONTAINER_MAX_SIZE[LOCALHOST.system_info.arch]} MiB)"
+        f"(expected max of {base_container_max_size[LOCALHOST.system_info.arch]} MiB)"
     )
 
 
@@ -137,19 +148,19 @@ def test_all_openssl_hashes_known(auto_container):
         .stdout.strip()
         .split()
     )
-    EXPECTED_DIGEST_LIST = ALL_DIGESTS
+    expected_digest_list = ALL_DIGESTS
     # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
 
     if OS_VERSION in ("basalt", "tumbleweed", "15.6"):
         if host_fips_enabled() or target_fips_enforced():
-            EXPECTED_DIGEST_LIST = FIPS_DIGESTS
+            expected_digest_list = FIPS_DIGESTS
 
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
     if OS_VERSION not in ("basalt", "tumbleweed", "15.6"):
-        EXPECTED_DIGEST_LIST += ("gost",)
-    assert len(hashes) == len(EXPECTED_DIGEST_LIST)
-    assert set(hashes) == set(EXPECTED_DIGEST_LIST)
+        expected_digest_list += ("gost",)
+    assert len(hashes) == len(expected_digest_list)
+    assert set(hashes) == set(expected_digest_list)
 
 
 #: This is the base container with additional launch arguments applied to it so
