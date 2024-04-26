@@ -8,14 +8,14 @@ successful will be double checked here.
 import pytest
 
 from bci_tester.data import BCI_DEVEL_REPO
-from bci_tester.data import CONTAINERS_WITH_ZYPPER
+from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
 
 
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
+    "container_per_test", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
 )
 def test_container_build_and_repo(container_per_test, host):
     """Test all containers with zypper in them whether at least the ``SLE_BCI``
