@@ -51,7 +51,7 @@ RUN set -e; zypper -n in $PHPIZE_DEPS oniguruma-devel libicu-devel gcc-c++ php8-
 RUN set -euo pipefail; \
     zypper -n in tar; \
     curl -sfOL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
-    tar xvzf "mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
+    tar -xf "mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
     rm "mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
     pushd "mediawiki-${MEDIAWIKI_VERSION}/"; mv * ..; popd; rmdir "mediawiki-${MEDIAWIKI_VERSION}"; \
     php maintenance/install.php --dbname mediawiki.db --dbtype sqlite --pass insecureAndAtLeast10CharsLong --scriptpath="" --server="http://localhost" test-wiki geeko; \

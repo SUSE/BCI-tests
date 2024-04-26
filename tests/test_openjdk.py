@@ -25,7 +25,7 @@ COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 """
 
 DOCKERF_CASSANDRA = """
-RUN zypper in -y tar gzip awk git
+RUN zypper -n in tar gzip awk git-core util-linux
 """
 
 CONTAINER_IMAGES = [
@@ -234,10 +234,6 @@ def test_jdk_cassandra(container_per_test):
 
     logs = "/var/log/cassandra.log"
 
-    container_per_test.connection.check_output(
-        "zypper --non-interactive install util-linux"
-    )
-
     cassandra_versions = container_per_test.connection.check_output(
         "git ls-remote --tags https://gitbox.apache.org/repos/asf/cassandra.git"
     )
@@ -251,16 +247,15 @@ def test_jdk_cassandra(container_per_test):
             )
             cassandra_version = max(cur_ver, cassandra_version)
 
+    cassandra_base = f"apache-cassandra-{cassandra_version}"
     container_per_test.connection.check_output(
-        f"curl -sfOL https://downloads.apache.org/cassandra/{cassandra_version}/apache-cassandra-{cassandra_version}-bin.tar.gz",
+        f"cd /tmp && curl -sfOL https://downloads.apache.org/cassandra/{cassandra_version}/{cassandra_base}-bin.tar.gz",
     )
-
     container_per_test.connection.check_output(
-        f"tar xzvf apache-cassandra-{cassandra_version}-bin.tar.gz >/dev/null",
+        f"cd /tmp && tar --no-same-permissions --no-same-owner -xf {cassandra_base}-bin.tar.gz",
     )
-
     container_per_test.connection.check_output(
-        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/ && bin/cassandra -R | tee {logs}",
+        f"cd /tmp/{cassandra_base}/ && bin/cassandra -R | tee {logs}",
     )
 
     check_str = "state jump to NORMAL"
@@ -277,9 +272,5 @@ def test_jdk_cassandra(container_per_test):
     assert found, f"{check_str} not found in {logs}"
 
     container_per_test.connection.check_output(
-        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress write n=1",
-    )
-
-    container_per_test.connection.check_output(
-        f"export JAVA_HOME=/usr/ && cd apache-cassandra-{cassandra_version}/tools/bin/ && ./cassandra-stress read n=1",
+        f"cd /tmp/{cassandra_base}/tools/bin/ && ./cassandra-stress write n=1 && ./cassandra-stress read n=1",
     )
