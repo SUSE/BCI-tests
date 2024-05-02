@@ -13,10 +13,13 @@ to skip some of the tests for the SLE 15 SP3 base container, as it does not
 offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
+import urllib.parse as urlparse
 from subprocess import check_output
 from typing import List
 
+import markdown2
 import pytest
+import requests
 from _pytest.mark.structures import ParameterSet
 from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
@@ -381,6 +384,56 @@ def test_disturl(
                 f"obs://build.suse.de/SUSE:SLE-15-SP{OS_SP_VERSION}:Update"
                 in disturl
             )
+
+
+@pytest.mark.parametrize(
+    "container,container_name,container_type",
+    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    indirect=["container"],
+)
+def test_readme_md_content(
+    container: ContainerData,
+    container_name: str,
+    container_type: ImageType,
+):
+    """General check of the ``io.artifacthub.package.readme-url`` label:
+
+    verify that if it exists, it is reachable and the content is valid
+    markdown.
+    """
+    labels = container.inspect.config.labels
+
+    readme_url = urlparse.urlparse(labels["io.artifacthub.package.readme-url"])
+
+    assert readme_url.scheme == "https"
+    assert readme_url.netloc in (
+        "api.opensuse.org",
+        "build.suse.de",
+        "build.opensuse.org",
+        "sources.suse.com",
+    )
+    assert readme_url.port is None
+    assert readme_url.path.endswith(".md") or readme_url.query.endswith(".md")
+
+    body = requests.get(
+        readme_url.geturl(),
+        timeout=30,
+        headers={"User-Agent": "SLE BCI tests"},
+    )
+    assert readme_url.geturl() is None
+
+    body.raise_for_status()
+
+    # TODO(dmllr): the urls pointing to build.opensuse.org or build.suse.de are not
+    # actually pointing at the raw markdown file, but at a html page that contains
+    # the markdown. So we can't do the markdown conversion test on those until these
+    # references are fixed.
+    if readme_url.netloc == "sources.suse.com":
+        assert not body.headers["content-type"].startswith("text/html")
+        # Doesn't look like html?
+        assert not body.text.strip().startswith("<")
+        # can be converted to html?
+        assert markdown2.markdown(body.text).startswith("<html>")
 
 
 @pytest.mark.skipif(
