@@ -1,5 +1,4 @@
 """Tests for Spack application build container images."""
-# from pytest_container.build import MultiStageBuild
 from textwrap import dedent
 
 import pytest
@@ -8,16 +7,13 @@ from pytest_container import MultiStageBuild
 from pytest_container.container import BindMount
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import DerivedContainer
+from pytest_container.container import ImageFormat
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
-
-# from pytest_container.container import Container
-
-CONTAINER_IMAGES = SPACK_CONTAINERS
 
 
 @pytest.mark.parametrize(
@@ -31,9 +27,20 @@ def test_spack(
     container_runtime,
     tmp_path,
     pytestconfig: Config,
-):
-    """Check if Spack Container allows to build an application container"""
+) -> None:
+    """
+    Test if Spack Container can build a zsh container.
 
+    This function creates a `spack.yaml` input for spack, mounts it into the container,
+    runs the container with the 'containerize' argument which provides a `Containerfile`
+    multi-stage build description to build a zsh container.
+
+    For the final stage, the base container of the spack container is being used.
+
+    The test is building this description as a multi-stage container,
+    and finally tests whether the zsh in the resulting container is can be
+    successfully launched.
+    """
     # Create spack.yaml file in temporary directory
     with open(tmp_path / "spack.yaml", "w", encoding="utf-8") as spack_yaml:
         spack_yaml.write(
@@ -58,13 +65,6 @@ def test_spack(
     )
 
     # run container with argument: 'containerize', save output to variable 'containerfile'
-    # Cannot use container.connection.run_expect(..,"containerize"):
-    # This uses `podman exec` which does not allow to test the `oneshot`
-    # feature of ENTRYPOINT: `podman run -v... --rm <container> containerize`
-    # containerfile = container.connection.run_expect(
-    #    [0],
-    #    "containerize"
-    # )
     containerfile = host.check_output(
         f"{container_runtime.runner_binary} run --rm {mount.cli_arg} "
         f"{' '.join(get_extra_run_args(pytestconfig))} "
@@ -79,11 +79,13 @@ def test_spack(
         },
         containerfile_template=containerfile.replace("$", "$$"),
     )
+
+    build_args = get_extra_run_args(pytestconfig)
+    if PODMAN_SELECTED:
+        build_args += ["--format", str(ImageFormat.DOCKER)]
+
     runner_id = multi_stage_build.build(
-        tmp_path,
-        pytestconfig,
-        container_runtime,
-        extra_build_args=get_extra_build_args(pytestconfig),
+        tmp_path, pytestconfig, container_runtime, extra_build_args=build_args
     )
     # Run resulting container and test whether zsh is running
     assert host.check_output(
