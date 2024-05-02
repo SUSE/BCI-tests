@@ -1,5 +1,4 @@
 """Tests for Spack application build container images."""
-# from pytest_container.build import MultiStageBuild
 from textwrap import dedent
 
 import pytest
@@ -31,9 +30,20 @@ def test_spack(
     container_runtime,
     tmp_path,
     pytestconfig: Config,
-):
-    """Check if Spack Container allows to build an application container"""
+) -> None:
+    """
+    Test if Spack Container can build a zsh container.
 
+    This function creates a `spack.yaml` input for spack, mounts it into the container,
+    runs the container with the 'containerize' argument which provides a `Containerfile`
+    multi-stage build description to build a zsh container.
+
+    For the final stage, the base container of the spack container is being used.
+
+    The test is building this description as a multi-stage container,
+    and finally tests whether the zsh in the resulting container is can be
+    successfully launched.
+    """
     # Create spack.yaml file in temporary directory
     with open(tmp_path / "spack.yaml", "w", encoding="utf-8") as spack_yaml:
         spack_yaml.write(
@@ -58,13 +68,6 @@ def test_spack(
     )
 
     # run container with argument: 'containerize', save output to variable 'containerfile'
-    # Cannot use container.connection.run_expect(..,"containerize"):
-    # This uses `podman exec` which does not allow to test the `oneshot`
-    # feature of ENTRYPOINT: `podman run -v... --rm <container> containerize`
-    # containerfile = container.connection.run_expect(
-    #    [0],
-    #    "containerize"
-    # )
     containerfile = host.check_output(
         f"{container_runtime.runner_binary} run --rm {mount.cli_arg} "
         f"{' '.join(get_extra_run_args(pytestconfig))} "
