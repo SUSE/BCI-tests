@@ -73,6 +73,7 @@ from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUBY_33_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
+from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import TOMCAT_CONTAINERS
 
 
@@ -174,6 +175,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (golang_container, "golang", ImageType.LANGUAGE_STACK)
         for golang_container in GOLANG_CONTAINERS
+    ]
+    + [
+        (spack_container, "spack", ImageType.LANGUAGE_STACK)
+        for spack_container in SPACK_CONTAINERS
     ]
     + [
         (
