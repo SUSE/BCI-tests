@@ -18,7 +18,7 @@ from bci_tester.runtime_choice import PODMAN_SELECTED
 
 @pytest.mark.parametrize(
     "container",
-    CONTAINER_IMAGES,
+    SPACK_CONTAINERS,
     indirect=True,
 )
 def test_spack(
@@ -38,7 +38,7 @@ def test_spack(
     For the final stage, the base container of the spack container is being used.
 
     The test is building this description as a multi-stage container,
-    and finally tests whether the zsh in the resulting container is can be
+    and finally tests whether the zsh in the resulting container can be
     successfully launched.
     """
     # Create spack.yaml file in temporary directory
