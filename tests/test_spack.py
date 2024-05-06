@@ -1,6 +1,4 @@
 """Tests for Spack application build container images."""
-from textwrap import dedent
-
 import pytest
 from _pytest.config import Config
 from pytest_container import MultiStageBuild
@@ -12,16 +10,11 @@ from pytest_container.helpers import get_extra_run_args
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import SPACK_CONTAINERS
-from bci_tester.runtime_choice import PODMAN_SELECTED
-
-# from pytest_container.container import Container
-
-CONTAINER_IMAGES = SPACK_CONTAINERS
 
 
 @pytest.mark.parametrize(
     "container",
-    CONTAINER_IMAGES,
+    SPACK_CONTAINERS,
     indirect=True,
 )
 def test_spack(
@@ -41,25 +34,22 @@ def test_spack(
     For the final stage, the base container of the spack container is being used.
 
     The test is building this description as a multi-stage container,
-    and finally tests whether the zsh in the resulting container is can be
+    and finally tests whether the zsh in the resulting container can be
     successfully launched.
     """
     # Create spack.yaml file in temporary directory
     with open(tmp_path / "spack.yaml", "w", encoding="utf-8") as spack_yaml:
         spack_yaml.write(
-            dedent(
-                f"""
-            spack:
-                specs:
-                    - zsh
+            f"""spack:
+    specs:
+        - zsh
 
-                container:
-                    format: docker
-                    images:
-                        build: "{container.image_url_or_id}"
-                        final: "{DerivedContainer.get_base(container_and_marks_from_pytest_param(BASE_CONTAINER)[0]).url}"
-        """
-            )
+    container:
+        format: docker
+        images:
+            build: "{container.image_url_or_id}"
+            final: "{DerivedContainer.get_base(container_and_marks_from_pytest_param(BASE_CONTAINER)[0]).url}"
+"""
         )
     # mount spack.yaml into container (/root)
     mount = BindMount(
