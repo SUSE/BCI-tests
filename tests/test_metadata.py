@@ -34,6 +34,7 @@ from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
+from bci_tester.data import GCC_CONTAINERS
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
@@ -176,6 +177,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (spack_container, "spack", ImageType.LANGUAGE_STACK)
         for spack_container in SPACK_CONTAINERS
+    ]
+    + [
+        (gcc_container, "gcc", ImageType.LANGUAGE_STACK)
+        for gcc_container in GCC_CONTAINERS
     ]
     + [
         (

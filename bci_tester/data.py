@@ -695,6 +695,18 @@ KERNEL_MODULE_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
+GCC_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/gcc:{gcc_version}",
+        available_versions=os_versions,
+    )
+    for gcc_version, os_versions in (
+        (7, ("15.5", "15.6")),
+        (13, ("15.5", "15.6", "tumbleweed")),
+        (14, ("tumbleweed",)),
+    )
+]
+
 TOMCAT_9_CONTAINER, TOMCAT_10_CONTAINER = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/tomcat:{tomcat_ver}",
@@ -740,6 +752,7 @@ CONTAINERS_WITH_ZYPPER = (
     + CONTAINER_389DS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
+    + GCC_CONTAINERS
     + GOLANG_CONTAINERS
     + RUST_CONTAINERS
     + OPENJDK_CONTAINERS
