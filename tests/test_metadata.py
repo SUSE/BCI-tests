@@ -339,7 +339,7 @@ def test_general_labels(
             "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
             "https://www.suse.com/lifecycle",
         )
-        if container_type == ImageType.OS_LTSS:
+        if container_type in (ImageType.OS_LTSS, ImageType.APPLICATION):
             assert labels["com.suse.eula"] == "sle-eula"
         else:
             assert labels["com.suse.eula"] == "sle-bci"
