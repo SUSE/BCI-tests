@@ -36,6 +36,20 @@ def test_passwd_present(auto_container):
 
 
 @pytest.mark.skipif(
+    OS_VERSION not in ("tumbleweed",),
+    reason="requires glibc-locale-base installed",
+)
+def test_iconv_working(auto_container):
+    """Generic test iconv works for UTF8 and ISO-8859-15 locale"""
+    assert (
+        auto_container.connection.check_output(
+            "echo -n 'SüSE' | iconv -f UTF8 -t ISO_8859-15 | wc -c"
+        )
+        == "4"
+    )
+
+
+@pytest.mark.skipif(
     not PODMAN_SELECTED,
     reason="docker size reporting is dependant on underlying filesystem",
 )
