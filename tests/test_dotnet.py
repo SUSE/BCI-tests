@@ -13,13 +13,10 @@ from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import GitRepositoryBuild
 
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_7_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
@@ -27,7 +24,6 @@ from bci_tester.util import get_repos_from_connection
 
 DOTNET_SDK_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
-    DOTNET_SDK_7_0_CONTAINER,
     DOTNET_SDK_8_0_CONTAINER,
 ]
 
@@ -55,7 +51,6 @@ def _generate_ctr_ver_param(ctr_ver: Tuple[ParameterSet, str]) -> ParameterSet:
         _generate_ctr_ver_param,
         (
             (DOTNET_SDK_6_0_CONTAINER, "6.0"),
-            (DOTNET_SDK_7_0_CONTAINER, "7.0"),
             (DOTNET_SDK_8_0_CONTAINER, "8.0"),
         ),
     ),
@@ -78,7 +73,6 @@ def test_dotnet_sdk_version(container, sdk_version):
         _generate_ctr_ver_param,
         (
             (DOTNET_ASPNET_6_0_CONTAINER, "6.0"),
-            (DOTNET_ASPNET_7_0_CONTAINER, "7.0"),
             (DOTNET_ASPNET_8_0_CONTAINER, "8.0"),
         ),
     ),
@@ -103,7 +97,6 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
         _generate_ctr_ver_param,
         (
             (DOTNET_RUNTIME_6_0_CONTAINER, "6.0"),
-            (DOTNET_RUNTIME_7_0_CONTAINER, "7.0"),
             (DOTNET_RUNTIME_8_0_CONTAINER, "8.0"),
         ),
     ),
@@ -143,7 +136,7 @@ def test_dotnet_hello_world(container_per_test):
 
 @pytest.mark.parametrize(
     "container_per_test",
-    [DOTNET_SDK_7_0_CONTAINER],
+    [DOTNET_SDK_8_0_CONTAINER],
     indirect=["container_per_test"],
 )
 @pytest.mark.parametrize(
@@ -151,7 +144,7 @@ def test_dotnet_hello_world(container_per_test):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/nopSolutions/nopCommerce.git",
-            repository_tag="release-4.60.5",
+            repository_tag="release-4.70.0",
             build_command="dotnet build ./src/NopCommerce.sln",
         )
     ],
@@ -161,11 +154,11 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     """Test the build of a popular web application:
 
     - Build `nopCommerce <https://github.com/nopSolutions/nopCommerce.git>`_
-      release ``4.60.5`` via :command:`dotnet build ./src/NopCommerce.sln`
+      release ``4.70.0`` via :command:`dotnet build ./src/NopCommerce.sln`
 
     """
-    container_per_test.connection.run_expect(
-        [0], container_git_clone.test_command
+    container_per_test.connection.check_output(
+        container_git_clone.test_command
     )
 
 
@@ -175,7 +168,7 @@ def test_popular_web_apps(container_per_test, container_git_clone):
     indirect=True,
 )
 def test_dotnet_sdk_telemetry_deactivated(container_per_test):
-    """Test that telemetry of the .Net SDK is turned off by default.
+    """Test whether telemetry of the .Net SDK is off by default.
 
     The .Net SDK will by default have `telemetry
     <https://docs.microsoft.com/en-us/dotnet/core/tools/telemetry>`_ enabled. We
@@ -193,7 +186,7 @@ def test_dotnet_sdk_telemetry_deactivated(container_per_test):
     "container_per_test", DOTNET_SDK_CONTAINERS, indirect=True
 )
 def test_microsoft_dotnet_repository(container_per_test):
-    """Check that we have correctly added and configured the Microsoft .Net
+    """Check that we have configured the Microsoft .Net
     repository.
 
     The following checks are run:
