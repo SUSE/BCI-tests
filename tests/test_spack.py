@@ -59,19 +59,18 @@ def test_spack(
             )
         )
     # mount spack.yaml into container (/root)
-    mount = BindMount(
+    mount_arg = BindMount(
         host_path=tmp_path / "spack.yaml",
         container_path="/root/spack.yaml",
-    )
+    ).cli_arg
 
     # run container with argument: 'containerize', save output to variable 'containerfile'
     containerfile = host.check_output(
-        f"{container_runtime.runner_binary} run --rm {mount.cli_arg} "
+        f"{container_runtime.runner_binary} run --rm {mount_arg} "
         f"{' '.join(get_extra_run_args(pytestconfig))} "
         f"{container.image_url_or_id} containerize",
     )
 
-    container.container.volume_mounts += [mount]
     multi_stage_build = MultiStageBuild(
         containers={
             "builder": container.container,
