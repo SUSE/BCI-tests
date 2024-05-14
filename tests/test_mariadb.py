@@ -5,7 +5,7 @@ from typing import List
 import pymysql
 import pytest
 from _pytest.mark import ParameterSet
-from pytest_container.container import container_from_pytest_param
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
 from pytest_container.pod import Pod
@@ -44,20 +44,22 @@ def _generate_test_matrix() -> List[ParameterSet]:
     params = []
 
     for db_cont_param in MARIADB_CONTAINERS:
-        db_cont = container_from_pytest_param(db_cont_param)
-        marks = db_cont_param.marks
+        db_cont, marks = container_and_marks_from_pytest_param(db_cont_param)
         ports = db_cont.forwarded_ports
-        for db_user, db_pw in product(
-            ("user", _OTHER_DB_USER), (MARIADB_ROOT_PASSWORD, _OTHER_DB_PW)
+        for db_user, db_pw, rootpw in product(
+            ("user", _OTHER_DB_USER),
+            (MARIADB_ROOT_PASSWORD, _OTHER_DB_PW),
+            (MARIADB_ROOT_PASSWORD, None),
         ):
             env = {
                 "MARIADB_USER": db_user,
                 "MARIADB_PASSWORD": db_pw,
                 "MARIADB_DATABASE": _TEST_DB,
             }
-            env["MARIADB_ROOT_PASSWORD"] = MARIADB_ROOT_PASSWORD
-            ### not supported by the container
-            # env["MARIADB_RANDOM_ROOT_PASSWORD"] = "1"
+            if rootpw:
+                env["MARIADB_ROOT_PASSWORD"] = rootpw
+            else:
+                env["MARIADB_RANDOM_ROOT_PASSWORD"] = "1"
 
             params.append(
                 pytest.param(
@@ -155,9 +157,9 @@ MARIADB_PODS = [
     pytest.param(
         Pod(
             containers=[
-                container_from_pytest_param(client_db_cont),
+                container_and_marks_from_pytest_param(client_db_cont)[0],
                 DerivedContainer(
-                    base=container_from_pytest_param(db_cont),
+                    base=container_and_marks_from_pytest_param(db_cont)[0],
                     extra_environment_variables={
                         "MARIADB_USER": _OTHER_DB_USER,
                         "MARIADB_PASSWORD": _OTHER_DB_PW,
