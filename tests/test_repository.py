@@ -51,7 +51,8 @@ REPOCLOSURE_FALSE_POSITIVES = (
             # boolean dependency: (python311-typing_extensions >= 4.6.0 if python311-base < 3.8)
             "python311-azure-core",
         ]
-        if OS_SP_VERSION >= 5
+        # will need to be updated to >= 5 once SP6 BCI repo published
+        if OS_SP_VERSION == 5
         else []
     )
     + (
