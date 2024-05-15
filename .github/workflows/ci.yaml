@@ -148,6 +148,13 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Install ldap-utils to have ldapwhoami for the 389ds tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install ldap-utils
+          command -v ldapwhoami
+        if: ${{ matrix.toxenv == '389ds' }}
+
       - name: Install new podman from OBS
         if: false
         run: |
