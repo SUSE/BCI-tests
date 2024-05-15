@@ -604,7 +604,7 @@ PHP_8_CLI = create_BCI(build_tag="bci/php:8")
 PHP_8_APACHE = create_BCI(build_tag="bci/php-apache:8")
 PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
 
-MARIADB_ROOT_PASSWORD = "n0ts3cr3t"
+MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
 MARIADB_CONTAINERS = [
     create_BCI(

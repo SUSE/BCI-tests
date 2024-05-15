@@ -5,11 +5,13 @@ from typing import List
 import pymysql
 import pytest
 from _pytest.mark import ParameterSet
-from pytest_container.container import container_from_pytest_param
+from pymysql.err import OperationalError
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
+from pytest_container.runtime import OciRuntimeBase
 from tenacity import retry
 from tenacity import stop_after_attempt
 from tenacity import wait_exponential
@@ -34,6 +36,7 @@ def test_entry_point(auto_container: ContainerData) -> None:
 
 
 _OTHER_DB_USER = "foo"
+_SOME_ROOT_PW = "'$ome; P@ssw0rd!>"
 _OTHER_DB_PW = "baz"
 
 # TODO test variants
@@ -44,20 +47,22 @@ def _generate_test_matrix() -> List[ParameterSet]:
     params = []
 
     for db_cont_param in MARIADB_CONTAINERS:
-        db_cont = container_from_pytest_param(db_cont_param)
-        marks = db_cont_param.marks
+        db_cont, marks = container_and_marks_from_pytest_param(db_cont_param)
         ports = db_cont.forwarded_ports
-        for db_user, db_pw in product(
-            ("user", _OTHER_DB_USER), (MARIADB_ROOT_PASSWORD, _OTHER_DB_PW)
+        for db_user, db_pw, root_pw in product(
+            ("user", _OTHER_DB_USER),
+            (_SOME_ROOT_PW, _OTHER_DB_PW),
+            (MARIADB_ROOT_PASSWORD, None),
         ):
             env = {
                 "MARIADB_USER": db_user,
                 "MARIADB_PASSWORD": db_pw,
                 "MARIADB_DATABASE": _TEST_DB,
             }
-            env["MARIADB_ROOT_PASSWORD"] = MARIADB_ROOT_PASSWORD
-            ### not supported by the container
-            # env["MARIADB_RANDOM_ROOT_PASSWORD"] = "1"
+            if root_pw:
+                env["MARIADB_ROOT_PASSWORD"] = root_pw
+            else:
+                env["MARIADB_RANDOM_ROOT_PASSWORD"] = "1"
 
             params.append(
                 pytest.param(
@@ -68,6 +73,7 @@ def _generate_test_matrix() -> List[ParameterSet]:
                     ),
                     db_user,
                     db_pw,
+                    root_pw,
                     marks=marks,
                 )
             )
@@ -84,7 +90,7 @@ def _wait_for_server(connection):
 
 
 @pytest.mark.parametrize(
-    "container_per_test,db_user,db_password",
+    "container_per_test,db_user,db_password,root_pw",
     _generate_test_matrix(),
     indirect=["container_per_test"],
 )
@@ -92,6 +98,9 @@ def test_mariadb_db_env_vars(
     container_per_test: ContainerData,
     db_user: str,
     db_password: str,
+    root_pw: str | None,
+    container_runtime: OciRuntimeBase,
+    host,
 ) -> None:
     """Simple smoke test connecting to the MariaDB database using the example
     from `<https://pymysql.readthedocs.io/en/latest/user/examples.html>`_ while
@@ -114,14 +123,13 @@ def test_mariadb_db_env_vars(
 
     _wait_for_server(container_per_test.connection)
 
-    conn = pymysql.connect(
+    with pymysql.connect(
         user=db_user,
         password=db_password,
         database=_TEST_DB,
         host="127.0.0.1",
         port=container_per_test.forwarded_ports[0].host_port,
-    )
-    with conn:
+    ) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar(32));"
@@ -134,6 +142,38 @@ def test_mariadb_db_env_vars(
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM test;")
             assert cur.fetchone() == (1, 100, "abc'def")
+
+    if root_pw is None:
+        for line in host.check_output(
+            f"{container_runtime.runner_binary} logs {container_per_test.container_id}",
+        ).splitlines():
+            if "GENERATED ROOT PASSWORD: " in line:
+                root_pw = line.partition("GENERATED ROOT PASSWORD: ")[
+                    2
+                ].strip()
+                break
+    assert root_pw, "Root password must be either set or obtained from the log"
+    # Test that we can connect using the root password
+    with pymysql.connect(
+        user="root",
+        password=root_pw,
+        database=_TEST_DB,
+        host="127.0.0.1",
+        port=container_per_test.forwarded_ports[0].host_port,
+    ) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1;")
+            assert cur.fetchone() == (1,)
+
+    # test that we can not connect using any other password
+    with pytest.raises(OperationalError):
+        pymysql.connect(
+            user="root",
+            password=root_pw[::-1],
+            database=_TEST_DB,
+            host="127.0.0.1",
+            port=container_per_test.forwarded_ports[0].host_port,
+        )
 
 
 @pytest.mark.parametrize(
@@ -155,9 +195,9 @@ MARIADB_PODS = [
     pytest.param(
         Pod(
             containers=[
-                container_from_pytest_param(client_db_cont),
+                container_and_marks_from_pytest_param(client_db_cont)[0],
                 DerivedContainer(
-                    base=container_from_pytest_param(db_cont),
+                    base=container_and_marks_from_pytest_param(db_cont)[0],
                     extra_environment_variables={
                         "MARIADB_USER": _OTHER_DB_USER,
                         "MARIADB_PASSWORD": _OTHER_DB_PW,
