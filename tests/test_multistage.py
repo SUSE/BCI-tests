@@ -7,8 +7,8 @@ from pytest_container import GitRepositoryBuild
 from pytest_container import MultiStageBuild
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import DOTNET_ASPNET_7_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_7_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_21_CONTAINER
@@ -194,8 +194,8 @@ if OS_VERSION in ("15.6",):
             ),
             MultiStageBuild(
                 containers={
-                    "builder": DOTNET_SDK_7_0_CONTAINER,
-                    "runner": DOTNET_ASPNET_7_0_CONTAINER,
+                    "builder": DOTNET_SDK_8_0_CONTAINER,
+                    "runner": DOTNET_ASPNET_8_0_CONTAINER,
                 },
                 containerfile_template=DOTNET_K8S_SAMPLE_DOCKERFILE,
             ),

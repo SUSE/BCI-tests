@@ -504,11 +504,6 @@ DOTNET_SDK_6_0_CONTAINER = create_BCI(
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-DOTNET_SDK_7_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-sdk:7.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
 DOTNET_SDK_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:8.0",
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
@@ -519,11 +514,6 @@ DOTNET_ASPNET_6_0_CONTAINER = create_BCI(
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-DOTNET_ASPNET_7_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-aspnet:7.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
 DOTNET_ASPNET_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:8.0",
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
@@ -531,11 +521,6 @@ DOTNET_ASPNET_8_0_CONTAINER = create_BCI(
 )
 DOTNET_RUNTIME_6_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:6.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
-DOTNET_RUNTIME_7_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-runtime:7.0",
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
@@ -722,13 +707,10 @@ TOMCAT_CONTAINERS = [TOMCAT_9_CONTAINER, TOMCAT_10_CONTAINER]
 
 DOTNET_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
-    DOTNET_SDK_7_0_CONTAINER,
     DOTNET_SDK_8_0_CONTAINER,
     DOTNET_ASPNET_6_0_CONTAINER,
-    DOTNET_ASPNET_7_0_CONTAINER,
     DOTNET_ASPNET_8_0_CONTAINER,
     DOTNET_RUNTIME_6_0_CONTAINER,
-    DOTNET_RUNTIME_7_0_CONTAINER,
     DOTNET_RUNTIME_8_0_CONTAINER,
 ]
 
