@@ -262,7 +262,7 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
 
     conn = container.connection
 
-    conn.run_expect([0], "timeout 2m zypper ref")
+    conn.run_expect([0], "timeout 2m zypper ref && zypper -n in libsolv-tools")
 
     conn.check_output(
         "dumpsolv -j /var/cache/zypp/solv/@System/solv > /solv/system"
