@@ -44,7 +44,7 @@ def test_node_version(auto_container):
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
-                build_command="npm ci && npm test && npm run lint",
+                build_command="npm ci && npm test && npm run check:lint",
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/expressjs/express.git",
@@ -96,7 +96,7 @@ def test_popular_npm_repos(
        * - `Glob <https://github.com/isaacs/node-glob>`_
          - :command:`npm ci && npm test`
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
-         - :command:`npm ci && npm test && npm run lint`
+         - :command:`npm ci && npm test && npm run check:lint`
        * - `Express <https://github.com/expressjs/express.git>`_
          - :command:`npm config set shrinkwrap false && npm rm --silent --save-dev connect-redis && npm run test -- --timeout 7500 && npm run lint`
        * - `prop-types <https://github.com/facebook/prop-types>`_
