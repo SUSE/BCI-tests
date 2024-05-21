@@ -1,6 +1,7 @@
 """Tests for the MariaDB related application container images."""
 from itertools import product
 from typing import List
+from typing import Optional
 
 import pymysql
 import pytest
@@ -98,7 +99,7 @@ def test_mariadb_db_env_vars(
     container_per_test: ContainerData,
     db_user: str,
     db_password: str,
-    root_pw: str | None,
+    root_pw: Optional[str],
     container_runtime: OciRuntimeBase,
     host,
 ) -> None:
