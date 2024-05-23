@@ -638,19 +638,6 @@ POSTGRESQL_CONTAINERS = [
     )
 ]
 
-REPOCLOSURE_CONTAINER = DerivedContainer(
-    base="registry.fedoraproject.org/fedora:latest",
-    containerfile=rf"""RUN dnf -y install 'dnf-command(repoclosure)'
-RUN rm -f /etc/yum.repos.d/*repo
-RUN printf '[{BCI_REPO_NAME}]\n\
-enabled=1\n\
-name="SLE BCI"\n\
-autorefresh=0\n\
-baseurl={BCI_DEVEL_REPO}\n\
-priority=100\n' > /etc/yum.repos.d/{BCI_REPO_NAME}.repo""",
-)
-
-
 DISTRIBUTION_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/registry:2.8",
     bci_type=ImageType.APPLICATION,
