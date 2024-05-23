@@ -1,4 +1,5 @@
 """Tests for the MariaDB related application container images."""
+
 from itertools import product
 from typing import List
 from typing import Optional

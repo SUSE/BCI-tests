@@ -1,6 +1,7 @@
 """Basic tests for the Python base container images,based on tensorflow library,
 and related tutorials, under Apache License.
 """
+
 import tensorflow as tf
 
 

@@ -2,6 +2,7 @@
 be installed and ensure that we do not accidentally ship forbidden packages.
 
 """
+
 import xml.etree.ElementTree as ET
 from typing import Callable
 from typing import List
@@ -132,9 +133,7 @@ def test_sle_bci_forbidden_packages(container_per_test):
         )
     )
 
-    assert (
-        not forbidden_packages
-    ), f"package_list must not contain any forbidden packages, but found {', '.join(forbidden_packages)}"
+    assert not forbidden_packages, f"package_list must not contain any forbidden packages, but found {', '.join(forbidden_packages)}"
 
 
 @pytest.mark.skipif(

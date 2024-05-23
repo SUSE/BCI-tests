@@ -1,4 +1,5 @@
 """Tests of the OpenJDK base container."""
+
 import os.path
 import re
 import time

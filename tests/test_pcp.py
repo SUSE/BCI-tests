@@ -1,5 +1,5 @@
-"""This module contains the tests for the pcp container
-"""
+"""This module contains the tests for the pcp container"""
+
 import time
 
 import requests

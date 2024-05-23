@@ -1,4 +1,5 @@
 """Module containing utility functions & constants for FIPS compliant digests."""
+
 import os
 
 from bci_tester.data import OS_VERSION

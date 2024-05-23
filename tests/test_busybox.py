@@ -1,4 +1,5 @@
 """Test module performing simple smoke tests for the busybox container image."""
+
 from typing import Dict
 
 import pytest

@@ -1,4 +1,5 @@
 """Tests for the PHP-cli, -apache and -fpm containers."""
+
 try:
     from typing import Literal
 except ImportError:

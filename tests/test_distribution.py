@@ -1,4 +1,5 @@
-""" Tests for the distribution container """
+"""Tests for the distribution container"""
+
 import textwrap
 
 import requests

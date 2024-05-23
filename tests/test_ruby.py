@@ -1,4 +1,5 @@
 """Basic tests for the Ruby base container images."""
+
 import pytest
 
 from bci_tester.data import OS_VERSION

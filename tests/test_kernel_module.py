@@ -1,4 +1,5 @@
 """Tests for the SLE15 kernel-module container."""
+
 import pytest
 from pytest_container import container_from_pytest_param
 from pytest_container import DerivedContainer
