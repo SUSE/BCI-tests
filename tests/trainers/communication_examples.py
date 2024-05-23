@@ -1,4 +1,5 @@
-""" Tests for the Python base containers, based on communication functionalities."""
+"""Tests for the Python base containers, based on communication functionalities."""
+
 import os
 import sys
 import time

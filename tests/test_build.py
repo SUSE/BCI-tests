@@ -5,6 +5,7 @@ then repository will be replaced in the containers and whether this was
 successful will be double checked here.
 
 """
+
 import pytest
 
 from bci_tester.data import BCI_DEVEL_REPO
@@ -103,10 +104,11 @@ def test_container_build_and_repo(container_per_test, host):
                 )
 
         assert (
-            "SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names
-        ) or (
-            "SLE_BCI_debug" not in repo_names
-            and "SLE_BCI_source" not in repo_names
+            ("SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names)
+            or (
+                "SLE_BCI_debug" not in repo_names
+                and "SLE_BCI_source" not in repo_names
+            )
         ), "repos SLE_BCI_source and SLE_BCI_debug must either both be present or both missing"
 
     # check that all enabled repos are valid and can be refreshed

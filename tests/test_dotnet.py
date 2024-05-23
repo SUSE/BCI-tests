@@ -2,6 +2,7 @@
 Microsoft's binaries.
 
 """
+
 import re
 import xml.etree.ElementTree as ET
 from typing import List

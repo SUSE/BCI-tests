@@ -1,5 +1,5 @@
-"""This module contains the tests for the helm container, the image with helm pre-installed.
-"""
+"""This module contains the tests for the helm container, the image with helm pre-installed."""
+
 from bci_tester.data import HELM_CONTAINER
 
 

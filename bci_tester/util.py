@@ -1,4 +1,5 @@
 """This module contains general purpose utility functions."""
+
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import Dict
@@ -49,7 +50,7 @@ class Repository:
             **str_kwargs,
             **bool_kwargs,
             priority=int(repo_element.get("priority")),
-            url=url
+            url=url,
         )
 
 

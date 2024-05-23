@@ -1,4 +1,5 @@
 """Tests for Spack application build container images."""
+
 from textwrap import dedent
 
 import pytest

@@ -1,5 +1,5 @@
-"""Tests for the minimal BCI container (the container without zypper but with rpm).
-"""
+"""Tests for the minimal BCI container (the container without zypper but with rpm)."""
+
 from typing import Dict
 
 import pytest

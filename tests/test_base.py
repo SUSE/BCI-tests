@@ -2,6 +2,7 @@
 registry.suse.com)
 
 """
+
 from typing import Dict
 
 import pytest

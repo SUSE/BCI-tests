@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   format:
-    name: Ensure code is black formatted
+    name: Ensure code is formatted
     runs-on: ubuntu-latest
     steps:
       - name: checkout source code
@@ -23,7 +23,7 @@ jobs:
           set -e
           sudo apt update
           sudo apt -y install jo tox
-      - name: Test formatting with black
+      - name: Test formatting with ruff
         run: tox -e format -- --check
 
   gentestmatrix:

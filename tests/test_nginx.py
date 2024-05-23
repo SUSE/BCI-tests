@@ -1,5 +1,5 @@
-"""This module contains the tests for the nginx container, the image with nginx pre-installed.
-"""
+"""This module contains the tests for the nginx container, the image with nginx pre-installed."""
+
 import requests
 from tenacity import retry
 from tenacity import stop_after_attempt

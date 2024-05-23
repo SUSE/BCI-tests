@@ -1,4 +1,5 @@
 """Integration tests via multistage container builds."""
+
 import pytest
 from _pytest.config import Config
 from pytest_container import get_extra_build_args

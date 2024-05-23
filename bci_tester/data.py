@@ -55,12 +55,12 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
-assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(
-    ALLOWED_BASE_OS_VERSIONS
+assert (
+    sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS)
 ), f"list ALLOWED_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
 
-assert sorted(ALLOWED_NONBASE_OS_VERSIONS) == list(
-    ALLOWED_NONBASE_OS_VERSIONS
+assert (
+    sorted(ALLOWED_NONBASE_OS_VERSIONS) == list(ALLOWED_NONBASE_OS_VERSIONS)
 ), f"list ALLOWED_NONOS_VERSIONS must be sorted, but got {ALLOWED_NONBASE_OS_VERSIONS}"
 
 if not (

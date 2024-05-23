@@ -103,8 +103,44 @@ markers = [
     'spack_0.21',
 ]
 
-[tool.black]
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".git",
+]
+
 line-length = 79
+indent-width = 4
+
+# Assume Python 3.7
+# Ideally we'd be 3.6 but upstream has no support for 3.6
+# https://github.com/astral-sh/ruff/issues/3826
+target-version = "py37"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = false
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint.isort]
+force-single-line = true
+case-sensitive = true
 
 [tool.pylint.main]
 # Specify a score threshold under which the program will exit with error.

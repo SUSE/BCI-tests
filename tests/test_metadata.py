@@ -13,6 +13,7 @@ to skip some of the tests for the SLE 15 SP3 base container, as it does not
 offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
+
 from subprocess import check_output
 from typing import List
 
