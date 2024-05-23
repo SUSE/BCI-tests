@@ -1,11 +1,14 @@
 #!/bin/bash
 
-if [ "$1" = "--check" ]; then
-    set -e
-    args="--check"
-fi
+set -o pipefail
 
-black . ${args}
-for f in $(git ls-files|grep '.*py$'); do
-    reorder-python-imports "$f"
-done
+if [ "$1" = "--check" ]; then
+    ruff format --check --diff
+    format_ret=$?
+
+    ruff check --diff
+    exit $([ $? -eq 0 ] && [ $format_ret -eq 0 ])
+else
+    ruff format
+    ruff check --fix
+fi
