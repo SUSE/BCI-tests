@@ -34,6 +34,7 @@ RUN chown -R git:git /home/git/.ssh
 RUN echo "{_PUB_KEY}" >> /home/git/.ssh/authorized_keys
 
 RUN mkdir -p /srv/git/project.git
+RUN chown git:git /srv/git/project.git
 RUN git -C /srv/git/project.git init --bare
 
 RUN echo -e '\
