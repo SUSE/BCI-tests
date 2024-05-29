@@ -117,6 +117,8 @@ def test_sle_bci_forbidden_packages(container_per_test):
         "kernel-devel",
         "kernel-syms",
         "kernel-syms-azure",
+        # aarch64 only
+        "kernel-64kb-devel",
     ]
 
     FORBIDDEN_PACKAGE_NAMES = ["kernel", "yast", "kvm", "xen"]
