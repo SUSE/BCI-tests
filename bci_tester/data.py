@@ -199,7 +199,9 @@ if BCI_DEVEL_REPO is None:
     BCI_DEVEL_REPO = f"https://updates.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
     _BCI_REPLACE_REPO_CONTAINERFILE = ""
 else:
-    _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
+    bci_repo_path = f"/etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
+    # only try to sed the baseurl if we can write to the repo
+    _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN if [ -w {bci_repo_path} ]; then sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' {bci_repo_path}; fi"
 
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
@@ -325,9 +327,11 @@ def create_BCI(
     return pytest.param(
         DerivedContainer(
             base=baseurl,
-            containerfile=""
-            if bci_type == ImageType.OS_LTSS
-            else _BCI_REPLACE_REPO_CONTAINERFILE,
+            containerfile=(
+                ""
+                if bci_type == ImageType.OS_LTSS
+                else _BCI_REPLACE_REPO_CONTAINERFILE
+            ),
             **kwargs,
         ),
         marks=marks,
