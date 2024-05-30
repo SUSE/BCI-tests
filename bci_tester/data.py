@@ -203,6 +203,7 @@ else:
     # only try to sed the baseurl if we can write to the repo
     _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN if [ -w {bci_repo_path} ]; then sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' {bci_repo_path}; fi"
 
+assert BCI_DEVEL_REPO, "BCI_DEVEL_REPO must be set at this point"
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 
