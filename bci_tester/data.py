@@ -202,6 +202,7 @@ if BCI_DEVEL_REPO is None:
 else:
     _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
 
+assert BCI_DEVEL_REPO, "BCI_DEVEL_REPO must be set at this point"
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 
