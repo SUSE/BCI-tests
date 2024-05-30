@@ -10,6 +10,7 @@ import pytest
 from _pytest.config import Config
 from _pytest.mark.structures import ParameterSet
 from pytest_container.build import MultiStageBuild
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
@@ -17,17 +18,12 @@ from pytest_container.runtime import OciRuntimeBase
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import OS_VERSION
+from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
+from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
-
-
-pytestmark = pytest.mark.skipif(
-    not host_fips_enabled(),
-    reason="The host must run in FIPS mode for the FIPS test suite",
-)
 
 
 #: multistage :file:`Dockerfile` that builds the program from
@@ -54,8 +50,31 @@ COPY --from=builder /usr/lib64/.libssl.so.1.1.hmac /usr/lib64/
 RUN /bin/fips-test sha256
 """
 
+_non_fips_host_skip_mark = [
+    pytest.mark.skipif(
+        not host_fips_enabled(),
+        reason="The target must run in FIPS mode for the FIPS test suite",
+    )
+]
+CONTAINER_IMAGES = []
+CONTAINER_IMAGES_WITH_ZYPPER = []
+for target_list, param_list in (
+    (CONTAINER_IMAGES, ALL_CONTAINERS),
+    (CONTAINER_IMAGES_WITH_ZYPPER, CONTAINERS_WITH_ZYPPER),
+):
+    for param in param_list:
+        ctr, marks = container_and_marks_from_pytest_param(param)
+        if param in LTSS_BASE_FIPS_CONTAINERS:
+            target_list.append(param)
+        else:
+            target_list.append(
+                pytest.param(
+                    ctr, marks=marks + _non_fips_host_skip_mark, id=param.id
+                )
+            )
 
-@pytest.mark.parametrize("runner", ALL_CONTAINERS)
+
+@pytest.mark.parametrize("runner", CONTAINER_IMAGES)
 def test_openssl_binary(
     runner: ParameterSet,
     tmp_path,
@@ -131,7 +150,7 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
 
 
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER, indirect=True
+    "container_per_test", CONTAINER_IMAGES_WITH_ZYPPER, indirect=True
 )
 def test_openssl_fips_hashes(container_per_test: ContainerData):
     openssl_fips_hashes_test_fnct(container_per_test)
