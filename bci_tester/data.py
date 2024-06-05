@@ -784,8 +784,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
 
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
-# SLE 15 SP6 is techpreview before GMC
-if OS_VERSION in ("15.6", "tumbleweed"):
+if OS_VERSION in ("tumbleweed",):
     L3_CONTAINERS = ()
 else:
     L3_CONTAINERS = (
