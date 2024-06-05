@@ -69,7 +69,11 @@ def test_base_size(auto_container: ContainerData, container_runtime):
     )
 
     #: size limits of the base container per arch in MiB
-    if OS_VERSION in ("basalt", "tumbleweed") or is_fips_ctr:
+    if is_fips_ctr:
+        base_container_max_size: Dict[str, int] = {
+            "x86_64": 130,
+        }
+    elif OS_VERSION in ("basalt", "tumbleweed"):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 120,
             "aarch64": 140,
