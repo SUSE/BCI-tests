@@ -50,12 +50,7 @@ def test_node_version(auto_container):
             GitRepositoryBuild(
                 repository_url="https://github.com/expressjs/express.git",
                 build_command=dedent(
-                    """if [[ "$(npm config get package-lock)" == "true" ]]; then
-                    npm config set package-lock false
-                else
-                    npm config set shrinkwrap false
-                fi &&
-                npm rm --silent --save-dev connect-redis &&
+                    """npm rm --silent --save-dev connect-redis &&
                 npm run test -- --timeout 7500 &&
                 npm run lint
                 """
