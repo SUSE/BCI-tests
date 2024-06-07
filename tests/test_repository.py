@@ -168,6 +168,8 @@ def test_package_installation(container_per_test, pkg):
     "pkg",
     [
         "libsnmp30",  # bsc#1209442
+        "aws-cli",  # disappeared after python311 switch due to unresolvables
+        "python3-azure-sdk",  # might also become unresolvable
     ],
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
@@ -176,5 +178,5 @@ def test_sle15_packages(container_per_test, pkg):
     remain installable and available.
     """
     container_per_test.connection.check_output(
-        f"{_RM_ZYPPSERVICE}; zypper -n in -r {BCI_REPO_NAME} {pkg}"
+        f"{_RM_ZYPPSERVICE}; zypper -n in --dry-run -r {BCI_REPO_NAME} {pkg}"
     )
