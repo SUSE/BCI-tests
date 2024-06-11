@@ -44,7 +44,7 @@ def test_go_version(auto_container):
         GitRepositoryBuild(
             repository_url="https://github.com/weaveworks/kured.git",
             repository_tag="1.13.2",
-            build_command="go run ./cmd/kured -h && go test -race ./...",
+            build_command="env GOMAXPROCS=2 go run ./cmd/kured -h && go test -race ./...",
         ).to_pytest_param(),
     ],
     indirect=["container_git_clone"],
@@ -68,8 +68,8 @@ def test_build_kured(auto_container_per_test, container_git_clone):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/helm/helm.git",
-            repository_tag="v3.14.3",
-            build_command="make build test-unit",
+            repository_tag="v3.15.1",
+            build_command="env GOMAXPROCS=2 make build test-unit",
         ).to_pytest_param(),
     ],
     indirect=["container_git_clone"],
@@ -79,6 +79,11 @@ def test_build_helm(auto_container_per_test, container_git_clone):
     container with :command:`make` pre-installed.
 
     """
+
+    go_version = auto_container_per_test.connection.check_output("go version")
+    if "go1.20" in go_version or "go1.21" in go_version:
+        pytest.skip("Helm requires Go >= 1.22")
+
     auto_container_per_test.connection.check_output(
         container_git_clone.test_command
     )
