@@ -735,6 +735,16 @@ SPACK_CONTAINERS = [
     for ver, tag in (("15.6", "0.21"),)
 ]
 
+PROMETHEUS_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/prometheus:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=9090)],
+        available_versions=versions,
+    )
+    for versions, tag in ((("15.5", "15.6"), "2.37.6"),)
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -756,6 +766,7 @@ CONTAINERS_WITH_ZYPPER = (
     + OPENJDK_CONTAINERS
     + PCP_CONTAINERS
     + POSTGRESQL_CONTAINERS
+    + PROMETHEUS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
     + RUST_CONTAINERS

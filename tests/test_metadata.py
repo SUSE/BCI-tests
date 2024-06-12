@@ -67,6 +67,7 @@ from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTGRESQL_CONTAINERS
+from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON311_CONTAINER
@@ -215,6 +216,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (pg_container, "postgres", ImageType.APPLICATION)
         for pg_container in POSTGRESQL_CONTAINERS
+    ]
+    + [
+        (prom_container, "prometheus", ImageType.APPLICATION)
+        for prom_container in PROMETHEUS_CONTAINERS
     ]
     + [
         (DISTRIBUTION_CONTAINER, "registry", ImageType.APPLICATION),
