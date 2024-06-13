@@ -25,6 +25,5 @@ def test_prometheus_healthy(container: ContainerData) -> None:
 
     port = container.forwarded_ports[0].host_port
     resp = requests.get(f"http://localhost:{port}/-/healthy", timeout=2)
-    baseurl = container.container.baseurl
     assert resp.status_code == 200
     assert resp.text == "Prometheus Server is Healthy.\n"
