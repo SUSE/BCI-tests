@@ -745,6 +745,28 @@ PROMETHEUS_CONTAINERS = [
     for versions, tag in ((("15.5", "15.6"), "2.37.6"),)
 ]
 
+ALERTMANAGER_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/alertmanager:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=9093)],
+        available_versions=versions,
+    )
+    for versions, tag in ((("15.5", "15.6"), "0.26.0"),)
+]
+
+BLACKBOX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/blackbox_exporter:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=9115)],
+        available_versions=versions,
+        custom_entry_point='["/usr/bin/blackbox_exporter",'
+        + ' "--config.file=/etc/prometheus/blackbox.yml"]',
+    )
+    for versions, tag in ((("15.5", "15.6"), "0.24.0"),)
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -755,6 +777,8 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_CLI,
         PHP_8_FPM,
     ]
+    + ALERTMANAGER_CONTAINERS
+    + BLACKBOX_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
     + GCC_CONTAINERS
     + GOLANG_CONTAINERS

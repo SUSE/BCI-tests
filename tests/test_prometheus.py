@@ -5,9 +5,17 @@ import requests
 from pytest_container.container import ContainerData
 
 from bci_tester.data import PROMETHEUS_CONTAINERS
+from bci_tester.data import ALERTMANAGER_CONTAINERS
+from bci_tester.data import BLACKBOX_CONTAINERS
 
 
-@pytest.mark.parametrize("container", PROMETHEUS_CONTAINERS, indirect=True)
+ready_containers = PROMETHEUS_CONTAINERS + ALERTMANAGER_CONTAINERS
+healthy_containers = (
+    PROMETHEUS_CONTAINERS + ALERTMANAGER_CONTAINERS + BLACKBOX_CONTAINERS
+)
+
+
+@pytest.mark.parametrize("container", ready_containers, indirect=True)
 def test_prometheus_ready(container: ContainerData) -> None:
     """Simple smoke test verifying that Prometheus is ready."""
 
@@ -16,14 +24,14 @@ def test_prometheus_ready(container: ContainerData) -> None:
     baseurl = container.container.baseurl
     assert baseurl
     assert resp.status_code == 200
-    assert resp.text == "Prometheus Server is Ready.\n"
+    assert resp.text in ["Prometheus Server is Ready.\n", "OK"]
 
 
-@pytest.mark.parametrize("container", PROMETHEUS_CONTAINERS, indirect=True)
+@pytest.mark.parametrize("container", healthy_containers, indirect=True)
 def test_prometheus_healthy(container: ContainerData) -> None:
     """Simple smoke test verifying that Prometheus is healthy."""
 
     port = container.forwarded_ports[0].host_port
     resp = requests.get(f"http://localhost:{port}/-/healthy", timeout=2)
     assert resp.status_code == 200
-    assert resp.text == "Prometheus Server is Healthy.\n"
+    assert resp.text in ["Prometheus Server is Healthy.\n", "OK", "Healthy"]

@@ -24,8 +24,10 @@ from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ACC_CONTAINERS
+from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BLACKBOX_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
 from bci_tester.data import DISTRIBUTION_CONTAINER
@@ -220,6 +222,8 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (prom_container, "prometheus", ImageType.APPLICATION)
         for prom_container in PROMETHEUS_CONTAINERS
+        + ALERTMANAGER_CONTAINERS
+        + BLACKBOX_CONTAINERS
     ]
     + [
         (DISTRIBUTION_CONTAINER, "registry", ImageType.APPLICATION),
