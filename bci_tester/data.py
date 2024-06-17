@@ -767,6 +767,16 @@ BLACKBOX_CONTAINERS = [
     for versions, tag in ((("15.5", "15.6"), "0.24.0"),)
 ]
 
+GRAFANA_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/grafana:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=3000)],
+        available_versions=versions,
+    )
+    for versions, tag in ((("15.5", "15.6"), "9.5.18"),)
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -782,6 +792,7 @@ CONTAINERS_WITH_ZYPPER = (
     + CONTAINER_389DS_CONTAINERS
     + GCC_CONTAINERS
     + GOLANG_CONTAINERS
+    + GRAFANA_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
     + MARIADB_CLIENT_CONTAINERS

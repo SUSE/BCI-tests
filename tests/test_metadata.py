@@ -40,6 +40,7 @@ from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import GCC_CONTAINERS
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
+from bci_tester.data import GRAFANA_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
@@ -224,6 +225,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for prom_container in PROMETHEUS_CONTAINERS
         + ALERTMANAGER_CONTAINERS
         + BLACKBOX_CONTAINERS
+    ]
+    + [
+        (grafana_container, "grafana", ImageType.APPLICATION)
+        for grafana_container in GRAFANA_CONTAINERS
     ]
     + [
         (DISTRIBUTION_CONTAINER, "registry", ImageType.APPLICATION),
