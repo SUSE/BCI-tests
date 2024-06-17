@@ -223,8 +223,14 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (prom_container, "prometheus", ImageType.APPLICATION)
         for prom_container in PROMETHEUS_CONTAINERS
-        + ALERTMANAGER_CONTAINERS
-        + BLACKBOX_CONTAINERS
+    ]
+    + [
+        (alertmngr_ctr, "alertmanager", ImageType.APPLICATION)
+        for alertmngr_ctr in ALERTMANAGER_CONTAINERS
+    ]
+    + [
+        (blackbox_ctr, "blackbox_exporter", ImageType.APPLICATION)
+        for blackbox_ctr in BLACKBOX_CONTAINERS
     ]
     + [
         (grafana_container, "grafana", ImageType.APPLICATION)
