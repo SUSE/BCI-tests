@@ -19,10 +19,10 @@ SLE_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
 }
 
 TW_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 51,
-    "aarch64": 51,
-    "s390x": 49,
-    "ppc64le": 59,
+    "aarch64": 65,
+    "ppc64le": 58,
+    "s390x": 41,
+    "x86_64": 49,
 }
 
 #: size limits of the micro image per architecture in MiB
@@ -35,8 +35,8 @@ SLE_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
 
 TW_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
     "x86_64": 34,
-    "aarch64": 36,
-    "s390x": 34,
+    "aarch64": 42,
+    "s390x": 28,
     "ppc64le": 41,
 }
 
