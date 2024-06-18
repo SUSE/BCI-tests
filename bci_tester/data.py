@@ -31,7 +31,7 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
-OS_VERSION = os.getenv("OS_VERSION", "15.5")
+OS_VERSION = os.getenv("OS_VERSION", "15.6")
 
 # Allowed os versions for base (non lang/non-app) containers
 ALLOWED_BASE_OS_VERSIONS = (
