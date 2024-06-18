@@ -6,7 +6,7 @@ except ImportError:
     from typing_extensions import Literal
 
 import pytest
-from pytest_container import container_from_pytest_param
+from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
@@ -34,7 +34,7 @@ _MEDIAWIKI_VERSION = "1.39.2"
 _MEDIAWIKI_MAJOR_VERSION = ".".join(_MEDIAWIKI_VERSION.split(".")[:2])
 
 MEDIAWIKI_APACHE_CONTAINER = DerivedContainer(
-    base=container_from_pytest_param(PHP_8_APACHE),
+    base=container_and_marks_from_pytest_param(PHP_8_APACHE)[0],
     forwarded_ports=[PortForwarding(container_port=80)],
     image_format=ImageFormat.DOCKER,
     containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
@@ -66,7 +66,7 @@ EXPOSE 80
 
 
 MEDIAWIKI_FPM_CONTAINER = DerivedContainer(
-    base=container_from_pytest_param(PHP_8_FPM),
+    base=container_and_marks_from_pytest_param(PHP_8_FPM)[0],
     containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
 ENV MEDIAWIKI_MAJOR_VERSION={_MEDIAWIKI_MAJOR_VERSION}"""
     + r"""
