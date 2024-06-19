@@ -7,7 +7,7 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
 from pytest_container import PortForwarding
-from pytest_container.container import container_from_pytest_param
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.runtime import get_selected_runtime
 from pytest_container.runtime import LOCALHOST
@@ -49,7 +49,7 @@ CONTAINER_IMAGES = PYTHON_CONTAINERS
 CONTAINER_IMAGES_T1 = [
     pytest.param(
         DerivedContainer(
-            base=container_from_pytest_param(CONTAINER_T),
+            base=container_and_marks_from_pytest_param(CONTAINER_T)[0],
             containerfile=DOCKERF_PY_T1,
             forwarded_ports=[PortForwarding(container_port=PORT1)],
         ),
@@ -64,7 +64,7 @@ CONTAINER_IMAGES_T1 = [
 CONTAINER_IMAGES_T2 = [
     pytest.param(
         DerivedContainer(
-            base=container_from_pytest_param(CONTAINER_T),
+            base=container_and_marks_from_pytest_param(CONTAINER_T)[0],
             containerfile=DOCKERF_PY_T2,
         ),
         marks=CONTAINER_T.marks,

@@ -7,9 +7,8 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 
-from pytest_container import container_and_marks_from_pytest_param
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
-from pytest_container.container import container_from_pytest_param
 from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
 from pytest_container.runtime import LOCALHOST
@@ -841,7 +840,7 @@ if __name__ == "__main__":
     print(
         json.dumps(
             [
-                container_from_pytest_param(cont).get_base().url
+                container_and_marks_from_pytest_param(cont)[0].get_base().url
                 for cont in ALL_CONTAINERS
                 if (not has_true_skipif(cont) and not has_xfail(cont))
             ]

@@ -7,7 +7,7 @@ from typing import Optional
 import psycopg2
 import pytest
 from _pytest.mark import ParameterSet
-from pytest_container.container import container_from_pytest_param
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
 
@@ -38,7 +38,7 @@ def _generate_test_matrix() -> List[ParameterSet]:
     params = []
 
     for pg_cont_param in POSTGRESQL_CONTAINERS:
-        pg_cont = container_from_pytest_param(pg_cont_param)
+        pg_cont = container_and_marks_from_pytest_param(pg_cont_param)[0]
         marks = pg_cont_param.marks
         ports = pg_cont.forwarded_ports
         params.append(
