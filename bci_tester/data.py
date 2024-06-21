@@ -742,7 +742,7 @@ PROMETHEUS_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9090)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.5", "15.6"), "2.37.6"),)
+    for versions, tag in ((("15.5", "15.6"), "2"),)
 ]
 
 ALERTMANAGER_CONTAINERS = [
