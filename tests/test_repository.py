@@ -61,6 +61,7 @@ def test_installcheck(container_per_test):
     """Run installcheck against the SLE_BCI repo + locally installed packages."""
     # Let zypper fetch the repo data and generate solv files.
     container_per_test.connection.check_output("zypper ref")
+    container_per_test.connection.check_output("zypper -n in libsolv-tools")
     # Check that all packages in SLE_BCI can be installed, using already installed
     # packages (@System) if necessary. It tries to keep rpm installed
     # but rpm-ndb conflicts with that, so exclude rpm-ndb.
