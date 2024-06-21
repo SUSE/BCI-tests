@@ -72,6 +72,7 @@ markers = [
     'nodejs_16',
     'nodejs_18',
     'nodejs_20',
+    'nodejs_22',
     'openjdk_11',
     'openjdk_17',
     'openjdk_21',
