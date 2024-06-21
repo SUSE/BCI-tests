@@ -26,7 +26,7 @@ COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 """
 
 DOCKERF_CASSANDRA = """
-RUN zypper -n in tar gzip awk git-core util-linux
+RUN zypper -n in tar gzip awk git-core util-linux procps
 """
 
 CONTAINER_IMAGES = [
