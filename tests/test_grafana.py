@@ -20,6 +20,6 @@ def test_prometheus_healthy(container: ContainerData) -> None:
         return requests.get(f"http://localhost:{port}/api/health", timeout=2)
 
     resp = _fetch_grafana_health()
-    assert resp.status_code == 200
+    resp.raise_for_status()
     data = resp.json()
     assert data == {"commit": "NA", "database": "ok", "version": "9.5.18"}
