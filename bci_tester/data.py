@@ -752,7 +752,7 @@ ALERTMANAGER_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9093)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.5", "15.6"), "0.26.0"),)
+    for versions, tag in ((("15.5", "15.6"), "0.26"),)
 ]
 
 BLACKBOX_CONTAINERS = [
