@@ -761,8 +761,6 @@ BLACKBOX_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
         forwarded_ports=[PortForwarding(container_port=9115)],
         available_versions=versions,
-        custom_entry_point='["/usr/bin/blackbox_exporter",'
-        + ' "--config.file=/etc/prometheus/blackbox.yml"]',
     )
     for versions, tag in ((("15.5", "15.6"), "0.24"),)
 ]
