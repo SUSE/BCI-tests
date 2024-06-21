@@ -43,7 +43,7 @@ markers = [
     'bci-minimal_15.5',
     'bci-minimal_15.6',
     'bci-minimal_latest',
-    'blackbox_exporter_0.24.0',
+    'blackbox_exporter_0.24',
     'dotnet-aspnet_6.0',
     'dotnet-aspnet_8.0',
     'dotnet-runtime_6.0',
