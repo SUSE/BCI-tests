@@ -17,7 +17,9 @@ def test_prometheus_healthy(container: ContainerData) -> None:
     )
     def _fetch_grafana_health() -> requests.Response:
         port = container.forwarded_ports[0].host_port
-        return requests.get(f"http://localhost:{port}/api/health", timeout=2)
+        resp = requests.get(f"http://localhost:{port}/api/health", timeout=2)
+        resp.raise_for_status()
+        return resp
 
     resp = _fetch_grafana_health()
     resp.raise_for_status()
