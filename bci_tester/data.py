@@ -764,7 +764,7 @@ BLACKBOX_CONTAINERS = [
         custom_entry_point='["/usr/bin/blackbox_exporter",'
         + ' "--config.file=/etc/prometheus/blackbox.yml"]',
     )
-    for versions, tag in ((("15.5", "15.6"), "0.24.0"),)
+    for versions, tag in ((("15.5", "15.6"), "0.24"),)
 ]
 
 GRAFANA_CONTAINERS = [
