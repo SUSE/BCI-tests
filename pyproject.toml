@@ -139,6 +139,22 @@ docstring-code-format = false
 # enabled.
 docstring-code-line-length = "dynamic"
 
+[tool.ruff.lint]
+select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    "E",
+    "W",
+    # isort
+    "I"
+]
+
+ignore = [
+    # too long lines
+    "E501"
+]
+
 [tool.ruff.lint.isort]
 force-single-line = true
 case-sensitive = true
