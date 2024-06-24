@@ -467,7 +467,7 @@ NODEJS_CONTAINERS = [
 ]
 
 PYTHON36_CONTAINER = create_BCI(
-    build_tag="bci/python:3.6", available_versions=["15.6"]
+    build_tag="bci/python:3.6", available_versions=["15.5", "15.6"]
 )
 PYTHON310_CONTAINER = create_BCI(
     build_tag="bci/python:3.10", available_versions=["tumbleweed"]
@@ -491,7 +491,7 @@ PYTHON_WITH_PIPX_CONTAINERS = [
 ]
 
 RUBY_25_CONTAINER = create_BCI(
-    build_tag="bci/ruby:2.5", available_versions=["15.6"]
+    build_tag="bci/ruby:2.5", available_versions=["15.5", "15.6"]
 )
 
 RUBY_33_CONTAINER = create_BCI(
@@ -587,6 +587,7 @@ CONTAINER_389DS_CONTAINERS = [
     )
     for ver, os_ver in (
         ("2.2", "15.6"),
+        ("2.2", "15.5"),
         ("3.0", "tumbleweed"),
     )
 ]
