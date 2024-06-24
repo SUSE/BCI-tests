@@ -7,13 +7,12 @@ from typing import Optional
 import psycopg2
 import pytest
 from _pytest.mark import ParameterSet
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
+from pytest_container.container import container_and_marks_from_pytest_param
 
-from bci_tester.data import POSTGRES_PASSWORD
 from bci_tester.data import POSTGRESQL_CONTAINERS
-
+from bci_tester.data import POSTGRES_PASSWORD
 
 CONTAINER_IMAGES = POSTGRESQL_CONTAINERS
 

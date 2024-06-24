@@ -14,7 +14,6 @@ from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import OS_VERSION
 
-
 _RM_ZYPPSERVICE = (
     "rm -v /usr/lib/zypp/plugins/services/container-suseconnect-zypp"
 )

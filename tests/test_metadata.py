@@ -39,7 +39,6 @@ from bci_tester.data import GCC_CONTAINERS
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
-from bci_tester.data import ImageType
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import L3_CONTAINERS
@@ -66,16 +65,16 @@ from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTGRESQL_CONTAINERS
+from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON311_CONTAINER
 from bci_tester.data import PYTHON312_CONTAINER
-from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUBY_33_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import TOMCAT_CONTAINERS
-
+from bci_tester.data import ImageType
 
 #: The official vendor name
 VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"

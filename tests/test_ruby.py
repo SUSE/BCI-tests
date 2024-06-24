@@ -5,7 +5,6 @@ import pytest
 from bci_tester.data import OS_VERSION
 from bci_tester.data import RUBY_CONTAINERS
 
-
 CONTAINER_IMAGES = RUBY_CONTAINERS
 
 

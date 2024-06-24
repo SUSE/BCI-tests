@@ -12,16 +12,16 @@ import packaging.version
 import pytest
 from _pytest.config import Config
 from pytest_container import Container
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
+from pytest_container import MultiStageBuild
+from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
-from pytest_container import MultiStageBuild
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
 
-from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
+from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
@@ -33,7 +33,6 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
-
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 

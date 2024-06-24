@@ -1,9 +1,9 @@
 """This module contains the tests for the git container, the image with git pre-installed."""
 
 import pytest
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import DerivedContainer
 from pytest_container.container import ImageFormat
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 

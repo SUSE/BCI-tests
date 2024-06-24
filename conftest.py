@@ -6,10 +6,10 @@ from subprocess import check_output
 
 import pytest
 from _pytest.fixtures import SubRequest
-from pytest_container import auto_container_parametrize
-from pytest_container import get_selected_runtime
 from pytest_container import GitRepositoryBuild
 from pytest_container import Version
+from pytest_container import auto_container_parametrize
+from pytest_container import get_selected_runtime
 from pytest_container.helpers import add_extra_run_and_build_args_options
 from pytest_container.helpers import add_logging_level_options
 from pytest_container.helpers import set_logging_level_from_cli_args

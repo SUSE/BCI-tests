@@ -8,7 +8,6 @@ from pytest_container import GitRepositoryBuild
 
 from bci_tester.data import RUST_CONTAINERS
 
-
 CONTAINER_IMAGES = RUST_CONTAINERS
 
 

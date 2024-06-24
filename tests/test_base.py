@@ -7,8 +7,8 @@ from typing import Dict
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
@@ -22,7 +22,6 @@ from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
 from bci_tester.runtime_choice import PODMAN_SELECTED
 from tests.test_fips import openssl_fips_hashes_test_fnct
-
 
 CONTAINER_IMAGES = [
     BASE_CONTAINER,

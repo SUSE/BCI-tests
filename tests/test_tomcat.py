@@ -3,13 +3,12 @@
 import pytest
 import requests
 import tenacity
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
+from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
 
 from bci_tester.data import TOMCAT_CONTAINERS
-
 
 TOMCAT_WITH_SAMPLE = []
 

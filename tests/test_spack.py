@@ -6,9 +6,9 @@ import pytest
 from _pytest.config import Config
 from pytest_container import MultiStageBuild
 from pytest_container.container import BindMount
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import DerivedContainer
 from pytest_container.container import ImageFormat
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
 
