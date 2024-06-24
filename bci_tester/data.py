@@ -6,6 +6,7 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Tuple
 
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
@@ -596,6 +597,12 @@ PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
 
 MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
+_MARIADB_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+    ("10.11", ("15.6",)),
+    ("10.6", ("15.5",)),
+    ("11.4", ("tumbleweed",)),
+)
+
 MARIADB_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/mariadb:{mariadb_ver}",
@@ -606,11 +613,7 @@ MARIADB_CONTAINERS = [
             "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD
         },
     )
-    for mariadb_ver, os_versions in (
-        ("10.11", ("15.6",)),
-        ("10.6", ("15.5",)),
-        ("11.2", ("tumbleweed",)),
-    )
+    for mariadb_ver, os_versions in _MARIADB_VERSION_OS_MATRIX
 ]
 
 MARIADB_CLIENT_CONTAINERS = [
@@ -620,11 +623,7 @@ MARIADB_CLIENT_CONTAINERS = [
         available_versions=os_versions,
         custom_entry_point="/bin/sh",
     )
-    for mariadb_client_ver, os_versions in (
-        ("10.11", ("15.6",)),
-        ("10.6", ("15.5",)),
-        ("11.2", ("tumbleweed",)),
-    )
+    for mariadb_client_ver, os_versions in _MARIADB_VERSION_OS_MATRIX
 ]
 
 POSTGRES_PASSWORD = "n0ts3cr3t"
