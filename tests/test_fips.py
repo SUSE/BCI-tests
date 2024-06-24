@@ -10,21 +10,20 @@ import pytest
 from _pytest.config import Config
 from _pytest.mark.structures import ParameterSet
 from pytest_container.build import MultiStageBuild
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
 from pytest_container.runtime import OciRuntimeBase
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import OS_VERSION
-from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
+from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
+from bci_tester.data import OS_VERSION
 from bci_tester.fips import FIPS_DIGESTS
-from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import NONFIPS_DIGESTS
-
+from bci_tester.fips import host_fips_enabled
 
 #: multistage :file:`Dockerfile` that builds the program from
 #: :py:const:`FIPS_TEST_DOT_C` using gcc and copies it, ``libcrypto``, ``libssl``

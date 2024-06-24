@@ -1,6 +1,5 @@
 from pytest_container import get_selected_runtime
 
-
 #: Is :command:`docker` the selected runtime?
 DOCKER_SELECTED: bool = False
 

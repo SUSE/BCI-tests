@@ -7,10 +7,10 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 try:
@@ -24,9 +24,7 @@ import pytest
 from _pytest.mark.structures import MarkDecorator
 from _pytest.mark.structures import ParameterSet
 
-
 from bci_tester.runtime_choice import DOCKER_SELECTED
-
 
 #: The operating system version as present in /etc/os-release & various other
 #: places

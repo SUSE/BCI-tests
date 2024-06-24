@@ -8,9 +8,9 @@ import pymysql
 import pytest
 from _pytest.mark import ParameterSet
 from pymysql.err import OperationalError
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 from pytest_container.runtime import OciRuntimeBase
@@ -21,7 +21,6 @@ from tenacity import wait_exponential
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MARIADB_ROOT_PASSWORD
-
 
 CONTAINER_IMAGES = MARIADB_CONTAINERS
 

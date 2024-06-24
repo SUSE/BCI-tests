@@ -1,8 +1,8 @@
 """Tests for the gcc containers."""
 
 import pytest
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import DerivedContainer
+from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 
 from bci_tester.data import GCC_CONTAINERS

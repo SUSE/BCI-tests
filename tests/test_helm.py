@@ -2,7 +2,6 @@
 
 from bci_tester.data import HELM_CONTAINER
 
-
 CONTAINER_IMAGES = (HELM_CONTAINER,)
 
 

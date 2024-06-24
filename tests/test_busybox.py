@@ -8,7 +8,6 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import OS_VERSION
 
-
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]
 
 

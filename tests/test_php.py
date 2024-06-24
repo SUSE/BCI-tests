@@ -6,21 +6,20 @@ except ImportError:
     from typing_extensions import Literal
 
 import pytest
-from pytest_container import container_and_marks_from_pytest_param
+import requests
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
+from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
 from pytest_container.container import PortForwarding
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
-import requests
 
+from bci_tester.data import OS_VERSION
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
-from bci_tester.data import OS_VERSION
-
 
 CONTAINER_IMAGES = [PHP_8_CLI, PHP_8_APACHE, PHP_8_FPM]
 

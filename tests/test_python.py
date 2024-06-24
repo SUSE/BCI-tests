@@ -7,11 +7,11 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
 from pytest_container import PortForwarding
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
-from pytest_container.runtime import get_selected_runtime
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import Version
+from pytest_container.runtime import get_selected_runtime
 
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON_CONTAINERS

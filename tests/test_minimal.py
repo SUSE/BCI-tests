@@ -9,7 +9,6 @@ from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import OS_VERSION
 
-
 #: size limits of the minimal image per architecture in MiB
 SLE_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
     "x86_64": 49,

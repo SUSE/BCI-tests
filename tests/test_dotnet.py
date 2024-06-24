@@ -10,8 +10,8 @@ from typing import Tuple
 
 import pytest
 from _pytest.mark import ParameterSet
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import GitRepositoryBuild
+from pytest_container import container_and_marks_from_pytest_param
 
 from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
@@ -21,7 +21,6 @@ from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
-
 
 DOTNET_SDK_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,

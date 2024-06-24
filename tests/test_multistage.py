@@ -2,10 +2,10 @@
 
 import pytest
 from _pytest.config import Config
-from pytest_container import get_extra_build_args
-from pytest_container import get_extra_run_args
 from pytest_container import GitRepositoryBuild
 from pytest_container import MultiStageBuild
+from pytest_container import get_extra_build_args
+from pytest_container import get_extra_run_args
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
@@ -16,7 +16,6 @@ from bci_tester.data import OPENJDK_21_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
 from bci_tester.data import OS_VERSION
-
 
 #: maven version that is being build in the multistage test build
 MAVEN_VERSION = "3.9.6"
