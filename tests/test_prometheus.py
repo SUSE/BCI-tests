@@ -4,10 +4,9 @@ import pytest
 import requests
 from pytest_container.container import ContainerData
 
-from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import BLACKBOX_CONTAINERS
-
+from bci_tester.data import PROMETHEUS_CONTAINERS
 
 PROMETHEUS_STACK_CONTAINERS = PROMETHEUS_CONTAINERS + ALERTMANAGER_CONTAINERS
 PROMETHEUS_AND_BLACKBOX_CONTAINERS = (
