@@ -742,7 +742,7 @@ PROMETHEUS_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9090)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.5", "15.6"), "2"),)
+    for versions, tag in ((("15.6", "tumbleweed"), "2"),)
 ]
 
 ALERTMANAGER_CONTAINERS = [
@@ -752,7 +752,7 @@ ALERTMANAGER_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9093)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.5", "15.6"), "0.26"),)
+    for versions, tag in ((("15.6", "tumbleweed"), "0.26"),)
 ]
 
 BLACKBOX_CONTAINERS = [
@@ -762,7 +762,7 @@ BLACKBOX_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9115)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.5", "15.6"), "0.24"),)
+    for versions, tag in ((("15.6", "tumbleweed"), "0.24"),)
 ]
 
 GRAFANA_CONTAINERS = [
@@ -772,7 +772,7 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.5", "15.6"), "9"),)
+    for versions, tag in ((("15.6", "tumbleweed"), "9"),)
 ]
 
 CONTAINERS_WITH_ZYPPER = (
