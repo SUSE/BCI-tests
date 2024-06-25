@@ -435,6 +435,13 @@ OPENJDK_21_CONTAINER = create_BCI(
 OPENJDK_DEVEL_21_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:21", available_versions=["15.6", "tumbleweed"]
 )
+OPENJDK_22_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:22", available_versions=["tumbleweed"]
+)
+OPENJDK_DEVEL_22_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:22", available_versions=["tumbleweed"]
+)
+
 
 OPENJDK_CONTAINERS = [
     OPENJDK_11_CONTAINER,
@@ -443,6 +450,8 @@ OPENJDK_CONTAINERS = [
     OPENJDK_DEVEL_17_CONTAINER,
     OPENJDK_21_CONTAINER,
     OPENJDK_DEVEL_21_CONTAINER,
+    OPENJDK_22_CONTAINER,
+    OPENJDK_DEVEL_22_CONTAINER,
 ]
 
 NODEJS_18_CONTAINER = create_BCI(
