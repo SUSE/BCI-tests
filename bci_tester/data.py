@@ -51,7 +51,7 @@ ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 _DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
 
 assert (
     sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS)
@@ -479,7 +479,10 @@ PYTHON36_CONTAINER = create_BCI(
 PYTHON310_CONTAINER = create_BCI(
     build_tag="bci/python:3.10", available_versions=["tumbleweed"]
 )
-PYTHON311_CONTAINER = create_BCI(build_tag="bci/python:3.11")
+PYTHON311_CONTAINER = create_BCI(
+    build_tag="bci/python:3.11",
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
+)
 
 PYTHON312_CONTAINER = create_BCI(
     build_tag="bci/python:3.12", available_versions=["15.6", "tumbleweed"]
@@ -645,7 +648,7 @@ POSTGRESQL_CONTAINERS = [
     )
     for pg_ver, pg_versions in (
         (15, ["15.5", "tumbleweed"]),
-        (16, ["15.5", "15.6", "tumbleweed"]),
+        (16, _DEFAULT_NONBASE_OS_VERSIONS),
     )
 ]
 
@@ -699,8 +702,8 @@ GCC_CONTAINERS = [
         available_versions=os_versions,
     )
     for gcc_version, os_versions in (
-        (7, ("15.5", "15.6")),
-        (13, ("15.5", "15.6", "tumbleweed")),
+        (7, ("15.6",)),
+        (13, ("15.6", "tumbleweed")),
         (14, ("tumbleweed",)),
     )
 ]
