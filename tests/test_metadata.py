@@ -55,9 +55,11 @@ from bci_tester.data import NODEJS_22_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 from bci_tester.data import OPENJDK_21_CONTAINER
+from bci_tester.data import OPENJDK_22_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
+from bci_tester.data import OPENJDK_DEVEL_22_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PCP_CONTAINERS
@@ -138,6 +140,12 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (OPENJDK_21_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
         (
             OPENJDK_DEVEL_21_CONTAINER,
+            "openjdk.devel",
+            ImageType.LANGUAGE_STACK,
+        ),
+        (OPENJDK_22_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
+        (
+            OPENJDK_DEVEL_22_CONTAINER,
             "openjdk.devel",
             ImageType.LANGUAGE_STACK,
         ),
