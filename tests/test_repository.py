@@ -181,6 +181,31 @@ def test_repo_content_licensing(container_per_test) -> None:
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="no included BCI repository - can't test",
 )
+@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+def test_codestream_lifecycle(container_per_test):
+    """Check that the codestream lifecycle information is available
+    and has the expected value."""
+
+    zypper_lifecycle_xml = ET.fromstring(
+        container_per_test.connection.check_output(
+            "zypper --xmlout -i pd --xmlfwd codestream"
+        )
+    )
+    lifecycle = zypper_lifecycle_xml.find(
+        ".//product[@name='SLES']/xmlfwd/codestream/endoflife"
+    )
+    assert (
+        lifecycle is not None
+    ), "No endoflife information found in product description"
+    assert (
+        lifecycle.text == "2031-07-31"
+    ), f"Expected end of life 2031-07-31, but got {lifecycle.text}"
+
+
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="no included BCI repository - can't test",
+)
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
 )
