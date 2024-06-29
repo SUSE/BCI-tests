@@ -109,9 +109,6 @@ def test_mariadb_db_env_vars(
     variables.
 
     """
-    conn = None
-    cur = None
-
     dbdir = "/var/lib/mysql"
 
     dbdir_f = container_per_test.connection.file(dbdir)
