@@ -636,6 +636,22 @@ MARIADB_CLIENT_CONTAINERS = [
     for mariadb_client_ver, os_versions in _MARIADB_VERSION_OS_MATRIX
 ]
 
+
+POSTFIX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/postfix:{postfix_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=os_versions,
+        forwarded_ports=[PortForwarding(container_port=25)],
+        extra_environment_variables={"SERVER_HOSTNAME": "localhost"},
+    )
+    for postfix_ver, os_versions in (
+        (3.7, ["15.5"]),
+        (3.8, ["15.6"]),
+        (3.9, ["tumbleweed"]),
+    )
+]
+
 POSTGRES_PASSWORD = "n0ts3cr3t"
 
 POSTGRESQL_CONTAINERS = [
@@ -755,6 +771,7 @@ CONTAINERS_WITH_ZYPPER = (
     + NODEJS_CONTAINERS
     + OPENJDK_CONTAINERS
     + PCP_CONTAINERS
+    + POSTFIX_CONTAINERS
     + POSTGRESQL_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
