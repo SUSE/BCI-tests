@@ -5,6 +5,7 @@ on:
   schedule:
     - cron: '44 4 */2 * *'
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: integration-tests-${{ github.ref_name }}
