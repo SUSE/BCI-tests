@@ -66,6 +66,7 @@ markers = [
     'golang_stable-openssl',
     'golang_unstable',
     'grafana_9',
+    'grafana_10',
     'mariadb_10.6',
     'mariadb_10.11',
     'mariadb_11.4',
