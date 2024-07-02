@@ -15,6 +15,7 @@ markers = [
     '389-ds_2.2',
     '389-ds_3.0',
     'alertmanager_0.26',
+    'alertmanager_0.27',
     'bci-base_15.3',
     'bci-base_15.3-ltss',
     'bci-base_15.4',
