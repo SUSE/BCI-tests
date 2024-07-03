@@ -104,7 +104,7 @@ def test_rpm_absent_in_micro(container):
 @pytest.mark.parametrize(
     "container", [MINIMAL_CONTAINER], indirect=["container"]
 )
-def test_rpm_present_in_micro(container):
+def test_rpm_present_in_minimal(container):
     """Ensure that rpm is present in the minimal container."""
     assert container.connection.exists(
         "rpm"
