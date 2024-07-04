@@ -24,6 +24,7 @@ markers = [
     'bci-base_15.6',
     'bci-base_latest',
     'bci-base-fips_15.3',
+    'bci-base-fips_15.4',
     'bci-busybox_15.3',
     'bci-busybox_15.4',
     'bci-busybox_15.5',

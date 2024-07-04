@@ -371,12 +371,13 @@ else:
             )
             for sp in ("15.3", "15.4")
         )
-        LTSS_BASE_FIPS_CONTAINERS.append(
+        LTSS_BASE_FIPS_CONTAINERS.extend(
             create_BCI(
-                build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle15.3/bci-base-fips:{OS_CONTAINER_TAG}",
-                available_versions=["15.3"],
+                build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle{sp}/bci-base-fips:{OS_CONTAINER_TAG}",
+                available_versions=[sp],
                 bci_type=ImageType.OS_LTSS,
             )
+            for sp in ("15.3", "15.4")
         )
 
 MINIMAL_CONTAINER = create_BCI(

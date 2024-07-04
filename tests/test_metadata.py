@@ -90,7 +90,7 @@ URL = (
     "https://www.opensuse.org"
     if OS_VERSION == "tumbleweed"
     else (
-        "https://www.suse.com/products/server/"
+        "https://www.suse.com/products/long-term-service-pack-support/"
         if OS_VERSION in ("15.3", "15.4")
         else "https://www.suse.com/products/base-container-images/"
     )
