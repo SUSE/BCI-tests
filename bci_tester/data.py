@@ -55,7 +55,7 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
 
 assert (
     sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS)
-), f"list ALLOWED_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
+), f"list ALLOWED_BASE_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
 
 assert (
     sorted(ALLOWED_NONBASE_OS_VERSIONS) == list(ALLOWED_NONBASE_OS_VERSIONS)
