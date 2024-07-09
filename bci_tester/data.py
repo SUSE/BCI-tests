@@ -305,9 +305,7 @@ def create_BCI(
     # only try to grab the mark from the build tag for containers that are
     # available for this os version, otherwise we get bogus errors for missing
     # marks
-    if OS_VERSION in (
-        available_versions or list(_DEFAULT_NONBASE_OS_VERSIONS)
-    ):
+    if OS_VERSION in (available_versions or list(ALLOWED_NONBASE_OS_VERSIONS)):
         marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
 
     if OS_VERSION == "tumbleweed":
