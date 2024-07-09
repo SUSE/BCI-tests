@@ -345,6 +345,7 @@ else:
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
         image_type="kiwi",
         bci_type=ImageType.OS,
+        available_versions=[OS_VERSION],
     )
     if TARGET in ("ibs", "ibs-cr", "ibs-released"):
         LTSS_BASE_CONTAINERS.extend(
