@@ -7,9 +7,9 @@ from subprocess import check_output
 import pytest
 from _pytest.fixtures import SubRequest
 from pytest_container import GitRepositoryBuild
+from pytest_container import OciRuntimeBase
 from pytest_container import Version
 from pytest_container import auto_container_parametrize
-from pytest_container import get_selected_runtime
 from pytest_container.helpers import add_extra_run_and_build_args_options
 from pytest_container.helpers import add_logging_level_options
 from pytest_container.helpers import set_logging_level_from_cli_args
@@ -18,7 +18,9 @@ from bci_tester.util import get_host_go_version
 
 
 @pytest.fixture(scope="function")
-def container_git_clone(request: SubRequest, tmp_path):
+def container_git_clone(
+    request: SubRequest, tmp_path, container_runtime: OciRuntimeBase
+):
     """This fixture clones the `GitRepositoryBuild` passed as an indirect
     parameter to it into the currently selected container.
 
@@ -54,10 +56,9 @@ def container_git_clone(request: SubRequest, tmp_path):
 
     check_output(shlex.split(git_repo_build.clone_command), cwd=tmp_path)
 
-    runtime = get_selected_runtime()
     check_output(
         [
-            runtime.runner_binary,
+            container_runtime.runner_binary,
             "cp",
             str(tmp_path / git_repo_build.repo_name),
             f"{container_fixture.container_id}:/{git_repo_build.repo_name}",
@@ -66,7 +67,7 @@ def container_git_clone(request: SubRequest, tmp_path):
     # fix file permissions for the git copied git repo
     check_output(
         [
-            runtime.runner_binary,
+            container_runtime.runner_binary,
             "exec",
             container_fixture.container_id,
             "/bin/sh",
