@@ -54,7 +54,7 @@ func main() {
 MULTISTAGE_DOCKERFILE = """FROM $builder as builder
 WORKDIR /src
 COPY main.go .
-RUN go build main.go
+RUN CGO_ENABLED=0 GOOS=linux go build main.go
 
 FROM $runner
 ENTRYPOINT []
