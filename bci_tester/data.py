@@ -53,6 +53,9 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
 
+# Test base containers by default for these versions
+_DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
+
 assert (
     sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS)
 ), f"list ALLOWED_BASE_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
@@ -298,6 +301,15 @@ def create_BCI(
                     )
         else:
             available_versions = list(_DEFAULT_NONBASE_OS_VERSIONS)
+    else:
+        if available_versions:
+            for ver in available_versions:
+                if ver not in ALLOWED_BASE_OS_VERSIONS:
+                    raise ValueError(
+                        f"Invalid os version for base container: {ver}"
+                    )
+        else:
+            available_versions = list(_DEFAULT_BASE_OS_VERSIONS)
 
     if available_versions:
         marks.append(create_container_version_mark(available_versions))
