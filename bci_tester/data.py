@@ -306,7 +306,7 @@ def create_BCI(
             for ver in available_versions:
                 if ver not in ALLOWED_BASE_OS_VERSIONS:
                     raise ValueError(
-                        f"Invalid os version for base container: {ver}"
+                        f"Invalid os version {ver} for base container: {build_tag}"
                     )
         else:
             available_versions = list(_DEFAULT_BASE_OS_VERSIONS)
