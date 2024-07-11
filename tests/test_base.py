@@ -74,10 +74,10 @@ def test_base_size(auto_container: ContainerData, container_runtime):
         }
     elif OS_VERSION in ("basalt", "tumbleweed"):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 106,
-            "aarch64": 130,
-            "ppc64le": 142,
-            "s390x": 113,
+            "x86_64": 100,
+            "aarch64": 126,
+            "ppc64le": 138,
+            "s390x": 99,
         }
     # 15.5/15.6 are hopefully only temporary large due to PED-5014
     elif OS_VERSION in ("15.6",):
