@@ -346,6 +346,10 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "alertmanager",
         "blackbox_exporter",
         "grafana",
+        "system-user-grafana",
+        "golang-github-prometheus-alertmanager",
+        "system-user-prometheus",
+        "prometheus-blackbox_exporter",
     }
 
     # kubic-locale-archive should be replaced by glibc-locale-base in the containers
