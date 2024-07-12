@@ -24,8 +24,10 @@ from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ACC_CONTAINERS
+from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BLACKBOX_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
 from bci_tester.data import DISTRIBUTION_CONTAINER
@@ -38,6 +40,7 @@ from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import GCC_CONTAINERS
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
+from bci_tester.data import GRAFANA_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
@@ -67,6 +70,7 @@ from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTGRESQL_CONTAINERS
+from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON36_CONTAINER
 from bci_tester.data import PYTHON310_CONTAINER
 from bci_tester.data import PYTHON311_CONTAINER
@@ -215,6 +219,22 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (pg_container, "postgres", ImageType.APPLICATION)
         for pg_container in POSTGRESQL_CONTAINERS
+    ]
+    + [
+        (prom_container, "prometheus", ImageType.APPLICATION)
+        for prom_container in PROMETHEUS_CONTAINERS
+    ]
+    + [
+        (alertmngr_ctr, "alertmanager", ImageType.APPLICATION)
+        for alertmngr_ctr in ALERTMANAGER_CONTAINERS
+    ]
+    + [
+        (blackbox_ctr, "blackbox_exporter", ImageType.APPLICATION)
+        for blackbox_ctr in BLACKBOX_CONTAINERS
+    ]
+    + [
+        (grafana_container, "grafana", ImageType.APPLICATION)
+        for grafana_container in GRAFANA_CONTAINERS
     ]
     + [
         (DISTRIBUTION_CONTAINER, "registry", ImageType.APPLICATION),

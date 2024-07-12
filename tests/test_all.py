@@ -340,6 +340,19 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
             'search-result/solvable-list/solvable[@repository="(System Packages)"]'
         )
     }
+
+    monitoring_stack_packages = {
+        "prometheus",
+        "alertmanager",
+        "blackbox_exporter",
+        "grafana",
+        "system-user-grafana",
+        "golang-github-prometheus-alertmanager",
+        "golang-github-prometheus-prometheus",
+        "system-user-prometheus",
+        "prometheus-blackbox_exporter",
+    }
+
     # kubic-locale-archive should be replaced by glibc-locale-base in the containers
     # but that is a few bytes larger so we accept it as an exception
     known_orphaned_packages = {
@@ -351,7 +364,7 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "sle-module-basesystem-release",
         "sle-module-python3-release",
         "sle-module-server-applications-release",
-    }
+    }.union(monitoring_stack_packages)
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 

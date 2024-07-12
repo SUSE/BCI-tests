@@ -735,6 +735,46 @@ SPACK_CONTAINERS = [
     for ver, tag in (("15.6", "0.21"),)
 ]
 
+PROMETHEUS_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/prometheus:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=9090)],
+        available_versions=versions,
+    )
+    for versions, tag in ((("15.6", "tumbleweed"), "2"),)
+]
+
+ALERTMANAGER_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/alertmanager:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=9093)],
+        available_versions=versions,
+    )
+    for versions, tag in ((("15.6",), "0.26"), (("tumbleweed",), "0.27"))
+]
+
+BLACKBOX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/blackbox_exporter:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=9115)],
+        available_versions=versions,
+    )
+    for versions, tag in ((("15.6", "tumbleweed"), "0.24"),)
+]
+
+GRAFANA_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/grafana:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=3000)],
+        available_versions=versions,
+    )
+    for versions, tag in ((("15.6",), "9"), (("tumbleweed",), "10"))
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -745,9 +785,12 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_CLI,
         PHP_8_FPM,
     ]
+    + ALERTMANAGER_CONTAINERS
+    + BLACKBOX_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
     + GCC_CONTAINERS
     + GOLANG_CONTAINERS
+    + GRAFANA_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
     + MARIADB_CLIENT_CONTAINERS
@@ -756,6 +799,7 @@ CONTAINERS_WITH_ZYPPER = (
     + OPENJDK_CONTAINERS
     + PCP_CONTAINERS
     + POSTGRESQL_CONTAINERS
+    + PROMETHEUS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
