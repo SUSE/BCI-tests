@@ -348,6 +348,7 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "grafana",
         "system-user-grafana",
         "golang-github-prometheus-alertmanager",
+        "golang-github-prometheus-prometheus",
         "system-user-prometheus",
         "prometheus-blackbox_exporter",
     }
