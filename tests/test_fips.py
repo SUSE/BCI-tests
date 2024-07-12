@@ -148,6 +148,17 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
         ), f"unexpected digest of hash {digest}: {dev_null_digest}"
 
 
+@pytest.mark.skipif(
+    OS_VERSION in ("15.3",), reason="FIPS 140-3 not supported on 15.3"
+)
+def fips_mode_setup_check(container_per_test: ContainerData) -> None:
+    """If the host is running in FIPS mode, then `fips-mode-setup --check` should
+    exit with `0`.
+
+    """
+    container_per_test.connection.check_output("fips-mode-setup --check")
+
+
 @pytest.mark.parametrize(
     "container_per_test", CONTAINER_IMAGES_WITH_ZYPPER, indirect=True
 )
