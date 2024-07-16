@@ -46,6 +46,7 @@ from bci_tester.data import GRAFANA_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
+from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
@@ -158,6 +159,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
+    + [(kiwi, "kiwi", ImageType.LANGUAGE_STACK) for kiwi in KIWI_CONTAINERS]
     + [
         (container_pcp, "pcp", ImageType.APPLICATION)
         for container_pcp in PCP_CONTAINERS
