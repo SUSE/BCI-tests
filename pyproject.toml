@@ -110,6 +110,7 @@ markers = [
     'bci-sle15-kernel-module-devel_15.5',
     'bci-sle15-kernel-module-devel_15.6',
     'spack_0.21',
+    'spack_0.22',
 ]
 
 [tool.ruff]
