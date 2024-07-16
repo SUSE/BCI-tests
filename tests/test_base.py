@@ -37,7 +37,7 @@ def test_passwd_present(auto_container):
 
 @pytest.mark.skipif(
     OS_VERSION not in ("tumbleweed",),
-    reason="requires glibc-locale-base installed",
+    reason="requires gconv modules",
 )
 def test_iconv_working(auto_container):
     """Generic test iconv works for UTF8 and ISO-8859-15 locale"""
