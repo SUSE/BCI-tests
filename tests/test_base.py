@@ -82,17 +82,24 @@ def test_base_size(auto_container: ContainerData, container_runtime):
     # 15.5/15.6 are hopefully only temporary large due to PED-5014
     elif OS_VERSION in ("15.6",):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 139,
-            "aarch64": 160,
-            "ppc64le": 184,
-            "s390x": 141,
+            "x86_64": 131,
+            "aarch64": 150,
+            "ppc64le": 173,
+            "s390x": 131,
         }
-    elif OS_VERSION in ("15.4", "15.5"):
+    elif OS_VERSION in ("15.5",):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 124,
-            "aarch64": 143,
-            "ppc64le": 165,
-            "s390x": 127,
+            "x86_64": 122,
+            "aarch64": 142,
+            "ppc64le": 164,
+            "s390x": 126,
+        }
+    elif OS_VERSION in ("15.4",):
+        base_container_max_size: Dict[str, int] = {
+            "x86_64": 118,
+            "aarch64": 135,
+            "ppc64le": 156,
+            "s390x": 122,
         }
     else:
         base_container_max_size: Dict[str, int] = {
