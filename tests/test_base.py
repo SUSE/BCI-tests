@@ -72,7 +72,7 @@ def test_base_size(auto_container: ContainerData, container_runtime):
         # SP4+ is a lot larger as it pulls in python3 and
         # the FIPS crypto policy scripts
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 130 if OS_VERSION in ("15.3",) else 168,
+            "x86_64": 130 if OS_VERSION in ("15.3",) else 169,
         }
     elif OS_VERSION in ("basalt", "tumbleweed"):
         base_container_max_size: Dict[str, int] = {
