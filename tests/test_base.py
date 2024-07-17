@@ -97,11 +97,12 @@ def test_base_size(auto_container: ContainerData, container_runtime):
             "s390x": 126,
         }
     elif OS_VERSION in ("15.4",):
+        # pick the sizes from sles15-ltss-image which is larger than sles15-ltsss
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 118,
-            "aarch64": 135,
-            "ppc64le": 156,
-            "s390x": 122,
+            "x86_64": 121,
+            "aarch64": 142,
+            "ppc64le": 162,
+            "s390x": 125,
         }
     else:
         base_container_max_size: Dict[str, int] = {
