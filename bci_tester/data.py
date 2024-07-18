@@ -78,7 +78,7 @@ if OS_VERSION == "tumbleweed":
     OS_MAJOR_VERSION = 17
     OS_SP_VERSION = 0
     OS_CONTAINER_TAG = "latest"
-    APP_CONTAINER_PREFIX = "opensuse"
+    APP_CONTAINER_PREFIX = SAC_CONTAINER_PREFIX = "opensuse"
     BCI_CONTAINER_PREFIX = "bci"
     OS_VERSION_ID = None
 
@@ -102,6 +102,7 @@ elif OS_VERSION == "basalt":
     )
 else:
     APP_CONTAINER_PREFIX = "suse"
+    SAC_CONTAINER_PREFIX = "containers"
     BCI_CONTAINER_PREFIX = "bci"
     OS_CONTAINER_TAG = OS_VERSION
     OS_VERSION_ID = OS_VERSION
@@ -230,6 +231,7 @@ class ImageType(enum.Enum):
 
     LANGUAGE_STACK = enum.auto()
     APPLICATION = enum.auto()
+    SAC_APPLICATION = enum.auto()
     OS = enum.auto()
     OS_LTSS = enum.auto()
 
@@ -238,7 +240,8 @@ class ImageType(enum.Enum):
             return "suse/ltss"
         return (
             "application"
-            if self.value == ImageType.APPLICATION.value
+            if self.value
+            in (ImageType.APPLICATION.value, ImageType.SAC_APPLICATION.value)
             else "bci"
         )
 
@@ -717,15 +720,38 @@ GCC_CONTAINERS = [
     )
 ]
 
-TOMCAT_9_CONTAINER, TOMCAT_10_CONTAINER = [
+APACHE_TOMCAT_10_CONTAINERS = [
     create_BCI(
-        build_tag=f"{APP_CONTAINER_PREFIX}/tomcat:{tomcat_ver}",
-        bci_type=ImageType.APPLICATION,
+        build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:10-jre{jre_version}",
+        bci_type=ImageType.SAC_APPLICATION,
+        available_versions=("15.6",),
         forwarded_ports=[PortForwarding(container_port=8080)],
     )
-    for tomcat_ver in (9, 10)
+    for jre_version in (21,)
+] + [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/apache-tomcat:10-jre{jre_version}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=("tumbleweed",),
+        forwarded_ports=[PortForwarding(container_port=8080)],
+    )
+    for jre_version in (22, 21, 17)
 ]
-TOMCAT_CONTAINERS = [TOMCAT_9_CONTAINER, TOMCAT_10_CONTAINER]
+
+APACHE_TOMCAT_9_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:9-jre{jre_version}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=("tumbleweed",),
+        forwarded_ports=[PortForwarding(container_port=8080)],
+    )
+    for jre_version in (17,)
+]
+
+TOMCAT_CONTAINERS = [
+    *APACHE_TOMCAT_9_CONTAINERS,
+    *APACHE_TOMCAT_10_CONTAINERS,
+]
 
 DOTNET_CONTAINERS = [
     DOTNET_SDK_6_0_CONTAINER,
