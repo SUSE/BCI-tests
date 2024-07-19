@@ -13,7 +13,7 @@ _HELLO_VERSION = "2.12.1"
 
 CONTAINERFILE_HELLO = f"""
 WORKDIR /src
-RUN curl -sLO https://ftpmirror.gnu.org/hello/hello-{_HELLO_VERSION}.tar.gz && \\
+RUN curl -sLO https://ftp.gnu.org/gnu/hello/hello-{_HELLO_VERSION}.tar.gz && \\
     tar --no-same-permissions --no-same-owner -xf hello-{_HELLO_VERSION}.tar.gz && \\
     cd hello-{_HELLO_VERSION} && \\
     ./configure && \\
