@@ -14,10 +14,12 @@ offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
 
-from subprocess import check_output
+import urllib.parse
+from pathlib import Path
 from typing import List
 
 import pytest
+import requests
 from _pytest.mark.structures import ParameterSet
 from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
@@ -420,10 +422,6 @@ def test_disturl(
             )
 
 
-@pytest.mark.skipif(
-    not LOCALHOST.exists("osc"),
-    reason="osc needs to be installed for this test",
-)
 @pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
 def test_disturl_can_be_checked_out(
     container: ContainerData,
@@ -432,15 +430,34 @@ def test_disturl_can_be_checked_out(
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
     label that can be checked out using :command:`osc` to get the sources at
     exactly the version from which the container was build. This test verifies
-    that it is possible to checkout this url. No further verification is run
-    though, i.e. it could be potentially a completely different package.
-
-    This test is skipped if :command:`osc` not installed. The test will fail
-    when `<https://build.suse.de>`_ is unreachable.
-
+    that the url is accessible.
     """
-    disturl = container.inspect.config.labels["org.openbuildservice.disturl"]
-    check_output(["osc", "co", disturl], cwd=tmp_path)
+    disturl_label = container.inspect.config.labels[
+        "org.openbuildservice.disturl"
+    ]
+    disturl = urllib.parse.urlparse(disturl_label)
+
+    assert disturl.scheme == "obs", f"unspported scheme in {disturl_label}"
+    for p in ("params", "query", "fragment"):
+        assert getattr(disturl, p) == "", f"unsupported {p} in {disturl_label}"
+
+    src_revision, _, src_package = Path(disturl.path).name.partition("-")
+    src_package = src_package.partition(":")[0]  # strip multibuild flavor
+    src_project = Path(disturl.path).parent.parent.name
+
+    try:
+        req = requests.get(
+            f"https://{disturl.hostname}/public/source/{src_project}/{src_package}",
+            params={"rev": src_revision},
+        )
+    except requests.exceptions.ConnectionError as e:
+        if "suse.de" in disturl.hostname:
+            pytest.skip(reason=f"Cannot connect to SUSE internal host: {e}")
+        raise
+    req.raise_for_status()
+    assert (
+        "kiwi" in req.text or "Dockerfile" in req.text
+    ), "Cannot find a valid build description"
 
 
 @SKIP_IF_TW_MARK
