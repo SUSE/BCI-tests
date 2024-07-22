@@ -115,7 +115,6 @@ jobs:
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
         os_version:
-          - 15.5
           - 15.6
           - "tumbleweed"
         include:
@@ -156,6 +155,24 @@ jobs:
             os_version: 15.4
           - toxenv: metadata
             os_version: 15.4
+          - toxenv: all
+            os_version: 15.5
+          - toxenv: base
+            os_version: 15.5
+          - toxenv: build
+            os_version: 15.5
+          - toxenv: busybox
+            os_version: 15.5
+          - toxenv: metadata
+            os_version: 15.5
+          - toxenv: minimal
+            os_version: 15.5
+          - toxenv: multistage
+            os_version: 15.5
+          - toxenv: repository
+            os_version: 15.5
+          - toxenv: init
+            os_version: 15.5
 
     steps:
       - name: Clean up disk space to maximize available space
