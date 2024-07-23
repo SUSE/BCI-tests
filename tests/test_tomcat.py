@@ -49,7 +49,7 @@ def test_tomcat_launches(container: ContainerData) -> None:
     resp = _fetch_tomcat_root()
     baseurl = container.container.baseurl
     assert baseurl
-    ver = baseurl.rpartition(":")[2]
+    ver = baseurl.rpartition(":")[2].partition("-")[0]
     assert resp.status_code == 404
     assert f"Apache Tomcat/{ver}" in resp.text
 

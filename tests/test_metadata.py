@@ -85,18 +85,6 @@ from bci_tester.data import ImageType
 #: The official vendor name
 VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"
 
-#: URL to the product's home page
-URL = (
-    "https://www.opensuse.org"
-    if OS_VERSION == "tumbleweed"
-    else (
-        "https://www.suse.com/products/long-term-service-pack-support/"
-        if OS_VERSION in ("15.3", "15.4")
-        else "https://www.suse.com/products/base-container-images/"
-    )
-)
-
-
 SKIP_IF_TW_MARK = pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
     reason="no supportlevel labels on openSUSE containers",
@@ -173,7 +161,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for container_pcp in PCP_CONTAINERS
     ]
     + [
-        (tomcat_ctr, "tomcat", ImageType.APPLICATION)
+        (tomcat_ctr, "apache-tomcat", ImageType.SAC_APPLICATION)
         for tomcat_ctr in TOMCAT_CONTAINERS
     ]
     + [
@@ -324,7 +312,11 @@ def test_general_labels(
         _get_container_label_prefix(container_name, container_type),
         "org.opencontainers.image",
     ):
-        if container_type not in (ImageType.APPLICATION, ImageType.OS_LTSS):
+        if container_type not in (
+            ImageType.SAC_APPLICATION,
+            ImageType.APPLICATION,
+            ImageType.OS_LTSS,
+        ):
             assert "BCI" in labels[f"{prefix}.title"]
 
         if OS_VERSION == "tumbleweed":
@@ -347,7 +339,22 @@ def test_general_labels(
 
         if version == "tumbleweed":
             assert OS_VERSION in labels[f"{prefix}.version"]
-        assert labels[f"{prefix}.url"] == URL
+
+        expected_url = "https://www.suse.com/products/base-container-images/"
+        if OS_VERSION == "tumbleweed":
+            expected_url = "https://www.opensuse.org"
+        elif container_type in (ImageType.SAC_APPLICATION,):
+            expected_url = (
+                f"https://apps.rancher.io/applications/{container_name}"
+            )
+        if OS_VERSION in ("15.3", "15.4"):
+            expected_url = (
+                "https://www.suse.com/products/long-term-service-pack-support/"
+            )
+
+        assert (
+            labels[f"{prefix}.url"] == expected_url
+        ), f"expected LABEL {prefix}.url = {expected_url} but is {labels[f'{prefix}.url']}"
         assert labels[f"{prefix}.vendor"] == VENDOR
 
     if OS_VERSION == "tumbleweed":
@@ -360,7 +367,11 @@ def test_general_labels(
             "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
             "https://www.suse.com/lifecycle",
         )
-        if container_type in (ImageType.OS_LTSS, ImageType.APPLICATION):
+        if container_type in (
+            ImageType.OS_LTSS,
+            ImageType.APPLICATION,
+            ImageType.SAC_APPLICATION,
+        ):
             assert labels["com.suse.eula"] == "sle-eula"
         else:
             assert labels["com.suse.eula"] == "sle-bci"
@@ -528,12 +539,17 @@ def test_reference(
         assert container_name.replace(".", "-") in reference
 
     if OS_VERSION == "tumbleweed":
-        if container_type == ImageType.APPLICATION:
+        if container_type in (
+            ImageType.APPLICATION,
+            ImageType.SAC_APPLICATION,
+        ):
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
     else:
-        if container_type == ImageType.APPLICATION:
+        if container_type == ImageType.SAC_APPLICATION:
+            assert reference.startswith("dp.apps.rancher.io/containers/")
+        elif container_type == ImageType.APPLICATION:
             assert reference.startswith("registry.suse.com/suse/")
         elif container_type == ImageType.OS_LTSS:
             assert reference.startswith("registry.suse.com/suse/ltss/sle15")
