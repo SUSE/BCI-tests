@@ -8,7 +8,7 @@ from bci_tester.data import OS_VERSION
 NONFIPS_DIGESTS = ("blake2b512", "blake2s256", "md5", "rmd160", "sm3")
 
 # OpenSSL 3.x in Tumbleweed dropped those as they're beyond deprecated
-if OS_VERSION not in ("basalt", "tumbleweed", "15.6"):
+if OS_VERSION in ("15.3", "15.4", "15.5"):
     NONFIPS_DIGESTS += ("md4", "mdc2")
 
 #: FIPS compliant openssl digests

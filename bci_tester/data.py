@@ -37,6 +37,7 @@ ALLOWED_BASE_OS_VERSIONS = (
     "15.4",
     "15.5",
     "15.6",
+    "15.7",
     "basalt",
     "tumbleweed",
 )
@@ -54,7 +55,7 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
 
 # Test base containers by default for these versions
-_DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
+_DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
 
 assert (
     sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS)

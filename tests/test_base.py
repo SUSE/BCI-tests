@@ -81,6 +81,13 @@ def test_base_size(auto_container: ContainerData, container_runtime):
             "ppc64le": 138,
             "s390x": 99,
         }
+    elif OS_VERSION in ("15.7",):
+        base_container_max_size: Dict[str, int] = {
+            "x86_64": 123,
+            "aarch64": 143,
+            "ppc64le": 165,
+            "s390x": 127,
+        }
     # 15.5/15.6 are hopefully only temporary large due to PED-5014
     elif OS_VERSION in ("15.6",):
         base_container_max_size: Dict[str, int] = {
@@ -131,7 +138,7 @@ def test_gost_digest_disable(auto_container):
     """Checks that the gost message digest is not known to openssl."""
     openssl_error_message = (
         "Invalid command 'gost'"
-        if OS_VERSION in ("basalt", "tumbleweed", "15.6")
+        if OS_VERSION not in ("15.3", "15.4", "15.5")
         else "gost is not a known digest"
     )
     assert (
@@ -179,13 +186,13 @@ def test_all_openssl_hashes_known(auto_container):
     expected_digest_list = ALL_DIGESTS
     # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
 
-    if OS_VERSION in ("basalt", "tumbleweed", "15.6"):
+    if OS_VERSION not in ("15.3", "15.4", "15.5"):
         if host_fips_enabled() or target_fips_enforced():
             expected_digest_list = FIPS_DIGESTS
 
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
-    if OS_VERSION not in ("basalt", "tumbleweed", "15.6"):
+    if OS_VERSION in ("15.3", "15.4", "15.5"):
         expected_digest_list += ("gost",)
     assert len(hashes) == len(expected_digest_list)
     assert set(hashes) == set(expected_digest_list)
@@ -211,6 +218,9 @@ DIND_CONTAINER = pytest.param(
 
 
 @pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
+@pytest.mark.xfail(
+    OS_VERSION in ("15.7",), reason="SLE BCI repository not yet available"
+)
 @pytest.mark.skipif(
     not DOCKER_SELECTED,
     reason="Docker in docker can only be tested when using the docker runtime",
