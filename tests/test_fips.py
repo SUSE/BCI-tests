@@ -18,6 +18,7 @@ from pytest_container.runtime import OciRuntimeBase
 
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_FIPS_CONTAINER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
@@ -39,12 +40,7 @@ RUN gcc -Og -g3 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test
 FROM $runner
 
 COPY --from=builder /src/fips-test /bin/fips-test
-COPY --from=builder /usr/lib64/libcrypto.so.1.1 /usr/lib64/
-COPY --from=builder /usr/lib64/libssl.so.1.1 /usr/lib64/
 COPY --from=builder {'/usr' if OS_VERSION not in ('15.3', '15.4') else ''}/lib64/libz.so.1 /usr/lib64/
-COPY --from=builder /usr/lib64/engines-1.1 /usr/lib64/engines-1.1
-COPY --from=builder /usr/lib64/.libcrypto.so.1.1.hmac /usr/lib64/
-COPY --from=builder /usr/lib64/.libssl.so.1.1.hmac /usr/lib64/
 
 RUN /bin/fips-test sha256
 """
@@ -63,7 +59,7 @@ for target_list, param_list in (
 ):
     for param in param_list:
         ctr, marks = container_and_marks_from_pytest_param(param)
-        if param in LTSS_BASE_FIPS_CONTAINERS:
+        if param in (BASE_FIPS_CONTAINER, *LTSS_BASE_FIPS_CONTAINERS):
             target_list.append(param)
         else:
             target_list.append(
@@ -137,14 +133,28 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     for digest in NONFIPS_DIGESTS:
         cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
         assert cmd.rc != 0
-        assert "is not a known digest" in cmd.stderr
+        assert (
+            "is not a known digest" in cmd.stderr
+            or "Error setting digest" in cmd.stderr
+        )
 
     for digest in FIPS_DIGESTS:
         dev_null_digest = container_per_test.connection.check_output(
             f"openssl {digest} /dev/null"
         )
+        digest_naming_exceptions: dict[str] = {
+            "sha224": "SHA2-224",
+            "sha256": "SHA2-256",
+            "sha384": "SHA2-384",
+            "sha512": "SHA2-512",
+            "sha512-224": "SHA2-512/224",
+            "sha512-256": "SHA2-512/256",
+            "shake128": "SHAKE-128",
+            "shake256": "SHAKE-256",
+        }
+        digest_output = digest_naming_exceptions.get(digest, digest.upper())
         assert (
-            f"{digest.upper()}(/dev/null)= " in dev_null_digest
+            f"{digest_output}(/dev/null)= " in dev_null_digest
         ), f"unexpected digest of hash {digest}: {dev_null_digest}"
 
 
