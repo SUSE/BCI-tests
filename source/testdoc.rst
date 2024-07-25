@@ -4,14 +4,6 @@ Existing tests
 This chapter contains the documentation how each container is tested.
 
 
-Build tests
------------
-
-.. automodule:: tests.test_build
-   :members:
-   :undoc-members:
-
-
 Base container tests
 --------------------
 
