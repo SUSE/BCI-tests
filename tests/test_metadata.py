@@ -114,9 +114,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (BASE_CONTAINER, "base", ImageType.OS),
         (GIT_CONTAINER, "git", ImageType.APPLICATION),
         (HELM_CONTAINER, "helm", ImageType.APPLICATION),
-    ]
-    # all other containers
-    + [
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
@@ -318,13 +315,6 @@ def test_general_labels(
         _get_container_label_prefix(container_name, container_type),
         "org.opencontainers.image",
     ):
-        if container_type not in (
-            ImageType.SAC_APPLICATION,
-            ImageType.APPLICATION,
-            ImageType.OS_LTSS,
-        ):
-            assert "BCI" in labels[f"{prefix}.title"]
-
         if OS_VERSION == "tumbleweed":
             assert (
                 "based on the openSUSE Tumbleweed Base Container Image."
@@ -353,7 +343,7 @@ def test_general_labels(
             expected_url = (
                 f"https://apps.rancher.io/applications/{container_name}"
             )
-        if OS_VERSION in ("15.3", "15.4"):
+        elif container_type == ImageType.OS_LTSS:
             expected_url = (
                 "https://www.suse.com/products/long-term-service-pack-support/"
             )
@@ -381,6 +371,7 @@ def test_general_labels(
             assert labels["com.suse.eula"] == "sle-eula"
         else:
             assert labels["com.suse.eula"] == "sle-bci"
+            assert "BCI" in labels[f"{prefix}.title"]
 
 
 @pytest.mark.parametrize(
