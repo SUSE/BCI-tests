@@ -374,6 +374,10 @@ else:
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
+    BASE_FIPS_CONTAINER = create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base-fips:{OS_CONTAINER_TAG}",
+        bci_type=ImageType.OS,
+    )
     if TARGET in ("ibs", "ibs-cr", "ibs-released"):
         LTSS_BASE_CONTAINERS.extend(
             create_BCI(
@@ -825,6 +829,7 @@ GRAFANA_CONTAINERS = [
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
+        BASE_FIPS_CONTAINER,
         INIT_CONTAINER,
         KERNEL_MODULE_CONTAINER,
         NGINX_CONTAINER,
@@ -894,6 +899,7 @@ else:
     L3_CONTAINERS = (
         [
             BASE_CONTAINER,
+            BASE_FIPS_CONTAINER,
             BUSYBOX_CONTAINER,
             DISTRIBUTION_CONTAINER,
             GIT_CONTAINER,

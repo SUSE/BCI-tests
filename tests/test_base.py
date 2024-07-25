@@ -12,6 +12,7 @@ from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_FIPS_CONTAINER
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
@@ -25,6 +26,7 @@ from tests.test_fips import openssl_fips_hashes_test_fnct
 
 CONTAINER_IMAGES = [
     BASE_CONTAINER,
+    BASE_FIPS_CONTAINER,
     *LTSS_BASE_CONTAINERS,
     *LTSS_BASE_FIPS_CONTAINERS,
 ]
@@ -145,7 +147,11 @@ def test_gost_digest_disable(auto_container):
 @without_fips
 @pytest.mark.parametrize(
     "container",
-    [c for c in CONTAINER_IMAGES if c not in LTSS_BASE_FIPS_CONTAINERS],
+    [
+        c
+        for c in CONTAINER_IMAGES
+        if c not in (*LTSS_BASE_FIPS_CONTAINERS, BASE_FIPS_CONTAINER)
+    ],
     indirect=True,
 )
 def test_openssl_hashes(container):
@@ -158,7 +164,9 @@ def test_openssl_hashes(container):
 
 
 @pytest.mark.parametrize(
-    "container_per_test", [*LTSS_BASE_FIPS_CONTAINERS], indirect=True
+    "container_per_test",
+    [*LTSS_BASE_FIPS_CONTAINERS, BASE_FIPS_CONTAINER],
+    indirect=True,
 )
 def test_openssl_fips_hashes(container_per_test):
     openssl_fips_hashes_test_fnct(container_per_test)

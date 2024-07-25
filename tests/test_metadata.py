@@ -29,6 +29,7 @@ from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_FIPS_CONTAINER
 from bci_tester.data import BLACKBOX_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
