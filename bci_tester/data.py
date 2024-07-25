@@ -201,8 +201,12 @@ if BCI_DEVEL_REPO is None:
     BCI_DEVEL_REPO = f"https://updates.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
     _BCI_REPLACE_REPO_CONTAINERFILE = ""
 else:
-    _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN sed -i 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|' /etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
+    bci_repo_path = f"/etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
+    # only try to replace the baseurl if the file exists and we have perl
+    # available (should be more ubiquitous than sed)
+    _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN if [ -e {bci_repo_path} ] && [ -e /usr/bin/perl ]; then perl -pi -e 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|g' {bci_repo_path}; fi"
 
+assert BCI_DEVEL_REPO, "BCI_DEVEL_REPO must be set at this point"
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 
@@ -252,6 +256,7 @@ def create_BCI(
     available_versions: Optional[List[str]] = None,
     extra_marks: Optional[Sequence[MarkDecorator]] = None,
     bci_type: ImageType = ImageType.LANGUAGE_STACK,
+    container_user: Optional[str] = None,
     **kwargs,
 ) -> ParameterSet:
     """Creates a DerivedContainer wrapped in a pytest.param for the BCI with the
@@ -335,12 +340,18 @@ def create_BCI(
     else:
         baseurl = f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
 
+    if bci_type == ImageType.OS_LTSS:
+        containerfile = ""
+    else:
+        if container_user:
+            containerfile = f"USER root\n{_BCI_REPLACE_REPO_CONTAINERFILE}\nUSER {container_user}"
+        else:
+            containerfile = _BCI_REPLACE_REPO_CONTAINERFILE
+
     return pytest.param(
         DerivedContainer(
             base=baseurl,
-            containerfile=""
-            if bci_type == ImageType.OS_LTSS
-            else _BCI_REPLACE_REPO_CONTAINERFILE,
+            containerfile=containerfile,
             **kwargs,
         ),
         marks=marks,
@@ -726,6 +737,7 @@ APACHE_TOMCAT_10_CONTAINERS = [
         bci_type=ImageType.SAC_APPLICATION,
         available_versions=("15.6",),
         forwarded_ports=[PortForwarding(container_port=8080)],
+        container_user="tomcat",
     )
     for jre_version in (21,)
 ] + [
