@@ -29,6 +29,7 @@ from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import BLACKBOX_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
@@ -159,11 +160,12 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
-    + [(kiwi, "kiwi", ImageType.LANGUAGE_STACK) for kiwi in KIWI_CONTAINERS]
+    + [(c, "base-fips", ImageType.OS) for c in BASE_FIPS_CONTAINERS]
     + [
         (container_pcp, "pcp", ImageType.APPLICATION)
         for container_pcp in PCP_CONTAINERS
     ]
+    + [(kiwi, "kiwi", ImageType.LANGUAGE_STACK) for kiwi in KIWI_CONTAINERS]
     + [
         (tomcat_ctr, "apache-tomcat", ImageType.SAC_APPLICATION)
         for tomcat_ctr in TOMCAT_CONTAINERS
