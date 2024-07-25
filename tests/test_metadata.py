@@ -425,10 +425,7 @@ def test_disturl(
 
 
 @pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
-def test_disturl_can_be_checked_out(
-    container: ContainerData,
-    tmp_path,
-):
+def test_disturl_can_be_checked_out(container: ContainerData):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
     label that can be checked out using :command:`osc` to get the sources at
     exactly the version from which the container was build. This test verifies
