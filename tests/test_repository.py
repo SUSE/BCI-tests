@@ -170,6 +170,7 @@ def test_package_installation(container_per_test, pkg):
         "libsnmp30",  # bsc#1209442
         "aws-cli",  # disappeared after python311 switch due to unresolvables
         "python3-azure-sdk",  # might also become unresolvable
+        "uuidd",  # reported as missing by ironbank user
     ],
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
