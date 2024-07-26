@@ -28,7 +28,6 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
-from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
@@ -388,16 +387,7 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
     [
         c
         for c in ALL_CONTAINERS
-        if (
-            c
-            not in [
-                INIT_CONTAINER,
-                # kernel-module-container contains systemd due to pesign,
-                # fixes are pending
-                KERNEL_MODULE_CONTAINER,
-            ]
-            + PCP_CONTAINERS
-        )
+        if (c not in PCP_CONTAINERS + [INIT_CONTAINER])
     ],
     indirect=True,
 )
