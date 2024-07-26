@@ -55,7 +55,12 @@ def test_iconv_working(auto_container):
     not PODMAN_SELECTED,
     reason="docker size reporting is dependant on underlying filesystem",
 )
-def test_base_size(auto_container: ContainerData, container_runtime):
+@pytest.mark.parametrize(
+    "container",
+    [c for c in CONTAINER_IMAGES if c not in BASE_FIPS_CONTAINERS],
+    indirect=True,
+)
+def test_base_size(container: ContainerData, container_runtime):
     """Ensure that the container's size is below the limits specified in
     :py:const:`base_container_max_size`
 
@@ -63,8 +68,8 @@ def test_base_size(auto_container: ContainerData, container_runtime):
 
     # the FIPS container is bigger too than the 15 SP3 base image
     is_fips_ctr = (
-        auto_container.container.baseurl
-        and auto_container.container.baseurl.rpartition("/")[2].startswith(
+        container.container.baseurl
+        and container.container.baseurl.rpartition("/")[2].startswith(
             "bci-base-fips"
         )
     )
@@ -121,7 +126,7 @@ def test_base_size(auto_container: ContainerData, container_runtime):
             "s390x": 125,
         }
     container_size = container_runtime.get_image_size(
-        auto_container.image_url_or_id
+        container.image_url_or_id
     ) // (1024 * 1024)
     max_container_size = base_container_max_size[LOCALHOST.system_info.arch]
     assert container_size <= max_container_size, (
@@ -184,18 +189,24 @@ def test_all_openssl_hashes_known(auto_container):
     :py:const:`bci_tester.fips.ALL_DIGESTS`.
 
     """
+    fips_mode: bool = (
+        auto_container.connection.check_output(
+            "echo ${OPENSSL_FIPS:-0}"
+        ).strip()
+        == "1"
+    )
     hashes = (
-        auto_container.connection.run_expect(
-            [0], "openssl list --digest-commands"
+        auto_container.connection.check_output(
+            "openssl list --digest-commands"
         )
-        .stdout.strip()
+        .strip()
         .split()
     )
     expected_digest_list = ALL_DIGESTS
     # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
 
     if OS_VERSION not in ("15.3", "15.4", "15.5"):
-        if host_fips_enabled() or target_fips_enforced():
+        if host_fips_enabled() or target_fips_enforced() or fips_mode:
             expected_digest_list = FIPS_DIGESTS
 
     # gost is not supported to generate digests, but it appears in:

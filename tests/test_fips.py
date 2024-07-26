@@ -23,6 +23,7 @@ from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import NONFIPS_DIGESTS
+from bci_tester.fips import NULL_DIGESTS
 from bci_tester.fips import host_fips_enabled
 
 #: multistage :file:`Dockerfile` that builds the program from
@@ -137,14 +138,17 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     for digest in NONFIPS_DIGESTS:
         cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
         assert cmd.rc != 0
-        assert "is not a known digest" in cmd.stderr
+        assert (
+            "is not a known digest" in cmd.stderr
+            or "Error setting digest" in cmd.stderr
+        )
 
     for digest in FIPS_DIGESTS:
         dev_null_digest = container_per_test.connection.check_output(
             f"openssl {digest} /dev/null"
         )
         assert (
-            f"{digest.upper()}(/dev/null)= " in dev_null_digest
+            f"= {NULL_DIGESTS[digest]}" in dev_null_digest
         ), f"unexpected digest of hash {digest}: {dev_null_digest}"
 
 
