@@ -17,6 +17,7 @@ offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 import urllib.parse
 from pathlib import Path
 from typing import List
+from typing import Tuple
 
 import pytest
 import requests
@@ -98,6 +99,8 @@ SKIP_IF_TW_MARK = pytest.mark.skipif(
 def _get_container_label_prefix(
     container_name: str, container_type: ImageType
 ) -> str:
+    if OS_VERSION == "tumbleweed" and container_name == "base":
+        return "org.opensuse.base"
     if OS_VERSION == "tumbleweed":
         return f"org.opensuse.{container_type}.{container_name}"
     if container_type == ImageType.OS_LTSS:
@@ -322,32 +325,48 @@ def test_general_labels(
         if version == "tumbleweed":
             assert OS_VERSION in labels[f"{prefix}.version"]
 
-        expected_url = "https://www.suse.com/products/base-container-images/"
+        expected_url: Tuple[str] = (
+            "https://www.suse.com/products/base-container-images/",
+        ) + (
+            ("https://www.suse.com/products/server/",)
+            if container_name in ("base",)
+            else ()
+        )
         if OS_VERSION == "tumbleweed":
-            expected_url = "https://www.opensuse.org"
+            expected_url = (
+                "https://www.opensuse.org",
+                "https://www.opensuse.org/",
+            )
         elif container_type in (ImageType.SAC_APPLICATION,):
             expected_url = (
-                f"https://apps.rancher.io/applications/{container_name}"
+                f"https://apps.rancher.io/applications/{container_name}",
             )
         elif container_type == ImageType.OS_LTSS:
             expected_url = (
-                "https://www.suse.com/products/long-term-service-pack-support/"
+                "https://www.suse.com/products/long-term-service-pack-support/",
             )
 
         assert (
-            labels[f"{prefix}.url"] == expected_url
+            labels[f"{prefix}.url"] in expected_url
         ), f"expected LABEL {prefix}.url = {expected_url} but is {labels[f'{prefix}.url']}"
         assert labels[f"{prefix}.vendor"] == VENDOR
 
     if OS_VERSION == "tumbleweed":
-        assert labels["org.opensuse.lifecycle-url"] in (
-            "https://en.opensuse.org/Lifetime#openSUSE_BCI",
+        assert (
+            labels["org.opensuse.lifecycle-url"]
+            in (
+                "https://en.opensuse.org/Lifetime#openSUSE_BCI",
+                "https://en.opensuse.org/Lifetime",  # Base container has incorrect URL
+            )
         )
         # no EULA for openSUSE images
     else:
-        assert labels["com.suse.lifecycle-url"] in (
-            "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
-            "https://www.suse.com/lifecycle",
+        assert (
+            labels["com.suse.lifecycle-url"]
+            in (
+                "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
+                "https://www.suse.com/lifecycle",  # SLE 15 SP5 base container has incorrect URL
+            )
         )
         if container_type in (
             ImageType.OS_LTSS,
@@ -532,16 +551,18 @@ def test_reference(
     )
     if container_type != ImageType.OS_LTSS:
         reference_name = container_name.replace(".", "-")
-        # the BCI-base container is actually identifying itself as the sle15 container
-        if container_name in ("base",) and OS_VERSION.startswith("15"):
-            reference_name = "sle15"
+        # the BCI-base container is actually identifying itself as the os container
+        if container_name in ("base",):
+            reference_name = (
+                "sle15" if OS_VERSION.startswith("15") else "tumbleweed"
+            )
         assert reference_name in reference
 
     if OS_VERSION == "tumbleweed":
         if container_type in (
             ImageType.APPLICATION,
             ImageType.SAC_APPLICATION,
-        ):
+        ) or container_name in ("base",):
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
