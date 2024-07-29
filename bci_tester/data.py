@@ -359,6 +359,11 @@ def create_BCI(
     )
 
 
+KIWI_CONTAINERS = [
+    create_BCI(build_tag=f"bci/kiwi:{tag}", available_versions={ver})
+    for ver, tag in (("15.6", "9.24"), ("tumbleweed", "10.0"))
+]
+
 LTSS_BASE_CONTAINERS = []
 LTSS_BASE_FIPS_CONTAINERS = []
 
@@ -838,6 +843,7 @@ CONTAINERS_WITH_ZYPPER = (
     + GCC_CONTAINERS
     + GOLANG_CONTAINERS
     + GRAFANA_CONTAINERS
+    + KIWI_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
     + MARIADB_CLIENT_CONTAINERS
