@@ -128,9 +128,39 @@ def test_pip(auto_container):
     OS_VERSION == "tumbleweed",
     reason="pip --user not working due to PEP 668",
 )
-def test_tox(auto_container):
+def test_tox(auto_container_per_test):
     """Ensure we can use :command:`pip` to install :command:`tox`."""
-    auto_container.connection.run_expect([0], "pip install --user tox")
+    auto_container_per_test.connection.run_expect(
+        [0], "pip install --user tox"
+    )
+
+
+def test_pep517_wheels(auto_container_per_test):
+    """Ensure we can use :command:`pip` to build PEP517 binary wheels"""
+    version = auto_container_per_test.connection.check_output(
+        "echo $PYTHON_VERSION"
+    )
+    if "3.12" in version and OS_VERSION not in ("tumbleweed",):
+        pytest.skip(
+            "SLEs python 3.12 currently does not provide python312-wheel"
+        )
+    if packaging.version.Version(version) < packaging.version.Version("3.10"):
+        pytest.skip("ujson pep517 only supported on Python >= 3.10")
+
+    pip_install = "pip install"
+    if OS_VERSION in ("tumbleweed",):
+        pip_install += " --break-system-packages --user"
+    ujson_version = "5.10.0"
+    auto_container_per_test.connection.check_output(
+        "zypper -n install gcc-c++ && "
+        f"pip download --no-deps --no-binary :all: ujson=={ujson_version} && "
+        f"tar --no-same-permissions --no-same-owner -xf ujson-{ujson_version}.tar.gz && "
+        f"cd ujson-{ujson_version} && "
+        f"{pip_install} setuptools_scm && "
+        "pip wheel --use-pep517 --no-build-isolation --no-deps -w $PWD . && "
+        f"{pip_install} ujson-{ujson_version}-*.whl && "
+        "python3 -c 'import ujson'"
+    )
 
 
 @pytest.mark.skipif(
