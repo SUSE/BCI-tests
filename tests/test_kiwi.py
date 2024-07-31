@@ -7,7 +7,7 @@ from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
 
 from bci_tester.data import KIWI_CONTAINERS
-from bci_tester.runtime_choice import DOCKER_SELECTED
+from bci_tester.runtime_choice import PODMAN_SELECTED
 
 CONTAINER_IMAGES = KIWI_CONTAINERS
 
@@ -50,17 +50,6 @@ def test_kiwi_installation(auto_container):
     )
 
 
-# Disabling this test with `podman` as it mounts the newly created iso image (by kiwi)
-# on a `/dev/loop*` device, which needs a rootful container for `root:disk` ownership.
-# In rootless mode, `/dev/loop*` devices are owned by `nobody:nobody`,
-# causing `losetup -f --show /tmp/myimage/kiwi-test-image-disk.x86_64-1.15.3.raw` to fail with "Permission denied".
-#
-# Also ref: https://github.com/containers/podman/issues/17715#issuecomment-1460227771
-# Mounting a loop device in rootless mode is not allowed by the kernel.
-@pytest.mark.skipif(
-    not DOCKER_SELECTED,
-    reason="https://github.com/containers/podman/issues/17715#issuecomment-1460227771",
-)
 @pytest.mark.parametrize(
     "container_per_test", KIWI_CONTAINER_EXTENDED, indirect=True
 )
@@ -69,13 +58,25 @@ def test_kiwi_create_image(
 ) -> None:
     """Testing kiwi installation as per https://osinside.github.io/kiwi/quickstart.html"""
 
+    # Disabling this test with `podman` rootless mode, as the test mounts the newly created
+    # iso image (by kiwi) on a `/dev/loop*` device,
+    # which needs a rootful container for `root:disk` ownership.
+    # In rootless mode, `/dev/loop*` devices are owned by `nobody:nobody` or `UNKNOWN`,
+    # causing `losetup -f --show /tmp/myimage/kiwi-test-image-disk.x86_64-1.15.3.raw` to fail with "Permission denied".
+    #
+    # Also ref: https://github.com/containers/podman/issues/17715#issuecomment-1460227771
+    # Mounting a loop device in rootless mode is not allowed by the kernel.
+    loop_dev_owner = container_per_test.connection.check_output(
+        "stat -c '%U:%G' /dev/loop1"
+    )
+    if "root:" not in loop_dev_owner and PODMAN_SELECTED:
+        pytest.skip(
+            "Mounting a loop device in rootless mode is not allowed by the kernel. Ref: https://github.com/containers/podman/issues/17715#issuecomment-1460227771"
+        )
+
     assert (
         "KIWI (next generation) version"
         in container_per_test.connection.check_output("kiwi-ng --version")
-    )
-
-    assert "root:" in container_per_test.connection.check_output(
-        "stat -c '%U:%G' /dev/loop1"
     )
 
     assert container_per_test.connection.file("kiwi/build-tests").exists
