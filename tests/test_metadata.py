@@ -363,7 +363,7 @@ def test_general_labels(
 
     if OS_VERSION == "tumbleweed":
         assert labels["org.opensuse.lifecycle-url"] in (
-            "https://en.opensuse.org/Lifetime",
+            "https://en.opensuse.org/Lifetime#openSUSE_BCI",
         )
         # no EULA for openSUSE images
     else:

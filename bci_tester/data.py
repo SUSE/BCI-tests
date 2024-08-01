@@ -434,7 +434,12 @@ GOLANG_CONTAINERS = (
     + [
         create_BCI(
             build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
-            extra_marks=[pytest.mark.__getattr__(f"golang_{golang_version}")],
+            extra_marks=[
+                pytest.mark.__getattr__(f"golang_{golang_version}"),
+                pytest.mark.skip(
+                    reason="There is no unstable golang at the moment"
+                ),
+            ],
             available_versions=["tumbleweed"],
         )
         for golang_version in ("unstable",)
