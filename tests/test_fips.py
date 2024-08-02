@@ -3,21 +3,11 @@ FIPS mode.
 
 """
 
-import os.path
-import shutil
-
 import pytest
-from _pytest.config import Config
-from _pytest.mark.structures import ParameterSet
-from pytest_container.build import MultiStageBuild
+from pytest_container import DerivedContainer
 from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
-from pytest_container.helpers import get_extra_build_args
-from pytest_container.helpers import get_extra_run_args
-from pytest_container.runtime import OciRuntimeBase
 
-from bci_tester.data import ALL_CONTAINERS
-from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
@@ -30,23 +20,13 @@ from bci_tester.fips import host_fips_enabled
 #: :py:const:`FIPS_TEST_DOT_C` using gcc and copies it, ``libcrypto``, ``libssl``
 #: and ``libz`` into the deployment image. The libraries must be copied, as they
 #: are not available in the minimal container images.
-DOCKERFILE = f"""FROM $builder as builder
-
-WORKDIR /src/
-COPY fips-test.c /src/
+DOCKERFILE = """WORKDIR /src/
+COPY tests/files/fips-test.c /src/
 RUN zypper -n ref && zypper -n in gcc libopenssl-devel && zypper -n clean
 RUN gcc -Og -g3 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test
+RUN mv fips-test /bin/fips-test
 
-FROM $runner
-
-COPY --from=builder /src/fips-test /bin/fips-test
-COPY --from=builder /usr/lib64/libcrypto.so.1.1 /usr/lib64/
-COPY --from=builder /usr/lib64/libssl.so.1.1 /usr/lib64/
-COPY --from=builder {'/usr' if OS_VERSION not in ('15.3', '15.4') else ''}/lib64/libz.so.1 /usr/lib64/
-COPY --from=builder /usr/lib64/engines-1.1 /usr/lib64/engines-1.1
-COPY --from=builder /usr/lib64/.libcrypto.so.1.1.hmac /usr/lib64/
-COPY --from=builder /usr/lib64/.libssl.so.1.1.hmac /usr/lib64/
-
+# smoke test
 RUN /bin/fips-test sha256
 """
 
@@ -56,32 +36,42 @@ _non_fips_host_skip_mark = [
         reason="The target must run in FIPS mode for the FIPS test suite",
     )
 ]
-CONTAINER_IMAGES = []
+
 CONTAINER_IMAGES_WITH_ZYPPER = []
-for target_list, param_list in (
-    (CONTAINER_IMAGES, ALL_CONTAINERS),
-    (CONTAINER_IMAGES_WITH_ZYPPER, CONTAINERS_WITH_ZYPPER),
-):
-    for param in param_list:
-        ctr, marks = container_and_marks_from_pytest_param(param)
-        if param in LTSS_BASE_FIPS_CONTAINERS:
-            target_list.append(param)
-        else:
-            target_list.append(
-                pytest.param(
-                    ctr, marks=marks + _non_fips_host_skip_mark, id=param.id
-                )
+FIPS_TESTER_IMAGES = []
+for param in CONTAINERS_WITH_ZYPPER:
+    ctr, marks = container_and_marks_from_pytest_param(param)
+    fips_tester_ctr = DerivedContainer(
+        base=ctr,
+        containerfile=DOCKERFILE,
+        extra_environment_variables=ctr.extra_environment_variables,
+        extra_launch_args=ctr.extra_launch_args,
+        custom_entry_point=ctr.custom_entry_point,
+    )
+    if param in LTSS_BASE_FIPS_CONTAINERS:
+        CONTAINER_IMAGES_WITH_ZYPPER.append(param)
+        FIPS_TESTER_IMAGES.append(
+            pytest.param(fips_tester_ctr, marks=marks, id=param.id)
+        )
+    else:
+        CONTAINER_IMAGES_WITH_ZYPPER.append(
+            pytest.param(
+                ctr, marks=marks + _non_fips_host_skip_mark, id=param.id
             )
+        )
+        FIPS_TESTER_IMAGES.append(
+            pytest.param(
+                fips_tester_ctr,
+                marks=marks + _non_fips_host_skip_mark,
+                id=param.id,
+            )
+        )
 
 
-@pytest.mark.parametrize("runner", CONTAINER_IMAGES)
-def test_openssl_binary(
-    runner: ParameterSet,
-    tmp_path,
-    pytestconfig: Config,
-    host,
-    container_runtime: OciRuntimeBase,
-):
+@pytest.mark.parametrize(
+    "container_per_test", FIPS_TESTER_IMAGES, indirect=True
+)
+def test_openssl_binary(container_per_test: ContainerData) -> None:
     """Check that a binary linked against OpenSSL obeys the host's FIPS mode
     setting:
 
@@ -93,37 +83,13 @@ def test_openssl_binary(
       with the expected error message.
 
     """
-    multi_stage_build = MultiStageBuild(
-        containers={"builder": BASE_CONTAINER, "runner": runner},
-        containerfile_template=DOCKERFILE,
-    )
-
-    shutil.copy(
-        os.path.join(
-            os.path.abspath(os.path.dirname(__file__)), "files", "fips-test.c"
-        ),
-        tmp_path / "fips-test.c",
-    )
-
-    img_id = multi_stage_build.build(
-        tmp_path,
-        pytestconfig,
-        container_runtime,
-        extra_build_args=get_extra_build_args(pytestconfig),
-    )
-
-    exec_cmd = " ".join(
-        [container_runtime.runner_binary, "run", "--rm"]
-        + get_extra_run_args(pytestconfig)
-        + [img_id]
-    )
 
     for digest in FIPS_DIGESTS:
-        host.run_expect([0], f"{exec_cmd} /bin/fips-test {digest}")
+        container_per_test.connection.check_output(f"/bin/fips-test {digest}")
 
     for digest in NONFIPS_DIGESTS:
-        err_msg = host.run_expect(
-            [1], f"{exec_cmd} /bin/fips-test {digest}"
+        err_msg = container_per_test.connection.run_expect(
+            [1], f"/bin/fips-test {digest}"
         ).stderr
 
         assert f"Unknown message digest {digest}" in err_msg
