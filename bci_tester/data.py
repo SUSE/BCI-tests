@@ -365,6 +365,7 @@ KIWI_CONTAINERS = [
     for ver, tag in (("15.6", "9.24"), ("tumbleweed", "10.0"))
 ]
 
+BASE_FIPS_CONTAINERS = []
 LTSS_BASE_CONTAINERS = []
 LTSS_BASE_FIPS_CONTAINERS = []
 
@@ -380,6 +381,15 @@ else:
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
+    BASE_FIPS_CONTAINERS = [
+        create_BCI(
+            build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base-fips:{OS_CONTAINER_TAG}",
+            bci_type=ImageType.OS,
+            # TODO set to _DEFAULT_BASE_OS_VERSIONS once the fips containers are available
+            # everywhere
+            available_versions=("15.5", "15.6"),
+        )
+    ]
     if TARGET in ("ibs", "ibs-cr", "ibs-released"):
         LTSS_BASE_CONTAINERS.extend(
             create_BCI(
@@ -844,6 +854,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_FPM,
     ]
     + ALERTMANAGER_CONTAINERS
+    + BASE_FIPS_CONTAINERS
     + BLACKBOX_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
     + GCC_CONTAINERS
@@ -918,6 +929,7 @@ else:
             PHP_8_CLI,
             PHP_8_FPM,
         ]
+        + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
         + GOLANG_CONTAINERS
         + LTSS_BASE_CONTAINERS

@@ -17,6 +17,7 @@ offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 import urllib.parse
 from pathlib import Path
 from typing import List
+from typing import Tuple
 
 import pytest
 import requests
@@ -29,6 +30,7 @@ from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import BLACKBOX_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
@@ -97,6 +99,8 @@ SKIP_IF_TW_MARK = pytest.mark.skipif(
 def _get_container_label_prefix(
     container_name: str, container_type: ImageType
 ) -> str:
+    if OS_VERSION == "tumbleweed" and container_name == "base":
+        return "org.opensuse.base"
     if OS_VERSION == "tumbleweed":
         return f"org.opensuse.{container_type}.{container_name}"
     if container_type == ImageType.OS_LTSS:
@@ -109,13 +113,9 @@ def _get_container_label_prefix(
 IMAGES_AND_NAMES: List[ParameterSet] = [
     pytest.param(cont, name, img_type, marks=cont.marks)
     for cont, name, img_type in [
-        # containers with XFAILs below
         (BASE_CONTAINER, "base", ImageType.OS),
         (GIT_CONTAINER, "git", ImageType.APPLICATION),
         (HELM_CONTAINER, "helm", ImageType.APPLICATION),
-    ]
-    # all other containers
-    + [
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
@@ -159,11 +159,12 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
-    + [(kiwi, "kiwi", ImageType.LANGUAGE_STACK) for kiwi in KIWI_CONTAINERS]
+    + [(c, "base-fips", ImageType.OS) for c in BASE_FIPS_CONTAINERS]
     + [
         (container_pcp, "pcp", ImageType.APPLICATION)
         for container_pcp in PCP_CONTAINERS
     ]
+    + [(kiwi, "kiwi", ImageType.LANGUAGE_STACK) for kiwi in KIWI_CONTAINERS]
     + [
         (tomcat_ctr, "apache-tomcat", ImageType.SAC_APPLICATION)
         for tomcat_ctr in TOMCAT_CONTAINERS
@@ -266,20 +267,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     ]
 ]
 
-IMAGES_AND_NAMES_WITH_BASE_XFAIL = [
-    pytest.param(
-        *IMAGES_AND_NAMES[0],
-        marks=(
-            pytest.mark.xfail(
-                reason=(
-                    "The base container has no com.suse.bci.base labels yet"
-                    if OS_VERSION == "15.3"
-                    else "https://bugzilla.suse.com/show_bug.cgi?id=1200373"
-                )
-            )
-        ),
-    ),
-] + IMAGES_AND_NAMES[1:]
 
 assert len(ALL_CONTAINERS) == len(
     IMAGES_AND_NAMES
@@ -288,7 +275,7 @@ assert len(ALL_CONTAINERS) == len(
 
 @pytest.mark.parametrize(
     "container,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    IMAGES_AND_NAMES,
     indirect=["container"],
 )
 def test_general_labels(
@@ -316,60 +303,70 @@ def test_general_labels(
         _get_container_label_prefix(container_name, container_type),
         "org.opencontainers.image",
     ):
-        if container_type not in (
-            ImageType.SAC_APPLICATION,
-            ImageType.APPLICATION,
-            ImageType.OS_LTSS,
-        ):
-            assert "BCI" in labels[f"{prefix}.title"]
-
-        if OS_VERSION == "tumbleweed":
-            assert (
-                "based on the openSUSE Tumbleweed Base Container Image."
-                in labels[f"{prefix}.description"]
-            )
-        elif container_type == ImageType.OS_LTSS:
-            assert (
-                "based on SUSE Linux Enterprise Server 15"
-                in labels[f"{prefix}.description"]
-                or "based on the SLE LTSS Base Container Image"
-                in labels[f"{prefix}.description"]
-            )
-        else:
-            assert (
-                "based on the SLE Base Container Image."
-                in labels[f"{prefix}.description"]
-            )
+        if container_name != "base":
+            if OS_VERSION == "tumbleweed":
+                assert (
+                    "based on the openSUSE Tumbleweed Base Container Image."
+                    in labels[f"{prefix}.description"]
+                )
+            elif container_type == ImageType.OS_LTSS:
+                assert (
+                    "based on SUSE Linux Enterprise Server 15"
+                    in labels[f"{prefix}.description"]
+                    or "based on the SLE LTSS Base Container Image"
+                    in labels[f"{prefix}.description"]
+                )
+            else:
+                assert (
+                    "based on the SLE Base Container Image."
+                    in labels[f"{prefix}.description"]
+                )
 
         if version == "tumbleweed":
             assert OS_VERSION in labels[f"{prefix}.version"]
 
-        expected_url = "https://www.suse.com/products/base-container-images/"
+        expected_url: Tuple[str] = (
+            "https://www.suse.com/products/base-container-images/",
+        ) + (
+            ("https://www.suse.com/products/server/",)
+            if container_name in ("base",)
+            else ()
+        )
         if OS_VERSION == "tumbleweed":
-            expected_url = "https://www.opensuse.org"
+            expected_url = (
+                "https://www.opensuse.org",
+                "https://www.opensuse.org/",
+            )
         elif container_type in (ImageType.SAC_APPLICATION,):
             expected_url = (
-                f"https://apps.rancher.io/applications/{container_name}"
+                f"https://apps.rancher.io/applications/{container_name}",
             )
-        if OS_VERSION in ("15.3", "15.4"):
+        elif container_type == ImageType.OS_LTSS:
             expected_url = (
-                "https://www.suse.com/products/long-term-service-pack-support/"
+                "https://www.suse.com/products/long-term-service-pack-support/",
             )
 
         assert (
-            labels[f"{prefix}.url"] == expected_url
+            labels[f"{prefix}.url"] in expected_url
         ), f"expected LABEL {prefix}.url = {expected_url} but is {labels[f'{prefix}.url']}"
         assert labels[f"{prefix}.vendor"] == VENDOR
 
     if OS_VERSION == "tumbleweed":
-        assert labels["org.opensuse.lifecycle-url"] in (
-            "https://en.opensuse.org/Lifetime#openSUSE_BCI",
+        assert (
+            labels["org.opensuse.lifecycle-url"]
+            in (
+                "https://en.opensuse.org/Lifetime#openSUSE_BCI",
+                "https://en.opensuse.org/Lifetime",  # Base container has incorrect URL
+            )
         )
         # no EULA for openSUSE images
     else:
-        assert labels["com.suse.lifecycle-url"] in (
-            "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
-            "https://www.suse.com/lifecycle",
+        assert (
+            labels["com.suse.lifecycle-url"]
+            in (
+                "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
+                "https://www.suse.com/lifecycle",  # SLE 15 SP5 base container has incorrect URL
+            )
         )
         if container_type in (
             ImageType.OS_LTSS,
@@ -379,11 +376,12 @@ def test_general_labels(
             assert labels["com.suse.eula"] == "sle-eula"
         else:
             assert labels["com.suse.eula"] == "sle-bci"
+            assert "BCI" in labels[f"{prefix}.title"]
 
 
 @pytest.mark.parametrize(
     "container,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    IMAGES_AND_NAMES,
     indirect=["container"],
 )
 def test_disturl(
@@ -425,10 +423,7 @@ def test_disturl(
 
 
 @pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
-def test_disturl_can_be_checked_out(
-    container: ContainerData,
-    tmp_path,
-):
+def test_disturl_can_be_checked_out(container: ContainerData):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
     label that can be checked out using :command:`osc` to get the sources at
     exactly the version from which the container was build. This test verifies
@@ -528,7 +523,7 @@ def test_l3_label(container: ContainerData):
 
 @pytest.mark.parametrize(
     "container,container_name,container_type",
-    IMAGES_AND_NAMES_WITH_BASE_XFAIL,
+    IMAGES_AND_NAMES,
     indirect=["container"],
 )
 def test_reference(
@@ -555,20 +550,28 @@ def test_reference(
         == reference
     )
     if container_type != ImageType.OS_LTSS:
-        assert container_name.replace(".", "-") in reference
+        reference_name = container_name.replace(".", "-")
+        # the BCI-base container is actually identifying itself as the os container
+        if container_name in ("base",):
+            reference_name = (
+                "sle15" if OS_VERSION.startswith("15") else "tumbleweed"
+            )
+        assert reference_name in reference
 
     if OS_VERSION == "tumbleweed":
         if container_type in (
             ImageType.APPLICATION,
             ImageType.SAC_APPLICATION,
-        ):
+        ) or container_name in ("base",):
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
     else:
         if container_type == ImageType.SAC_APPLICATION:
             assert reference.startswith("dp.apps.rancher.io/containers/")
-        elif container_type == ImageType.APPLICATION:
+        elif container_type == ImageType.APPLICATION or container_name in (
+            "base",
+        ):
             assert reference.startswith("registry.suse.com/suse/")
         elif container_type == ImageType.OS_LTSS:
             assert reference.startswith("registry.suse.com/suse/ltss/sle15")
@@ -576,9 +579,9 @@ def test_reference(
             assert reference.startswith("registry.suse.com/bci/")
 
     # for the OS versioned containers we'll get a reference that contains the
-    # current full version + release, which has not yet been published to the
-    # registry (obviously). So instead we just try to fetch the current major
-    # version of the OS for this container
+    # current full version + release, which is unpublished in the public registry
+    # at the time of testing. Hence we fetch the current major version of the OS
+    # for this container and compare that.
     name, version_release = reference.split(":")
     if container_type == ImageType.OS:
         ref = (
