@@ -16,6 +16,7 @@ from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
+from bci_tester.data import TARGET
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
@@ -72,6 +73,7 @@ def test_base_size(container: ContainerData, container_runtime):
         and container.container.baseurl.rpartition("/")[2].startswith(
             "bci-base-fips"
         )
+        or TARGET in ("dso",)
     )
 
     #: size limits of the base container per arch in MiB
@@ -81,6 +83,9 @@ def test_base_size(container: ContainerData, container_runtime):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 130 if OS_VERSION in ("15.3",) else 169,
         }
+        if TARGET in ("dso",):
+            # the dso container is larger than the bci-base-fips container
+            base_container_max_size["x86_64"] += 10
     elif OS_VERSION in ("tumbleweed",):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 100,
@@ -183,7 +188,8 @@ def test_openssl_hashes(container):
 
 @pytest.mark.parametrize(
     "container_per_test",
-    [*LTSS_BASE_FIPS_CONTAINERS, *BASE_FIPS_CONTAINERS],
+    [*LTSS_BASE_FIPS_CONTAINERS, *BASE_FIPS_CONTAINERS]
+    + ([BASE_CONTAINER] if TARGET in ("dso",) else []),
     indirect=True,
 )
 def test_openssl_fips_hashes(container_per_test):
