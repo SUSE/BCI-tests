@@ -23,7 +23,7 @@ from bci_tester.fips import host_fips_enabled
 #: are not available in the minimal container images.
 DOCKERFILE = """WORKDIR /src/
 COPY tests/files/fips-test.c /src/
-RUN zypper -n ref && zypper -n in gcc libopenssl-devel && zypper -n clean
+RUN zypper --gpg-auto-import-keys -n ref && zypper -n in gcc libopenssl-devel && zypper -n clean
 RUN gcc -Og -g3 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test
 RUN mv fips-test /bin/fips-test
 
