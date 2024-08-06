@@ -13,6 +13,8 @@ from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import NONFIPS_DIGESTS
+from bci_tester.fips import FIPS_GNUTLS_DIGESTS
+from bci_tester.fips import NONFIPS_GNUTLS_DIGESTS
 from bci_tester.fips import NULL_DIGESTS
 from bci_tester.fips import host_fips_enabled
 
@@ -30,6 +32,16 @@ RUN mv fips-test /bin/fips-test
 RUN /bin/fips-test sha256
 """
 
+DOCKERFILE_GNUTLS = """WORKDIR /src/
+COPY tests/files/fips-test-gnutls.c /src/
+RUN zypper -n ref && zypper -n in gcc gnutls gnutls-devel && zypper -n clean
+RUN gcc -Og -g3 fips-test-gnutls.c -Wall -Wextra -Wpedantic -lgnutls -o fips-test-gnutls
+RUN mv fips-test-gnutls /bin/fips-test-gnutls
+
+# smoke test
+RUN /bin/fips-test-gnutls sha256
+"""
+
 _non_fips_host_skip_mark = [
     pytest.mark.skipif(
         not host_fips_enabled(),
@@ -39,6 +51,7 @@ _non_fips_host_skip_mark = [
 
 CONTAINER_IMAGES_WITH_ZYPPER = []
 FIPS_TESTER_IMAGES = []
+FIPS_GNUTLS_TESTER_IMAGES = []
 for param in CONTAINERS_WITH_ZYPPER:
     ctr, marks = container_and_marks_from_pytest_param(param)
     fips_tester_ctr = DerivedContainer(
@@ -48,10 +61,20 @@ for param in CONTAINERS_WITH_ZYPPER:
         extra_launch_args=ctr.extra_launch_args,
         custom_entry_point=ctr.custom_entry_point,
     )
+    fips_gnutls_tester_ctr = DerivedContainer(
+        base=ctr,
+        containerfile=DOCKERFILE_GNUTLS,
+        extra_environment_variables=ctr.extra_environment_variables,
+        extra_launch_args=ctr.extra_launch_args,
+        custom_entry_point=ctr.custom_entry_point,
+    )
     if param in LTSS_BASE_FIPS_CONTAINERS:
         CONTAINER_IMAGES_WITH_ZYPPER.append(param)
         FIPS_TESTER_IMAGES.append(
             pytest.param(fips_tester_ctr, marks=marks, id=param.id)
+        )
+        FIPS_GNUTLS_TESTER_IMAGES.append(
+            pytest.param(fips_gnutls_tester_ctr, marks=marks, id=param.id)
         )
     else:
         CONTAINER_IMAGES_WITH_ZYPPER.append(
@@ -62,6 +85,13 @@ for param in CONTAINERS_WITH_ZYPPER:
         FIPS_TESTER_IMAGES.append(
             pytest.param(
                 fips_tester_ctr,
+                marks=marks + _non_fips_host_skip_mark,
+                id=param.id,
+            )
+        )
+        FIPS_GNUTLS_TESTER_IMAGES.append(
+            pytest.param(
+                fips_gnutls_tester_ctr,
                 marks=marks + _non_fips_host_skip_mark,
                 id=param.id,
             )
@@ -134,3 +164,30 @@ def fips_mode_setup_check(container_per_test: ContainerData) -> None:
 )
 def test_openssl_fips_hashes(container_per_test: ContainerData):
     openssl_fips_hashes_test_fnct(container_per_test)
+
+@pytest.mark.parametrize(
+    "container_per_test", FIPS_GNUTLS_TESTER_IMAGES, indirect=True
+)
+
+def test_gnutls_binary(container_per_test: ContainerData) -> None:
+    """Check that a binary linked against Gnutls obeys the host's FIPS mode
+    setting:
+
+    - build a container image using :py:const:`DOCKERFILE_GNUTLS`
+    - run the bundled binary compiled from :file:`tests/files/fips-gnutls-test.c` with
+      all FIPS digests and assert that it successfully calculates the message
+      digest
+    - rerun the same binary with non-FIPS digests and assert that this fails
+      with the expected error message.
+
+    """
+
+    for digest in FIPS_GNUTLS_DIGESTS:
+        container_per_test.connection.check_output(f"/bin/fips-test-gnutls {digest}")
+
+    for digest in NONFIPS_GNUTLS_DIGESTS:
+        err_msg = container_per_test.connection.run_expect(
+            [1], f"/bin/fips-test-gnutls {digest}"
+        ).stderr
+
+        assert f"Hash calculation failed" in err_msg

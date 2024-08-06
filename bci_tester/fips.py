@@ -64,6 +64,22 @@ ALL_DIGESTS: Tuple[str] = NONFIPS_DIGESTS + FIPS_DIGESTS
 
 assert len(set(ALL_DIGESTS)) == len(ALL_DIGESTS)
 
+#: gnutls digests that are not FIPS compliant
+NONFIPS_GNUTLS_DIGESTS: Tuple[str] = ("md5", "gostr341194", "streebog-256", "streebog-512")
+
+#: FIPS compliant gnutls digests
+FIPS_GNUTLS_DIGESTS: Tuple[str] = (
+    "sha1",
+    "sha224",
+    "sha256",
+    "sha384",
+    "sha512",
+)
+
+#: all digests supported by gnutls
+ALL_GNUTLS_DIGESTS: Tuple[str] = NONFIPS_GNUTLS_DIGESTS + FIPS_GNUTLS_DIGESTS
+
+assert len(set(ALL_GNUTLS_DIGESTS)) == len(ALL_GNUTLS_DIGESTS)
 
 def host_fips_supported(
     fipsfile: str = "/proc/sys/crypto/fips_enabled",
