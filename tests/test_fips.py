@@ -190,4 +190,4 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
             [1], f"/bin/fips-test-gnutls {digest}"
         ).stderr
 
-        assert f"Hash calculation failed" in err_msg
+        assert f"Hash calculation failed" in err_msg, f"Hash calculation unexpectedly succeeded for {digest}"
