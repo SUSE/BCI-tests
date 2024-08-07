@@ -1,5 +1,7 @@
 """This module contains the tests for the kiwi container, the image with kiwi package & dependencies pre-installed."""
 
+import os
+
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container import container_and_marks_from_pytest_param
@@ -50,6 +52,11 @@ def test_kiwi_installation(auto_container):
     )
 
 
+@pytest.mark.skipif(
+    PODMAN_SELECTED and os.geteuid(),
+    # https://github.com/containers/podman/issues/17715#issuecomment-1460227771
+    reason="PODMAN requires root privileges for kiwi tests",
+)
 @pytest.mark.parametrize(
     "container_per_test", KIWI_CONTAINER_EXTENDED, indirect=True
 )
@@ -57,22 +64,6 @@ def test_kiwi_create_image(
     container_per_test: ContainerData,
 ) -> None:
     """Testing kiwi installation as per https://osinside.github.io/kiwi/quickstart.html"""
-
-    # Disabling this test with `podman` rootless mode, as the test mounts the newly created
-    # iso image (by kiwi) on a `/dev/loop*` device,
-    # which needs a rootful container for `root:disk` ownership.
-    # In rootless mode, `/dev/loop*` devices are owned by `nobody:nobody` or `UNKNOWN`,
-    # causing `losetup -f --show /tmp/myimage/kiwi-test-image-disk.x86_64-1.15.3.raw` to fail with "Permission denied".
-    #
-    # Also ref: https://github.com/containers/podman/issues/17715#issuecomment-1460227771
-    # Mounting a loop device in rootless mode is not allowed by the kernel.
-    loop_dev_owner = container_per_test.connection.check_output(
-        "stat -c '%U:%G' /dev/loop1"
-    )
-    if "root:" not in loop_dev_owner and PODMAN_SELECTED:
-        pytest.skip(
-            "Mounting a loop device in rootless mode is not allowed by the kernel. Ref: https://github.com/containers/podman/issues/17715#issuecomment-1460227771"
-        )
 
     assert (
         "KIWI (next generation) version"
