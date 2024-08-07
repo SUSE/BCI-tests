@@ -47,7 +47,7 @@ RUN /bin/fips-test-gnutls sha256
 DOCKERFILE_GCRYPT = """WORKDIR /src/
 COPY tests/files/fips-test-gcrypt.c /src/
 RUN zypper -n ref && zypper -n in gcc  libgcrypt20 libgcrypt-devel && zypper -n clean
-RUN gcc -Og -g3 fips-test-gcrypt.c -Wall -Wextra -Wpedantic -lgnutls -o fips-test-gcrypt
+RUN gcc -Og -g3 fips-test-gcrypt.c -Wall -Wextra -Wpedantic -lgcrypt -o fips-test-gcrypt
 RUN mv fips-test-gcrypt /bin/fips-test-gcrypt
 
 # smoke test
