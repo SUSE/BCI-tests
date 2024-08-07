@@ -18,34 +18,32 @@ int main(int argc, char *argv[]) {
     const char *mess2 = "Hello World\n";
     unsigned char md_value[128];
     size_t md_len;
+    int ret_code=1;
 
     if (argc < 2) {
         fprintf(stderr, "Usage: mdtest digestname\n");
-        return 1;
+        return ret_code;
     }
 
     gnutls_global_init();
     digest_algorithm = gnutls_digest_get_id(argv[1]);
     if (digest_algorithm == GNUTLS_DIG_UNKNOWN) {
         fprintf(stderr, "Unknown message digest %s\n", argv[1]);
-        gnutls_global_deinit();
-        return 1;
+        goto cleanup;
     }
 
     unsigned char hash1[64];
     size_t hash1_size = gnutls_hash_get_len(digest_algorithm);
     if (gnutls_hash_fast(digest_algorithm, (const unsigned char *)mess1, strlen(mess1), hash1) != GNUTLS_E_SUCCESS) {
         fprintf(stderr, "Hash calculation failed\n");
-        gnutls_global_deinit();
-        return 1;
+        goto cleanup;
     }
 
     unsigned char hash2[64];
     size_t hash2_size = gnutls_hash_get_len(digest_algorithm);
     if (gnutls_hash_fast(digest_algorithm, (const unsigned char *)mess2, strlen(mess2), hash2) != GNUTLS_E_SUCCESS) {
         fprintf(stderr, "Hash calculation failed\n");
-        gnutls_global_deinit();
-        return 1;
+        goto cleanup;
     }
 
     memcpy(md_value, hash1, hash1_size);
@@ -58,6 +56,10 @@ int main(int argc, char *argv[]) {
         printf("%02x", md_value[i]);
     }
     printf("\n");
+    ret_code=0;
+    goto cleanup;
 
-    return 0;
+    cleanup:
+        gnutls_global_deinit();
+        return ret_code;
 }
