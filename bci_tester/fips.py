@@ -88,7 +88,6 @@ assert len(set(ALL_GNUTLS_DIGESTS)) == len(ALL_GNUTLS_DIGESTS)
 
 #: gcrypt digests that are not FIPS compliant
 NONFIPS_GCRYPT_DIGESTS: Tuple[str] = (
-    "sm3",
     "ripemd160",
     "tiger",
     "tiger2",
@@ -102,6 +101,7 @@ NONFIPS_GCRYPT_DIGESTS: Tuple[str] = (
 
 #: FIPS compliant gcrypt digests
 FIPS_GCRYPT_DIGESTS: Tuple[str] = (
+    "sm3",
     "md5",
     "sha1",
     "sha224",
