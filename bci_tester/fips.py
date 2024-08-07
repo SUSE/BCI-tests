@@ -86,6 +86,44 @@ ALL_GNUTLS_DIGESTS: Tuple[str] = NONFIPS_GNUTLS_DIGESTS + FIPS_GNUTLS_DIGESTS
 
 assert len(set(ALL_GNUTLS_DIGESTS)) == len(ALL_GNUTLS_DIGESTS)
 
+#: gcrypt digests that are not FIPS compliant
+NONFIPS_GCRYPT_DIGESTS: Tuple[str] = (
+    "sm3",
+    "ripemd160",
+    "tiger",
+    "tiger2",
+    "tiger192",
+    "md4",
+    "whirlpool",
+    "gostr3411_94",
+    "stribog256",
+    "stribog512",
+) 
+
+#: FIPS compliant gcrypt digests
+FIPS_GCRYPT_DIGESTS: Tuple[str] = (
+    "md5",
+    "sha1",
+    "sha224",
+    "sha256",
+    "sha384",
+    "sha512",
+    "sha512_224",
+    "sha512_256",
+    "sha3-224",
+    "sha3-256",
+    "sha3-384",
+    "sha3-512",
+    "crc32",
+    "crc32rfc1510",
+    "crc24rfc2440",
+    
+)
+
+#: all digests supported by gcrypt
+ALL_GCRYPT_DIGESTS: Tuple[str] = NONFIPS_GCRYPT_DIGESTS + FIPS_GCRYPT_DIGESTS
+
+assert len(set(ALL_GNUTLS_DIGESTS)) == len(ALL_GNUTLS_DIGESTS)
 
 def host_fips_supported(
     fipsfile: str = "/proc/sys/crypto/fips_enabled",
