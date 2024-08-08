@@ -50,7 +50,7 @@ The base container
 ^^^^^^^^^^^^^^^^^^
 
 We are basing most of our tests on _the_ base container (available via the
-``BASE_CONTAINER`` variable in :file:`bci_tester/data.py`). This container is pulled
+``BASE_CONTAINERS`` variable in :file:`bci_tester/data.py`). This container is pulled
 directly from ``registry.suse.de`` and is being build from the
 `SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image
 <https://build.suse.de/package/show/SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image>`_
@@ -66,7 +66,7 @@ http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP3:/Update:/BCI/images/repo/. Unfortu
 you have to hand pick the correct folder (use the one ending with ``-Media1`` and
 for the correct arch) because the build number is put into the folder name.
 
-The ``BASE_CONTAINER`` will then be rebuild with the ``SLE_BCI`` repository
+The ``BASE_CONTAINERS`` will then be rebuild with the ``SLE_BCI`` repository
 replaced with the one from the ``BCI_DEVEL_REPO`` and all tests will thus use
 the new repository.
 
