@@ -369,18 +369,32 @@ LTSS_BASE_CONTAINERS = []
 LTSS_BASE_FIPS_CONTAINERS = []
 
 if OS_VERSION == "tumbleweed":
-    BASE_CONTAINER = create_BCI(
-        build_tag="tumbleweed:latest",
-        image_type="kiwi",
-        bci_type=ImageType.OS,
-    )
+    BASE_CONTAINERS = [
+        create_BCI(
+            build_tag="tumbleweed:latest",
+            image_type="kiwi",
+            bci_type=ImageType.OS,
+        )
+    ]
 else:
-    BASE_CONTAINER = create_BCI(
-        build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
-        image_type="kiwi",
-        bci_type=ImageType.OS,
-    )
-    if TARGET not in ("dso",):
+    # DSO has the bci-base container as fips version and no non-fips base container
+    if TARGET in ("dso",):
+        BASE_CONTAINERS: list[ParameterSet] = []
+        BASE_FIPS_CONTAINERS: list[ParameterSet] = [
+            create_BCI(
+                build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
+                bci_type=ImageType.OS,
+                available_versions=("15.6",),
+            )
+        ]
+    else:
+        BASE_CONTAINERS = [
+            create_BCI(
+                build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
+                image_type="kiwi",
+                bci_type=ImageType.OS,
+            )
+        ]
         BASE_FIPS_CONTAINERS = [
             create_BCI(
                 build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base-fips:{OS_CONTAINER_TAG}",
@@ -859,7 +873,6 @@ GRAFANA_CONTAINERS = [
 
 CONTAINERS_WITH_ZYPPER = (
     [
-        BASE_CONTAINER,
         INIT_CONTAINER,
         KERNEL_MODULE_CONTAINER,
         NGINX_CONTAINER,
@@ -868,6 +881,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_FPM,
     ]
     + ALERTMANAGER_CONTAINERS
+    + BASE_CONTAINERS
     + BASE_FIPS_CONTAINERS
     + BLACKBOX_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
@@ -931,7 +945,6 @@ if OS_VERSION in ("tumbleweed",):
 else:
     L3_CONTAINERS = (
         [
-            BASE_CONTAINER,
             BUSYBOX_CONTAINER,
             DISTRIBUTION_CONTAINER,
             GIT_CONTAINER,
@@ -944,6 +957,7 @@ else:
             PHP_8_CLI,
             PHP_8_FPM,
         ]
+        + BASE_CONTAINERS
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
         + GOLANG_CONTAINERS
