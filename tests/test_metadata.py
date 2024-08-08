@@ -552,10 +552,11 @@ def test_reference(
     if container_type != ImageType.OS_LTSS:
         reference_name = container_name.replace(".", "-")
         # the BCI-base container is actually identifying itself as the os container
-        if container_name in ("base",):
-            reference_name = (
-                "sle15" if OS_VERSION.startswith("15") else "tumbleweed"
-            )
+        # Fixed by creating bci-base from dockerfile-generator on 15.6+
+        if OS_VERSION in ("15.5", "tumbleweed") and container_name in (
+            "base",
+        ):
+            reference_name = "sle15" if OS_VERSION == "15.5" else "tumbleweed"
         assert reference_name in reference
 
     if OS_VERSION == "tumbleweed":
@@ -569,8 +570,8 @@ def test_reference(
     else:
         if container_type == ImageType.SAC_APPLICATION:
             assert reference.startswith("dp.apps.rancher.io/containers/")
-        elif container_type == ImageType.APPLICATION or container_name in (
-            "base",
+        elif container_type == ImageType.APPLICATION or (
+            OS_VERSION == "15.5" and container_name in ("base",)
         ):
             assert reference.startswith("registry.suse.com/suse/")
         elif container_type == ImageType.OS_LTSS:
