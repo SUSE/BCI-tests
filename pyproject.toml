@@ -106,6 +106,8 @@ markers = [
     'php_8',
     'php-apache_8',
     'php-fpm_8',
+    'postfix_3.8',
+    'postfix_3.9',
     'postgres_14',
     'postgres_15',
     'postgres_16',

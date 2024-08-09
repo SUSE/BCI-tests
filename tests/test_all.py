@@ -33,6 +33,7 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
+from bci_tester.data import POSTFIX_CONTAINERS
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -384,18 +385,25 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
 
 # PCP_CONTAINERS: uses systemd for starting multiple services
 # KIWI_CONTAINERS: pulls lvm2 which pulls systemd
+# POSTFIX_CONTAINERS (SP6): pulls rsyslog which pulls systemd
 @pytest.mark.parametrize(
     "container",
     [
         c
         for c in ALL_CONTAINERS
-        if (c not in PCP_CONTAINERS + [INIT_CONTAINER] + KIWI_CONTAINERS)
+        if (
+            c
+            not in PCP_CONTAINERS
+            + [INIT_CONTAINER]
+            + KIWI_CONTAINERS
+            + (POSTFIX_CONTAINERS if OS_VERSION != "tumbleweed" else [])
+        )
     ],
     indirect=True,
 )
 def test_systemd_not_installed_in_all_containers_except_init(container):
     """Ensure that systemd is not present in all containers besides the init
-    and pcp containers.
+    pcp, and postfix containers.
 
     """
     assert not container.connection.exists("systemctl")

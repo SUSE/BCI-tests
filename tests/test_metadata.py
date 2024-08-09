@@ -74,6 +74,7 @@ from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
+from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON36_CONTAINER
@@ -208,6 +209,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             ImageType.APPLICATION,
         )
         for mariab_client_container in MARIADB_CLIENT_CONTAINERS
+    ]
+    + [
+        (postfix_container, "postfix", ImageType.SAC_APPLICATION)
+        for postfix_container in POSTFIX_CONTAINERS
     ]
     + [
         (pg_container, "postgres", ImageType.APPLICATION)
