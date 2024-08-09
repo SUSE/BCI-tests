@@ -10,7 +10,7 @@ from typing import List
 import pytest
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
-from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_CONTAINERS
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import OS_VERSION
 
@@ -55,7 +55,7 @@ def package_name_filter_func(
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
 )
-@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+@pytest.mark.parametrize("container_per_test", BASE_CONTAINERS, indirect=True)
 def test_installcheck(container_per_test):
     """Run installcheck against the SLE_BCI repo + locally installed packages."""
     # Let zypper fetch the repo data and generate solv files.
@@ -72,7 +72,7 @@ def test_installcheck(container_per_test):
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
 )
-@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+@pytest.mark.parametrize("container_per_test", BASE_CONTAINERS, indirect=True)
 def test_sle_bci_forbidden_packages(container_per_test):
     """Regression test that no packages containing the following strings are in the
     ``SLE_BCI`` repository:
@@ -143,7 +143,7 @@ def test_sle_bci_forbidden_packages(container_per_test):
     reason="no included BCI repository - can't test",
 )
 @pytest.mark.parametrize("pkg", ("git", "curl", "wget", "unzip"))
-@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+@pytest.mark.parametrize("container_per_test", BASE_CONTAINERS, indirect=True)
 def test_package_installation(container_per_test, pkg):
     """Check that some basic packages (:command:`wget`, :command:`git`,
     :command:`curl` and :command:`unzip`) can be installed.
@@ -173,7 +173,7 @@ def test_package_installation(container_per_test, pkg):
         "uuidd",  # reported as missing by ironbank user
     ],
 )
-@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+@pytest.mark.parametrize("container_per_test", BASE_CONTAINERS, indirect=True)
 def test_sle15_packages(container_per_test, pkg):
     """Test that packages that we received reports by users for as missing/broken
     remain installable and available.

@@ -29,7 +29,7 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
-from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_CONTAINERS
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import BLACKBOX_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
@@ -113,7 +113,9 @@ def _get_container_label_prefix(
 IMAGES_AND_NAMES: List[ParameterSet] = [
     pytest.param(cont, name, img_type, marks=cont.marks)
     for cont, name, img_type in [
-        (BASE_CONTAINER, "base", ImageType.OS),
+        (c, "base-fips", ImageType.OS) for c in BASE_CONTAINERS
+    ]
+    + [
         (GIT_CONTAINER, "git", ImageType.APPLICATION),
         (HELM_CONTAINER, "helm", ImageType.APPLICATION),
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
@@ -466,18 +468,7 @@ def test_disturl_can_be_checked_out(container: ContainerData):
         if (
             cont not in L3_CONTAINERS
             and cont not in ACC_CONTAINERS
-            and cont != BASE_CONTAINER
-        )
-    ]
-    + [
-        pytest.param(
-            BASE_CONTAINER.values,
-            marks=BASE_CONTAINER.marks
-            + [
-                pytest.mark.xfail(
-                    reason="Base container for SLE 15 SP6 is not using the techpreview label (https://build.suse.de/request/show/325200)"
-                )
-            ],
+            and cont not in BASE_CONTAINERS
         )
     ],
     indirect=True,

@@ -12,7 +12,7 @@ from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
 
-from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
@@ -55,7 +55,7 @@ def test_spack(
                     format: docker
                     images:
                         build: "{container.image_url_or_id}"
-                        final: "{DerivedContainer.get_base(container_and_marks_from_pytest_param(BASE_CONTAINER)[0]).url}"
+                        final: "{DerivedContainer.get_base(container_and_marks_from_pytest_param(BASE_CONTAINERS[0])[0]).url}"
         """
             )
         )
@@ -75,7 +75,7 @@ def test_spack(
     multi_stage_build = MultiStageBuild(
         containers={
             "builder": container.container,
-            "runner": BASE_CONTAINER,
+            "runner": BASE_CONTAINERS[0],
         },
         containerfile_template=containerfile.replace("$", "$$"),
     )
