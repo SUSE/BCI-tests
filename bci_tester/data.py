@@ -48,7 +48,7 @@ ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.6",)
 
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
@@ -624,7 +624,7 @@ PCP_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
     )
     for ver, os_ver in (
-        ("5", ["15.5", "15.6"]),
+        ("5", ["15.6"]),
         ("6", ["tumbleweed"]),
     )
 ]
