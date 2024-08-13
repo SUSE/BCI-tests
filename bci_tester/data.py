@@ -641,7 +641,7 @@ CONTAINER_389DS_CONTAINERS = [
     )
     for ver, os_ver in (
         ("2.2", "15.6"),
-        ("3.0", "tumbleweed"),
+        ("3.1", "tumbleweed"),
     )
 ]
 

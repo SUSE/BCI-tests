@@ -8,6 +8,7 @@ from pytest_container import DerivedContainer
 from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
 
+from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
@@ -68,7 +69,7 @@ for param in CONTAINERS_WITH_ZYPPER:
         extra_launch_args=ctr.extra_launch_args,
         custom_entry_point=ctr.custom_entry_point,
     )
-    if param in LTSS_BASE_FIPS_CONTAINERS:
+    if param in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
         CONTAINER_IMAGES_WITH_ZYPPER.append(param)
         FIPS_TESTER_IMAGES.append(
             pytest.param(fips_tester_ctr, marks=marks, id=param.id)
@@ -122,7 +123,10 @@ def test_openssl_binary(container_per_test: ContainerData) -> None:
             [1], f"/bin/fips-test {digest}"
         ).stderr
 
-        assert f"Unknown message digest {digest}" in err_msg
+        assert (
+            f"Unknown message digest {digest}" in err_msg
+            or "EVP_DigestInit_ex was not successful" in err_msg
+        ), f"non-fips digest {digest} unexpected output {err_msg}"
 
 
 def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:

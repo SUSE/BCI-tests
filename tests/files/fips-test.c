@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   err_msg = msg;                                                               \
   goto fail
 
-  if (argv[1] == NULL) {
+  if (argc < 1 || argv[1] == NULL) {
     FAIL("Usage: mdtest digestname");
   }
 
