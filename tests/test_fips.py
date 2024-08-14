@@ -3,8 +3,11 @@ FIPS mode.
 
 """
 
+from pathlib import Path
+
 import pytest
 from pytest_container import DerivedContainer
+from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
 
@@ -23,12 +26,6 @@ from bci_tester.fips import host_fips_enabled
 #: are not available in the minimal container images.
 DOCKERFILE = """WORKDIR /src/
 COPY tests/files/fips-test.c /src/
-RUN zypper -n ref && zypper -n in gcc libopenssl-devel && zypper -n clean
-RUN gcc -Og -g3 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test
-RUN mv fips-test /bin/fips-test
-
-# smoke test
-RUN /bin/fips-test sha256
 """
 
 _non_fips_host_skip_mark = [
@@ -37,6 +34,8 @@ _non_fips_host_skip_mark = [
         reason="The target must run in FIPS mode for the FIPS test suite",
     )
 ]
+
+_zypp_credentials_dir: str = "/etc/zypp/credentials.d"
 
 CONTAINER_IMAGES_WITH_ZYPPER = []
 FIPS_TESTER_IMAGES = []
@@ -48,6 +47,16 @@ for param in CONTAINERS_WITH_ZYPPER:
         extra_environment_variables=ctr.extra_environment_variables,
         extra_launch_args=ctr.extra_launch_args,
         custom_entry_point=ctr.custom_entry_point,
+        volume_mounts=(
+            [
+                BindMount(
+                    _zypp_credentials_dir,
+                    host_path=_zypp_credentials_dir,
+                )
+            ]
+            if Path(_zypp_credentials_dir).exists()
+            else []
+        ),
     )
     if param in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
         CONTAINER_IMAGES_WITH_ZYPPER.append(param)
@@ -84,6 +93,11 @@ def test_openssl_binary(container_per_test: ContainerData) -> None:
       with the expected error message.
 
     """
+    container_per_test.connection.check_output(
+        "zypper --gpg-auto-import-keys -n ref && zypper -n in gcc libopenssl-devel && zypper -n clean &&"
+        "gcc -O2 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test && "
+        "mv fips-test /bin/fips-test"
+    )
 
     for digest in FIPS_DIGESTS:
         container_per_test.connection.check_output(f"/bin/fips-test {digest}")
