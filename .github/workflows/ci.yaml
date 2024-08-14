@@ -122,6 +122,9 @@ jobs:
           - toxenv: fips
             testing_target: ibs-released
             os_version: 15.3
+          - toxenv: fips
+            testing_target: ibs-released
+            os_version: 15.4
           - toxenv: repository
             testing_target: ibs-released
             os_version: 15.5
