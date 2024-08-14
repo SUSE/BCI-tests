@@ -1,5 +1,7 @@
 """Tests for the SLE15 kernel-module container."""
 
+import re
+
 import pytest
 from _pytest.mark import ParameterSet
 from pytest_container import DerivedContainer
@@ -65,9 +67,19 @@ RUN set -euxo pipefail; \
 @pytest.mark.parametrize("container", [DRBD_CONTAINER], indirect=True)
 def test_drbd_builds(container: ContainerData) -> None:
     """Test that the DRBD kernel module builds."""
-    assert container.connection.file(
-        f"/src/drbd-{_DRBD_VERSION}/drbd/drbd.ko"
-    ).exists
+    drbd_kernel_module_file = (
+        f"/src/drbd-{_DRBD_VERSION}/drbd/build-current/drbd.ko"
+    )
+
+    assert container.connection.file(drbd_kernel_module_file).exists
+
+    modinfo_out = container.connection.check_output(
+        f"modinfo {drbd_kernel_module_file}"
+    )
+    assert re.search(r"^name:\s+drbd", modinfo_out, flags=re.MULTILINE)
+    assert re.search(
+        rf"^version:\s+{_DRBD_VERSION}", modinfo_out, flags=re.MULTILINE
+    )
 
 
 @pytest.mark.skipif(
