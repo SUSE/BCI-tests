@@ -17,7 +17,7 @@ pytestmark = pytest.mark.skipif(
     reason="no kernel-module containers for Tumbleweed and Basalt",
 )
 
-_DRBD_VERSION = "9.2.7"
+_DRBD_VERSION = "9.2.11"
 
 
 def create_kernel_test(containerfile: str) -> ParameterSet:
@@ -38,9 +38,9 @@ DRBD_CONTAINER = create_kernel_test(
 RUN zypper -n in coccinelle tar
 
 RUN set -euxo pipefail; \
-    curl -Lsf -o - https://pkg.linbit.com//downloads/drbd/9/drbd-{_DRBD_VERSION}.tar.gz | tar xzf - ; \
+    curl -Lsf -o - https://pkg.linbit.com/downloads/drbd/9/drbd-{_DRBD_VERSION}.tar.gz | tar xzf - ; \
     cd drbd-{_DRBD_VERSION}; \
-    make -C /usr/src/linux-obj/$(uname -m)/default modules M="$(pwd)/drbd" SPAAS=false
+    make -C drbd all KDIR=/usr/src/linux-obj/$(uname -m)/default
 """,
 )
 
