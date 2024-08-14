@@ -889,7 +889,6 @@ CONTAINERS_WITH_ZYPPER = (
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
-    + TOMCAT_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
 
@@ -897,8 +896,8 @@ CONTAINERS_WITH_ZYPPER = (
 CONTAINERS_WITH_ZYPPER_AS_ROOT = []
 for param in CONTAINERS_WITH_ZYPPER:
     # only modify the user for containers where `USER` is explicitly set,
-    # atm this is only tomcat
-    if param not in TOMCAT_CONTAINERS:
+    # atm this is no container
+    if param not in []:
         CONTAINERS_WITH_ZYPPER_AS_ROOT.append(param)
     else:
         ctr, marks = container_and_marks_from_pytest_param(param)
@@ -922,6 +921,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     HELM_CONTAINER,
     MICRO_CONTAINER,
     MINIMAL_CONTAINER,
+    *TOMCAT_CONTAINERS,
 ]
 
 #: Containers with L3 support
