@@ -53,7 +53,7 @@ jobs:
 
           set users_envs (echo $PR_BODY | awk -F' ' '/^\[CI:TOXENVS\]/ { print $2 }')
           if [ -n "$users_envs" ]
-              set stringified_matrix (echo "$users_envs,build,all,repository,metadata,multistage" | tr ',' '\n' | sort | uniq | jo -a)
+              set stringified_matrix (echo "$users_envs,all,repository,metadata,multistage" | tr ',' '\n' | sort | uniq | jo -a)
           end
           echo "matrix=$stringified_matrix" >> $GITHUB_OUTPUT
         shell: fish {0}
@@ -144,15 +144,11 @@ jobs:
             os_version: 15.3
           - toxenv: base
             os_version: 15.3
-          - toxenv: build
-            os_version: 15.3
           - toxenv: metadata
             os_version: 15.3
           - toxenv: all
             os_version: 15.4
           - toxenv: base
-            os_version: 15.4
-          - toxenv: build
             os_version: 15.4
           - toxenv: metadata
             os_version: 15.4

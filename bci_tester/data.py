@@ -3,7 +3,6 @@ import enum
 import os
 from datetime import timedelta
 from typing import Iterable
-from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -49,7 +48,7 @@ ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.6",)
 
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
@@ -254,7 +253,7 @@ class ImageType(enum.Enum):
 def create_BCI(
     build_tag: str,
     image_type: _IMAGE_TYPE_T = "dockerfile",
-    available_versions: Optional[List[str]] = None,
+    available_versions: Optional[Sequence[str]] = None,
     extra_marks: Optional[Sequence[MarkDecorator]] = None,
     bci_type: ImageType = ImageType.LANGUAGE_STACK,
     container_user: Optional[str] = None,
@@ -625,7 +624,7 @@ PCP_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
     )
     for ver, os_ver in (
-        ("5", ["15.5", "15.6"]),
+        ("5", ["15.6"]),
         ("6", ["tumbleweed"]),
     )
 ]
