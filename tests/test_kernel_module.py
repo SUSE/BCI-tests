@@ -46,20 +46,15 @@ RUN set -euxo pipefail; \
 """,
 )
 
-_DPDK_VERSION = "23.07"
-
-_DPDK_MESON_SETUP = "meson python3-pip"
-if OS_VERSION in ("15.6",):
-    _DPDK_MESON_SETUP = "meson python311-pip"
-
-DPDK_CONTAINER = create_kernel_test(
-    rf"""WORKDIR /src/
-RUN zypper -n in libnuma-devel {_DPDK_MESON_SETUP} && pip install pyelftools
-
+IGB_UIO_CONTAINER = create_kernel_test(
+    r"""WORKDIR /src/
 RUN set -euxo pipefail; \
-    curl -Lsf -o - https://fast.dpdk.org/rel/dpdk-{_DPDK_VERSION}.tar.gz | tar xzf - ; cd dpdk-{_DPDK_VERSION}; \
-    meson --prefix=/usr --includedir=/usr/include/ -Ddefault_library=shared -Denable_docs=false -Db_lto=false -Dplatform="generic" -Dcpu_instruction_set=generic -Denable_kmods=true -Dkernel_dir="/usr/src/linux-obj/$(uname -m)/default" build; \
-    meson compile -C build
+    zypper -n in git; \
+    zypper -n clean;
+RUN set -euxo pipefail; \
+    git clone https://dpdk.org/git/dpdk-kmods; \
+    cd dpdk-kmods/linux/igb_uio/; \
+    make KSRC=/usr/src/linux-obj/$(uname -m)/default
 """
 )
 
@@ -86,9 +81,13 @@ def test_drbd_builds(container: ContainerData) -> None:
     LOCALHOST.system_info.arch not in ("x86_64", "aarch64", "ppc64le"),
     reason="DPDK is not supported on this architecture",
 )
-@pytest.mark.parametrize("container", [DPDK_CONTAINER], indirect=True)
-def test_dpdk_builds(container: ContainerData) -> None:
+@pytest.mark.parametrize("container", [IGB_UIO_CONTAINER], indirect=True)
+def test_igb_uio(container: ContainerData) -> None:
     """Test that the DPDK kernel module builds."""
-    assert container.connection.file(
-        f"/src/dpdk-{_DPDK_VERSION}/build/kernel/linux/kni/rte_kni.ko"
-    ).exists
+    igb_uio_kernel_module_file = "/src/dpdk-kmods/linux/igb_uio/igb_uio.ko"
+
+    assert container.connection.file(igb_uio_kernel_module_file).exists
+    modinfo_out = container.connection.check_output(
+        f"modinfo {igb_uio_kernel_module_file}"
+    )
+    assert re.search(r"^name:\s+igb_uio", modinfo_out, flags=re.MULTILINE)
