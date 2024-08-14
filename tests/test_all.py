@@ -34,7 +34,6 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
-from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.util import get_repos_from_connection
 
 CONTAINER_IMAGES = ALL_CONTAINERS
@@ -387,19 +386,12 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
 
 # PCP_CONTAINERS: uses systemd for starting multiple services
 # KIWI_CONTAINERS: pulls lvm2 which pulls systemd
-# POSTFIX_CONTAINERS (SP6): pulls rsyslog which pulls systemd
 @pytest.mark.parametrize(
     "container",
     [
         c
         for c in ALL_CONTAINERS
-        if (
-            c
-            not in PCP_CONTAINERS
-            + [INIT_CONTAINER]
-            + KIWI_CONTAINERS
-            + (POSTFIX_CONTAINERS if OS_VERSION != "tumbleweed" else [])
-        )
+        if (c not in PCP_CONTAINERS + [INIT_CONTAINER] + KIWI_CONTAINERS)
     ],
     indirect=True,
 )

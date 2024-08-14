@@ -11,18 +11,9 @@ from bci_tester.data import POSTFIX_CONTAINERS
 
 CONTAINER_IMAGES = POSTFIX_CONTAINERS
 
-POSTFIX_WITH_LOGGING_ENABLED = []
 POSTFIX_WITH_MAILHOG = []
 POSTFIX_WITH_VIRTUAL_MBOX_ENABLED = []
 POSTFIX_WITH_LDAP_ENABLED = []
-
-
-CONTAINERFILE_POSTFIX_WITH_LOGGING_ENABLED = """
-RUN postconf maillog_file=/var/log/postfix.log
-RUN postconf maillog_file_permissions=0644
-HEALTHCHECK --interval=5s --timeout=10s --start-period=30s --retries=3 \
-        CMD postfix status
-"""
 
 
 CONTAINERFILE_POSTFIX_WITH_MAILHOG = """
@@ -92,22 +83,6 @@ HEALTHCHECK --interval=5s --timeout=10s --start-period=30s --retries=3 \
 
 
 for postfix_ctr in POSTFIX_CONTAINERS:
-    ctr, marks = container_and_marks_from_pytest_param(postfix_ctr)
-    POSTFIX_WITH_LOGGING_ENABLED.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                forwarded_ports=ctr.forwarded_ports,
-                containerfile=CONTAINERFILE_POSTFIX_WITH_LOGGING_ENABLED,
-                extra_environment_variables=ctr.extra_environment_variables,
-                image_format=ImageFormat.DOCKER,
-            ),
-            marks=marks,
-        )
-    )
-
-
-for postfix_ctr in POSTFIX_WITH_LOGGING_ENABLED:
     ctr, marks = container_and_marks_from_pytest_param(postfix_ctr)
     POSTFIX_WITH_MAILHOG.append(
         pytest.param(
@@ -190,7 +165,7 @@ def test_postfix_status(auto_container):
 
     # verify PID 1 process is ENTRYPOINT - `/bin/bash /entrypoint/entrypoint.sh postfix start`
     assert (
-        "/bin/bash /entrypoint/entrypoint.sh postfix start"
+        "/usr/lib/postfix/bin//master -i"
         in auto_container.connection.check_output(
             "ps -eo pid,cmd | grep '^ *1 ' | sed 's/^ *1 //'"
         )
@@ -202,26 +177,18 @@ def test_postfix_status(auto_container):
     )
 
 
-@pytest.mark.parametrize(
-    "container_per_test", POSTFIX_WITH_LOGGING_ENABLED, indirect=True
-)
-def test_postfix_send_email_delivered(
-    container_per_test: ContainerData,
-) -> None:
+def test_postfix_send_email_delivered(auto_container_per_test):
     """test sending an email successfully to localhost, using Postfix container"""
 
-    assert container_per_test.connection.file("/var/log/postfix.log").exists
-
     sendmail_cmd = 'echo "Subject: Test Email\n\nThis is a test email body." | sendmail -v root@localhost'
-    container_per_test.connection.check_output(sendmail_cmd)
+    auto_container_per_test.connection.check_output(sendmail_cmd)
 
-    assert "Mail queue is empty" in container_per_test.connection.check_output(
-        "sleep 10; mailq"
+    assert (
+        "Mail queue is empty"
+        in auto_container_per_test.connection.check_output("sleep 10; mailq")
     )
 
-    log = container_per_test.connection.file(
-        "/var/log/postfix.log"
-    ).content_string
+    log = auto_container_per_test.read_container_logs()
     for output in [
         "from=<root@localhost>",
         "dsn=2.0.0",
@@ -231,24 +198,18 @@ def test_postfix_send_email_delivered(
         assert output in log
 
 
-@pytest.mark.parametrize(
-    "container_per_test", POSTFIX_WITH_LOGGING_ENABLED, indirect=True
-)
-def test_postfix_send_email_failed(
-    container_per_test: ContainerData,
-) -> None:
+def test_postfix_send_email_failed(auto_container_per_test):
     """send a test email using the Postfix container, which fails"""
 
     sendmail_cmd = 'echo "Subject: Test Email\n\nThis is a test email body." | sendmail -f user1@example.com user2@example.com'
-    container_per_test.connection.check_output(sendmail_cmd)
+    auto_container_per_test.connection.check_output(sendmail_cmd)
 
-    assert "Mail queue is empty" in container_per_test.connection.check_output(
-        "sleep 10; mailq"
+    assert (
+        "Mail queue is empty"
+        in auto_container_per_test.connection.check_output("sleep 10; mailq")
     )
 
-    log = container_per_test.connection.file(
-        "/var/log/postfix.log"
-    ).content_string
+    log = auto_container_per_test.read_container_logs()
     for output in [
         "to=<user1@example.com>",
         "dsn=5.1.0",
@@ -277,9 +238,7 @@ def test_postfix_relay_email_to_mailhog(
         "sleep 10; mailq"
     )
 
-    log = container_per_test.connection.file(
-        "/var/log/postfix.log"
-    ).content_string
+    log = container_per_test.read_container_logs()
     for output in [
         "from=<user1@example.com>",
         "to=<user2@example.com>",
@@ -313,9 +272,7 @@ def test_postfix_send_email_delivered_to_virtual_mbox(
         "sleep 10; mailq"
     )
 
-    log = container_per_test.connection.file(
-        "/var/log/postfix.log"
-    ).content_string
+    log = container_per_test.read_container_logs()
     for output in [
         "from=<user1@example.com>",
         "to=<user2@example.com>",
@@ -373,9 +330,7 @@ def test_postfix_with_ldap_and_email_delivered(
         "sleep 10; mailq"
     )
 
-    log = container_per_test.connection.file(
-        "/var/log/postfix.log"
-    ).content_string
+    log = container_per_test.read_container_logs()
     for output in [
         "from=<user1@example.com>",
         "to=<user2@mail.example.com>, orig_to=<user2@example.com>",
