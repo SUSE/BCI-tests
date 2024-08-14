@@ -174,6 +174,7 @@ def test_package_installation(container_per_test, pkg):
         "aws-cli",  # disappeared after python311 switch due to unresolvables
         "python3-azure-sdk",  # might also become unresolvable
         "uuidd",  # reported as missing by ironbank user
+        "java-11-openjdk-headless",  # provide java11 until 2026-12-31 see jsc#PED-9926/jsc#NVSHAS-8819
     ],
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
