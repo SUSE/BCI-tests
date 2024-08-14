@@ -386,7 +386,7 @@ else:
             bci_type=ImageType.OS,
             # TODO set to _DEFAULT_BASE_OS_VERSIONS once the fips containers are available
             # everywhere
-            available_versions=("15.5", "15.6"),
+            available_versions=("15.6",),
         )
     ]
     if TARGET in ("ibs", "ibs-cr", "ibs-released"):
