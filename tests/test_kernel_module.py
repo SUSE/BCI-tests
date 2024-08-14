@@ -1,6 +1,7 @@
 """Tests for the SLE15 kernel-module container."""
 
 import pytest
+from _pytest.mark import ParameterSet
 from pytest_container import DerivedContainer
 from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
@@ -19,7 +20,7 @@ pytestmark = pytest.mark.skipif(
 _DRBD_VERSION = "9.2.7"
 
 
-def create_kernel_test(containerfile: str) -> pytest.param:
+def create_kernel_test(containerfile: str) -> ParameterSet:
     return pytest.param(
         DerivedContainer(
             base=container_and_marks_from_pytest_param(
