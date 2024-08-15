@@ -122,6 +122,9 @@ jobs:
           - toxenv: fips
             testing_target: ibs-released
             os_version: 15.3
+          - toxenv: fips
+            testing_target: ibs-released
+            os_version: 15.4
           - toxenv: repository
             testing_target: ibs-released
             os_version: 15.5
@@ -335,6 +338,18 @@ jobs:
         env:
           REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
           REGISTRY_LOGIN_PASSWORD: ${{ secrets.REGISTRY_LOGIN_PASSWORD }}
+
+      - name: setup SCC credentials
+        run: |
+          sudo install -d -m 755 /etc/zypp/credentials.d
+          cat << EOF | sudo tee /etc/zypp/credentials.d/SCCcredentials
+          username=$SCC_SYSTEM_USERNAME
+          password=$SCC_SYSTEM_PASSWORD
+          EOF
+        if: ${{ matrix.testing_target == 'ibs-released' }}
+        env:
+          SCC_SYSTEM_USERNAME: ${{ secrets.SCC_SYSTEM_USERNAME }}
+          SCC_SYSTEM_PASSWORD: ${{ secrets.SCC_SYSTEM_PASSWORD }}
 
       - name: Add /etc/host entries
         run: |
