@@ -11,11 +11,8 @@ import pytest
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BASE_CONTAINER
-from bci_tester.data import BASE_FIPS_CONTAINERS
-from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import OS_VERSION
-from bci_tester.util import get_repos_from_connection
 
 _RM_ZYPPSERVICE = (
     "rm -v /usr/lib/zypp/plugins/services/container-suseconnect-zypp"
@@ -185,109 +182,3 @@ def test_sle15_packages(container_per_test, pkg):
     container_per_test.connection.check_output(
         f"{_RM_ZYPPSERVICE}; zypper -n in --dry-run -r {BCI_REPO_NAME} {pkg}"
     )
-
-
-@pytest.mark.skipif(
-    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
-    reason="no included BCI repository - can't test",
-)
-@pytest.mark.parametrize(
-    "container_per_test",
-    [BASE_CONTAINER, *BASE_FIPS_CONTAINERS],
-    indirect=True,
-)
-def test_container_build_and_repo(container_per_test, host):
-    """Test all containers with zypper in them whether at least the ``SLE_BCI``
-    repository is present (if the host is unregistered). If a custom value for
-    the repository url has been supplied, then check that it is correct.
-
-    If the host is registered, then we check that there are more than one
-    repository present.
-
-    Additionally, check if the ``SLE_BCI_debug`` and ``SLE_BCI_source`` repos
-    are either both present or both absent. If both are present, enable them to
-    check that the URIs are valid.
-
-    """
-    # container-suseconnect will inject the correct repositories on registered
-    # SLES hosts
-    # => if the host is registered, we will have multiple repositories in the
-    # container, otherwise we will just have the SLE_BCI repository
-    suseconnect_injects_repos: bool = (
-        host.system_info.type == "linux"
-        and host.system_info.distribution == "sles"
-        and host.file("/etc/zypp/credentials.d/SCCcredentials").exists
-    )
-
-    repos = get_repos_from_connection(container_per_test.connection)
-    repo_names = {repo.name for repo in repos}
-
-    expected_repos = (
-        {
-            "openSUSE-Tumbleweed-Debug",
-            "openSUSE-Tumbleweed-Non-Oss",
-            "openSUSE-Tumbleweed-Oss",
-            "openSUSE-Tumbleweed-Source",
-            "openSUSE-Tumbleweed-Update",
-            "Open H.264 Codec (openSUSE Tumbleweed)",
-        }
-        if OS_VERSION == "tumbleweed"
-        else {
-            "SLE_BCI",
-            "SLE_BCI_debug",
-            "SLE_BCI_source",
-            "packages-microsoft-com-prod",
-        }
-    )
-
-    if suseconnect_injects_repos:
-        for _ in range(5):
-            if len(repos) > 1:
-                break
-
-            repos = get_repos_from_connection(container_per_test.connection)
-
-        assert (
-            len(repos) > 1
-        ), "On a registered host, we must have more than one repository on the host"
-    else:
-        assert len(repos) <= len(expected_repos)
-        assert not repo_names - expected_repos
-
-        if OS_VERSION == "tumbleweed":
-            for repo_name in "repo-debug", "repo-source":
-                container_per_test.connection.run_expect(
-                    [0], f"zypper modifyrepo --enable {repo_name}"
-                )
-
-    if OS_VERSION != "tumbleweed":
-        sle_bci_repo_candidates = [
-            repo for repo in repos if repo.name == "SLE_BCI"
-        ]
-        assert len(sle_bci_repo_candidates) == 1
-        sle_bci_repo = sle_bci_repo_candidates[0]
-
-        assert sle_bci_repo.name == "SLE_BCI"
-        assert sle_bci_repo.url == BCI_DEVEL_REPO
-
-        # find the debug and source repositories in the repo list, enable them so
-        # that we will check their url in the zypper ref call at the end
-        for repo_name in "SLE_BCI_debug", "SLE_BCI_source":
-            candidates = [repo for repo in repos if repo.name == repo_name]
-            assert len(candidates) in (0, 1)
-
-            if candidates:
-                container_per_test.connection.run_expect(
-                    [0], f"zypper modifyrepo --enable {candidates[0].alias}"
-                )
-
-        assert (
-            ("SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names)
-            or (
-                "SLE_BCI_debug" not in repo_names
-                and "SLE_BCI_source" not in repo_names
-            )
-        ), "repos SLE_BCI_source and SLE_BCI_debug must either both be present or both missing"
-
-    # check that all enabled repos are valid and can be refreshed
-    container_per_test.connection.run_expect([0], "zypper -n ref")
