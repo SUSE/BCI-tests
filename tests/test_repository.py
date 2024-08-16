@@ -11,9 +11,9 @@ import pytest
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BASE_CONTAINER
+from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import BCI_REPO_NAME
-from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
 
@@ -186,8 +186,14 @@ def test_sle15_packages(container_per_test, pkg):
     )
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="no included BCI repository - can't test",
+)
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
+    "container_per_test",
+    [BASE_CONTAINER, *BASE_FIPS_CONTAINERS],
+    indirect=True,
 )
 def test_container_build_and_repo(container_per_test, host):
     """Test all containers with zypper in them whether at least the ``SLE_BCI``
