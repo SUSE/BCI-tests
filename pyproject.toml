@@ -82,7 +82,7 @@ markers = [
     'grafana_9',
     'grafana_10',
     'kiwi_9.24',
-    'kiwi_10.0',
+    'kiwi_10.1',
     'mariadb_10.6',
     'mariadb_10.11',
     'mariadb_11.4',
