@@ -205,6 +205,7 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
     """
 
     container_per_test.connection.check_output(
+        "ls /usr/lib64/libgnutl* &&"
         "zypper --gpg-auto-import-keys -n ref && zypper -n in gcc gnutls gnutls-devel && zypper -n clean && "
         "gcc -Og -g3 fips-test-gnutls.c -Wall -Wextra -Wpedantic -lgnutls -o fips-test-gnutls && "
         "mv fips-test-gnutls /bin/fips-test-gnutls"
