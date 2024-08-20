@@ -200,10 +200,10 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
         container_per_test.connection.check_output(
             f"/bin/fips-test-gnutls {digest}"
         )
-        res = container_per_test.connection.run_expect(
-            [0], f"/bin/fips-test-gnutls {digest}"
+        res = container_per_test.connection.check_output(
+            f"/bin/fips-test-gnutls {digest}"
         )
-        assert expected_digest in res.stdout
+        assert expected_digest in res
 
     for digest in NONFIPS_GNUTLS_DIGESTS:
         err_msg = container_per_test.connection.run_expect(
