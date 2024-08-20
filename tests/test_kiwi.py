@@ -7,6 +7,7 @@ from pytest_container import DerivedContainer
 from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
@@ -53,6 +54,10 @@ def test_kiwi_installation(auto_container):
 
 
 @pytest.mark.skipif(
+    LOCALHOST.system_info.arch != "x86_64",
+    reason="test is atm x86_64 specific",
+)
+@pytest.mark.skipif(
     PODMAN_SELECTED and os.geteuid(),
     # https://github.com/containers/podman/issues/17715#issuecomment-1460227771
     reason="PODMAN requires root privileges for kiwi tests",
@@ -73,10 +78,10 @@ def test_kiwi_create_image(
     assert container_per_test.connection.file("kiwi/build-tests").exists
 
     kiwi_cmd = "kiwi-ng system build --description kiwi/build-tests/x86/leap/test-image-disk --set-repo obs://openSUSE:Leap:15.5/standard --target-dir /tmp/myimage"
-    assert container_per_test.connection.run_expect([0], kiwi_cmd)
+    container_per_test.connection.check_output(kiwi_cmd)
 
-    assert container_per_test.connection.run_expect(
-        [0], "kiwi-ng result list --target-dir=/tmp/myimage/"
+    container_per_test.connection.check_output(
+        "kiwi-ng result list --target-dir=/tmp/myimage/"
     )
 
     result_files = [
@@ -88,4 +93,4 @@ def test_kiwi_create_image(
     ]
     for file_path in result_files:
         command = f"ls {file_path}"
-        assert container_per_test.connection.run_expect([0], command)
+        container_per_test.connection.check_output(command)

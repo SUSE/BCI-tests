@@ -3,7 +3,6 @@ import enum
 import os
 from datetime import timedelta
 from typing import Iterable
-from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -49,7 +48,7 @@ ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.5", "15.6")
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.6",)
 
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
@@ -254,7 +253,7 @@ class ImageType(enum.Enum):
 def create_BCI(
     build_tag: str,
     image_type: _IMAGE_TYPE_T = "dockerfile",
-    available_versions: Optional[List[str]] = None,
+    available_versions: Optional[Sequence[str]] = None,
     extra_marks: Optional[Sequence[MarkDecorator]] = None,
     bci_type: ImageType = ImageType.LANGUAGE_STACK,
     container_user: Optional[str] = None,
@@ -332,7 +331,7 @@ def create_BCI(
         marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
 
     if OS_VERSION == "tumbleweed":
-        if bci_type == ImageType.APPLICATION:
+        if bci_type in (ImageType.APPLICATION, ImageType.SAC_APPLICATION):
             baseurl = (
                 f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
             )
@@ -361,8 +360,8 @@ def create_BCI(
 
 
 KIWI_CONTAINERS = [
-    create_BCI(build_tag=f"bci/kiwi:{tag}", available_versions={ver})
-    for ver, tag in (("15.6", "9.24"), ("tumbleweed", "10.0"))
+    create_BCI(build_tag=f"bci/kiwi:{tag}", available_versions=(ver,))
+    for ver, tag in (("15.6", "9.24"), ("tumbleweed", "10.1"))
 ]
 
 BASE_FIPS_CONTAINERS = []
@@ -387,7 +386,7 @@ else:
             bci_type=ImageType.OS,
             # TODO set to _DEFAULT_BASE_OS_VERSIONS once the fips containers are available
             # everywhere
-            available_versions=("15.5", "15.6"),
+            available_versions=("15.6",),
         )
     ]
     if TARGET in ("ibs", "ibs-cr", "ibs-released"):
@@ -625,7 +624,7 @@ PCP_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
     )
     for ver, os_ver in (
-        ("5", ["15.5", "15.6"]),
+        ("5", ["15.6"]),
         ("6", ["tumbleweed"]),
     )
 ]
@@ -678,6 +677,20 @@ MARIADB_CLIENT_CONTAINERS = [
         custom_entry_point="/bin/sh",
     )
     for mariadb_client_ver, os_versions in _MARIADB_VERSION_OS_MATRIX
+]
+
+POSTFIX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{SAC_CONTAINER_PREFIX}/postfix:{postfix_ver}",
+        bci_type=ImageType.SAC_APPLICATION,
+        available_versions=os_versions,
+        forwarded_ports=[PortForwarding(container_port=25)],
+        extra_environment_variables={"SERVER_HOSTNAME": "localhost"},
+    )
+    for postfix_ver, os_versions in (
+        (3.8, ["15.6"]),
+        (3.9, ["tumbleweed"]),
+    )
 ]
 
 POSTGRES_PASSWORD = "n0ts3cr3t"
@@ -868,13 +881,13 @@ CONTAINERS_WITH_ZYPPER = (
     + NODEJS_CONTAINERS
     + OPENJDK_CONTAINERS
     + PCP_CONTAINERS
+    + POSTFIX_CONTAINERS
     + POSTGRESQL_CONTAINERS
     + PROMETHEUS_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
-    + TOMCAT_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
 
@@ -882,8 +895,8 @@ CONTAINERS_WITH_ZYPPER = (
 CONTAINERS_WITH_ZYPPER_AS_ROOT = []
 for param in CONTAINERS_WITH_ZYPPER:
     # only modify the user for containers where `USER` is explicitly set,
-    # atm this is only tomcat
-    if param not in TOMCAT_CONTAINERS:
+    # atm this is no container
+    if param not in []:
         CONTAINERS_WITH_ZYPPER_AS_ROOT.append(param)
     else:
         ctr, marks = container_and_marks_from_pytest_param(param)
@@ -907,6 +920,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     HELM_CONTAINER,
     MICRO_CONTAINER,
     MINIMAL_CONTAINER,
+    *TOMCAT_CONTAINERS,
 ]
 
 #: Containers with L3 support
