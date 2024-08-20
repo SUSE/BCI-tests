@@ -211,6 +211,7 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
     )
 
     expected_fips_gnutls_digests = {
+        "md5": "bcfe53d9a81f2d0382a280d017796084e59ff97941044f85df5297e1c302d260",
         "sha1": "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
         "sha224": "54655eae3d97147de34564572231c34d6d0917dd7852b5b93647fb4fe53ee97e5e0a2a4d359b5b461409dc44d9315afbc3b7d6bc5cd598e6",
         "sha256": "4ea6a95a3a56fa6b7c1673c145198c52265fea4fe4cebef97249b39c25a733a0d2a84f4b8b650937ec8f73cd8be2c74add5a911ba64df27458ed8229da804a26",

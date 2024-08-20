@@ -66,7 +66,6 @@ assert len(set(ALL_DIGESTS)) == len(ALL_DIGESTS)
 
 #: gnutls digests that are not FIPS compliant
 NONFIPS_GNUTLS_DIGESTS: Tuple[str] = (
-    "md5",
     "gostr341194",
     "streebog-256",
     "streebog-512",
@@ -74,6 +73,7 @@ NONFIPS_GNUTLS_DIGESTS: Tuple[str] = (
 
 #: FIPS compliant gnutls digests
 FIPS_GNUTLS_DIGESTS: Tuple[str] = (
+    "md5",
     "sha1",
     "sha224",
     "sha256",
