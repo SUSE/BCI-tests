@@ -32,12 +32,6 @@ COPY tests/files/fips-test.c /src/
 
 DOCKERFILE_GNUTLS = """WORKDIR /src/
 COPY tests/files/fips-test-gnutls.c /src/
-RUN zypper -n ref && zypper -n in gcc gnutls gnutls-devel && zypper -n clean
-RUN gcc -Og -g3 fips-test-gnutls.c -Wall -Wextra -Wpedantic -lgnutls -o fips-test-gnutls
-RUN mv fips-test-gnutls /bin/fips-test-gnutls
-
-# smoke test
-RUN /bin/fips-test-gnutls sha256
 """
 
 _non_fips_host_skip_mark = [
@@ -77,6 +71,16 @@ for param in CONTAINERS_WITH_ZYPPER:
         extra_environment_variables=ctr.extra_environment_variables,
         extra_launch_args=ctr.extra_launch_args,
         custom_entry_point=ctr.custom_entry_point,
+        volume_mounts=(
+            [
+                BindMount(
+                    _zypp_credentials_dir,
+                    host_path=_zypp_credentials_dir,
+                )
+            ]
+            if Path(_zypp_credentials_dir).exists()
+            else []
+        ),
     )
     if param in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
         CONTAINER_IMAGES_WITH_ZYPPER.append(param)
@@ -199,6 +203,12 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
       with the expected error message.
 
     """
+
+    container_per_test.connection.check_output(
+        "zypper --gpg-auto-import-keys -n ref && zypper -n in gcc gnutls gnutls-devel && zypper -n clean && "
+        "gcc -Og -g3 fips-test-gnutls.c -Wall -Wextra -Wpedantic -lgnutls -o fips-test-gnutls && "
+        "mv fips-test-gnutls /bin/fips-test-gnutls"
+    )
 
     expected_fips_gnutls_digests = {
         "sha1": "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
