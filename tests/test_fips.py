@@ -186,24 +186,22 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
 
     """
 
-    expected_fips_gnutls_digests = [
-        "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
-        "54655eae3d97147de34564572231c34d6d0917dd7852b5b93647fb4fe53ee97e5e0a2a4d359b5b461409dc44d9315afbc3b7d6bc5cd598e6",
-        "4ea6a95a3a56fa6b7c1673c145198c52265fea4fe4cebef97249b39c25a733a0d2a84f4b8b650937ec8f73cd8be2c74add5a911ba64df27458ed8229da804a26",
-        "416b69644f4844065fcfe7b60f14fe07d1573420c4db2b15a6d1f4cb2b6933ffce8dcb1bce7788b962eb3d0c8d4eefc4acbfd470c22c0d95a1d10a087dc31988b9f7bfeb13be70b876a73558be664e5858d11f9459923e6e5fd838cb5708b969",
-        "3916af571551c0c40eb19936c7ac2c090e140cad48e348dc4e9d5b6508a34ac6090daeeed3a081ce0e44c90b181987b71f09e8e0c190e5af26cd46eea724489de1c112ff908febc3b98b1693a6cd3564eaf8e5e6ca629d084d9f0eba99247cacdd72e369ff8941397c2807409ff66be64be908da17ad7b8a49a2a26c0e8086aa",
-    ]
+    expected_fips_gnutls_digests = {
+        "sha1": "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
+        "sha224": "54655eae3d97147de34564572231c34d6d0917dd7852b5b93647fb4fe53ee97e5e0a2a4d359b5b461409dc44d9315afbc3b7d6bc5cd598e6",
+        "sha256": "4ea6a95a3a56fa6b7c1673c145198c52265fea4fe4cebef97249b39c25a733a0d2a84f4b8b650937ec8f73cd8be2c74add5a911ba64df27458ed8229da804a26",
+        "sha384": "416b69644f4844065fcfe7b60f14fe07d1573420c4db2b15a6d1f4cb2b6933ffce8dcb1bce7788b962eb3d0c8d4eefc4acbfd470c22c0d95a1d10a087dc31988b9f7bfeb13be70b876a73558be664e5858d11f9459923e6e5fd838cb5708b969",
+        "sha512": "3916af571551c0c40eb19936c7ac2c090e140cad48e348dc4e9d5b6508a34ac6090daeeed3a081ce0e44c90b181987b71f09e8e0c190e5af26cd46eea724489de1c112ff908febc3b98b1693a6cd3564eaf8e5e6ca629d084d9f0eba99247cacdd72e369ff8941397c2807409ff66be64be908da17ad7b8a49a2a26c0e8086aa",
+    }
 
-    for digest, expected_digest in zip(
-        FIPS_GNUTLS_DIGESTS, expected_fips_gnutls_digests
-    ):
+    for digest in FIPS_GNUTLS_DIGESTS:
         container_per_test.connection.check_output(
             f"/bin/fips-test-gnutls {digest}"
         )
         res = container_per_test.connection.check_output(
             f"/bin/fips-test-gnutls {digest}"
         )
-        assert expected_digest in res
+        assert expected_fips_gnutls_digests[digest] in res
 
     for digest in NONFIPS_GNUTLS_DIGESTS:
         err_msg = container_per_test.connection.run_expect(
