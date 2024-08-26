@@ -41,12 +41,12 @@ static void audit_log_func(gnutls_session session, const char *str) {
 
 int main(int argc, char *argv[]) {
     gnutls_digest_algorithm_t digest_algorithm;
+    gnutls_hmac_hd_t mh;
     gnutls_fips140_operation_state_t state;
     gnutls_fips140_context_t fips_context;
     const char *mess1 = "Test Message\n";
-    const char *mess2 = "Hello World\n";
-    unsigned char md_value[128];
-    size_t md_len;
+    const char *key = "Hello World 123456789012345678901234567890123456789\n";
+    unsigned char hmac[128];
     int ret;
     int ret_code=1;
 
@@ -75,27 +75,20 @@ int main(int argc, char *argv[]) {
         goto cleanup;
     }
 
-    unsigned char hash1[64];
-    size_t hash1_size = gnutls_hash_get_len(digest_algorithm);
-    if (gnutls_hash_fast(digest_algorithm, (const unsigned char *)mess1, strlen(mess1), hash1) != GNUTLS_E_SUCCESS) {
-        fprintf(stderr, "Hash calculation failed\n");
+    if (gnutls_hmac_init(&mh, digest_algorithm, key, strlen(key)) != GNUTLS_E_SUCCESS) {
+        fprintf(stderr, "HMAC init failed\n");
         goto cleanup;
     }
 
-    unsigned char hash2[64];
-    size_t hash2_size = gnutls_hash_get_len(digest_algorithm);
-    if (gnutls_hash_fast(digest_algorithm, (const unsigned char *)mess2, strlen(mess2), hash2) != GNUTLS_E_SUCCESS) {
-        fprintf(stderr, "Hash calculation failed\n");
+    size_t hash_size = gnutls_hash_get_len(digest_algorithm);
+    if (gnutls_hmac_fast(digest_algorithm, key, strlen(key), mess1, strlen(mess1), hmac) != GNUTLS_E_SUCCESS) {
+        fprintf(stderr, "HMAC calculation failed\n");
         goto cleanup;
     }
 
-    memcpy(md_value, hash1, hash1_size);
-    memcpy(md_value + hash1_size, hash2, hash2_size);
-    md_len = hash1_size + hash2_size;
-
-    printf("Digest is: ");
-    for (size_t i = 0; i < md_len; i++) {
-        printf("%02x", md_value[i]);
+    printf("HMAC is: ");
+    for (size_t i = 0; i < hash_size; i++) {
+        printf("%02x", hmac[i]);
     }
     printf("\n");
 
