@@ -30,13 +30,18 @@ def test_lang_set(auto_container):
     assert auto_container.connection.check_output("echo $LANG") == "C.UTF-8"
 
 
+_sqlite3 = "sqlite3"
+if OS_VERSION != "tumbleweed":
+    _sqlite3 += " -v 1.4.0"  # bsc#1203692
+
+
 @pytest.mark.parametrize(
     "gem",
     [
         (  # bsc1225821
             ("--platform ruby " if OS_VERSION != "tumbleweed" else "") + "ffi"
         ),
-        "sqlite3 -v 1.4.0",  # bsc#1203692
+        _sqlite3,
         "rspec-expectations",
         "diff-lcs",
         "rspec-mocks",
