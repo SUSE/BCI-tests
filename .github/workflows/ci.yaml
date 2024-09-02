@@ -155,8 +155,14 @@ jobs:
             os_version: 15.4
           - toxenv: metadata
             os_version: 15.4
+          - toxenv: all
+            os_version: "15.7"
           - toxenv: base
-            os_version: 15.7
+            os_version: "15.7"
+          - toxenv: minimal
+            os_version: "15.7"
+          - toxenv: metadata
+            os_version: "15.7"
           - toxenv: all
             os_version: "16.0"
           - toxenv: base
