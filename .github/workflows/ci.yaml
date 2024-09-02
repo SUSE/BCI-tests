@@ -155,8 +155,6 @@ jobs:
             os_version: 15.4
           - toxenv: metadata
             os_version: 15.4
-          - toxenv: base
-            os_version: 15.7
           - toxenv: all
             os_version: "16.0"
           - toxenv: base
@@ -165,6 +163,14 @@ jobs:
             os_version: "16.0"
           - toxenv: metadata
             os_version: "16.0"
+          - toxenv: all
+            os_version: "15.7"
+          - toxenv: base
+            os_version: "15.7"
+          - toxenv: minimal
+            os_version: "15.7"
+          - toxenv: metadata
+            os_version: "15.7"
 
     steps:
       - name: Clean up disk space to maximize available space
