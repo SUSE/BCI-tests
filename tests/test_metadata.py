@@ -413,7 +413,12 @@ def test_disturl(
     )
 
     if OS_VERSION == "tumbleweed":
-        assert "obs://build.opensuse.org/devel:BCI:Tumbleweed" in disturl
+        assert any(
+            (
+                "obs://build.opensuse.org/devel:BCI:Tumbleweed" in disturl,
+                "obs://build.opensuse.org/openSUSE:Factory" in disturl,
+            )
+        )
     else:
         if "opensuse.org" in container.container.get_base().url:
             assert (
