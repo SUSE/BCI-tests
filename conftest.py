@@ -59,10 +59,10 @@ def container_git_clone(
 
     check_output(shlex.split(git_repo_build.clone_command), cwd=tmp_path)
 
-    ctr_path = os.path.join(
-        container_fixture.inspect.config.workingdir,
-        git_repo_build.repo_name,
+    ctr_path = (
+        container_fixture.inspect.config.workingdir / git_repo_build.repo_name
     )
+
     check_output(
         [
             container_runtime.runner_binary,
