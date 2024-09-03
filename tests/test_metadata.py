@@ -413,7 +413,12 @@ def test_disturl(
     )
 
     if OS_VERSION == "tumbleweed":
-        assert "obs://build.opensuse.org/devel:BCI:Tumbleweed" in disturl
+        assert any(
+            (
+                "obs://build.opensuse.org/devel:BCI:Tumbleweed" in disturl,
+                "obs://build.opensuse.org/openSUSE:Factory" in disturl,
+            )
+        )
     else:
         if "opensuse.org" in container.container.get_base().url:
             assert (
@@ -599,8 +604,7 @@ def test_reference(
         version = list(version_release.split("-"))[0]
         ref = f"{name}:{version}"
 
-    # only test if our testing target is released - otherwise we'll just fail on
-    # containers that are not yet ever released
+    # Skip testing containers that have not yet been released to avoid unnecessary failures
     if not container.container.baseurl.startswith(ref.partition(":")[0]):
         pytest.skip(
             f"reference {ref} not checked in TARGET={container.container.baseurl}"
