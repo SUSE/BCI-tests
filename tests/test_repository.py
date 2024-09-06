@@ -158,6 +158,26 @@ def test_package_installation(container_per_test, pkg):
 
 
 @pytest.mark.skipif(
+    OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
+)
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="no included BCI repository - can't test",
+)
+@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+def test_repo_content_licensing(container_per_test) -> None:
+    conn = container_per_test.connection
+    conn.check_output("timeout 2m zypper ref && zypper -n in libsolv-tools")
+
+    assert (
+        conn.check_output(
+            f"set -o pipefail; dumpsolv /var/cache/zypp/solv/{BCI_REPO_NAME}/solv | sed -n '/^solvable:license:.*SUSE-Firmware/p' | wc -l"
+        ).strip()
+        == "0"
+    ), "Found a package with a SUSE-Firmware license"
+
+
+@pytest.mark.skipif(
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="no included BCI repository - can't test",
 )
