@@ -11,6 +11,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
+from bci_tester.selinux import selinux_status
 
 CONTAINER_IMAGES = KIWI_CONTAINERS
 
@@ -78,7 +79,11 @@ def test_kiwi_create_image(
     assert container_per_test.connection.file("kiwi/build-tests").exists
 
     kiwi_cmd = "kiwi-ng system build --description kiwi/build-tests/x86/leap/test-image-disk --set-repo obs://openSUSE:Leap:15.5/standard --target-dir /tmp/myimage"
-    container_per_test.connection.check_output(kiwi_cmd)
+    res = container_per_test.connection.run_expect([0, 1], kiwi_cmd)
+    if res.rc == 1 and selinux_status() == "enforcing":
+        pytest.xfail(
+            "kiwi container fails to build an image on hosts in SELinux enforcing mode"
+        )
 
     container_per_test.connection.check_output(
         "kiwi-ng result list --target-dir=/tmp/myimage/"
