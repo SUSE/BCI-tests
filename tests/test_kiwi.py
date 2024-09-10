@@ -59,7 +59,7 @@ def test_kiwi_installation(auto_container):
     reason="test is atm x86_64 specific",
 )
 @pytest.mark.skipif(
-    PODMAN_SELECTED and os.geteuid(),
+    PODMAN_SELECTED and os.geteuid() != 0,
     # https://github.com/containers/podman/issues/17715#issuecomment-1460227771
     reason="PODMAN requires root privileges for kiwi tests",
 )
