@@ -160,16 +160,18 @@ for postfix_ctr in POSTFIX_WITH_VIRTUAL_MBOX_ENABLED:
     )
 
 
-def test_postfix_status(auto_container):
+def test_postfix_status(auto_container: ContainerData):
     """check if Postfix service is running inside the container"""
 
-    # verify PID 1 process is ENTRYPOINT - `/bin/bash /entrypoint/entrypoint.sh postfix start`
-    assert (
-        "/usr/lib/postfix/bin//master -i"
-        in auto_container.connection.check_output(
-            "ps -eo pid,cmd | grep '^ *1 ' | sed 's/^ *1 //'"
-        )
-    )
+    # verify PID 1 process is ENTRYPOINT:
+    # /bin/bash /entrypoint/entrypoint.sh postfix start
+
+    # we don't have ps in the container, so read /proc/1/cmdline instead, it
+    # contains the binary and its arguments separated by \x00
+    cmdline: str = auto_container.connection.file(
+        "/proc/1/cmdline"
+    ).content_string
+    assert "/usr/lib/postfix/bin//master -i" in cmdline.replace("\x00", " ")
 
     assert (
         "the Postfix mail system is running"
