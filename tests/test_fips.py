@@ -164,7 +164,7 @@ def test_openssl_fips_hashes(container_per_test: ContainerData):
     "container_per_test", FIPS_GNUTLS_TESTER_IMAGES, indirect=True
 )
 @pytest.mark.xfail(
-    TARGET in ("ibs-released",) and OS_VERSION in ("15.3", "15.4"),
+    TARGET in ("ibs-released",) and OS_VERSION in ("15.3",),
     reason="Base image should export GNUTLS_FORCE_FIPS_MODE=1",
 )
 def test_gnutls_binary(container_per_test: ContainerData) -> None:
