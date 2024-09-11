@@ -49,68 +49,39 @@ FIPS_TESTER_IMAGES = []
 FIPS_GNUTLS_TESTER_IMAGES = []
 for param in CONTAINERS_WITH_ZYPPER:
     ctr, marks = container_and_marks_from_pytest_param(param)
-    fips_tester_ctr = DerivedContainer(
-        base=ctr,
-        containerfile=DOCKERFILE,
-        extra_environment_variables=ctr.extra_environment_variables,
-        extra_launch_args=ctr.extra_launch_args,
-        custom_entry_point=ctr.custom_entry_point,
-        volume_mounts=(
+    kwargs = {
+        "base": ctr,
+        "extra_environment_variables": ctr.extra_environment_variables,
+        "extra_launch_args": ctr.extra_launch_args,
+        "custom_entry_point": ctr.custom_entry_point,
+        "volume_mounts": (
             [
                 BindMount(
                     _zypp_credentials_dir,
                     host_path=_zypp_credentials_dir,
+                    flags=[],
                 )
             ]
             if Path(_zypp_credentials_dir).exists()
             else []
         ),
-    )
+    }
+    fips_tester_ctr = DerivedContainer(containerfile=DOCKERFILE, **kwargs)
     fips_gnutls_tester_ctr = DerivedContainer(
-        base=ctr,
-        containerfile=DOCKERFILE_GNUTLS,
-        extra_environment_variables=ctr.extra_environment_variables,
-        extra_launch_args=ctr.extra_launch_args,
-        custom_entry_point=ctr.custom_entry_point,
-        volume_mounts=(
-            [
-                BindMount(
-                    _zypp_credentials_dir,
-                    host_path=_zypp_credentials_dir,
-                )
-            ]
-            if Path(_zypp_credentials_dir).exists()
-            else []
-        ),
+        containerfile=DOCKERFILE_GNUTLS, **kwargs
     )
-    if param in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
-        CONTAINER_IMAGES_WITH_ZYPPER.append(param)
-        FIPS_TESTER_IMAGES.append(
-            pytest.param(fips_tester_ctr, marks=marks, id=param.id)
-        )
-        FIPS_GNUTLS_TESTER_IMAGES.append(
-            pytest.param(fips_gnutls_tester_ctr, marks=marks, id=param.id)
-        )
-    else:
-        CONTAINER_IMAGES_WITH_ZYPPER.append(
-            pytest.param(
-                ctr, marks=marks + _non_fips_host_skip_mark, id=param.id
-            )
-        )
-        FIPS_TESTER_IMAGES.append(
-            pytest.param(
-                fips_tester_ctr,
-                marks=marks + _non_fips_host_skip_mark,
-                id=param.id,
-            )
-        )
-        FIPS_GNUTLS_TESTER_IMAGES.append(
-            pytest.param(
-                fips_gnutls_tester_ctr,
-                marks=marks + _non_fips_host_skip_mark,
-                id=param.id,
-            )
-        )
+    if param not in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
+        marks += _non_fips_host_skip_mark
+
+    CONTAINER_IMAGES_WITH_ZYPPER.append(
+        pytest.param(ctr, marks=marks, id=param.id)
+    )
+    FIPS_TESTER_IMAGES.append(
+        pytest.param(fips_tester_ctr, marks=marks, id=param.id)
+    )
+    FIPS_GNUTLS_TESTER_IMAGES.append(
+        pytest.param(fips_gnutls_tester_ctr, marks=marks, id=param.id)
+    )
 
 
 @pytest.mark.parametrize(
