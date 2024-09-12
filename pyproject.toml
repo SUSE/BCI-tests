@@ -101,6 +101,7 @@ markers = [
     'openjdk-devel_17',
     'openjdk-devel_21',
     'openjdk-devel_22',
+    'osc_latest',
     'pcp_5',
     'pcp_6',
     'php_8',

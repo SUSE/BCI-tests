@@ -856,6 +856,14 @@ GRAFANA_CONTAINERS = [
     for versions, tag in ((("15.6",), "9"), (("tumbleweed",), "10"))
 ]
 
+OSC_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/osc:latest",
+        bci_type=ImageType.APPLICATION,
+        available_versions=["tumbleweed"],
+    )
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -888,6 +896,7 @@ CONTAINERS_WITH_ZYPPER = (
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
+    + OSC_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
 )
 

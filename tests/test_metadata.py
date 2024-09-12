@@ -68,6 +68,7 @@ from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_22_CONTAINER
+from bci_tester.data import OSC_CONTAINERS
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PCP_CONTAINERS
@@ -237,6 +238,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (DISTRIBUTION_CONTAINER, "registry", ImageType.APPLICATION),
     ]
+    + [(osc_ctr, "osc", ImageType.APPLICATION) for osc_ctr in OSC_CONTAINERS]
     + (
         [
             (DOTNET_SDK_6_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
