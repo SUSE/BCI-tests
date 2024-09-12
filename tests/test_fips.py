@@ -15,7 +15,6 @@ from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
-from bci_tester.data import TARGET
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import FIPS_GCRYPT_DIGESTS
 from bci_tester.fips import FIPS_GNUTLS_DIGESTS
@@ -174,10 +173,6 @@ def test_openssl_fips_hashes(container_per_test: ContainerData):
 
 @pytest.mark.parametrize(
     "container_per_test", FIPS_GNUTLS_TESTER_IMAGES, indirect=True
-)
-@pytest.mark.xfail(
-    TARGET in ("ibs-released",) and OS_VERSION in ("15.3",),
-    reason="Base image should export GNUTLS_FORCE_FIPS_MODE=1",
 )
 def test_gnutls_binary(container_per_test: ContainerData) -> None:
     """Check that a binary linked against GnuTLS obeys the host's FIPS mode
