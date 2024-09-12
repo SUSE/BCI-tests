@@ -7,7 +7,7 @@ from typing import Tuple
 from bci_tester.data import OS_VERSION
 
 #: openssl digests that are not FIPS compliant
-NONFIPS_DIGESTS: Tuple[str] = (
+NONFIPS_DIGESTS: Tuple[str, ...] = (
     "blake2b512",
     "blake2s256",
     "md5",
@@ -20,7 +20,7 @@ if OS_VERSION in ("15.3", "15.4", "15.5"):
     NONFIPS_DIGESTS += ("md4", "mdc2")
 
 #: FIPS compliant openssl digests
-FIPS_DIGESTS: Tuple[str] = (
+FIPS_DIGESTS: Tuple[str, ...] = (
     "sha1",
     "sha224",
     "sha256",
@@ -60,12 +60,12 @@ NULL_DIGESTS: Dict[str, str] = {
 }
 
 #: all digests supported by openssl
-ALL_DIGESTS: Tuple[str] = NONFIPS_DIGESTS + FIPS_DIGESTS
+ALL_DIGESTS: Tuple[str, ...] = NONFIPS_DIGESTS + FIPS_DIGESTS
 
 assert len(set(ALL_DIGESTS)) == len(ALL_DIGESTS)
 
 #: gnutls digests that are not FIPS compliant
-NONFIPS_GNUTLS_DIGESTS: Tuple[str] = (
+NONFIPS_GNUTLS_DIGESTS: Tuple[str, ...] = (
     "md5",
     "gostr341194",
     "streebog-256",
@@ -73,7 +73,7 @@ NONFIPS_GNUTLS_DIGESTS: Tuple[str] = (
 )
 
 #: FIPS compliant gnutls digests
-FIPS_GNUTLS_DIGESTS: Tuple[str] = (
+FIPS_GNUTLS_DIGESTS: Tuple[str, ...] = (
     "sha1",
     "sha224",
     "sha256",
@@ -82,7 +82,9 @@ FIPS_GNUTLS_DIGESTS: Tuple[str] = (
 )
 
 #: all digests supported by gnutls
-ALL_GNUTLS_DIGESTS: Tuple[str] = NONFIPS_GNUTLS_DIGESTS + FIPS_GNUTLS_DIGESTS
+ALL_GNUTLS_DIGESTS: Tuple[str, ...] = (
+    NONFIPS_GNUTLS_DIGESTS + FIPS_GNUTLS_DIGESTS
+)
 
 #: gcrypt digests that are not FIPS compliant
 NONFIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
