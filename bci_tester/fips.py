@@ -86,6 +86,42 @@ ALL_GNUTLS_DIGESTS: Tuple[str, ...] = (
     NONFIPS_GNUTLS_DIGESTS + FIPS_GNUTLS_DIGESTS
 )
 
+#: gcrypt digests that are not FIPS compliant
+NONFIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
+    "ripemd160",
+    "tiger",
+    "tiger2",
+    "tiger192",
+    "md4",
+    "whirlpool",
+    "gostr3411_94",
+    "stribog256",
+    "stribog512",
+    "md5",
+)
+
+if OS_VERSION != "15.3":
+    NONFIPS_GCRYPT_DIGESTS += ("sm3",)
+
+#: FIPS compliant gcrypt digests
+FIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
+    "sha1",
+    "sha224",
+    "sha256",
+    "sha384",
+    "sha512",
+    "sha3-224",
+    "sha3-256",
+    "sha3-384",
+    "sha3-512",
+)
+
+if OS_VERSION != "15.3":
+    FIPS_GCRYPT_DIGESTS += (
+        "sha512_224",
+        "sha512_256",
+    )
+
 
 def host_fips_supported(
     fipsfile: str = "/proc/sys/crypto/fips_enabled",
