@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import host_fips_supported
+from bci_tester.selinux import selinux_status
 from bci_tester.util import get_repos_from_zypper_xmlout
 
 
@@ -63,3 +66,19 @@ def test_repository_from_xml():
     assert repos[1].pkg_gpgcheck
     assert repos[1].url == "https://packages.microsoft.com/sles/15/prod/"
     assert repos[1].priority == 99
+
+
+def test_selinux_disabled(tmp_path: Path) -> None:
+    assert selinux_status(str(tmp_path)) == "disabled"
+
+
+def test_selinux_enforcing(tmp_path: Path) -> None:
+    (tmp_path / "enforce").touch()
+    (tmp_path / "enforce").write_text("1\n")
+    assert selinux_status(str(tmp_path)) == "enforcing"
+
+
+def test_selinux_permissive(tmp_path: Path) -> None:
+    (tmp_path / "enforce").touch()
+    (tmp_path / "enforce").write_text("0\n")
+    assert selinux_status(str(tmp_path)) == "permissive"
