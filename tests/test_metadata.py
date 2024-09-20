@@ -433,7 +433,9 @@ def test_disturl(
 
 
 @pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
-def test_disturl_can_be_checked_out(container: ContainerData):
+def test_disturl_can_be_checked_out(
+    container: ContainerData, pytestconfig: pytest.Config
+):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
     label that can be checked out using :command:`osc` to get the sources at
     exactly the version from which the container was build. This test verifies
@@ -452,10 +454,16 @@ def test_disturl_can_be_checked_out(container: ContainerData):
     src_package = src_package.partition(":")[0]  # strip multibuild flavor
     src_project = Path(disturl.path).parent.parent.name
 
+    cert = (
+        str(pytestconfig.rootpath / "tests" / "files" / "SUSE_Trust_Root.crt")
+        if "suse.de" in disturl.hostname
+        else None
+    )
     try:
         req = requests.get(
             f"https://{disturl.hostname}/public/source/{src_project}/{src_package}",
             params={"rev": src_revision},
+            cert=cert,
         )
     except requests.exceptions.ConnectionError as e:
         if "suse.de" in disturl.hostname:
