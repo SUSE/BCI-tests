@@ -37,7 +37,7 @@ ALLOWED_BASE_OS_VERSIONS = (
     "15.5",
     "15.6",
     "15.7",
-    "basalt",
+    "16.0",
     "tumbleweed",
 )
 
@@ -54,7 +54,7 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.6",)
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
 
 # Test base containers by default for these versions
-_DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
+_DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "16.0", "tumbleweed")
 
 assert (
     sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS)
@@ -87,19 +87,6 @@ if OS_VERSION == "tumbleweed":
         "OS_PRETTY_NAME",
         "openSUSE Tumbleweed",
     )
-elif OS_VERSION == "basalt":
-    OS_MAJOR_VERSION = 16
-    OS_SP_VERSION = 0
-    OS_CONTAINER_TAG = "latest"
-    APP_CONTAINER_PREFIX = "basalt"
-    BCI_CONTAINER_PREFIX = "alp/bci"
-    OS_VERSION_ID = "0.1"
-
-    #: The Basalt pretty name (from /etc/os-release)
-    OS_PRETTY_NAME = os.getenv(
-        "OS_PRETTY_NAME",
-        "ALP",
-    )
 else:
     APP_CONTAINER_PREFIX = "suse"
     SAC_CONTAINER_PREFIX = "containers"
@@ -114,10 +101,14 @@ else:
     #: The SLES 15 pretty name (from /etc/os-release)
     OS_PRETTY_NAME = os.getenv(
         "OS_PRETTY_NAME",
-        f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION} SP{OS_SP_VERSION}",
+        (
+            f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION} SP{OS_SP_VERSION}"
+            if OS_MAJOR_VERSION == 15
+            else f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION}.{OS_SP_VERSION}"
+        ),
     )
 
-    assert OS_MAJOR_VERSION == 15, (
+    assert OS_MAJOR_VERSION in (15, 16), (
         "The tests are created for SLE 15 base images only, "
         f"but got a request for SLE {OS_MAJOR_VERSION}"
     )
@@ -146,16 +137,21 @@ if TARGET not in (
     if BASEURL.endswith("/"):
         BASEURL = BASEURL[:-1]
 else:
-    if OS_VERSION in ("basalt", "tumbleweed"):
+    if OS_VERSION in ("tumbleweed", "16.0"):
         DISTNAME = OS_VERSION
     else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
+
+    ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
+    if OS_VERSION.startswith("16"):
+        ibs_cr_project = f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}"
+
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
         "dso": "registry1.dso.mil/ironbank/suse",
-        "ibs-cr": f"registry.suse.de/suse/{DISTNAME}/update/cr/totest",
+        "ibs-cr": ibs_cr_project,
         "ibs-released": "registry.suse.com",
     }[TARGET]
 
@@ -163,8 +159,6 @@ else:
 BCI_REPO_NAME = "SLE_BCI"
 if OS_VERSION == "tumbleweed":
     BCI_REPO_NAME = "repo-oss"
-if OS_VERSION == "basalt":
-    BCI_REPO_NAME = "repo-basalt"
 
 
 def create_container_version_mark(
@@ -180,7 +174,7 @@ def create_container_version_mark(
         ``15.3`` for SLE 15 SP3 and so on
     """
     for ver in available_versions:
-        if ver[:2] == str(OS_MAJOR_VERSION):
+        if ver.startswith("15") and ver[:2] == str(OS_MAJOR_VERSION):
             assert (
                 ver[:2] == str(OS_MAJOR_VERSION)
                 and len(ver.split(".")) == 2
@@ -749,11 +743,18 @@ NGINX_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=80)],
 )
 
-KERNEL_MODULE_CONTAINER = create_BCI(
-    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
-    available_versions=["15.5", "15.6"],
-    bci_type=ImageType.OS,
-)
+if OS_VERSION in ("16.0",):
+    KERNEL_MODULE_CONTAINER = create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle16-kernel-module-devel:{OS_CONTAINER_TAG}",
+        available_versions=["16.0"],
+        bci_type=ImageType.OS,
+    )
+else:
+    KERNEL_MODULE_CONTAINER = create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
+        available_versions=["15.5", "15.6"],
+        bci_type=ImageType.OS,
+    )
 
 GCC_CONTAINERS = [
     create_BCI(
@@ -927,7 +928,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
 
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
-if OS_VERSION in ("tumbleweed",):
+if OS_VERSION in ("tumbleweed", "16.0"):
     L3_CONTAINERS = ()
 else:
     L3_CONTAINERS = (

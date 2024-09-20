@@ -38,7 +38,7 @@ def test_passwd_present(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ("tumbleweed",),
+    OS_VERSION not in ("tumbleweed", "16.0"),
     reason="requires gconv modules",
 )
 def test_iconv_working(auto_container):
@@ -81,12 +81,19 @@ def test_base_size(container: ContainerData, container_runtime):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 130 if OS_VERSION in ("15.3",) else 169,
         }
-    elif OS_VERSION in ("basalt", "tumbleweed"):
+    elif OS_VERSION in ("tumbleweed",):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 100,
             "aarch64": 126,
             "ppc64le": 138,
             "s390x": 99,
+        }
+    elif OS_VERSION in ("16.0",):
+        base_container_max_size: Dict[str, int] = {
+            "x86_64": 158,
+            "aarch64": 178,
+            "ppc64le": 194,
+            "s390x": 155,
         }
     elif OS_VERSION in ("15.7",):
         base_container_max_size: Dict[str, int] = {
@@ -95,7 +102,6 @@ def test_base_size(container: ContainerData, container_runtime):
             "ppc64le": 156,
             "s390x": 122,
         }
-    # 15.5/15.6 are hopefully only temporary large due to PED-5014
     elif OS_VERSION in ("15.6",):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 120,
@@ -239,7 +245,8 @@ DIND_CONTAINER = pytest.param(
 
 @pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
 @pytest.mark.xfail(
-    OS_VERSION in ("15.7",), reason="SLE BCI repository not yet available"
+    OS_VERSION in ("15.7", "16.0"),
+    reason="SLE BCI repository not yet available",
 )
 @pytest.mark.skipif(
     not DOCKER_SELECTED,

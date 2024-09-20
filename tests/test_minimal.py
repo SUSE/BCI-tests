@@ -8,55 +8,54 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import OS_VERSION
-
-#: size limits of the minimal image per architecture in MiB
-SLE_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 49,
-    "aarch64": 51,
-    "s390x": 49,
-    "ppc64le": 59,
-}
-
-TW_MINIMAL_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "aarch64": 65,
-    "ppc64le": 58,
-    "s390x": 41,
-    "x86_64": 49,
-}
-
-#: size limits of the micro image per architecture in MiB
-SLE_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 26,
-    "aarch64": 28,
-    "s390x": 26,
-    "ppc64le": 33,
-}
-
-TW_MICRO_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 34,
-    "aarch64": 42,
-    "s390x": 28,
-    "ppc64le": 41,
-}
+from bci_tester.runtime_choice import PODMAN_SELECTED
 
 
+@pytest.mark.skipif(
+    not PODMAN_SELECTED,
+    reason="docker size reporting is dependant on underlying filesystem",
+)
 @pytest.mark.parametrize("container", [MINIMAL_CONTAINER], indirect=True)
 def test_minimal_image_size(container, container_runtime):
     """Check that the size of the minimal container is below the limits specified in
     :py:const:`SLE_MINIMAL_IMAGE_MAX_SIZE`.
 
     """
-    size = (
-        TW_MINIMAL_IMAGE_MAX_SIZE
-        if OS_VERSION == "tumbleweed"
-        else SLE_MINIMAL_IMAGE_MAX_SIZE
-    )
+    if OS_VERSION in ("tumbleweed",):
+        minimal_container_max_size: Dict[str, int] = {
+            "aarch64": 63,
+            "ppc64le": 58,
+            "s390x": 41,
+            "x86_64": 49,
+        }
+    elif OS_VERSION in ("16.0",):
+        minimal_container_max_size: Dict[str, int] = {
+            "aarch64": 38,
+            "ppc64le": 45,
+            "s390x": 35,
+            "x86_64": 36,
+        }
+    else:
+        minimal_container_max_size: Dict[str, int] = {
+            "x86_64": 49,
+            "aarch64": 51,
+            "s390x": 49,
+            "ppc64le": 59,
+        }
+
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
     ) // (1024 * 1024)
-    assert container_size <= size[LOCALHOST.system_info.arch]
+    assert (
+        container_size
+        <= minimal_container_max_size[LOCALHOST.system_info.arch]
+    )
 
 
+@pytest.mark.skipif(
+    not PODMAN_SELECTED,
+    reason="docker size reporting is dependant on underlying filesystem",
+)
 @pytest.mark.parametrize("container", [MICRO_CONTAINER], indirect=True)
 def test_micro_image_size(container, container_runtime):
     """Check that the size of the micro container is below the limits specified in
@@ -64,11 +63,21 @@ def test_micro_image_size(container, container_runtime):
 
     """
 
-    size = (
-        TW_MICRO_IMAGE_MAX_SIZE
-        if OS_VERSION == "tumbleweed"
-        else SLE_MICRO_IMAGE_MAX_SIZE
-    )
+    if OS_VERSION in ("tumbleweed",):
+        size: Dict[str, int] = {
+            "x86_64": 34,
+            "aarch64": 42,
+            "s390x": 28,
+            "ppc64le": 41,
+        }
+    else:
+        size = {
+            "x86_64": 26,
+            "aarch64": 28,
+            "s390x": 26,
+            "ppc64le": 33,
+        }
+
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
     ) // (1024 * 1024)

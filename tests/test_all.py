@@ -29,6 +29,7 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
+from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
@@ -93,10 +94,13 @@ def test_os_release(auto_container):
                 ).days < 10
                 continue
 
+        # Ignore the Milestone suffix in the form of "SUSE Linux Enterprise Server XX YY (AlphaZ)"
         assert (
             auto_container.connection.check_output(
                 f". /etc/os-release && echo ${var_name}"
             )
+            .partition("(")[0]
+            .strip()
             == expected_value
         )
 
@@ -391,7 +395,13 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
     [
         c
         for c in ALL_CONTAINERS
-        if (c not in PCP_CONTAINERS + [INIT_CONTAINER] + KIWI_CONTAINERS)
+        if (
+            c
+            not in PCP_CONTAINERS
+            + [INIT_CONTAINER]
+            + KIWI_CONTAINERS
+            + ([KERNEL_MODULE_CONTAINER] if OS_VERSION == "16.0" else [])
+        )
     ],
     indirect=True,
 )
@@ -404,7 +414,9 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
 
     # we cannot check for an existing package if rpm is not installed
     if container.connection.exists("rpm"):
-        assert not container.connection.package("systemd").is_installed
+        assert not container.connection.package(
+            "systemd"
+        ).is_installed, "systemd is installed in this container!"
 
 
 @pytest.mark.parametrize(
