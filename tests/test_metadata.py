@@ -464,6 +464,7 @@ def test_disturl_can_be_checked_out(
             f"https://{disturl.hostname}/public/source/{src_project}/{src_package}",
             params={"rev": src_revision},
             cert=cert,
+            timeout=(5, 10),
         )
     except requests.exceptions.ConnectionError as e:
         if "suse.de" in disturl.hostname:
