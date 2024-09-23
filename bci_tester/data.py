@@ -767,7 +767,7 @@ GCC_CONTAINERS = [
 
 APACHE_TOMCAT_10_CONTAINERS = [
     create_BCI(
-        build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:10-openjdk{openjdk_version}",
+        build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:10.1-openjdk{openjdk_version}",
         bci_type=ImageType.SAC_APPLICATION,
         available_versions=("15.6",),
         forwarded_ports=[PortForwarding(container_port=8080)],
@@ -776,7 +776,7 @@ APACHE_TOMCAT_10_CONTAINERS = [
     for openjdk_version in (21,)
 ] + [
     create_BCI(
-        build_tag=f"{APP_CONTAINER_PREFIX}/apache-tomcat:10-openjdk{openjdk_version}",
+        build_tag=f"{APP_CONTAINER_PREFIX}/apache-tomcat:10.1-openjdk{openjdk_version}",
         bci_type=ImageType.APPLICATION,
         available_versions=("tumbleweed",),
         forwarded_ports=[PortForwarding(container_port=8080)],
