@@ -23,7 +23,7 @@ _PUB_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMkxHs1b6A1kZuiu6nPxehkSO4pG4qMv
 
 _SSH_PORT = 22022
 
-_git_server_containerfile = rf"""
+_GIT_SERVER_CONTAINERFILE = rf"""
 RUN zypper -n in git-core openssh-server openssh-clients
 RUN ssh-keygen -A
 RUN useradd -U -m -p "*" git
@@ -86,7 +86,7 @@ def test_git_clone_https(auto_container_per_test):
 
 GIT_SERVER_CONTAINER = DerivedContainer(
     base="registry.suse.com/bci/bci-base:latest",
-    containerfile=_git_server_containerfile,
+    containerfile=_GIT_SERVER_CONTAINERFILE,
     image_format=ImageFormat.DOCKER,
     extra_launch_args=["--cap-add", "AUDIT_WRITE"],
 )

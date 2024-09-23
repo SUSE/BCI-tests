@@ -181,6 +181,7 @@ def test_openssl_hashes(container):
     indirect=True,
 )
 def test_openssl_fips_hashes(container_per_test):
+    """Check that all FIPS allowed hashes perform correctly."""
     openssl_fips_hashes_test_fnct(container_per_test)
 
 
