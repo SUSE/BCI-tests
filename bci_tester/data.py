@@ -704,8 +704,10 @@ POSTGRESQL_CONTAINERS = [
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
     )
     for pg_ver, pg_versions in (
+        (14, ["tumbleweed"]),
         (15, ["15.5", "tumbleweed"]),
         (16, _DEFAULT_NONBASE_OS_VERSIONS),
+        (17, ["tumbleweed"]),
     )
 ]
 
