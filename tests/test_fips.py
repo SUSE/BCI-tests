@@ -74,26 +74,25 @@ for param in CONTAINERS_WITH_ZYPPER:
         containerfile=DOCKERFILE_GCRYPT, **kwargs
     )
 
-    # create a shallow copy, here to avoid mutating the original params
-    fips_marks = marks[:]
     if param not in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
-        fips_marks.append(
+        # create a shallow copy here to avoid mutating the original params
+        marks = marks[:] + [
             pytest.mark.skipif(
                 not host_fips_enabled(),
                 reason="The target must run in FIPS mode for the FIPS test suite",
             )
-        )
+        ]
     CONTAINER_IMAGES_WITH_ZYPPER.append(
-        pytest.param(ctr, marks=fips_marks, id=param.id)
+        pytest.param(ctr, marks=marks, id=param.id)
     )
     FIPS_TESTER_IMAGES.append(
-        pytest.param(tester_ctr, marks=fips_marks, id=param.id)
+        pytest.param(tester_ctr, marks=marks, id=param.id)
     )
     FIPS_GNUTLS_TESTER_IMAGES.append(
-        pytest.param(gnutls_tester_ctr, marks=fips_marks, id=param.id)
+        pytest.param(gnutls_tester_ctr, marks=marks, id=param.id)
     )
     FIPS_GCRYPT_TESTER_IMAGES.append(
-        pytest.param(gcrypt_tester_ctr, marks=fips_marks, id=param.id)
+        pytest.param(gcrypt_tester_ctr, marks=marks, id=param.id)
     )
 
 
