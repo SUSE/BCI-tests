@@ -39,12 +39,7 @@ COPY tests/files/fips-test-gnutls.c /src/
 DOCKERFILE_GCRYPT = """WORKDIR /src/
 COPY tests/files/fips-test-gcrypt.c /src/
 """
-_non_fips_host_skip_mark = [
-    pytest.mark.skipif(
-        not host_fips_enabled(),
-        reason="The target must run in FIPS mode for the FIPS test suite",
-    )
-]
+
 
 _zypp_credentials_dir: str = "/etc/zypp/credentials.d"
 
@@ -71,27 +66,34 @@ for param in CONTAINERS_WITH_ZYPPER:
             else []
         ),
     }
-    fips_tester_ctr = DerivedContainer(containerfile=DOCKERFILE, **kwargs)
-    fips_gnutls_tester_ctr = DerivedContainer(
+    tester_ctr = DerivedContainer(containerfile=DOCKERFILE, **kwargs)
+    gnutls_tester_ctr = DerivedContainer(
         containerfile=DOCKERFILE_GNUTLS, **kwargs
     )
-    fips_gcrypt_tester_ctr = DerivedContainer(
+    gcrypt_tester_ctr = DerivedContainer(
         containerfile=DOCKERFILE_GCRYPT, **kwargs
     )
-    if param not in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
-        marks += _non_fips_host_skip_mark
 
+    # create a shallow copy, here to avoid mutating the original params
+    fips_marks = marks[:]
+    if param not in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
+        fips_marks.append(
+            pytest.mark.skipif(
+                not host_fips_enabled(),
+                reason="The target must run in FIPS mode for the FIPS test suite",
+            )
+        )
     CONTAINER_IMAGES_WITH_ZYPPER.append(
-        pytest.param(ctr, marks=marks, id=param.id)
+        pytest.param(ctr, marks=fips_marks, id=param.id)
     )
     FIPS_TESTER_IMAGES.append(
-        pytest.param(fips_tester_ctr, marks=marks, id=param.id)
+        pytest.param(tester_ctr, marks=fips_marks, id=param.id)
     )
     FIPS_GNUTLS_TESTER_IMAGES.append(
-        pytest.param(fips_gnutls_tester_ctr, marks=marks, id=param.id)
+        pytest.param(gnutls_tester_ctr, marks=fips_marks, id=param.id)
     )
     FIPS_GCRYPT_TESTER_IMAGES.append(
-        pytest.param(fips_gcrypt_tester_ctr, marks=marks, id=param.id)
+        pytest.param(gcrypt_tester_ctr, marks=fips_marks, id=param.id)
     )
 
 
