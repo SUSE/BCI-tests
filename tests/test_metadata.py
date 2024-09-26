@@ -120,7 +120,15 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
-        (KERNEL_MODULE_CONTAINER, "sle15-kernel-module-devel", ImageType.OS),
+        (
+            KERNEL_MODULE_CONTAINER,
+            (
+                "sle16-kernel-module-devel"
+                if OS_VERSION.startswith("16")
+                else "sle15-kernel-module-devel"
+            ),
+            ImageType.OS,
+        ),
         (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
         (
             OPENJDK_DEVEL_11_CONTAINER,
@@ -419,6 +427,17 @@ def test_disturl(
                 "obs://build.opensuse.org/openSUSE:Factory" in disturl,
             )
         )
+    elif OS_VERSION == "16.0":
+        if "opensuse.org" in container.container.get_base().url:
+            assert (
+                f"obs://build.opensuse.org/devel:BCI:16.{OS_SP_VERSION}"
+                in disturl
+            )
+        else:
+            assert (
+                f"obs://build.suse.de/SUSE:SLFO:Products:SLES:16.{OS_SP_VERSION}"
+                in disturl
+            )
     else:
         if "opensuse.org" in container.container.get_base().url:
             assert (
