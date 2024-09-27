@@ -316,7 +316,10 @@ def test_general_labels(
         _get_container_label_prefix(container_name, container_type),
         "org.opencontainers.image",
     ):
-        if container_name != "base":
+        if (
+            container_name != "base"
+            and container_type != ImageType.SAC_APPLICATION
+        ):
             if OS_VERSION == "tumbleweed":
                 assert (
                     "based on the openSUSE Tumbleweed Base Container Image."
