@@ -644,3 +644,37 @@ def test_reference(
     LOCALHOST.run_expect(
         [0], f"{container_runtime.runner_binary} manifest inspect {ref}"
     )
+
+
+@SKIP_IF_TW_MARK
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_oci_base_refs(
+    container: ContainerData,
+    container_runtime: OciRuntimeBase,
+):
+    """The ``org.opencontainers.image.base.digest`` label is pointing to a
+    digest that can be inspected via :command:`podman` or :command:`docker`.
+    """
+    labels = container.inspect.config.labels
+
+    if "org.opencontainers.image.base.digest" not in labels:
+        pytest.skip("no oci base ref annotation set - itself a base image?")
+
+    base_digest: str = labels["org.opencontainers.image.base.digest"]
+    base_name: str = labels["org.opencontainers.image.base.name"]
+
+    assert (
+        ":" in base_name
+    ), f"`org.opencontainers.image.base.name` is not the expected format: {base_name}"
+    base_repository = base_name.partition(":")[0]
+
+    assert base_name.startswith("registry.suse.com/")
+    assert (
+        f":{OS_VERSION}" in base_name
+    ), "Base image reference is not the expected version"
+    assert base_digest.startswith("sha256:")
+
+    LOCALHOST.run_expect(
+        [0],
+        f"{container_runtime.runner_binary} manifest inspect {base_repository}@{base_digest}",
+    )
