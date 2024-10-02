@@ -87,6 +87,7 @@ from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import ImageType
+from bci_tester.runtime_choice import PODMAN_SELECTED
 
 #: The official vendor name
 VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"
@@ -674,7 +675,9 @@ def test_oci_base_refs(
     ), "Base image reference is not the expected version"
     assert base_digest.startswith("sha256:")
 
-    LOCALHOST.run_expect(
-        [0],
+    if PODMAN_SELECTED and container_runtime.version.major < 3:
+        pytest.skip("Podman version too old for checking manifest")
+
+    LOCALHOST.check_output(
         f"{container_runtime.runner_binary} manifest inspect {base_repository}@{base_digest}",
     )
