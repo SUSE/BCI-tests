@@ -19,11 +19,7 @@ KIWI_CONTAINER_EXTENDED = []
 
 CONTAINERFILE_KIWI_EXTENDED = """
 RUN set -euo pipefail; \
-zypper -n in --no-recommends git-core; \
-zypper -n clean; \
-rm -rf /var/log/{lastlog,tallylog,zypper.log,zypp/history,YaST2}
-
-RUN git clone https://github.com/OSInside/kiwi
+    curl -Lsf -o - https://github.com/OSInside/kiwi/archive/refs/heads/master.tar.gz | tar xzf -
 """
 
 for kiwi_ctr in KIWI_CONTAINERS:

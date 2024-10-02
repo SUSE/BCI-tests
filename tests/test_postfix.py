@@ -29,12 +29,12 @@ HEALTHCHECK --interval=5s --timeout=10s --start-period=30s --retries=3 \
 
 CONTAINERFILE_POSTFIX_WITH_LDAP_ENABLED = """
 RUN set -euo pipefail; \
-zypper -n in --no-recommends git find openldap2 openldap2-client; \
+zypper -n in --no-recommends find openldap2 openldap2-client; \
 zypper -n clean; \
 rm -rf /var/log/{lastlog,tallylog,zypper.log,zypp/history,YaST2}
 
 # TODO: move postfix & openldap container files to bci-dockerfile-generator
-RUN git clone https://github.com/thkukuk/containers-mailserver.git && \
+RUN curl -Lsf -o - https://github.com/thkukuk/containers-mailserver/archive/refs/heads/master.tar.gz | tar xzf - \
     cd containers-mailserver/openldap && \
     cp -r ldif /entrypoint/ && \
     cp slapd.init.ldif /entrypoint/ && \
