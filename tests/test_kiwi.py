@@ -10,7 +10,7 @@ from pytest_container.container import ImageFormat
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import KIWI_CONTAINERS
-from bci_tester.runtime_choice import PODMAN_SELECTED
+from bci_tester.runtime_choice import DOCKER_SELECTED
 from bci_tester.selinux import selinux_status
 
 CONTAINER_IMAGES = KIWI_CONTAINERS
@@ -55,7 +55,10 @@ def test_kiwi_installation(auto_container):
     reason="test is atm x86_64 specific",
 )
 @pytest.mark.skipif(
-    PODMAN_SELECTED and os.geteuid() != 0,
+    DOCKER_SELECTED, reason="Kiwi containers are only supported with podman"
+)
+@pytest.mark.skipif(
+    os.geteuid() != 0,
     # https://github.com/containers/podman/issues/17715#issuecomment-1460227771
     reason="PODMAN requires root privileges for kiwi tests",
 )
