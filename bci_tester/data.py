@@ -618,7 +618,7 @@ PCP_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
     )
     for ver, os_ver in (
-        ("5", ["15.6"]),
+        ("6", ["15.6"]),
         ("6", ["tumbleweed"]),
     )
 ]
