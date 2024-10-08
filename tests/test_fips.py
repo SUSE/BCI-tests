@@ -285,3 +285,14 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
             non_fips_call.rc == 1
             and "Failed to create hash context" in non_fips_call.stderr
         ), f"Hash calculation unexpectedly succeeded for {digest}"
+
+
+@pytest.mark.parametrize(
+    "container_per_test", FIPS_GCRYPT_TESTER_IMAGES, indirect=True
+)
+def test_gpgconf_binary(container_per_test: ContainerData) -> None:
+    """validate that gpgconf lists fips-mode"""
+
+    assert container_per_test.connection.check_output(
+        "gpgconf --show-versions | sed -n '/fips-mode:[yn]:/p' "
+    ).startswith("fips-mode:y:")
