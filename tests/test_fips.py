@@ -10,6 +10,7 @@ from pytest_container import DerivedContainer
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
@@ -296,3 +297,26 @@ def test_gpgconf_binary(container_per_test: ContainerData) -> None:
     assert container_per_test.connection.check_output(
         "gpgconf --show-versions | sed -n '/fips-mode:[yn]:/p' "
     ).startswith("fips-mode:y:")
+
+
+@pytest.mark.skipif(
+    LOCALHOST.system_info.arch != "s390x", reason="libica is s390x specific"
+)
+@pytest.mark.skipif(
+    OS_VERSION in ("15.3",), reason="FIPS 140-3 not supported on 15.3"
+)
+@pytest.mark.parametrize(
+    "container_per_test", FIPS_TESTER_IMAGES, indirect=True
+)
+def test_icainfo_binary(container_per_test: ContainerData) -> None:
+    """Check that icainfo -r returns 'FIPS 140-3 mode active'"""
+
+    assert "FIPS-SUSE" in container_per_test.connection.check_output(
+        "zypper -n install libica-tools && icainfo -v"
+    )
+    assert (
+        "FIPS 140-3 mode active"
+        in container_per_test.connection.check_output("icainfo -r")
+    )
+    container_per_test.connection.check_output("icastats -k")
+    container_per_test.connection.check_output("icastats -S")
