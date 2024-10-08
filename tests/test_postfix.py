@@ -34,8 +34,8 @@ zypper -n clean; \
 rm -rf /var/log/{lastlog,tallylog,zypper.log,zypp/history,YaST2}
 
 # TODO: move postfix & openldap container files to bci-dockerfile-generator
-RUN curl -Lsf -o - https://github.com/thkukuk/containers-mailserver/archive/refs/heads/master.tar.gz | tar xzf - \
-    cd containers-mailserver/openldap && \
+RUN curl -Lsf -o - https://github.com/thkukuk/containers-mailserver/archive/refs/heads/master.tar.gz | tar  --no-same-permissions --no-same-owner -xzf - && \
+    cd containers-mailserver-master/openldap && \
     cp -r ldif /entrypoint/ && \
     cp slapd.init.ldif /entrypoint/ && \
     cp entrypoint.sh /entrypoint/openldap-entrypoint.sh
