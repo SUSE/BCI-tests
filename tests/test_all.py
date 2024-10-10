@@ -10,15 +10,13 @@ import xml.etree.ElementTree as ET
 
 import packaging.version
 import pytest
-from _pytest.config import Config
 from pytest_container import Container
 from pytest_container import DerivedContainer
-from pytest_container import MultiStageBuild
 from pytest_container import container_and_marks_from_pytest_param
-from pytest_container import get_extra_build_args
-from pytest_container import get_extra_run_args
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
+from pytest_container.container import ContainerImageData
+from pytest_container.container import MultiStageContainer
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import ALL_CONTAINERS
@@ -38,33 +36,6 @@ from bci_tester.data import PCP_CONTAINERS
 from bci_tester.util import get_repos_from_connection
 
 CONTAINER_IMAGES = ALL_CONTAINERS
-
-
-#: go file to perform a GET request to suse.com and that panics if the request
-#: fails
-FETCH_SUSE_DOT_COM = """package main
-
-import "net/http"
-
-func main() {
-        _, err := http.Get("https://suse.com/")
-        if err != nil {
-                panic(err)
-        }
-}
-"""
-
-MULTISTAGE_DOCKERFILE = """FROM $builder as builder
-WORKDIR /src
-COPY main.go .
-RUN CGO_ENABLED=0 GOOS=linux go build main.go
-
-FROM $runner
-ENTRYPOINT []
-WORKDIR /fetcher/
-COPY --from=builder /src/main .
-CMD ["/fetcher/main"]
-"""
 
 
 def test_os_release(auto_container):
@@ -433,10 +404,44 @@ def test_no_compat_packages(container):
         ).is_installed
 
 
-@pytest.mark.parametrize("runner", ALL_CONTAINERS)
+MULTISTAGE_DOCKERFILE = """FROM $builder as builder
+WORKDIR /src
+COPY tests/files/main.go .
+RUN CGO_ENABLED=0 GOOS=linux go build main.go
+
+FROM $runner
+ENTRYPOINT []
+WORKDIR /fetcher/
+COPY --from=builder /src/main .
+CMD ["/fetcher/main"]
+"""
+
+
+CERTIFICATE_FETCHER_CONTAINERS = []
+for param in ALL_CONTAINERS:
+    ctr, marks = container_and_marks_from_pytest_param(param)
+    assert isinstance(ctr, (DerivedContainer, Container))
+
+    CERTIFICATE_FETCHER_CONTAINERS.append(
+        pytest.param(
+            MultiStageContainer(
+                containerfile=MULTISTAGE_DOCKERFILE,
+                containers={
+                    "builder": "registry.suse.com/bci/golang:latest",
+                    "runner": ctr,
+                },
+            ),
+            marks=marks or [],
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    "container_image", CERTIFICATE_FETCHER_CONTAINERS, indirect=True
+)
 def test_certificates_are_present(
-    host, tmp_path, container_runtime, runner: Container, pytestconfig: Config
-):
+    container_image: ContainerImageData, host
+) -> None:
     """This is a multistage container build, verifying that the certificates are
     correctly set up in the containers.
 
@@ -447,34 +452,8 @@ def test_certificates_are_present(
 
     If the certificates are incorrectly set up, then the GET request will fail.
     """
-    multi_stage_build = MultiStageBuild(
-        containers={
-            "builder": "registry.suse.com/bci/golang:latest",
-            "runner": runner,
-        },
-        containerfile_template=MULTISTAGE_DOCKERFILE,
-    )
-    multi_stage_build.prepare_build(
-        tmp_path, container_runtime, pytestconfig.rootpath
-    )
-
-    with open(tmp_path / "main.go", "w", encoding="utf-8") as main_go:
-        main_go.write(FETCH_SUSE_DOT_COM)
-
-    # FIXME: ugly duplication of pytest_container internals :-/
-    # see: https://github.com/dcermak/pytest_container/issues/149
-    iidfile = tmp_path / "iid"
-    host.run_expect(
-        [0],
-        f"{' '.join(container_runtime.build_command + get_extra_build_args(pytestconfig))} "
-        f"--iidfile={iidfile} {tmp_path}",
-    )
-    img_id = container_runtime.get_image_id_from_iidfile(iidfile)
-
-    host.run_expect(
-        [0],
-        f"{container_runtime.runner_binary} run --rm {' '.join(get_extra_run_args(pytestconfig))} {img_id}",
-    )
+    out = host.check_output(container_image.run_command)
+    assert "html" in out
 
 
 @pytest.mark.skipif(
