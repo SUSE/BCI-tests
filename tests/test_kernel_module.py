@@ -5,6 +5,7 @@ import re
 import pytest
 from _pytest.mark import ParameterSet
 from pytest_container import DerivedContainer
+from pytest_container import GitRepositoryBuild
 from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
@@ -15,8 +16,8 @@ from bci_tester.data import OS_VERSION
 CONTAINER_IMAGES = [KERNEL_MODULE_CONTAINER]
 
 pytestmark = pytest.mark.skipif(
-    OS_VERSION in ("tumbleweed", "basalt"),
-    reason="no kernel-module containers for Tumbleweed and Basalt",
+    OS_VERSION in ("tumbleweed",),
+    reason="no kernel-module containers for Tumbleweed",
 )
 
 _DRBD_VERSION = "9.2.11"
@@ -46,19 +47,11 @@ RUN set -euxo pipefail; \
 """,
 )
 
-IGB_UIO_CONTAINER = create_kernel_test(
-    r"""WORKDIR /src/
-RUN set -euxo pipefail; \
-    zypper -n in git; \
-    zypper -n clean;
-RUN set -euxo pipefail; \
-    git clone https://dpdk.org/git/dpdk-kmods; \
-    cd dpdk-kmods/linux/igb_uio/; \
-    make KSRC=/usr/src/linux-obj/$(uname -m)/default
-"""
+
+@pytest.mark.skipif(
+    OS_VERSION in ("16.0",),
+    reason="can't install additional packages yet on 16",
 )
-
-
 @pytest.mark.parametrize("container", [DRBD_CONTAINER], indirect=True)
 def test_drbd_builds(container: ContainerData) -> None:
     """Test that the DRBD kernel module builds."""
@@ -81,13 +74,30 @@ def test_drbd_builds(container: ContainerData) -> None:
     LOCALHOST.system_info.arch not in ("x86_64", "aarch64", "ppc64le"),
     reason="DPDK is not supported on this architecture",
 )
-@pytest.mark.parametrize("container", [IGB_UIO_CONTAINER], indirect=True)
-def test_igb_uio(container: ContainerData) -> None:
+@pytest.mark.parametrize(
+    "container_git_clone",
+    [
+        GitRepositoryBuild(
+            repository_url="https://dpdk.org/git/dpdk-kmods",
+            repository_tag="main",
+            build_command="""cd linux/igb_uio/;
+                make KSRC=/usr/src/linux-obj/$(uname -m)/default""",
+        ).to_pytest_param(),
+    ],
+    indirect=["container_git_clone"],
+)
+def test_igb_uio(auto_container_per_test, container_git_clone) -> None:
     """Test that the DPDK kernel module builds."""
-    igb_uio_kernel_module_file = "/src/dpdk-kmods/linux/igb_uio/igb_uio.ko"
+    igb_uio_kernel_module_file = "/dpdk-kmods/linux/igb_uio/igb_uio.ko"
 
-    assert container.connection.file(igb_uio_kernel_module_file).exists
-    modinfo_out = container.connection.check_output(
+    auto_container_per_test.connection.check_output(
+        container_git_clone.test_command
+    )
+
+    assert auto_container_per_test.connection.file(
+        igb_uio_kernel_module_file
+    ).exists
+    modinfo_out = auto_container_per_test.connection.check_output(
         f"modinfo {igb_uio_kernel_module_file}"
     )
     assert re.search(r"^name:\s+igb_uio", modinfo_out, flags=re.MULTILINE)
