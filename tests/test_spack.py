@@ -1,95 +1,86 @@
 """Tests for Spack application build container images."""
 
-from textwrap import dedent
-
 import pytest
 from _pytest.config import Config
-from pytest_container import MultiStageBuild
-from pytest_container.container import BindMount
+from pytest_container.container import ContainerImageData
+from pytest_container.container import ContainerLauncher
 from pytest_container.container import DerivedContainer
+from pytest_container.container import EntrypointSelection
 from pytest_container.container import ImageFormat
+from pytest_container.container import MultiStageContainer
 from pytest_container.container import container_and_marks_from_pytest_param
-from pytest_container.helpers import get_extra_build_args
-from pytest_container.helpers import get_extra_run_args
+from pytest_container.runtime import OciRuntimeBase
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import SPACK_CONTAINERS
-from bci_tester.runtime_choice import PODMAN_SELECTED
+
+BASE_CTR, _ = container_and_marks_from_pytest_param(BASE_CONTAINER)
+assert isinstance(BASE_CTR, DerivedContainer)
+
+SPACK_IMAGES_WITH_YAML_CONFIG = []
+
+for param in SPACK_CONTAINERS:
+    spac_ctr, spac_marks = container_and_marks_from_pytest_param(param)
+    assert isinstance(spac_ctr, DerivedContainer)
+
+    SPACK_IMAGES_WITH_YAML_CONFIG.append(
+        pytest.param(
+            DerivedContainer(
+                base=spac_ctr,
+                containerfile=rf"""SHELL ["/bin/bash", "-c"]
+RUN echo $'spack: \n\
+    specs: \n\
+        - zsh \n\
+    container: \n\
+        format: docker \n\
+        images: \n\
+            build: "{spac_ctr.baseurl}" \n\
+            final: "{BASE_CTR.baseurl}" \n\
+' > /root/spack.yaml
+""",
+            ),
+            marks=spac_marks or [],
+            id=param.id,
+        )
+    )
 
 
 @pytest.mark.parametrize(
-    "container",
-    SPACK_CONTAINERS,
-    indirect=True,
+    "container_image", SPACK_IMAGES_WITH_YAML_CONFIG, indirect=True
 )
 def test_spack(
-    container,
+    container_image: ContainerImageData,
     host,
-    container_runtime,
-    tmp_path,
+    container_runtime: OciRuntimeBase,
     pytestconfig: Config,
 ) -> None:
-    """
-    Test if Spack Container can build a zsh container.
+    """Test if Spack Container can build a zsh container.
 
-    This function creates a `spack.yaml` input for spack, mounts it into the container,
-    runs the container with the 'containerize' argument which provides a `Containerfile`
-    multi-stage build description to build a zsh container.
-
-    For the final stage, the base container of the spack container is being used.
+    This function uses the spack container image with a :file:`spack.yaml`
+    embedded in the image to run :command:`spack containerize` which outputs a
+    `Containerfile` multi-stage build description to build a zsh container.
 
     The test is building this description as a multi-stage container,
     and finally tests whether the zsh in the resulting container can be
     successfully launched.
+
     """
-    # Create spack.yaml file in temporary directory
-    with open(tmp_path / "spack.yaml", "w", encoding="utf-8") as spack_yaml:
-        spack_yaml.write(
-            dedent(
-                f"""
-            spack:
-                specs:
-                    - zsh
-
-                container:
-                    format: docker
-                    images:
-                        build: "{container.image_url_or_id}"
-                        final: "{DerivedContainer.get_base(container_and_marks_from_pytest_param(BASE_CONTAINER)[0]).url}"
-        """
-            )
-        )
-    # mount spack.yaml into container (/root)
-    mount_arg = BindMount(
-        host_path=tmp_path / "spack.yaml",
-        container_path="/root/spack.yaml",
-    ).cli_arg
-
-    # run container with argument: 'containerize', save output to variable 'containerfile'
     containerfile = host.check_output(
-        f"{container_runtime.runner_binary} run --rm {mount_arg} "
-        f"{' '.join(get_extra_run_args(pytestconfig))} "
-        f"{container.image_url_or_id} containerize",
+        f"{container_image.run_command} containerize"
     )
 
-    multi_stage_build = MultiStageBuild(
-        containers={
-            "builder": container.container,
-            "runner": BASE_CONTAINER,
-        },
-        containerfile_template=containerfile.replace("$", "$$"),
+    ctr = MultiStageContainer(
+        containerfile=containerfile.replace("$", "$$"),
+        image_format=ImageFormat.DOCKER,
+        entry_point=EntrypointSelection.IMAGE,
     )
 
-    build_args = get_extra_run_args(pytestconfig)
-    if PODMAN_SELECTED:
-        build_args += ["--format", str(ImageFormat.DOCKER)]
+    with ContainerLauncher.from_pytestconfig(
+        container=ctr,
+        container_runtime=container_runtime,
+        pytestconfig=pytestconfig,
+    ) as launcher:
+        launcher.prepare_container()
+        ci = launcher.container_image_data
 
-    runner_id = multi_stage_build.build(
-        tmp_path, pytestconfig, container_runtime, extra_build_args=build_args
-    )
-    # Run resulting container and test whether zsh is running
-    assert host.check_output(
-        f"{container_runtime.runner_binary} run --rm "
-        f"{' '.join(get_extra_build_args(pytestconfig))} "
-        f"{runner_id} zsh -c 'echo $ZSH_VERSION' ",
-    )
+        host.check_output(f"{ci.run_command} zsh -c 'echo $ZSH_VERSION'")
