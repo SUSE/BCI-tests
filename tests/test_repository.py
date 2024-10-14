@@ -178,7 +178,10 @@ def test_repo_content_licensing(container_per_test) -> None:
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    (
+        not OS_VERSION.startswith("15")
+        or OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS
+    ),
     reason="no included BCI repository",
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
