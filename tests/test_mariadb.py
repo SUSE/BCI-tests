@@ -1,6 +1,7 @@
 """Tests for the MariaDB related application container images."""
 
 from itertools import product
+from pathlib import Path
 from typing import List
 from typing import Optional
 
@@ -8,7 +9,9 @@ import pymysql
 import pytest
 from _pytest.mark import ParameterSet
 from pymysql.err import OperationalError
+from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
+from pytest_container.container import ContainerLauncher
 from pytest_container.container import DerivedContainer
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
@@ -21,6 +24,7 @@ from tenacity import wait_exponential
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MARIADB_ROOT_PASSWORD
+from bci_tester.data import OS_VERSION
 
 CONTAINER_IMAGES = MARIADB_CONTAINERS
 
@@ -276,3 +280,76 @@ def test_mariadb_healthcheck_galera_cluster_disabled(auto_container_per_test):
     _wait_for_server(conn)
 
     conn.run_expect([1], "healthcheck.sh --su-mysql --galera_online")
+
+
+_DB_ENV = {
+    "MARIADB_USER": _OTHER_DB_USER,
+    "MARIADB_PASSWORD": _OTHER_DB_PW,
+    "MARIADB_DATABASE": _TEST_DB,
+    "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD,
+    "MARIADB_AUTO_UPGRADE": "1",
+}
+
+
+@pytest.mark.parametrize("ctr_image", MARIADB_CONTAINERS)
+@pytest.mark.skipif(
+    OS_VERSION in ("15.5",), reason="MariaDB upgrade scenario not supported"
+)
+def test_mariadb_upgrade(
+    container_runtime: OciRuntimeBase,
+    pytestconfig: pytest.Config,
+    ctr_image: DerivedContainer,
+    tmp_path: Path,
+) -> None:
+    mounts = [BindMount(host_path=tmp_path, container_path="/var/lib/mysql")]
+    mariadb_old = DerivedContainer(
+        base="registry.suse.com/suse/mariadb:10.6",
+        containerfile='RUN set -euo pipefail; head -n -1 /usr/local/bin/gosu > /tmp/gosu;  echo \'exec setpriv --pdeathsig=keep --reuid="$u" --regid="$u" --clear-groups -- "$@"\' >> /tmp/gosu;  mv /tmp/gosu /usr/local/bin/gosu; chmod +x /usr/local/bin/gosu',
+        volume_mounts=mounts,
+        extra_environment_variables=_DB_ENV,
+    )
+    mariadb_new = DerivedContainer(
+        base=ctr_image,
+        volume_mounts=mounts,
+        extra_environment_variables=_DB_ENV,
+    )
+    with ContainerLauncher.from_pytestconfig(
+        mariadb_old, container_runtime, pytestconfig
+    ) as launcher:
+        launcher.launch_container()
+        con = launcher.container_data.connection
+        _wait_for_server(con)
+        mariadb_cmd = f"mariadb --user={_OTHER_DB_USER} --password={_OTHER_DB_PW} --host=0.0.0.0 {_TEST_DB}"
+
+        con.check_output(
+            f'echo "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar(32));" | {mariadb_cmd}'
+        )
+        con.check_output(
+            f"echo 'INSERT INTO test (num, data) VALUES (100, \"abcdef\")' | {mariadb_cmd}"
+        )
+        rows = (
+            con.check_output(f'echo "SELECT * FROM test;" | {mariadb_cmd}')
+            .strip()
+            .splitlines()
+        )
+
+        assert rows and len(rows) == 2
+        _, num, data = rows[-1].split()
+        assert num == "100" and data == "abcdef"
+
+    with ContainerLauncher.from_pytestconfig(
+        mariadb_new, container_runtime, pytestconfig
+    ) as launcher:
+        launcher.launch_container()
+        con = launcher.container_data.connection
+        _wait_for_server(con)
+        mariadb_cmd = f"mariadb --user={_OTHER_DB_USER} --password={_OTHER_DB_PW} --host=0.0.0.0 {_TEST_DB}"
+        rows = (
+            con.check_output(f'echo "SELECT * FROM test;" | {mariadb_cmd}')
+            .strip()
+            .splitlines()
+        )
+
+        assert rows and len(rows) == 2
+        _, num, data = rows[-1].split()
+        assert num == "100" and data == "abcdef"
