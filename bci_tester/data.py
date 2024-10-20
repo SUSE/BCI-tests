@@ -128,6 +128,7 @@ if TARGET not in (
     "ibs-cr",
     "dso",
     "factory-totest",
+    "factory-arm-totest",
     "ibs-released",
 ):
     if BASEURL is None:
@@ -149,6 +150,7 @@ else:
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
+        "factory-arm-totest": "registry.opensuse.org/opensuse/factory/arm/totest",
         "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
         "dso": "registry1.dso.mil/ironbank/suse",
         "ibs-cr": ibs_cr_project,
@@ -211,6 +213,8 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET == "ibs-cr":
         return "images/"
     if TARGET == "factory-totest":
+        return "containers/"
+    if TARGET == "factory-arm-totest":
         return "containers/"
     if image_type == "dockerfile":
         return "containerfile/"
