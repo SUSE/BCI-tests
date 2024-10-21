@@ -212,9 +212,7 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return ""
     if TARGET == "ibs-cr":
         return "images/"
-    if TARGET == "factory-totest":
-        return "containers/"
-    if TARGET == "factory-arm-totest":
+    if TARGET in ("factory-totest", "factory-arm-totest"):
         return "containers/"
     if image_type == "dockerfile":
         return "containerfile/"
