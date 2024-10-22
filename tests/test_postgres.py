@@ -4,7 +4,7 @@ from itertools import product
 from typing import List
 from typing import Optional
 
-import psycopg2
+import pg8000.dbapi
 import pytest
 from _pytest.mark import ParameterSet
 from pytest_container.container import ContainerData
@@ -94,11 +94,7 @@ def test_postgres_db_env_vars(
     variables.
 
     """
-    conn = None
-    cur = None
-
     pgdata = container_per_test.inspect.config.env["PGDATA"]
-
     pgdata_f = container_per_test.connection.file(pgdata)
     assert pgdata_f.exists
     assert pgdata_f.user == "postgres"
@@ -108,27 +104,23 @@ def test_postgres_db_env_vars(
         username or "root"
     )
 
-    try:
-        conn = psycopg2.connect(
-            user=pg_user or "postgres",
-            password=password,
-            host="localhost",
-            port=container_per_test.forwarded_ports[0].host_port,
-        )
+    with pg8000.dbapi.connect(
+        user=pg_user or "postgres",
+        password=password,
+        host="localhost",
+        timeout=50,
+        port=container_per_test.forwarded_ports[0].host_port,
+    ) as conn:
         cur = conn.cursor()
         cur.execute(
             "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);"
         )
         cur.execute(
-            "INSERT INTO test (num, data) VALUES (%s, %s)", (100, "abc'def")
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (100, "abc'def"),
         )
 
         cur.execute("SELECT * FROM test;")
-        assert cur.fetchone() == (1, 100, "abc'def")
+        assert cur.fetchone() == [1, 100, "abc'def"]
 
         conn.commit()
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
