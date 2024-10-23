@@ -457,26 +457,31 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
         OS_VERSION in ALLOWED_BCI_REPO_OS_VERSIONS
         and OS_VERSION in RELEASED_SLE_VERSIONS
     ):
-        assert container.connection.file(bci_license).exists
+        assert container.connection.file(
+            bci_license
+        ).exists, "BCI EULA is missing"
         assert (
             "SUSE Linux Enterprise Base Container Image License"
             in container.connection.check_output(f"head -n 1 {bci_license}")
-        )
+        ), "EULA is not the expected BCI EULA"
         return
 
     # LTSS containers should not have the BCI license, however we currently
     # are running tests for the bci-* base os containers which are not LTSS
     # and still contain a BCI license. As they are out of maintenance, we
     # need to ignore them
-    if OS_VERSION in RELEASED_SLE_VERSIONS and container.container in (
-        BASE_CONTAINER.values[0],
-        INIT_CONTAINER.values[0],
-        MINIMAL_CONTAINER.values[0],
-        MICRO_CONTAINER.values[0],
-    ):
-        pytest.skip("Unmaintained bci-* base os containers are not tested")
-        return
-    assert not container.connection.file(bci_license).exists
+    if OS_VERSION in RELEASED_SLE_VERSIONS:
+        if container.container in (
+            BASE_CONTAINER.values[0],
+            INIT_CONTAINER.values[0],
+            MINIMAL_CONTAINER.values[0],
+            MICRO_CONTAINER.values[0],
+        ):
+            pytest.skip("Unmaintained bci-* base os containers are not tested")
+            return
+        assert not container.connection.file(
+            bci_license
+        ).exists, "BCI EULA shall not be in LTSS container"
 
 
 @pytest.mark.skipif(
