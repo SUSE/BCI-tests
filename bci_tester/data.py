@@ -786,7 +786,7 @@ APACHE_TOMCAT_10_CONTAINERS = [
         available_versions=("tumbleweed",),
         forwarded_ports=[PortForwarding(container_port=8080)],
     )
-    for openjdk_version in (22, 21, 17)
+    for openjdk_version in (23, 21, 17)
 ]
 
 APACHE_TOMCAT_9_CONTAINERS = [
