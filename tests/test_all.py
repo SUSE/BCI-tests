@@ -376,6 +376,13 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
 @pytest.mark.parametrize(
     "container", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
 )
+@pytest.mark.xfail(
+    OS_VERSION in ("15.7",),
+    reason=(
+        "zypper verify fails for invalid repo URLs, "
+        "but not if no repositories are defined"
+    ),
+)
 def test_zypper_verify_passes(container: ContainerData) -> None:
     """Check that there are no packages missing according to zypper verify so that
     users of the container would not get excessive dependencies installed.

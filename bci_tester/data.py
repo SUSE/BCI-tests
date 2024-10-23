@@ -42,16 +42,16 @@ ALLOWED_BASE_OS_VERSIONS = (
 )
 
 # Allowed os versions for Language and Application containers
-ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
+ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
 
 # Allowed os versions for SLE_BCI repo checks
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.6",)
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.6", "15.7")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "tumbleweed")
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "15.7", "tumbleweed")
 
 # Test base containers by default for these versions
 _DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "16.0", "tumbleweed")
@@ -715,7 +715,7 @@ DISTRIBUTION_CONTAINER = create_BCI(
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
-if OS_VERSION in ("15.6", "basalt"):
+if OS_VERSION in ("15.6", "15.7", "basalt"):
     _GIT_APP_VERSION = "2.43"
 elif OS_VERSION in ("15.5", "15.4"):
     _GIT_APP_VERSION = "2.35"
@@ -930,7 +930,8 @@ CONTAINERS_WITHOUT_ZYPPER = [
 
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
-if OS_VERSION in ("tumbleweed", "16.0"):
+# 15.7 is not yet released, so no l3 support either
+if OS_VERSION in ("tumbleweed", "16.0", "15.7"):
     L3_CONTAINERS = ()
 else:
     L3_CONTAINERS = (
