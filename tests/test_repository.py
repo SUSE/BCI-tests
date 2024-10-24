@@ -77,10 +77,12 @@ def test_sle_bci_forbidden_packages(container_per_test):
     """Regression test that no packages containing the following strings are in the
     ``SLE_BCI`` repository:
 
+    - ``gcc-build``
     - ``kernel``
-    - ``yast``
     - ``kvm``
+    - ``livepatch``
     - ``xen``
+    - ``yast``
 
     The following packages contain the above strings, but are ok to be shipped:
 
@@ -121,7 +123,16 @@ def test_sle_bci_forbidden_packages(container_per_test):
         "kernel-64kb-devel",
     ]
 
-    FORBIDDEN_PACKAGE_NAMES = ["kernel", "yast", "kvm", "xen"]
+    FORBIDDEN_PACKAGE_NAMES = [
+        "gcc-build",
+        "libstdc++-build-devel",
+        "libgccjit-build-devel",
+        "livepatch",
+        "kernel",
+        "yast",
+        "kvm",
+        "xen",
+    ]
 
     forbidden_packages = list(
         filter(
