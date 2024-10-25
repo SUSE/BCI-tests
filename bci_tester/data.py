@@ -767,7 +767,7 @@ GCC_CONTAINERS = [
         available_versions=os_versions,
     )
     for gcc_version, os_versions in (
-        (13, ("15.6", "tumbleweed")),
+        (13, ("tumbleweed",)),
         (14, ("15.6", "tumbleweed")),
     )
 ]
