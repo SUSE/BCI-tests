@@ -320,3 +320,30 @@ def test_icainfo_binary(container_per_test: ContainerData) -> None:
     )
     container_per_test.connection.check_output("icastats -k")
     container_per_test.connection.check_output("icastats -S")
+
+
+@pytest.mark.parametrize(
+    "container_per_test", FIPS_TESTER_IMAGES, indirect=True
+)
+def test_nss_firefox_cert(container_per_test: ContainerData) -> None:
+    container_per_test.connection.check_output(
+        "zypper -n install mozilla-nss-tools"
+    )
+    container_per_test.connection.check_output(
+        "dd if=/dev/urandom bs=1k count=2048 of=seedfile.dat"
+    )
+    container_per_test.connection.check_output("touch password.txt")
+    assert (
+        container_per_test.connection.check_output(
+            'mkdir -p nssdb && certutil -N -d "${PWD}/nssdb" --empty-password && modutil -fips true -dbdir "${PWD}/nssdb" -force'
+        )
+        == "FIPS mode enabled."
+    ), "FIPS mode not enabled properly"
+    # Following will fail in FIPS mode because to short rsa keylength (1024)
+    container_per_test.connection.run_expect(
+        [255],
+        'certutil -R -k rsa -g 1024 -s "CN=Daniel Duesentrieb3,O=Example Corp,L=Mountain View,ST=California,C=DE" -d "${PWD}/nssdb" -o cert9.cer -f password.txt -z seedfile.dat',
+    )
+    container_per_test.connection.check_output(
+        'certutil -R -k rsa -g 2048 -s "CN=Daniel Duesentrieb3,O=Example Corp,L=Mountain View,ST=California,C=DE" -d "${PWD}/nssdb" -o cert9.cer -f password.txt -z seedfile.dat',
+    )
