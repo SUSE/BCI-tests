@@ -780,7 +780,7 @@ APACHE_TOMCAT_10_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=8080)],
         container_user="tomcat",
     )
-    for openjdk_version in (21, 17)
+    for openjdk_version in (21, 17, 11)
 ] + [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/apache-tomcat:10.1-openjdk{openjdk_version}",
