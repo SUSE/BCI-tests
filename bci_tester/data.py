@@ -532,16 +532,22 @@ PYTHON312_CONTAINER = create_BCI(
     build_tag="bci/python:3.12", available_versions=["15.6", "tumbleweed"]
 )
 
+PYTHON313_CONTAINER = create_BCI(
+    build_tag="bci/python:3.13", available_versions=["15.7"]
+)
+
 PYTHON_CONTAINERS = [
     PYTHON36_CONTAINER,
     PYTHON310_CONTAINER,
     PYTHON311_CONTAINER,
     PYTHON312_CONTAINER,
+    PYTHON313_CONTAINER,
 ]
 
 PYTHON_WITH_PIPX_CONTAINERS = [
     PYTHON310_CONTAINER,
-    PYTHON311_CONTAINER,
+    PYTHON312_CONTAINER,
+    PYTHON313_CONTAINER,
 ]
 
 RUBY_25_CONTAINER = create_BCI(

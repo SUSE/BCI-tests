@@ -94,6 +94,10 @@ def test_python_version(auto_container):
     PYTHON_WITH_PIPX_CONTAINERS,
     indirect=["container_per_test"],
 )
+@pytest.mark.xfail(
+    OS_VERSION in ("15.7",),
+    reason="https://bugzilla.suse.com/show_bug.cgi?id=1232537",
+)
 def test_pipx(container_per_test):
     """Test that we can install xkcdpass via :command:`pipx`."""
     container_per_test.connection.check_output("pipx install xkcdpass")
