@@ -113,7 +113,7 @@ def test_openssl_binary(container_per_test: ContainerData) -> None:
 
     """
     container_per_test.connection.check_output(
-        "zypper --gpg-auto-import-keys -n ref && zypper -n in gcc libopenssl-devel && zypper -n clean &&"
+        "zypper --gpg-auto-import-keys -n ref && zypper -n install gcc libopenssl-devel && zypper -n clean &&"
         "gcc -O2 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test && "
         "mv fips-test /bin/fips-test"
     )
@@ -190,7 +190,7 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
     """
 
     container_per_test.connection.check_output(
-        "zypper --gpg-auto-import-keys -n ref && zypper -n in gcc gnutls gnutls-devel && zypper -n clean && "
+        "zypper --gpg-auto-import-keys -n ref && zypper -n install gcc gnutls gnutls-devel && zypper -n clean && "
         "gcc -Og -g3 fips-test-gnutls.c -Wall -Wextra -Wpedantic -lgnutls -o fips-test-gnutls && "
         "mv fips-test-gnutls /bin/fips-test-gnutls"
     )
@@ -327,7 +327,7 @@ def test_icainfo_binary(container_per_test: ContainerData) -> None:
 )
 def test_nss_firefox_cert(container_per_test: ContainerData) -> None:
     container_per_test.connection.check_output(
-        "zypper -n install mozilla-nss-tools"
+        "zypper --gpg-auto-import-keys -n ref && zypper -n install mozilla-nss-tools"
     )
     container_per_test.connection.check_output(
         "dd if=/dev/urandom bs=1k count=2048 of=seedfile.dat"
