@@ -239,6 +239,10 @@ def test_sle15_packages(container_per_test, pkg):
     """Test that packages that we received reports by users for as missing/broken
     remain installable and available.
     """
+
+    if OS_VERSION not in ("15.6",) and pkg in ("java-11-openjdk-headless",):
+        pytest.skip(reason="Only available for SP6")
+
     container_per_test.connection.check_output(
         f"{_RM_ZYPPSERVICE}; zypper -n in --dry-run -r {BCI_REPO_NAME} {pkg}"
     )
