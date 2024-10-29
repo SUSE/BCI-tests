@@ -26,6 +26,23 @@ WORKDIR {CONTAINER_TEST_DIR}
 COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 """
 
+DOCKERFILE_OPENJDK_FIPS = """WORKDIR /src/
+COPY tests/files/Tcheck.java tests/files/JCEProviderInfo.java /src/
+ENV NSS_FIPS 1
+RUN zypper -n in mozilla-nss* java-$JAVA_VERSION-openjdk-devel
+"""
+
+FIPS_OPENJDK_IMAGES = []
+
+for param in [OPENJDK_17_CONTAINER, OPENJDK_21_CONTAINER]:
+    ctr, marks = container_and_marks_from_pytest_param(param)
+    tester_ctr = DerivedContainer(
+        containerfile=DOCKERFILE_OPENJDK_FIPS, base=ctr
+    )
+    FIPS_OPENJDK_IMAGES.append(
+        pytest.param(tester_ctr, marks=marks, id=param.id)
+    )
+
 DOCKERF_CASSANDRA = """
 RUN zypper -n in tar gzip git-core util-linux
 """
@@ -280,3 +297,20 @@ def test_jdk_cassandra(container_per_test):
     container_per_test.connection.check_output(
         f"cd /tmp/{cassandra_base}/tools/bin/ && ./cassandra-stress write n=1 && ./cassandra-stress read n=1",
     )
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    FIPS_OPENJDK_IMAGES,
+    indirect=True,
+)
+def test_openjdk_sec_providers(container_per_test: ContainerData) -> None:
+    """
+    Verifies that the primary security provider in FIPS-enabled OpenJDK
+    containers is `SunPKCS11-NSS-FIPS`. The test uses Java scripts to list and
+    validate security providers, ensuring FIPS compliance.
+    """
+    c = container_per_test.connection
+
+    c.run_expect([0], "java JCEProviderInfo.java")
+    assert "1. SunPKCS11-NSS-FIPS" in c.check_output("java Tcheck.java")
