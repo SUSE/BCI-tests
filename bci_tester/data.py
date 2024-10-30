@@ -740,6 +740,15 @@ HELM_CONTAINER = create_BCI(
     image_type="kiwi",
 )
 
+_COSIGN_VERSION: str = "2.4" if OS_VERSION in ("tumbleweed",) else "2.2"
+COSIGN_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/cosign:{_COSIGN_VERSION}",
+        bci_type=ImageType.APPLICATION,
+        custom_entry_point="/bin/sh",
+    )
+]
+
 _NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
 
 NGINX_CONTAINER = create_BCI(
@@ -924,6 +933,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     DISTRIBUTION_CONTAINER,
     GIT_CONTAINER,
     HELM_CONTAINER,
+    *COSIGN_CONTAINERS,
     MICRO_CONTAINER,
     MINIMAL_CONTAINER,
     *POSTFIX_CONTAINERS,
