@@ -42,3 +42,19 @@ def test_gcc_container_builds_hello(container: ContainerData) -> None:
         container.connection.check_output("hello -g 'Hello SUSE'").strip()
         == "Hello SUSE"
     )
+
+
+def test_gcc_fortran_hello_world(auto_container_per_test):
+    """Test that we can build fortran applications."""
+
+    auto_container_per_test.connection.check_output("""cat > hello.f90 <<EOF;
+program hello
+  print *, 'Hello, World!'
+end program hello
+EOF""")
+    assert (
+        "Hello, World!"
+        == auto_container_per_test.connection.check_output(
+            "gfortran hello.f90 -o hello && ./hello"
+        ).strip()
+    )
