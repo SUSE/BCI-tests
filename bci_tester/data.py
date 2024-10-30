@@ -860,7 +860,7 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.6",), "9"), (("tumbleweed",), "10"))
+    for versions, tag in ((("15.6",), "9"), (("tumbleweed",), "11"))
 ]
 
 CONTAINERS_WITH_ZYPPER = (
