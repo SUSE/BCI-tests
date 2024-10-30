@@ -154,6 +154,10 @@ def test_tox(auto_container_per_test):
     )
 
 
+@pytest.mark.xfail(
+    OS_VERSION in ("15.6", "15.7"),
+    reason="https://bugzilla.suse.com/show_bug.cgi?id=1232072",
+)
 def test_packaged_tox(auto_container_per_test):
     """Ensure we can use the packaged tox version."""
     version = auto_container_per_test.connection.check_output(
