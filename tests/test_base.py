@@ -251,7 +251,7 @@ DIND_CONTAINER = pytest.param(
 
 @pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
 @pytest.mark.xfail(
-    OS_VERSION in ("15.7", "16.0"),
+    OS_VERSION in ("16.0",),
     reason="SLE BCI repository not yet available",
 )
 @pytest.mark.skipif(

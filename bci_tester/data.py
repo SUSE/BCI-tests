@@ -45,7 +45,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
 
 # Allowed os versions for SLE_BCI repo checks
-ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "tumbleweed")
+ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
 
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_SLE_VERSIONS = ("15.6", "15.7")
