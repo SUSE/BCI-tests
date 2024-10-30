@@ -5,12 +5,12 @@ from textwrap import dedent
 import pytest
 from _pytest.config import Config
 from pytest_container import MultiStageBuild
-from pytest_container.container import BindMount
 from pytest_container.container import DerivedContainer
 from pytest_container.container import ImageFormat
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.helpers import get_extra_build_args
 from pytest_container.helpers import get_extra_run_args
+from pytest_container.volume import CreatedBindMount
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import SPACK_CONTAINERS
@@ -60,7 +60,7 @@ def test_spack(
             )
         )
     # mount spack.yaml into container (/root)
-    mount_arg = BindMount(
+    mount_arg = CreatedBindMount(
         host_path=tmp_path / "spack.yaml",
         container_path="/root/spack.yaml",
     ).cli_arg
