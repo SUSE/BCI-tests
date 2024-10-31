@@ -326,24 +326,27 @@ def test_icainfo_binary(container_per_test: ContainerData) -> None:
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
 def test_nss_firefox_cert(container_per_test: ContainerData) -> None:
-    container_per_test.connection.check_output(
-        "zypper --gpg-auto-import-keys -n ref && zypper -n install mozilla-nss-tools"
+    c = container_per_test.connection
+    c.check_output(
+        "zypper --gpg-auto-import-keys -n ref && zypper -n install mozilla-nss-tools && "
+        "dd if=/dev/urandom bs=1k count=2048 of=seedfile.dat && "
+        "mkdir nssdb && "
+        "certutil --empty-password -N -d nssdb"
     )
-    container_per_test.connection.check_output(
-        "dd if=/dev/urandom bs=1k count=2048 of=seedfile.dat"
+    # ensure FIPS mode. 15-SP6 and newer already respect $NSS_FIPS being set to 1, olders
+    # do not
+    c.check_output(
+        "modutil -chkfips false -dbdir nssdb && modutil -fips true -force -dbdir nssdb || :"
     )
-    container_per_test.connection.check_output("touch password.txt")
     assert (
-        container_per_test.connection.check_output(
-            'mkdir -p nssdb && certutil -N -d "${PWD}/nssdb" --empty-password && modutil -fips true -dbdir "${PWD}/nssdb" -force'
-        )
+        c.check_output("modutil -chkfips true -dbdir nssdb")
         == "FIPS mode enabled."
     ), "FIPS mode not enabled properly"
     # Following will fail in FIPS mode because to short rsa keylength (1024)
-    container_per_test.connection.run_expect(
+    c.run_expect(
         [255],
         'certutil -R -k rsa -g 1024 -s "CN=Daniel Duesentrieb3,O=Example Corp,L=Mountain View,ST=California,C=DE" -d "${PWD}/nssdb" -o cert9.cer -f password.txt -z seedfile.dat',
     )
-    container_per_test.connection.check_output(
+    c.check_output(
         'certutil -R -k rsa -g 2048 -s "CN=Daniel Duesentrieb3,O=Example Corp,L=Mountain View,ST=California,C=DE" -d "${PWD}/nssdb" -o cert9.cer -f password.txt -z seedfile.dat',
     )
