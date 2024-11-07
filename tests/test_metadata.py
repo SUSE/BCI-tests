@@ -78,10 +78,7 @@ from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
-from bci_tester.data import PYTHON36_CONTAINER
-from bci_tester.data import PYTHON310_CONTAINER
-from bci_tester.data import PYTHON311_CONTAINER
-from bci_tester.data import PYTHON312_CONTAINER
+from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUBY_33_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
@@ -158,10 +155,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (NODEJS_18_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (NODEJS_20_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (NODEJS_22_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
-        (PYTHON36_CONTAINER, "python", ImageType.LANGUAGE_STACK),
-        (PYTHON310_CONTAINER, "python", ImageType.LANGUAGE_STACK),
-        (PYTHON311_CONTAINER, "python", ImageType.LANGUAGE_STACK),
-        (PYTHON312_CONTAINER, "python", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (RUBY_33_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
@@ -170,6 +163,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
+    + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "base-fips", ImageType.OS) for c in BASE_FIPS_CONTAINERS]
     + [
         (container_pcp, "pcp", ImageType.APPLICATION)

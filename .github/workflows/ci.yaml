@@ -168,6 +168,8 @@ jobs:
             os_version: "15.7"
           - toxenv: metadata
             os_version: "15.7"
+          - toxenv: python
+            os_version: "15.7"
           - toxenv: repository
             os_version: "15.7"
           - toxenv: all
