@@ -1,14 +1,21 @@
 """Tests for the MariaDB related application container images."""
 
+import os
 from itertools import product
+from pathlib import Path
+from typing import Any
 from typing import List
 from typing import Optional
+from typing import Union
 
 import pymysql
 import pytest
 from _pytest.mark import ParameterSet
 from pymysql.err import OperationalError
+from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
+from pytest_container.container import ContainerLauncher
+from pytest_container.container import ContainerVolume
 from pytest_container.container import DerivedContainer
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
@@ -22,6 +29,8 @@ from tenacity import wait_exponential
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MARIADB_ROOT_PASSWORD
+from bci_tester.data import OS_VERSION
+from bci_tester.runtime_choice import PODMAN_SELECTED
 
 CONTAINER_IMAGES = MARIADB_CONTAINERS
 
@@ -279,3 +288,98 @@ def test_mariadb_healthcheck_galera_cluster_disabled(auto_container_per_test):
     _wait_for_server(conn)
 
     conn.run_expect([1], "healthcheck.sh --su-mysql --galera_online")
+
+
+_DB_ENV = {
+    "MARIADB_USER": _OTHER_DB_USER,
+    "MARIADB_PASSWORD": _OTHER_DB_PW,
+    "MARIADB_DATABASE": _TEST_DB,
+    "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD,
+    "MARIADB_AUTO_UPGRADE": "1",
+}
+
+
+@pytest.mark.parametrize("ctr_image", MARIADB_CONTAINERS)
+@pytest.mark.skipif(
+    OS_VERSION not in ("15.6",),
+    reason="MariaDB upgrade scenario not supported",
+)
+def test_mariadb_upgrade(
+    container_runtime: OciRuntimeBase,
+    pytestconfig: pytest.Config,
+    ctr_image: DerivedContainer,
+    tmp_path: Path,
+    host,
+) -> None:
+    mounts: List[Union[BindMount, ContainerVolume]] = [
+        BindMount(host_path=tmp_path, container_path="/var/lib/mysql")
+    ]
+    mariadb_old = DerivedContainer(
+        base="registry.suse.com/suse/mariadb:10.6",
+        containerfile='RUN set -euo pipefail; head -n -1 /usr/local/bin/gosu > /tmp/gosu;  echo \'exec setpriv --pdeathsig=keep --reuid="$u" --regid="$u" --clear-groups -- "$@"\' >> /tmp/gosu;  mv /tmp/gosu /usr/local/bin/gosu; chmod +x /usr/local/bin/gosu',
+        volume_mounts=mounts,
+        extra_environment_variables=_DB_ENV,
+    )
+    mariadb_new = DerivedContainer(
+        base=ctr_image,
+        volume_mounts=mounts,
+        extra_environment_variables=_DB_ENV,
+    )
+
+    mariadb_cmd = f"mariadb --user={_OTHER_DB_USER} --password={_OTHER_DB_PW} --host=0.0.0.0 {_TEST_DB}"
+
+    def _verify_rowcount(con: Any, table_name: str, no_of_rows: int):
+        rows = (
+            con.check_output(
+                f'echo "SELECT count(*) FROM {table_name};" | {mariadb_cmd}'
+            )
+            .strip()
+            .splitlines()
+        )
+        assert no_of_rows == int(rows[1])
+
+    try:
+        with ContainerLauncher.from_pytestconfig(
+            mariadb_old, container_runtime, pytestconfig
+        ) as launcher:
+            launcher.launch_container()
+            con = launcher.container_data.connection
+            _wait_for_server(con)
+            con.check_output(
+                f'echo "CREATE TABLE random_strings (string VARCHAR(255) NOT NULL);" | {mariadb_cmd}'
+            )
+
+            for _ in range(10):
+                con.check_output(
+                    f"echo 'INSERT INTO random_strings (string) VALUES (MD5(RAND()));' | {mariadb_cmd}"
+                )
+            _verify_rowcount(con, "random_strings", 10)
+
+            con.check_output(
+                f'echo "CREATE TABLE random_numbers (number INT NOT NULL);" | {mariadb_cmd}'
+            )
+            for _ in range(12):
+                con.check_output(
+                    f"echo 'INSERT INTO random_numbers (number) VALUES (RAND());' | {mariadb_cmd}"
+                )
+            _verify_rowcount(con, "random_numbers", 12)
+
+        with ContainerLauncher.from_pytestconfig(
+            mariadb_new, container_runtime, pytestconfig
+        ) as launcher:
+            launcher.launch_container()
+            con = launcher.container_data.connection
+            _wait_for_server(con)
+            _verify_rowcount(con, "random_strings", 10)
+            _verify_rowcount(con, "random_numbers", 12)
+
+    finally:
+        # The tmp_path folder is chown'd to the mariadb user by the mariadb
+        # container, podman remaps that to some subuid that our current user has
+        # no permission to delete. With podman unshare we enter the user
+        # namespace, where we can fix the file permissions so that the cleanup
+        # by pytest works.
+        # Note that we have to chown to root as root inside the user namespace
+        # is our current user
+        if PODMAN_SELECTED and os.getuid() != 0:
+            host.check_output(f"podman unshare chown -R root:root {tmp_path}")
