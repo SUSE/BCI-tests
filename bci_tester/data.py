@@ -42,7 +42,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 )
 
 # Allowed os versions for Language and Application containers
-ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
+ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "16.0", "tumbleweed")
 
 # Allowed os versions for SLE_BCI repo checks
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
