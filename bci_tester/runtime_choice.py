@@ -1,3 +1,5 @@
+"""Provide helper variables to determine which runtime is used for this test run."""
+
 from pytest_container import get_selected_runtime
 
 #: Is :command:`docker` the selected runtime?
