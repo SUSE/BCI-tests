@@ -815,6 +815,15 @@ APACHE_TOMCAT_10_CONTAINERS = [
 APACHE_TOMCAT_9_CONTAINERS = [
     create_BCI(
         build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:9-openjdk{openjdk_version}",
+        bci_type=ImageType.SAC_APPLICATION,
+        available_versions=("15.6",),
+        forwarded_ports=[PortForwarding(container_port=8080)],
+        container_user="tomcat",
+    )
+    for openjdk_version in (17, 11)
+] + [
+    create_BCI(
+        build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:9-openjdk{openjdk_version}",
         bci_type=ImageType.APPLICATION,
         available_versions=("tumbleweed",),
         forwarded_ports=[PortForwarding(container_port=8080)],
