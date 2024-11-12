@@ -110,6 +110,8 @@ markers = [
     'openjdk-devel_17',
     'openjdk-devel_21',
     'openjdk-devel_23',
+    'ollama_0',
+    'open-webui_0',
     'pcp_5',
     'pcp_6',
     'php_8',
