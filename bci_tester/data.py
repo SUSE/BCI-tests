@@ -752,7 +752,7 @@ HELM_CONTAINER = create_BCI(
     image_type="kiwi",
 )
 
-_COSIGN_VERSION: str = "2.4" if OS_VERSION in ("tumbleweed",) else "2.2"
+_COSIGN_VERSION: str = "2.4"
 COSIGN_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/cosign:{_COSIGN_VERSION}",
