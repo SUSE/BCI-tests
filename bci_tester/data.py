@@ -42,7 +42,14 @@ ALLOWED_BASE_OS_VERSIONS = (
 )
 
 # Allowed os versions for Language and Application containers
-ALLOWED_NONBASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "16.0", "tumbleweed")
+ALLOWED_NONBASE_OS_VERSIONS = (
+    "15.5",
+    "15.6",
+    "15.6-ai",
+    "15.7",
+    "16.0",
+    "tumbleweed",
+)
 
 # Allowed os versions for SLE_BCI repo checks
 ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
@@ -98,7 +105,7 @@ else:
     OS_VERSION_ID = OS_VERSION
 
     OS_MAJOR_VERSION, OS_SP_VERSION = (
-        int(ver) for ver in OS_VERSION.split(".")
+        int(ver) for ver in OS_VERSION.partition("-")[0].split(".")
     )
 
     #: The SLES 15 pretty name (from /etc/os-release)
@@ -149,6 +156,8 @@ else:
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}"
+    if OS_VERSION == "15.6-ai":
+        ibs_cr_project = "registry.suse.de/suse/sle-15-sp6/update/products/ai"
 
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
@@ -182,8 +191,8 @@ def create_container_version_mark(
         if ver.startswith("15") and ver[:2] == str(OS_MAJOR_VERSION):
             assert (
                 ver[:2] == str(OS_MAJOR_VERSION)
-                and len(ver.split(".")) == 2
-                and int(ver.split(".")[1]) >= 3
+                and len(ver.partition("-")[0].split(".")) == 2
+                and int(ver.partition("-")[0].split(".")[1]) >= 3
             ), f"invalid version {ver} specified in {available_versions}"
     return pytest.mark.skipif(
         OS_VERSION not in available_versions,
@@ -213,6 +222,8 @@ _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET in ("dso", "ibs-released"):
         return ""
+    if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
+        return "containerfile/"
     if TARGET == "ibs-cr":
         return "images/"
     if TARGET in ("factory-totest", "factory-arm-totest"):
@@ -892,6 +903,20 @@ GRAFANA_CONTAINERS = [
     )
     for versions, tag in ((("15.6",), "9"), (("tumbleweed",), "11"))
 ]
+
+OLLAMA_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    forwarded_ports=[PortForwarding(container_port=11434)],
+)
+
+OPENWEBUI_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui:0",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    forwarded_ports=[PortForwarding(container_port=8080)],
+)
 
 CONTAINERS_WITH_ZYPPER = (
     [
