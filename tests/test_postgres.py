@@ -1,5 +1,6 @@
 """Tests for the PostgreSQL related application container images."""
 
+from datetime import timedelta
 from itertools import product
 from typing import List
 from typing import Optional
@@ -66,6 +67,9 @@ def _generate_test_matrix() -> List[ParameterSet]:
                         extra_launch_args=(
                             ["--user", username] if username else []
                         ),
+                        healthcheck_timeout=timedelta(
+                            seconds=180
+                        ),  # FIXME https://github.com/SUSE/BCI-tests/issues/647
                     ),
                     pg_user,
                     pw,

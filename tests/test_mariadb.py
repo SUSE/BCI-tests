@@ -82,9 +82,10 @@ def _generate_test_matrix() -> List[ParameterSet]:
     return params
 
 
+## FIXME Increased attempts from 5 to 8 due to https://github.com/SUSE/BCI-tests/issues/647
 @retry(
     wait=wait_exponential(multiplier=1, min=4, max=10),
-    stop=stop_after_attempt(5),
+    stop=stop_after_attempt(8),
 )
 def _wait_for_server(connection):
     connection.check_output("healthcheck.sh --connect")
