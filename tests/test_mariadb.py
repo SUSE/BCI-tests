@@ -13,6 +13,7 @@ from pytest_container.container import DerivedContainer
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
+from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import OciRuntimeBase
 from tenacity import retry
 from tenacity import stop_after_attempt
@@ -82,10 +83,11 @@ def _generate_test_matrix() -> List[ParameterSet]:
     return params
 
 
-## FIXME Increased attempts from 5 to 8 due to https://github.com/SUSE/BCI-tests/issues/647
 @retry(
     wait=wait_exponential(multiplier=1, min=4, max=10),
-    stop=stop_after_attempt(8),
+    stop=stop_after_attempt(
+        8 if LOCALHOST.system_info.arch == "ppc64le" else 5
+    ),
 )
 def _wait_for_server(connection):
     connection.check_output("healthcheck.sh --connect")

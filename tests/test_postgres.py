@@ -68,7 +68,7 @@ def _generate_test_matrix() -> List[ParameterSet]:
                         extra_launch_args=(
                             ["--user", username] if username else []
                         ),
-                        # FIXME https://github.com/SUSE/BCI-tests/issues/647
+                        # https://github.com/SUSE/BCI-tests/issues/647
                         healthcheck_timeout=(
                             timedelta(minutes=3)
                             if LOCALHOST.system_info.arch == "ppc64le"
