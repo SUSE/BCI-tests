@@ -44,7 +44,7 @@ class TestSystemd:
     def test_systemd_boottime(self, auto_container):
         """Ensure the container startup time is below 5 seconds"""
 
-        # FIXME: Temporary workaround: While using emulated workers, the startup time test doesn't make sense.'
+        # https://github.com/SUSE/BCI-tests/issues/647
         if auto_container.connection.system_info.arch == "ppc64le":
             pytest.skip(
                 "boottime test temporarily disabled on emulated ppc64le workers."
