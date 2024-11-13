@@ -739,6 +739,12 @@ DISTRIBUTION_CONTAINER = create_BCI(
     image_type="kiwi",
     forwarded_ports=[PortForwarding(container_port=5000)],
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
+    # FIXME: https://github.com/SUSE/BCI-tests/issues/647, Default timeout is 4 minutes
+    healthcheck_timeout=(
+        timedelta(minutes=8)
+        if LOCALHOST.system_info.arch == "ppc64le"
+        else None
+    ),
 )
 
 if OS_VERSION in ("15.6", "15.7", "basalt"):
