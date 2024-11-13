@@ -13,18 +13,18 @@ from _pytest.mark import ParameterSet
 from pytest_container import GitRepositoryBuild
 from pytest_container import container_and_marks_from_pytest_param
 
-from bci_tester.data import DOTNET_ASPNET_6_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_6_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_9_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_6_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_9_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_9_0_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repos_from_connection
 
 DOTNET_SDK_CONTAINERS = [
-    DOTNET_SDK_6_0_CONTAINER,
     DOTNET_SDK_8_0_CONTAINER,
+    DOTNET_SDK_9_0_CONTAINER,
 ]
 
 #: Name and alias of the microsoft .Net repository
@@ -50,8 +50,8 @@ def _generate_ctr_ver_param(ctr_ver: Tuple[ParameterSet, str]) -> ParameterSet:
     map(
         _generate_ctr_ver_param,
         (
-            (DOTNET_SDK_6_0_CONTAINER, "6.0"),
             (DOTNET_SDK_8_0_CONTAINER, "8.0"),
+            (DOTNET_SDK_9_0_CONTAINER, "9.0"),
         ),
     ),
     indirect=["container"],
@@ -72,8 +72,8 @@ def test_dotnet_sdk_version(container, sdk_version):
     map(
         _generate_ctr_ver_param,
         (
-            (DOTNET_ASPNET_6_0_CONTAINER, "6.0"),
             (DOTNET_ASPNET_8_0_CONTAINER, "8.0"),
+            (DOTNET_ASPNET_9_0_CONTAINER, "9.0"),
         ),
     ),
     indirect=["container"],
@@ -96,8 +96,8 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     map(
         _generate_ctr_ver_param,
         (
-            (DOTNET_RUNTIME_6_0_CONTAINER, "6.0"),
             (DOTNET_RUNTIME_8_0_CONTAINER, "8.0"),
+            (DOTNET_RUNTIME_9_0_CONTAINER, "9.0"),
         ),
     ),
     indirect=["container"],
@@ -130,7 +130,8 @@ def test_dotnet_hello_world(container_per_test):
     )
     assert (
         container_per_test.connection.check_output("cd MyApp && dotnet run")
-        == "Hello, World!"
+        .strip()
+        .endswith("Hello, World!")
     )
 
 
