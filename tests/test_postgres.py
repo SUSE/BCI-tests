@@ -11,6 +11,7 @@ from _pytest.mark import ParameterSet
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
 from pytest_container.container import container_and_marks_from_pytest_param
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import POSTGRES_PASSWORD
@@ -67,9 +68,12 @@ def _generate_test_matrix() -> List[ParameterSet]:
                         extra_launch_args=(
                             ["--user", username] if username else []
                         ),
-                        healthcheck_timeout=timedelta(
-                            seconds=180
-                        ),  # FIXME https://github.com/SUSE/BCI-tests/issues/647
+                        # FIXME https://github.com/SUSE/BCI-tests/issues/647
+                        healthcheck_timeout=(
+                            timedelta(minutes=3)
+                            if LOCALHOST.system_info.arch == "ppc64le"
+                            else None
+                        ),
                     ),
                     pg_user,
                     pw,
