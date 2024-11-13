@@ -519,7 +519,7 @@ NODEJS_18_CONTAINER = create_BCI(
 )
 NODEJS_20_CONTAINER = create_BCI(
     build_tag="bci/nodejs:20",
-    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
+    available_versions=["15.6"],
 )
 
 NODEJS_22_CONTAINER = create_BCI(

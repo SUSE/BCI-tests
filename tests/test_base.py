@@ -52,6 +52,10 @@ def test_iconv_working(auto_container):
     )
 
 
+@pytest.mark.xfail(
+    OS_VERSION in ("tumbleweed",),
+    reason="https://bugzilla.opensuse.org/show_bug.cgi?id=1233235",
+)
 @pytest.mark.skipif(
     not PODMAN_SELECTED,
     reason="docker size reporting is dependant on underlying filesystem",
