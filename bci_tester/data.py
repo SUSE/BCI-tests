@@ -159,7 +159,9 @@ else:
             f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}/test"
         )
     if OS_VERSION == "15.6-ai":
-        ibs_cr_project = "registry.suse.de/suse/sle-15-sp6/update/products/ai"
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
+        )
 
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
@@ -225,7 +227,7 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET in ("dso", "ibs-released"):
         return ""
     if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
-        return "containerfile/"
+        return "images/"
     if not OS_VERSION.startswith("16") and TARGET == "ibs-cr":
         return "images/"
     if TARGET in ("factory-totest", "factory-arm-totest"):
@@ -914,14 +916,14 @@ GRAFANA_CONTAINERS = [
 ]
 
 OLLAMA_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0",
+    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0.3",
     bci_type=ImageType.SAC_APPLICATION,
     available_versions=["15.6-ai"],
     forwarded_ports=[PortForwarding(container_port=11434)],
 )
 
 OPENWEBUI_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui:0",
+    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui:0.3",
     bci_type=ImageType.SAC_APPLICATION,
     available_versions=["15.6-ai"],
     forwarded_ports=[PortForwarding(container_port=8080)],
