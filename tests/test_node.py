@@ -42,6 +42,12 @@ def test_node_version(auto_container):
             GitRepositoryBuild(
                 repository_url="https://github.com/isaacs/node-glob",
                 build_command="npm ci && npm test",
+                marks=[
+                    pytest.mark.skipif(
+                        LOCALHOST.system_info.arch == "ppc64le",
+                        reason="glob tests timeout on emulated ppc64 workers",
+                    )
+                ],
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/tj/commander.js.git",
