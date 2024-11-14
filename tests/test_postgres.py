@@ -70,7 +70,7 @@ def _generate_test_matrix() -> List[ParameterSet]:
                         ),
                         # https://github.com/SUSE/BCI-tests/issues/647
                         healthcheck_timeout=(
-                            timedelta(minutes=3)
+                            timedelta(minutes=6)
                             if LOCALHOST.system_info.arch == "ppc64le"
                             else None
                         ),
