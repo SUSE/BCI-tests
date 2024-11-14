@@ -6,6 +6,7 @@ from pytest_container.container import ImageFormat
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import GIT_CONTAINER
 
@@ -23,7 +24,8 @@ _PUB_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMkxHs1b6A1kZuiu6nPxehkSO4pG4qMv
 
 _SSH_PORT = 22022
 
-_GIT_SERVER_CONTAINERFILE = rf"""
+_GIT_SERVER_CONTAINERFILE = (
+    rf"""
 RUN zypper -n in git-core openssh-server openssh-clients
 RUN ssh-keygen -A
 RUN useradd -U -m -p "*" git
@@ -56,8 +58,11 @@ EXPOSE {_SSH_PORT}
 
 CMD ["/usr/sbin/sshd", "-De"]
 
-HEALTHCHECK --interval=5s --timeout=5s --retries=5 CMD ["/usr/bin/ssh-keyscan", "-vvv", "-H", "-p", "{_SSH_PORT}", "127.0.0.1"]
+HEALTHCHECK --interval=5s --timeout=5s --retries=5"""
+    + (" --start-period=1m" if LOCALHOST.system_info.arch == "ppc64le" else "")
+    + """ CMD ["/usr/bin/ssh-keyscan", "-vvv", "-H", "-p", "{_SSH_PORT}", "127.0.0.1"]
 """
+)
 
 
 def test_git_version(auto_container):
