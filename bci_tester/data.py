@@ -727,6 +727,12 @@ POSTGRESQL_CONTAINERS = [
         available_versions=pg_versions,
         forwarded_ports=[PortForwarding(container_port=5432)],
         extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD},
+        # https://github.com/SUSE/BCI-tests/issues/647
+        healthcheck_timeout=(
+            timedelta(minutes=6)
+            if LOCALHOST.system_info.arch == "ppc64le"
+            else None
+        ),
     )
     for pg_ver, pg_versions in (
         (14, ["tumbleweed"]),
