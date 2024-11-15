@@ -7,24 +7,41 @@ from bci_tester.util import get_repos_from_zypper_xmlout
 
 
 def test_host_fips_supported(tmp_path):
+    """Check that ``host_fips_supported`` correctly returns True if the fips
+    file exists.
+
+    """
     fipsfile = tmp_path / "fips"
     fipsfile.write_text("")
     assert host_fips_supported(f"{fipsfile}")
 
 
 def test_host_fips_enabled(tmp_path):
+    """Check that ``host_fips_enabled`` correctly returns True if the fips file
+    contains a 1.
+
+    """
     fipsfile = tmp_path / "fips"
     fipsfile.write_text("1")
     assert host_fips_enabled(f"{fipsfile}")
 
 
 def test_host_fips_disabled(tmp_path):
+    """Check that ``host_fips_enabled`` correctly returns False if the fips file
+    contains nothing.
+
+    """
     fipsfile = tmp_path / "fips"
     fipsfile.write_text("")
     assert not host_fips_enabled(f"{fipsfile}")
 
 
 def test_repository_from_xml():
+    """Test that ``get_repos_from_zypper_xmlout`` correctly identifies the
+    SLE_BCI and the microsoft .Net repository from a saved output of
+    ``zypper -x repos``.
+
+    """
     repos = get_repos_from_zypper_xmlout(
         """<?xml version='1.0'?>
 <stream>
@@ -69,16 +86,28 @@ def test_repository_from_xml():
 
 
 def test_selinux_disabled(tmp_path: Path) -> None:
+    """Validate that ``selinux_status`` reports ``disabled`` if the sysfs
+    directory is empty.
+
+    """
     assert selinux_status(str(tmp_path)) == "disabled"
 
 
 def test_selinux_enforcing(tmp_path: Path) -> None:
+    """Check that ``selinux_status`` returns ``enforcing`` when there's a file
+    :file:`enforce` in the sysfs directory and it contains a ``1``.
+
+    """
     (tmp_path / "enforce").touch()
     (tmp_path / "enforce").write_text("1\n")
     assert selinux_status(str(tmp_path)) == "enforcing"
 
 
 def test_selinux_permissive(tmp_path: Path) -> None:
+    """Check that ``selinux_status`` returns ``permissive`` when there's a file
+    :file:`enforce` in the sysfs directory and it contains a ``0``.
+
+    """
     (tmp_path / "enforce").touch()
     (tmp_path / "enforce").write_text("0\n")
     assert selinux_status(str(tmp_path)) == "permissive"
