@@ -6,6 +6,7 @@ Rust development containers include rust and cargo.
 import pytest
 from pytest_container import GitRepositoryBuild
 
+from bci_tester.data import OS_VERSION
 from bci_tester.data import RUST_CONTAINERS
 
 CONTAINER_IMAGES = RUST_CONTAINERS
@@ -41,6 +42,16 @@ def test_cargo_version(auto_container):
             GitRepositoryBuild(
                 repository_url="https://github.com/sfackler/rust-openssl",
                 build_command="zypper -n in libopenssl-devel && cargo build && cargo test",
+                marks=(
+                    None
+                    if OS_VERSION != "tumbleweed"
+                    else pytest.mark.xfail(
+                        reason=(
+                            "broken test on Tumbleweed due to disabled prime curves,"
+                            "see https://github.com/sfackler/rust-openssl/pull/2330"
+                        )
+                    )
+                ),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/rust-random/rand",
