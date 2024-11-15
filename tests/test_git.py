@@ -60,7 +60,7 @@ CMD ["/usr/sbin/sshd", "-De"]
 
 HEALTHCHECK --interval=5s --timeout=5s --retries=5"""
     + (" --start-period=1m" if LOCALHOST.system_info.arch == "ppc64le" else "")
-    + """ CMD ["/usr/bin/ssh-keyscan", "-vvv", "-H", "-p", "{_SSH_PORT}", "127.0.0.1"]
+    + f""" CMD ["/usr/bin/ssh-keyscan", "-vvv", "-H", "-p", "{_SSH_PORT}", "127.0.0.1"]
 """
 )
 
