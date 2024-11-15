@@ -49,7 +49,7 @@ jobs:
 
       - id: setmatrix
         run: |
-          set stringified_matrix (tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d'  | jo -a)
+          set stringified_matrix (tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d' -e '/ai/d' | jo -a)
 
           set users_envs (echo $PR_BODY | awk -F' ' '/^\[CI:TOXENVS\]/ { print $2 }')
           if [ -n "$users_envs" ]
