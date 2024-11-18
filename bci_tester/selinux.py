@@ -1,6 +1,5 @@
 """Module with helper utilities around SELinux."""
 
-import os
 from pathlib import Path
 
 try:
@@ -12,13 +11,18 @@ except ImportError:
 
 
 def selinux_status(
-    selinux_sysfs_dir: str = "/sys/fs/selinux/",
+    _selinux_sysfs_dir: str = "/sys/fs/selinux/",
 ) -> Literal["enforcing", "permissive", "disabled"]:
     """Returns the host's SELinux status"""
-    if not os.listdir(selinux_sysfs_dir):
+
+    selinux_sysfs_dir = Path(_selinux_sysfs_dir)
+
+    if not (
+        selinux_sysfs_dir.exists() and (selinux_sysfs_dir / "enforce").exists()
+    ):
         return "disabled"
 
-    if (Path(selinux_sysfs_dir) / "enforce").read_text().strip() == "1":
+    if (selinux_sysfs_dir / "enforce").read_text().strip() == "1":
         return "enforcing"
 
     return "permissive"
