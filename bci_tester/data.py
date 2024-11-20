@@ -553,7 +553,7 @@ PYTHON312_CONTAINER = create_BCI(
 )
 
 PYTHON313_CONTAINER = create_BCI(
-    build_tag="bci/python:3.13", available_versions=["15.7"]
+    build_tag="bci/python:3.13", available_versions=["15.7", "tumbleweed"]
 )
 
 PYTHON_CONTAINERS = [
