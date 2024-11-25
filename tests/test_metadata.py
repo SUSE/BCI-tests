@@ -468,7 +468,7 @@ def test_disturl_can_be_checked_out(
     ]
     disturl = urllib.parse.urlparse(disturl_label)
 
-    assert disturl.scheme == "obs", f"unspported scheme in {disturl_label}"
+    assert disturl.scheme == "obs", f"unsupported scheme in {disturl_label}"
     for p in ("params", "query", "fragment"):
         assert getattr(disturl, p) == "", f"unsupported {p} in {disturl_label}"
 

@@ -13,7 +13,7 @@ from bci_tester.runtime_choice import PODMAN_SELECTED
 
 @pytest.mark.skipif(
     not PODMAN_SELECTED,
-    reason="docker size reporting is dependant on underlying filesystem",
+    reason="docker size reporting is dependent on underlying filesystem",
 )
 @pytest.mark.parametrize("container", [MINIMAL_CONTAINER], indirect=True)
 def test_minimal_image_size(container, container_runtime):
@@ -54,7 +54,7 @@ def test_minimal_image_size(container, container_runtime):
 
 @pytest.mark.skipif(
     not PODMAN_SELECTED,
-    reason="docker size reporting is dependant on underlying filesystem",
+    reason="docker size reporting is dependent on underlying filesystem",
 )
 @pytest.mark.parametrize("container", [MICRO_CONTAINER], indirect=True)
 def test_micro_image_size(container, container_runtime):

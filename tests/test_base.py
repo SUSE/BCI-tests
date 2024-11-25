@@ -54,7 +54,7 @@ def test_iconv_working(auto_container):
 
 @pytest.mark.skipif(
     not PODMAN_SELECTED,
-    reason="docker size reporting is dependant on underlying filesystem",
+    reason="docker size reporting is dependent on underlying filesystem",
 )
 @pytest.mark.parametrize(
     "container",
