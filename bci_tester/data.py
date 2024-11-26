@@ -80,7 +80,11 @@ if not (
 ):
     raise ValueError(
         f"Invalid OS_VERSION: {OS_VERSION}, allowed values are: "
-        + ", ".join(ALLOWED_BASE_OS_VERSIONS)
+        + ", ".join(
+            set(ALLOWED_BASE_OS_VERSIONS).union(
+                set(ALLOWED_NONBASE_OS_VERSIONS)
+            )
+        )
     )
 
 

@@ -51,7 +51,10 @@ jobs:
         run: |
           set stringified_matrix (tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/fips/d' -e '/ai/d' | jo -a)
 
-          set users_envs (echo $PR_BODY | awk -F' ' '/^\[CI:TOXENVS\]/ { print $2 }')
+          # grep the [CI:TOXENVS] line and print everything after it.
+          # the sed call removes additional whitespace after a comma as
+          # otherwise awk only prints the toxenvs until the whitespace
+          set users_envs (echo $PR_BODY | sed 's|,\s*|,|g' | awk -F' ' '/^\[CI:TOXENVS\]/ { print $2 }')
           if [ -n "$users_envs" ]
               set stringified_matrix (echo "$users_envs,all,repository,metadata,multistage" | tr ',' '\n' | sort | uniq | jo -a)
           end
