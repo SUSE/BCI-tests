@@ -184,7 +184,7 @@ def test_install_multiple_extensions_via_script(
     auto_container_per_test: ContainerData,
 ) -> None:
     """Try to install multiple extensions at the same time via
-    :commad:`docker-php-ext-install $ext1 $ext2` and check that they have
+    :command:`docker-php-ext-install $ext1 $ext2` and check that they have
     actually been installed via :command:`zypper`.
 
     """
@@ -326,7 +326,7 @@ def test_mediawiki_php_apache(container_per_test: ContainerData) -> None:
 def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
     """Application test of the php-fpm variant.
 
-    This test builds mediawiki deployed via fpm with a nginx proxy infront of
+    This test builds mediawiki deployed via fpm with a nginx proxy in front of
     it, both deployed via two containers in a podman pod.  The test itself just
     checks if the pod is reachable using requests.
 

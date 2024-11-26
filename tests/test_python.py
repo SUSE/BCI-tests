@@ -220,7 +220,7 @@ def test_python_webserver_1(
 
     command = f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
 
-    # pkg neeed to run socket/port check
+    # pkg needed to run socket/port check
     if not container_per_test.connection.package("iproute2").is_installed:
         container_per_test.connection.run_expect([0], "zypper -n in iproute2")
 
