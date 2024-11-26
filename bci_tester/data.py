@@ -744,7 +744,7 @@ POSTGRESQL_CONTAINERS = [
         (14, ["tumbleweed"]),
         (15, ["15.5", "tumbleweed"]),
         (16, _DEFAULT_NONBASE_OS_VERSIONS),
-        (17, ["tumbleweed"]),
+        (17, ["15.6", "tumbleweed"]),
     )
 ]
 
