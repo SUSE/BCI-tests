@@ -135,6 +135,23 @@ def test_tox(auto_container_per_test):
     )
 
 
+def test_packaged_tox(auto_container_per_test):
+    """Ensure we can use the packaged tox version."""
+    version = auto_container_per_test.connection.check_output(
+        "echo $PYTHON_VERSION"
+    )
+    if (
+        OS_VERSION.startswith("15")
+        and not version.startswith("3.6")
+        and not version.startswith("3.11")
+    ):
+        pytest.skip("packaged tox not available")
+
+    auto_container_per_test.connection.check_output(
+        f"zypper --non-interactive in {'python3' if version.startswith('3.6') else 'python311'}-tox && tox --version"
+    )
+
+
 def test_pep517_wheels(auto_container_per_test):
     """Ensure we can use :command:`pip` to build PEP517 binary wheels"""
     version = auto_container_per_test.connection.check_output(
