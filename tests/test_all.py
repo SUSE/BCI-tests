@@ -323,6 +323,10 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
+@pytest.mark.skipif(
+    OS_VERSION == "15.6-ai",
+    reason="AI containers include unpublished packages",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
 )
