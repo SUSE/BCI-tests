@@ -26,6 +26,7 @@ from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
+from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
@@ -394,6 +395,17 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
             "timeout 5m env LC_ALL=C zypper --no-refresh -n verify -D"
         )
     )
+
+
+@pytest.mark.parametrize("container", CONTAINERS_WITHOUT_ZYPPER, indirect=True)
+def test_zypper_not_present_in_containers_without_it(
+    container: ContainerData,
+) -> None:
+    """Sanity check that containers which are expected to not contain zypper,
+    actually do not contain it.
+
+    """
+    container.connection.run_expect([1, 127], "command -v zypper")
 
 
 # PCP_CONTAINERS: uses systemd for starting multiple services
