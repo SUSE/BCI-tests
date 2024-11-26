@@ -1029,7 +1029,6 @@ MILVUS_CONTAINER = create_BCI(
     custom_entry_point="/bin/bash",
 )
 
-
 STUNNEL_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
     bci_type=ImageType.APPLICATION,
@@ -1037,6 +1036,15 @@ STUNNEL_CONTAINER = create_BCI(
     available_versions=["15.6", "15.7", "tumbleweed"],
 )
 
+VALKEY_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/valkey:{tag}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=versions,
+        forwarded_ports=[PortForwarding(container_port=6379)],
+    )
+    for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
+]
 
 CONTAINERS_WITH_ZYPPER = (
     [
@@ -1111,6 +1119,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *MARIADB_CONTAINERS,
     STUNNEL_CONTAINER,
     *KUBECTL_CONTAINERS,
+    *VALKEY_CONTAINERS,
 ]
 
 
@@ -1171,7 +1180,7 @@ else:
 
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS
 
-#: Containers that are directly pulled from registry.suse.de
+#: Containers pulled from registry.suse.de
 ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER
 
 
