@@ -471,7 +471,7 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
             MICRO_CONTAINER.values[0],
         ):
             pytest.skip("Unmaintained bci-* base os containers are not tested")
-            return
+
         assert not container.connection.file(
             bci_license
         ).exists, "BCI EULA shall not be in LTSS container"
