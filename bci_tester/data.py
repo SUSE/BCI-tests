@@ -1055,6 +1055,8 @@ else:
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
+            OLLAMA_CONTAINER,
+            OPENWEBUI_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
