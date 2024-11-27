@@ -367,6 +367,15 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "prometheus-blackbox_exporter",
     }
 
+    python39_stack_packages = {
+        "libpython3_9-1_0",
+        "python39",
+        "python39-base",
+        "python39-devel",
+        "python39-pip",
+        "python39-setuptools",
+    }
+
     # kubic-locale-archive should be replaced by glibc-locale-base in the containers
     # but that is a few bytes larger so we accept it as an exception
     known_orphaned_packages = {
@@ -378,7 +387,7 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "sle-module-basesystem-release",
         "sle-module-python3-release",
         "sle-module-server-applications-release",
-    }.union(monitoring_stack_packages)
+    }.union(monitoring_stack_packages).union(python39_stack_packages)
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
