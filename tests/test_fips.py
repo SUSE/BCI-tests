@@ -4,6 +4,7 @@ FIPS mode.
 """
 
 from pathlib import Path
+from re import search as regexsearch
 
 import pytest
 from pytest_container import DerivedContainer
@@ -189,11 +190,18 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
 
     """
 
-    container_per_test.connection.check_output(
+    c = container_per_test.connection
+
+    c.check_output(
         "zypper --gpg-auto-import-keys -n ref && zypper -n install gcc gnutls gnutls-devel && zypper -n clean && "
         "gcc -Og -g3 fips-test-gnutls.c -Wall -Wextra -Wpedantic -lgnutls -o fips-test-gnutls && "
         "mv fips-test-gnutls /bin/fips-test-gnutls"
     )
+
+    assert regexsearch(
+        r"library is in FIPS140(-3|-2|) mode",
+        c.run_expect([0], "gnutls-cli --fips140-mode").stderr
+    ), "Container library not in FIPS140 mode"
 
     expected_fips_gnutls_digests = {
         "sha1": "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
@@ -204,15 +212,11 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
     }
 
     for digest in FIPS_GNUTLS_DIGESTS:
-        res = container_per_test.connection.check_output(
-            f"/bin/fips-test-gnutls {digest}"
-        )
+        res = c.check_output(f"/bin/fips-test-gnutls {digest}")
         assert "Digest is: " + expected_fips_gnutls_digests[digest] in res
 
     for digest in NONFIPS_GNUTLS_DIGESTS:
-        err_msg = container_per_test.connection.run_expect(
-            [1], f"/bin/fips-test-gnutls {digest}"
-        ).stderr
+        err_msg = c.run_expect([1], f"/bin/fips-test-gnutls {digest}").stderr
 
         assert (
             "Hash calculation failed" in err_msg
