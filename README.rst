@@ -28,11 +28,30 @@ How can I contribute?
 What do I need to contribute?
 -----------------------------
 
-* A host with python 3.6+, gcc and the python development header files
-* tox
-* go
+* A host with `python` 3.6+ and `tox`
 * docker and/or podman+buildah
 * vagrant (optional, can be used to test FIPS mode and registered hosts)
+
+Test setup on openSUSE
+^^^^^^^^^^^^^^^^^^^^^^
+
+It is recommended to run BCI tests in its own virtual environment by doing the following:
+
+.. code-block:: shell-session
+    
+    $ sudo zypper in python3-virtualenv
+    $ virtualenv .bci_tester
+    $ source .bci_tester/bin/activate
+
+Once the virtual environment `.bci_tester` has been setup, you only need to run `source .bci_tester/bin/activate` again to activate it.
+
+To setup the test environment on openSUSE Leap 15.6 and Tumbleweed, run the following commands:
+
+.. code-block:: shell-session
+
+    $ sudo zypper -n in podman buildah docker git-core python3 python3-pip
+    $ pip3 --quiet install --upgrade pip
+    $ pip3 --quiet install tox --ignore-installed six
 
 How can I run the tests?
 ------------------------
@@ -42,6 +61,27 @@ How can I run the tests?
 3. Run ``tox -e build`` (this is not strictly necessary to run beforehands, but it
    will reduce the danger of race conditions when building containers)
 4. Run ``tox -e $language_stack -- -n auto``
+
+Environment variables
+^^^^^^^^^^^^^^^^^^^^^
+
+You can set the following environment variables to configure the behavior of the BCI-Tests:
+
+.. code-block:: shell-session
+
+    $ export OS_VERSION=15.6                         # Target SLES version
+    $ export CONTAINER_RUNTIME=podman                # Defaults to podman
+    $ export TARGET=ibs-cr                           # Set container to be tested, see below
+
+Available `TARGET` settings are the following:
+
+    ibs                    SUSE:SLE-15-SP*:Update:BCI
+    ibs-cr                 Pending ToTest containers
+    ibs-released           Release BCI container
+    obs                    devel:BCI:* on OBS
+    factory-totest         Factory
+    factory-arm-totest     Factory for ARM/aarch64
+    manual                 Test the container defined by CONTAINER_URL
 
 Technical contributions
 -----------------------
