@@ -12,6 +12,7 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
+from bci_tester.data import OS_VERSION
 from tests import test_openjdk
 
 CONTAINER_TEST_DIR = "/tmp/"
@@ -87,6 +88,10 @@ def test_maven_present(auto_container):
     assert auto_container.connection.run_expect([0], "mvn --version")
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in ("15.3", "15.4", "15.5", "15.6"),
+    reason="jshell is no longer the CMD as of SP7",
+)
 @pytest.mark.parametrize(
     "container,java_version",
     # Softfailure for bsc#1221983 only applies to OpenJDK-devel-21
