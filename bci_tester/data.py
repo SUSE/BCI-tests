@@ -927,6 +927,19 @@ OPENWEBUI_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=8080)],
 )
 
+_KEA_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+    ("2.6", ("tumbleweed",)),
+)
+
+KEA_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/:{kea_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=os_versions,
+    )
+    for kea_ver, os_versions in _KEA_VERSION_OS_MATRIX
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
