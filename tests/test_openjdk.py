@@ -312,5 +312,5 @@ def test_openjdk_sec_providers(container_per_test: ContainerData) -> None:
     """
     c = container_per_test.connection
 
-    c.run_expect([0], "java JCEProviderInfo.java")
+    c.check_output("java JCEProviderInfo.java")
     assert "1. SunPKCS11-NSS-FIPS" in c.check_output("java Tcheck.java")
