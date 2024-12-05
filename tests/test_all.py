@@ -26,6 +26,7 @@ from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
+from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
@@ -323,6 +324,10 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
+@pytest.mark.skipif(
+    OS_VERSION == "15.6-ai",
+    reason="AI containers include unpublished packages",
+)
 @pytest.mark.parametrize(
     "container_per_test", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
 )
@@ -390,6 +395,17 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
             "timeout 5m env LC_ALL=C zypper --no-refresh -n verify -D"
         )
     )
+
+
+@pytest.mark.parametrize("container", CONTAINERS_WITHOUT_ZYPPER, indirect=True)
+def test_zypper_not_present_in_containers_without_it(
+    container: ContainerData,
+) -> None:
+    """Sanity check that containers which are expected to not contain zypper,
+    actually do not contain it.
+
+    """
+    container.connection.run_expect([1, 127], "command -v zypper")
 
 
 # PCP_CONTAINERS: uses systemd for starting multiple services
@@ -471,7 +487,7 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
             MICRO_CONTAINER.values[0],
         ):
             pytest.skip("Unmaintained bci-* base os containers are not tested")
-            return
+
         assert not container.connection.file(
             bci_license
         ).exists, "BCI EULA shall not be in LTSS container"
