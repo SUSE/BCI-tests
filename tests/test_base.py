@@ -66,7 +66,6 @@ def test_base_size(container: ContainerData, container_runtime):
     :py:const:`base_container_max_size`
 
     """
-
     # the FIPS container is bigger too than the 15 SP3 base image
     is_fips_ctr = (
         container.container.baseurl
@@ -95,10 +94,10 @@ def test_base_size(container: ContainerData, container_runtime):
         }
     elif OS_VERSION in ("16.0",):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 154,
-            "aarch64": 174,
-            "ppc64le": 189,
-            "s390x": 155,
+            "x86_64": 100,
+            "aarch64": 126,
+            "ppc64le": 138,
+            "s390x": 99,
         }
     elif OS_VERSION in ("15.7",):
         base_container_max_size: Dict[str, int] = {
