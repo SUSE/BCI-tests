@@ -495,19 +495,25 @@ OPENJDK_11_CONTAINER = create_BCI(
     build_tag="bci/openjdk:11", available_versions=["15.5", "tumbleweed"]
 )
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:11", available_versions=["15.5", "tumbleweed"]
+    build_tag="bci/openjdk-devel:11",
+    available_versions=["15.5", "tumbleweed"],
+    custom_entry_point="/bin/sh",
 )
 OPENJDK_17_CONTAINER = create_BCI(
     build_tag="bci/openjdk:17", available_versions=["15.5", "tumbleweed"]
 )
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:17", available_versions=["15.5", "tumbleweed"]
+    build_tag="bci/openjdk-devel:17",
+    available_versions=["15.5", "tumbleweed"],
+    custom_entry_point="/bin/sh",
 )
 OPENJDK_21_CONTAINER = create_BCI(
     build_tag="bci/openjdk:21", available_versions=["15.6", "tumbleweed"]
 )
 OPENJDK_DEVEL_21_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:21", available_versions=["15.6", "tumbleweed"]
+    build_tag="bci/openjdk-devel:21",
+    available_versions=["15.6", "tumbleweed"],
+    custom_entry_point="/bin/sh",
 )
 OPENJDK_23_CONTAINER = create_BCI(
     build_tag="bci/openjdk:23", available_versions=["tumbleweed"]
