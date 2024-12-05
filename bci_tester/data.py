@@ -995,6 +995,14 @@ MILVUS_CONTAINER = create_BCI(
 )
 
 
+STUNNEL_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
+    bci_type=ImageType.APPLICATION,
+    custom_entry_point="/bin/sh",
+    available_versions=["15.6", "15.7", "tumbleweed"],
+)
+
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1065,6 +1073,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *POSTGRESQL_CONTAINERS,
     *MARIADB_CLIENT_CONTAINERS,
     *MARIADB_CONTAINERS,
+    STUNNEL_CONTAINER,
 ]
 
 #: Containers with L3 support

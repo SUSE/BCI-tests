@@ -146,6 +146,7 @@ markers = [
     'bci-sle15-kernel-module-devel_15.7',
     'bci-sle16-kernel-module-devel_16.0',
     'spack_0.21',
+    'stunnel_5',
 ]
 
 [tool.ruff]

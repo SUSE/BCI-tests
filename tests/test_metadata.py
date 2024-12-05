@@ -85,6 +85,7 @@ from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SAC_PYTHON_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
+from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import ImageType
 from bci_tester.runtime_choice import PODMAN_SELECTED
@@ -286,6 +287,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
         (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
     ]
+    + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
 ]
 
 
