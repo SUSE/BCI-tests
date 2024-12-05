@@ -350,7 +350,11 @@ def create_BCI(
     ):
         marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
 
-    if OS_VERSION == "tumbleweed":
+    if TARGET == "manual":
+        baseurl = os.getenv("CONTAINER_URL")
+        if not baseurl:
+            raise ValueError("Missing CONTAINER_URL for TARGET manual")
+    elif OS_VERSION == "tumbleweed":
         if bci_type in (ImageType.APPLICATION, ImageType.SAC_APPLICATION):
             baseurl = (
                 f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
