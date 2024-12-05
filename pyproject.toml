@@ -38,6 +38,8 @@ markers = [
     'bci-base-fips_15.5',
     'bci-base-fips_15.6',
     'bci-base-fips_15.7',
+    'bci-base-fips_16.0',
+    'bci-base-fips_latest',
     'bci-busybox_15.3',
     'bci-busybox_15.4',
     'bci-busybox_15.5',
