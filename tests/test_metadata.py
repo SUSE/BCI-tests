@@ -83,6 +83,7 @@ from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUBY_33_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
+from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import ImageType
 from bci_tester.runtime_choice import PODMAN_SELECTED
@@ -278,6 +279,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (cont, "base-fips", ImageType.OS_LTSS)
         for cont in LTSS_BASE_FIPS_CONTAINERS
     ]
+    + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
 ]
 
 
