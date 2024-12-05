@@ -403,6 +403,13 @@ if OS_VERSION == "tumbleweed":
         image_type="kiwi",
         bci_type=ImageType.OS,
     )
+    BASE_FIPS_CONTAINERS.append(
+        create_BCI(
+            build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base-fips:{OS_CONTAINER_TAG}",
+            bci_type=ImageType.OS,
+            available_versions=["tumbleweed"],
+        )
+    )
 else:
     BASE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base:{OS_CONTAINER_TAG}",
@@ -410,15 +417,17 @@ else:
         bci_type=ImageType.OS,
     )
     if TARGET not in ("dso",):
-        BASE_FIPS_CONTAINERS = [
+        BASE_FIPS_CONTAINERS.append(
             create_BCI(
                 build_tag=f"{BCI_CONTAINER_PREFIX}/bci-base-fips:{OS_CONTAINER_TAG}",
                 bci_type=ImageType.OS,
-                # TODO set to _DEFAULT_BASE_OS_VERSIONS once the fips containers are available
-                # everywhere
-                available_versions=("15.6",),
+                available_versions=[
+                    ver
+                    for ver in _DEFAULT_BASE_OS_VERSIONS
+                    if ver not in ("15.5",)
+                ],
             )
-        ]
+        )
     if TARGET in ("ibs", "ibs-cr", "ibs-released"):
         LTSS_BASE_CONTAINERS.extend(
             create_BCI(
@@ -695,7 +704,6 @@ MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
 _MARIADB_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
     ("10.11", ("15.6", "15.7")),
-    ("10.6", ("15.5",)),
     ("11.6", ("tumbleweed",)),
 )
 
