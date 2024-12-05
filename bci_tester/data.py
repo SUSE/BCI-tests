@@ -959,6 +959,13 @@ OPENWEBUI_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=8080)],
 )
 
+STUNNEL_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/stunnel:5",
+    bci_type=ImageType.APPLICATION,
+    custom_entry_point="/bin/sh",
+    available_versions=["15.6", "15.7", "tumbleweed"],
+)
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -968,6 +975,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
+        STUNNEL_CONTAINER,
     ]
     + ALERTMANAGER_CONTAINERS
     + BASE_FIPS_CONTAINERS
