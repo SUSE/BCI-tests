@@ -126,6 +126,7 @@ markers = [
     'postgres_16',
     'postgres_17',
     'prometheus_2',
+    'python_3.9',
     'python_3.10',
     'python_3.11',
     'python_3.12',
