@@ -61,6 +61,7 @@ from bci_tester.data import NGINX_CONTAINER
 from bci_tester.data import NODEJS_18_CONTAINER
 from bci_tester.data import NODEJS_20_CONTAINER
 from bci_tester.data import NODEJS_22_CONTAINER
+from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 from bci_tester.data import OPENJDK_21_CONTAINER
@@ -69,8 +70,10 @@ from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
 from bci_tester.data import OPENJDK_DEVEL_23_CONTAINER
+from bci_tester.data import OPENWEBUI_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
+from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
@@ -278,6 +281,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (cont, "base-fips", ImageType.OS_LTSS)
         for cont in LTSS_BASE_FIPS_CONTAINERS
     ]
+    + [
+        (OLLAMA_CONTAINER, "ollama", ImageType.SAC_APPLICATION),
+        (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
+    ]
 ]
 
 
@@ -378,7 +385,7 @@ def test_general_labels(
         # no EULA for openSUSE images
     else:
         assert (
-            labels["com.suse.lifecycle-url"]
+            labels["com.suse.lifecycle-url"].removesuffix("/")
             in (
                 "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
                 "https://www.suse.com/lifecycle",  # SLE 15 SP5 base container has incorrect URL
@@ -670,7 +677,7 @@ def test_oci_base_refs(
 
     assert base_name.startswith("registry.suse.com/")
     assert (
-        f":{OS_VERSION}" in base_name
+        f":{OS_VERSION_ID}" in base_name
     ), "Base image reference is not the expected version"
     assert base_digest.startswith("sha256:")
 
