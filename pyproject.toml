@@ -83,7 +83,7 @@ markers = [
     'git_2.35',
     'git_2.43',
     'git_latest',
-    'helm_3.13',
+    'helm_3',
     'helm_latest',
     'nginx_1.21',
     'nginx_latest',
