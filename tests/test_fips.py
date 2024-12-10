@@ -239,11 +239,18 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
 
     """
 
-    container_per_test.connection.check_output(
-        "zypper --gpg-auto-import-keys -n ref && zypper -n in gcc libgcrypt-devel && zypper -n clean && "
+    c = container_per_test.connection
+
+    c.check_output(
+        "zypper -n ref && zypper -n in gcc libgcrypt-devel dirmngr && "
         "gcc -Og -g3 fips-test-gcrypt.c -Wall -Wextra -Wpedantic -lgcrypt -o fips-test-gcrypt && "
         "mv fips-test-gcrypt /bin/fips-test-gcrypt"
     )
+
+    assert re.search(
+        r"fips-mode:y::Libgcrypt version [\d\.\-]+:",
+        c.check_output("gpgconf --show-versions"),
+    ), "FIPS mode not detected by gpgconf"
 
     expected_fips_gcrypt_digests = {
         "sha1": "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
@@ -260,9 +267,7 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
     }
 
     for digest in FIPS_GCRYPT_DIGESTS:
-        res = container_per_test.connection.run_expect(
-            [0, 1], f"/bin/fips-test-gcrypt {digest}"
-        )
+        res = c.run_expect([0, 1], f"/bin/fips-test-gcrypt {digest}")
 
         assert (
             res.rc == 0
@@ -271,9 +276,7 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
         )
 
     for digest in NONFIPS_GCRYPT_DIGESTS:
-        non_fips_call = container_per_test.connection.run_expect(
-            [0, 1], f"/bin/fips-test-gcrypt {digest}"
-        )
+        non_fips_call = c.run_expect([0, 1], f"/bin/fips-test-gcrypt {digest}")
         if non_fips_call.rc != 1 and non_fips_call.stdout.strip().startswith(
             "Digest is: "
         ):
