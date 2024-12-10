@@ -14,6 +14,7 @@ offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
 
+import re
 import urllib.parse
 from pathlib import Path
 from typing import List
@@ -385,7 +386,7 @@ def test_general_labels(
         # no EULA for openSUSE images
     else:
         assert (
-            labels["com.suse.lifecycle-url"].removesuffix("/")
+            re.sub(r"\/$", "", labels["com.suse.lifecycle-url"])
             in (
                 "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
                 "https://www.suse.com/lifecycle",  # SLE 15 SP5 base container has incorrect URL
