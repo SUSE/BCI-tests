@@ -807,7 +807,6 @@ HELM_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_HELM_APP_VERSION}",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
-    image_type="kiwi",
 )
 
 _COSIGN_VERSION: str = "2.4"
