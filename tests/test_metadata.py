@@ -385,7 +385,7 @@ def test_general_labels(
         # no EULA for openSUSE images
     else:
         assert (
-            labels["com.suse.lifecycle-url"].removesuffix("/")
+            labels["com.suse.lifecycle-url"]
             in (
                 "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
                 "https://www.suse.com/lifecycle",  # SLE 15 SP5 base container has incorrect URL

@@ -395,7 +395,7 @@ KIWI_CONTAINERS = [
         ("15.6", "9.24"),
         ("15.7", "9.24"),
         ("16.0", "10.1"),
-        ("tumbleweed", "10.1"),
+        ("tumbleweed", "latest"),
     )
 ]
 
@@ -807,7 +807,6 @@ HELM_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_HELM_APP_VERSION}",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
-    image_type="kiwi",
 )
 
 _COSIGN_VERSION: str = "2.4"
