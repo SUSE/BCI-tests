@@ -395,7 +395,7 @@ KIWI_CONTAINERS = [
         ("15.6", "9.24"),
         ("15.7", "9.24"),
         ("16.0", "10.1"),
-        ("tumbleweed", "10.1"),
+        ("tumbleweed", "latest"),
     )
 ]
 
