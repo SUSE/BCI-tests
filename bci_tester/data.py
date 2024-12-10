@@ -52,7 +52,13 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 )
 
 # Allowed os versions for SLE_BCI repo checks
-ALLOWED_BCI_REPO_OS_VERSIONS = ("15.5", "15.6", "15.7", "tumbleweed")
+ALLOWED_BCI_REPO_OS_VERSIONS = (
+    "15.5",
+    "15.6",
+    "15.6-ai",
+    "15.7",
+    "tumbleweed",
+)
 
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_SLE_VERSIONS = ("15.6", "15.7")
@@ -64,7 +70,7 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "15.7", "tumbleweed")
 _DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
-RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6")
+RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "15.6-ai")
 
 assert (
     sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS)
@@ -106,10 +112,10 @@ else:
     SAC_CONTAINER_PREFIX = "containers"
     BCI_CONTAINER_PREFIX = "bci"
     OS_CONTAINER_TAG = OS_VERSION
-    OS_VERSION_ID = OS_VERSION
+    OS_VERSION_ID = OS_VERSION.partition("-")[0]
 
     OS_MAJOR_VERSION, OS_SP_VERSION = (
-        int(ver) for ver in OS_VERSION.partition("-")[0].split(".")
+        int(ver) for ver in OS_VERSION_ID.split(".")
     )
 
     #: The SLES 15 pretty name (from /etc/os-release)
@@ -971,6 +977,7 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
+        OPENWEBUI_CONTAINER,
     ]
     + ALERTMANAGER_CONTAINERS
     + BASE_FIPS_CONTAINERS
@@ -1023,6 +1030,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *COSIGN_CONTAINERS,
     MICRO_CONTAINER,
     MINIMAL_CONTAINER,
+    OLLAMA_CONTAINER,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1050,6 +1058,8 @@ else:
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
+            OLLAMA_CONTAINER,
+            OPENWEBUI_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
