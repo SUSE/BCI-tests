@@ -16,6 +16,7 @@ from pytest_container.runtime import get_selected_runtime
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTHON_WITH_PIPX_CONTAINERS
+from bci_tester.data import SAC_PYTHON_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
 BCDIR = "/tmp/"
@@ -41,7 +42,7 @@ COPY {ORIG + APPDIR}/{APPL1}  {APPDIR}
 """
 
 #: Base containers under test, input of auto_container fixture
-CONTAINER_IMAGES = PYTHON_CONTAINERS
+CONTAINER_IMAGES = PYTHON_CONTAINERS + SAC_PYTHON_CONTAINERS
 
 
 #: Derived containers, from custom Dockerfile including additional test files
@@ -174,8 +175,8 @@ def test_pip_install_source_cryptography(auto_container_per_test):
         "echo $PYTHON_VERSION"
     )
 
-    if packaging.version.Version(version) < packaging.version.Version("3.8"):
-        pytest.skip("cryptography tests only supported on >= 3.8")
+    if packaging.version.Version(version) < packaging.version.Version("3.10"):
+        pytest.skip("cryptography tests only supported on >= 3.10")
 
     # install dependencies
     auto_container_per_test.connection.run_expect(
