@@ -250,10 +250,16 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
         "mv fips-test-gcrypt /bin/fips-test-gcrypt"
     )
 
-    assert re.search(
+    fips_ver_match = re.search(
         r"fips-mode:y::Libgcrypt version [\d\.\-]+:",
         c.check_output("gpgconf --show-versions"),
-    ), "FIPS mode not detected by gpgconf"
+    )
+    if not fips_ver_match:
+        if OS_VERSION == "15.3":
+            pytest.xfail(
+                reason="https://bugzilla.suse.com/show_bug.cgi?id=1234366"
+            )
+        assert fips_ver_match, "FIPS mode not detected by gpgconf"
 
     expected_fips_gcrypt_digests = {
         "sha1": "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
