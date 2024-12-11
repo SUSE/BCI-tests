@@ -87,13 +87,23 @@ def test_maven_present(auto_container):
     assert auto_container.connection.run_expect([0], "mvn --version")
 
 
-@pytest.mark.xfail(
-    LOCALHOST.system_info.arch == "ppc64le",
-    reason="https://bugzilla.suse.com/show_bug.cgi?id=1221983",
-)
 @pytest.mark.parametrize(
     "container,java_version",
-    CONTAINER_IMAGES_WITH_VERSION,
+    # Softfailure for bsc#1221983 only applies to OpenJDK-devel-21
+    [
+        param
+        if param.values[1] != 21
+        else pytest.param(
+            *param.values,
+            id=param.id,
+            marks=param.marks
+            + pytest.mark.xfail(
+                condition=LOCALHOST.system_info.arch == "ppc64le",
+                reason="https://bugzilla.suse.com/show_bug.cgi?id=1221983",
+            ),
+        )
+        for param in CONTAINER_IMAGES_WITH_VERSION
+    ],
     indirect=["container"],
 )
 def test_entrypoint(container, java_version, host, container_runtime):
