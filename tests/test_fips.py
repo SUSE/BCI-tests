@@ -241,8 +241,11 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
 
     c = container_per_test.connection
 
+    # we must add --gpg-auto-import-keys to import the NVidia GPG key
+    c.check_output("zypper --gpg-auto-import-keys -n ref")
+
     c.check_output(
-        "zypper -n ref && zypper -n in gcc libgcrypt-devel dirmngr && "
+        "zypper -n in gcc libgcrypt-devel dirmngr && "
         "gcc -Og -g3 fips-test-gcrypt.c -Wall -Wextra -Wpedantic -lgcrypt -o fips-test-gcrypt && "
         "mv fips-test-gcrypt /bin/fips-test-gcrypt"
     )
