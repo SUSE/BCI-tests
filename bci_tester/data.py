@@ -220,15 +220,22 @@ BCI_DEVEL_REPO = os.getenv("BCI_DEVEL_REPO")
 
 
 if BCI_DEVEL_REPO is None:
-    # from SLE 15 SP6 onward we use the unauthenticated CDN
-    cdn_prefix = "installer-updates" if OS_SP_VERSION >= 6 else "updates"
-    BCI_DEVEL_REPO = f"https://{cdn_prefix}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
+    if OS_VERSION == "tumbleweed":
+        BCI_DEVEL_REPO = "http://download.opensuse.org/tumbleweed/repo/oss/"
+    else:
+        # from SLE 15 SP6 onward we use the unauthenticated CDN
+        cdn_prefix = "installer-updates" if OS_SP_VERSION >= 6 else "updates"
+        BCI_DEVEL_REPO = f"https://{cdn_prefix}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
     _BCI_REPLACE_REPO_CONTAINERFILE = ""
 else:
     bci_repo_path = f"/etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
-    # only try to replace the baseurl if the file exists and we have perl
-    # available (should be more ubiquitous than sed)
-    _BCI_REPLACE_REPO_CONTAINERFILE = f"RUN if [ -e {bci_repo_path} ] && [ -e /usr/bin/perl ]; then perl -pi -e 's|baseurl.*|baseurl={BCI_DEVEL_REPO}|g' {bci_repo_path}; fi"
+    bci_repo_replace = "${line/baseurl*/baseurl = " + BCI_DEVEL_REPO + "}"
+    _BCI_REPLACE_REPO_CONTAINERFILE = f"""RUN if [ -e {bci_repo_path} ]; then \\
+        while IFS= read -r line; do \\
+            echo \"{bci_repo_replace}\" >> {bci_repo_path}.tmp; \\
+        done < {bci_repo_path}; \\
+        mv {bci_repo_path}.tmp {bci_repo_path}; \\
+    fi"""
 
 assert BCI_DEVEL_REPO, "BCI_DEVEL_REPO must be set at this point"
 
