@@ -11,8 +11,7 @@ from pytest_container.container import ContainerData
 from bci_tester.data import TOMCAT_CONTAINERS
 
 
-@pytest.mark.parametrize("container", TOMCAT_CONTAINERS, indirect=True)
-def test_tomcat_launches(container: ContainerData) -> None:
+def _tomcat_launch_test_fn(container: ContainerData) -> requests.Response:
     """Simple smoke test verifying that the entrypoint launches tomcat and the
     server is responding to a ``GET /`` on the exposed port.
 
@@ -29,11 +28,38 @@ def test_tomcat_launches(container: ContainerData) -> None:
         )
 
     resp = _fetch_tomcat_root()
+    return resp
+
+
+@pytest.mark.parametrize("container", TOMCAT_CONTAINERS, indirect=True)
+def test_tomcat_launches(container: ContainerData) -> None:
+    """Simple smoke test verifying that the entrypoint launches tomcat and the
+    server is responding to a ``GET /`` on the exposed port.
+
+    """
+
+    resp = _tomcat_launch_test_fn(container)
+
     baseurl = container.container.baseurl
     assert baseurl
     ver = baseurl.rpartition(":")[2].partition("-")[0]
     assert resp.status_code == 404
     assert f"Apache Tomcat/{ver}" in resp.text
+
+
+@pytest.mark.parametrize("container", TOMCAT_CONTAINERS, indirect=True)
+def test_tomcat_logs(container: ContainerData) -> None:
+    """"""
+    _tomcat_launch_test_fn(container)
+    logs = container.read_container_logs()
+    assert (
+        "[main] org.apache.catalina.startup.Catalina.start Server startup in"
+        in logs
+    ), "startup logging message not found"
+    assert (
+        "-Djava.util.logging.config.file=/usr/share/tomcat/conf/logging.properties"
+        in logs
+    ), "expected logfile CLI argument not found"
 
 
 @pytest.mark.parametrize(
