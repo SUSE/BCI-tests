@@ -637,15 +637,17 @@ def test_container_build_and_repo(container_per_test, host):
                     [0], f"zypper modifyrepo --enable {repo_name}"
                 )
 
-    if OS_VERSION != "tumbleweed":
-        sle_bci_repo_candidates = [
-            repo for repo in repos if repo.name == "SLE_BCI"
-        ]
-        assert len(sle_bci_repo_candidates) == 1
-        sle_bci_repo = sle_bci_repo_candidates[0]
+    sle_bci_repo_candidates = [
+        repo
+        for repo in repos
+        if repo.name in ("SLE_BCI", "openSUSE-Tumbleweed-Oss")
+    ]
+    assert len(sle_bci_repo_candidates) == 1
+    sle_bci_repo = sle_bci_repo_candidates[0]
+    assert sle_bci_repo.url == BCI_DEVEL_REPO
 
+    if OS_VERSION != "tumbleweed":
         assert sle_bci_repo.name == "SLE_BCI"
-        assert sle_bci_repo.url == BCI_DEVEL_REPO
 
         # find the debug and source repositories in the repo list, enable them so
         # that we will check their url in the zypper ref call at the end
