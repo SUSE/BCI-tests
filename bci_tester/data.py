@@ -260,6 +260,7 @@ class ImageType(enum.Enum):
     """
 
     LANGUAGE_STACK = enum.auto()
+    SAC_LANGUAGE_STACK = enum.auto()
     APPLICATION = enum.auto()
     SAC_APPLICATION = enum.auto()
     OS = enum.auto()
@@ -268,12 +269,11 @@ class ImageType(enum.Enum):
     def __str__(self) -> str:
         if self.value == ImageType.OS_LTSS:
             return "suse/ltss"
-        return (
-            "application"
-            if self.value
-            in (ImageType.APPLICATION.value, ImageType.SAC_APPLICATION.value)
-            else "bci"
-        )
+        if self.value == ImageType.APPLICATION.value:
+            return "application"
+        if self.value == ImageType.SAC_APPLICATION.value:
+            return "application"
+        return "bci"
 
 
 def create_BCI(
@@ -568,37 +568,37 @@ NODEJS_CONTAINERS = [
     NODEJS_22_CONTAINER,
 ]
 
-PYTHON36_CONTAINER = create_BCI(
-    build_tag="bci/python:3.6", available_versions=["15.6"]
-)
-PYTHON310_CONTAINER = create_BCI(
-    build_tag="bci/python:3.10", available_versions=["tumbleweed"]
-)
-PYTHON311_CONTAINER = create_BCI(
-    build_tag="bci/python:3.11",
-    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
-)
-
-PYTHON312_CONTAINER = create_BCI(
-    build_tag="bci/python:3.12", available_versions=["15.6", "tumbleweed"]
-)
-
-PYTHON313_CONTAINER = create_BCI(
-    build_tag="bci/python:3.13", available_versions=["15.7", "tumbleweed"]
-)
-
-PYTHON_CONTAINERS = [
-    PYTHON36_CONTAINER,
-    PYTHON310_CONTAINER,
-    PYTHON311_CONTAINER,
-    PYTHON312_CONTAINER,
-    PYTHON313_CONTAINER,
+PYTHON_WITH_PIPX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/python:{ver}",
+        available_versions=versions,
+    )
+    for ver, versions in (
+        ("3.10", ["tumbleweed"]),
+        ("3.12", ["15.6", "tumbleweed"]),
+        ("3.13", ["15.7", "tumbleweed"]),
+    )
 ]
 
-PYTHON_WITH_PIPX_CONTAINERS = [
-    PYTHON310_CONTAINER,
-    PYTHON312_CONTAINER,
-    PYTHON313_CONTAINER,
+PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/python:{ver}",
+        available_versions=versions,
+    )
+    for ver, versions in (
+        ("3.6", ["15.6"]),
+        ("3.11", _DEFAULT_NONBASE_OS_VERSIONS),
+    )
+]
+
+# Python containers on SUSE Application Collection
+SAC_PYTHON_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{SAC_CONTAINER_PREFIX}/python:{ver}",
+        available_versions=versions,
+        bci_type=ImageType.SAC_LANGUAGE_STACK,
+    )
+    for ver, versions in (("3.9", ["15.6"]), ("3.11", ["15.6"]))
 ]
 
 RUBY_25_CONTAINER = create_BCI(
@@ -993,6 +993,7 @@ CONTAINERS_WITH_ZYPPER = (
     + PCP_CONTAINERS
     + PROMETHEUS_CONTAINERS
     + PYTHON_CONTAINERS
+    + SAC_PYTHON_CONTAINERS
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
@@ -1073,6 +1074,7 @@ else:
         + OPENJDK_CONTAINERS
         + PCP_CONTAINERS
         + PYTHON_CONTAINERS
+        + SAC_PYTHON_CONTAINERS
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
