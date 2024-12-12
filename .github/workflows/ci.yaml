@@ -387,9 +387,11 @@ jobs:
       - name: Add /etc/host entries
         run: |
           # precache dns entries to avoid timeouts in the runs later
-          for host in index.crates.io proxy.golang.org installer-updates.suse.com public-dl.suse.com updates.suse.com registry.suse.com registry.opensuse.org download.opensuse.org cdn.opensuse.org packages.microsoft.com; do
+          for host in index.crates.io proxy.golang.org public-dl.suse.com updates.suse.com registry.suse.com registry.opensuse.org download.opensuse.org cdn.opensuse.org packages.microsoft.com; do
             echo -e "$(getent ahostsv4 $host | grep STREAM | cut -d' ' -f1 | head -n 1)\t$host"  | sudo tee -a /etc/hosts
           done
+          # switch to new host
+          echo -e "$(getent ahosts4 public-dl.suse.com | grep STREAM  | cut -d' ' -f1 | head -n 1)\t installer-updates.suse.com" | sudo tee -a /etc/hosts
 
       - name: Run the tests for docker
         run: python3 -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
