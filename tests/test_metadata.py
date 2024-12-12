@@ -85,6 +85,7 @@ from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import RUBY_25_CONTAINER
 from bci_tester.data import RUBY_33_CONTAINER
 from bci_tester.data import RUST_CONTAINERS
+from bci_tester.data import SAC_PYTHON_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import ImageType
@@ -167,6 +168,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
+    + [
+        (c, "python", ImageType.SAC_LANGUAGE_STACK)
+        for c in SAC_PYTHON_CONTAINERS
+    ]
     + [(c, "base-fips", ImageType.OS) for c in BASE_FIPS_CONTAINERS]
     + [
         (container_pcp, "pcp", ImageType.APPLICATION)
@@ -360,7 +365,10 @@ def test_general_labels(
                 "https://www.opensuse.org",
                 "https://www.opensuse.org/",
             )
-        elif container_type in (ImageType.SAC_APPLICATION,):
+        elif container_type in (
+            ImageType.SAC_LANGUAGE_STACK,
+            ImageType.SAC_APPLICATION,
+        ):
             expected_url = (
                 f"https://apps.rancher.io/applications/{container_name}",
             )
@@ -394,6 +402,7 @@ def test_general_labels(
         if container_type in (
             ImageType.OS_LTSS,
             ImageType.APPLICATION,
+            ImageType.SAC_LANGUAGE_STACK,
             ImageType.SAC_APPLICATION,
         ):
             assert labels["com.suse.eula"] == "sle-eula"
@@ -616,7 +625,10 @@ def test_reference(
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
     else:
-        if container_type == ImageType.SAC_APPLICATION:
+        if container_type in (
+            ImageType.SAC_LANGUAGE_STACK,
+            ImageType.SAC_APPLICATION,
+        ):
             assert reference.startswith("dp.apps.rancher.io/containers/")
         elif container_type == ImageType.APPLICATION or (
             OS_VERSION == "15.5" and container_name in ("base",)
