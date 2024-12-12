@@ -322,6 +322,15 @@ def create_BCI(
         for m in extra_marks:
             marks.append(m)
 
+    if bci_type in (ImageType.SAC_APPLICATION, ImageType.SAC_LANGUAGE_STACK):
+        marks.append(
+            pytest.mark.skipif(
+                condition=LOCALHOST.system_info.arch
+                not in ("x86_64", "aarch64"),
+                reason="Application collection containers are only available for x86_64 and aarch64",
+            )
+        )
+
     # Ironbank currently has only the "bci-base" image and nothing else, so
     # skip all other tests
     if TARGET == "dso" and (
