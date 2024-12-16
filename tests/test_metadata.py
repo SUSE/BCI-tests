@@ -56,6 +56,7 @@ from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
+from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
 from bci_tester.data import NODEJS_18_CONTAINER
@@ -289,6 +290,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (OLLAMA_CONTAINER, "ollama", ImageType.SAC_APPLICATION),
         (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
+        (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
     ]
 ]
 
