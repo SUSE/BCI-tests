@@ -6,13 +6,11 @@ from tenacity import retry
 from tenacity import stop_after_attempt
 from tenacity import wait_exponential
 
+from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENWEBUI_CONTAINER
 
-CONTAINER_IMAGES = (
-    OLLAMA_CONTAINER,
-    OPENWEBUI_CONTAINER,
-)
+CONTAINER_IMAGES = (OLLAMA_CONTAINER, OPENWEBUI_CONTAINER, MILVUS_CONTAINER)
 
 
 @pytest.mark.parametrize(
@@ -57,3 +55,19 @@ def test_openwebui_health(container_per_test):
         assert ":true" in resp.text
 
     check_openwebui_response()
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    [MILVUS_CONTAINER],
+    indirect=["container_per_test"],
+)
+def test_milvus_health(container_per_test):
+    """Test the milvus container."""
+
+    # doesn't allow running outside kubernetes as far as I can see
+    container_per_test.connection.check_output(
+        "minio-client -q --dp --version"
+    )
+    container_per_test.connection.check_output("etcd --version")
+    container_per_test.connection.check_output("milvus")

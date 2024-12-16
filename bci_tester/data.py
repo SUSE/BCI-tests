@@ -983,6 +983,14 @@ OPENWEBUI_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=8080)],
 )
 
+MILVUS_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/milvus:2.4",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
+
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1047,6 +1055,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MICRO_CONTAINER,
     MINIMAL_CONTAINER,
     OLLAMA_CONTAINER,
+    MILVUS_CONTAINER,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1076,6 +1085,7 @@ else:
             PHP_8_FPM,
             OLLAMA_CONTAINER,
             OPENWEBUI_CONTAINER,
+            MILVUS_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
