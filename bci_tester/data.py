@@ -851,7 +851,7 @@ if OS_VERSION in ("16.0",):
 else:
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
-        available_versions=["15.5", "15.6"],
+        available_versions=["15.5", "15.6", "15.7"],
         bci_type=ImageType.OS,
     )
 
@@ -862,7 +862,7 @@ GCC_CONTAINERS = [
     )
     for gcc_version, os_versions in (
         (13, ("tumbleweed",)),
-        (14, ("15.6", "tumbleweed")),
+        (14, ("15.6", "15.7", "tumbleweed")),
     )
 ]
 
@@ -923,7 +923,7 @@ SPACK_CONTAINERS = [
         build_tag=f"{BCI_CONTAINER_PREFIX}/spack:{tag}",
         available_versions=[f"{ver}"],
     )
-    for ver, tag in (("15.6", "0.21"),)
+    for ver, tag in (("15.6", "0.21"), ("15.7", "0.21"))
 ]
 
 PROMETHEUS_CONTAINERS = [
@@ -935,6 +935,7 @@ PROMETHEUS_CONTAINERS = [
     )
     for versions, tag in (
         (("15.6",), "2"),
+        (("15.7",), "2"),
         (("tumbleweed",), "3"),
     )
 ]
@@ -946,7 +947,11 @@ ALERTMANAGER_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9093)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.6",), "0.26"), (("tumbleweed",), "0.27"))
+    for versions, tag in (
+        (("15.6",), "0.26"),
+        (("15.7",), "0.26"),
+        (("tumbleweed",), "0.27"),
+    )
 ]
 
 BLACKBOX_CONTAINERS = [
@@ -956,7 +961,7 @@ BLACKBOX_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9115)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.6", "tumbleweed"), "0.24"),)
+    for versions, tag in ((("15.6", "15.7", "tumbleweed"), "0.24"),)
 ]
 
 GRAFANA_CONTAINERS = [
@@ -966,7 +971,11 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.6",), "9"), (("tumbleweed",), "11"))
+    for versions, tag in (
+        (("15.6",), "9"),
+        (("15.7",), "9"),
+        (("tumbleweed",), "11"),
+    )
 ]
 
 OLLAMA_CONTAINER = create_BCI(
