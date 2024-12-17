@@ -73,7 +73,7 @@ def test_kiwi_create_image(
 
     assert container_per_test.connection.file("kiwi-main/build-tests").exists
 
-    kiwi_cmd = "kiwi-ng system build --description kiwi-main/build-tests/x86/leap/test-image-disk --set-repo obs://openSUSE:Leap:15.5/standard --target-dir /tmp/myimage"
+    kiwi_cmd = "kiwi-ng system build --description kiwi-main/build-tests/x86/leap/test-image-disk --set-repo obs://openSUSE:Leap:15.6/standard --target-dir /tmp/myimage"
     res = container_per_test.connection.run_expect([0, 1], kiwi_cmd)
     if res.rc == 1 and selinux_status() == "enforcing":
         pytest.xfail(
