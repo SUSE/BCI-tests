@@ -152,6 +152,15 @@ jobs:
             testing_target: ibs-released
             os_version: 15.4
           - toxenv: all
+            testing_target: ibs-released
+            os_version: 15.5
+          - toxenv: base
+            testing_target: ibs-released
+            os_version: 15.5
+          - toxenv: metadata
+            testing_target: ibs-released
+            os_version: 15.5
+          - toxenv: all
             os_version: 15.3
           - toxenv: base
             os_version: 15.3
