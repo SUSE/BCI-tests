@@ -117,6 +117,8 @@ jobs:
   test-containers:
     name: tox
     runs-on: ubuntu-latest
+    env:
+      K3S_CLUSTER_NAME: "test-k3s"
     needs: gentestmatrix
     strategy:
       fail-fast: false
@@ -399,6 +401,13 @@ jobs:
           for host in index.crates.io proxy.golang.org installer-updates.suse.com public-dl.suse.com updates.suse.com registry.suse.com registry.opensuse.org download.opensuse.org cdn.opensuse.org packages.microsoft.com; do
             echo -e "$(getent ahostsv4 $host | grep STREAM | cut -d' ' -f1 | head -n 1)\t$host"  | sudo tee -a /etc/hosts
           done
+
+      - uses: AbsaOSS/k3d-action@v2
+        name: "Create Single node k3d Cluster"
+        if: ${{ matrix.toxenv == 'kubectl' }}
+        with:
+          cluster-name: ${{ env.K3S_CLUSTER_NAME }}
+          args: --agents 1
 
       - name: Run the tests for docker
         run: python3 -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug

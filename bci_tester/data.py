@@ -842,6 +842,23 @@ NGINX_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=80)],
 )
 
+_KUBECTL_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+    ("1.28", ("15.6", "tumbleweed")),
+    ("1.30", ("15.7")),
+    ("1.29", ("tumbleweed")),
+    ("1.30", ("tumbleweed")),
+    ("1.31", ("tumbleweed")),
+)
+
+KUBECTL_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/:{kubectl_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=os_versions,
+    )
+    for kubectl_ver, os_versions in _KUBECTL_VERSION_OS_MATRIX
+]
+
 if OS_VERSION in ("16.0",):
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle16-kernel-module-devel:{OS_CONTAINER_TAG}",
@@ -1031,6 +1048,7 @@ CONTAINERS_WITH_ZYPPER = (
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
+    + KUBECTL_CONTAINERS
 )
 
 #: all containers with zypper and with the flag to launch them as root
@@ -1113,6 +1131,7 @@ else:
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
+        + KUBECTL_CONTAINERS
     )
 
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS
