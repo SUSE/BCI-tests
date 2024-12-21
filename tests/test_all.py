@@ -33,6 +33,7 @@ from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIWI_CONTAINERS
+from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
@@ -256,10 +257,6 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
-@pytest.mark.skipif(
-    OS_VERSION == "basalt",
-    reason="Basalt repos are known to be out of sync with IBS state",
-)
 @pytest.mark.parametrize(
     "container", _CONTAINERS_WITH_VOLUME_MOUNT, indirect=True
 )
@@ -329,7 +326,13 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     reason="AI containers include unpublished packages",
 )
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
+    "container_per_test",
+    [
+        c
+        for c in CONTAINERS_WITH_ZYPPER_AS_ROOT
+        if c not in LTSS_BASE_CONTAINERS
+    ],
+    indirect=True,
 )
 def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     """Check that containers do not contain any package that isn't also
@@ -464,7 +467,7 @@ def test_no_compat_packages(container):
 
 @pytest.mark.parametrize(
     "container",
-    ALL_CONTAINERS,
+    [c for c in ALL_CONTAINERS if c not in LTSS_BASE_CONTAINERS],
     indirect=True,
 )
 def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
@@ -571,7 +574,13 @@ def test_certificates_are_present(
     reason="no included BCI repository - can't test",
 )
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
+    "container_per_test",
+    [
+        c
+        for c in CONTAINERS_WITH_ZYPPER_AS_ROOT
+        if c not in LTSS_BASE_CONTAINERS
+    ],
+    indirect=True,
 )
 def test_container_build_and_repo(container_per_test, host):
     """Test all containers with zypper in them whether at least the ``SLE_BCI``
