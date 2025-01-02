@@ -457,22 +457,8 @@ else:
                 extra_marks=[pytest.mark.__getattr__(f"bci-base_{sp}-ltss")],
                 bci_type=ImageType.OS_LTSS,
             )
-            for sp in ("15.3", "15.4")
+            for sp in ("15.3", "15.4", "15.5")
         )
-        # Make Dan happy
-        if TARGET not in ("ibs-released",):
-            LTSS_BASE_CONTAINERS.extend(
-                create_BCI(
-                    build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle{sp}/bci-base:{OS_CONTAINER_TAG}",
-                    available_versions=[sp],
-                    image_type="kiwi",
-                    extra_marks=[
-                        pytest.mark.__getattr__(f"bci-base_{sp}-ltss")
-                    ],
-                    bci_type=ImageType.OS_LTSS,
-                )
-                for sp in ("15.5",)
-            )
         LTSS_BASE_FIPS_CONTAINERS.extend(
             create_BCI(
                 build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle{sp}/bci-base-fips:{OS_CONTAINER_TAG}",
