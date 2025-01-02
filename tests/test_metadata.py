@@ -59,9 +59,7 @@ from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
-from bci_tester.data import NODEJS_18_CONTAINER
-from bci_tester.data import NODEJS_20_CONTAINER
-from bci_tester.data import NODEJS_22_CONTAINER
+from bci_tester.data import NODEJS_CONTAINERS
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
@@ -157,9 +155,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             "openjdk.devel",
             ImageType.LANGUAGE_STACK,
         ),
-        (NODEJS_18_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
-        (NODEJS_20_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
-        (NODEJS_22_CONTAINER, "nodejs", ImageType.LANGUAGE_STACK),
         (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (RUBY_33_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
@@ -168,6 +163,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
+    + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [
         (c, "python", ImageType.SAC_LANGUAGE_STACK)
