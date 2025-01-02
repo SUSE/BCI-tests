@@ -43,7 +43,6 @@ ALLOWED_BASE_OS_VERSIONS = (
 
 # Allowed os versions for Language and Application containers
 ALLOWED_NONBASE_OS_VERSIONS = (
-    "15.5",
     "15.6",
     "15.6-ai",
     "15.7",
@@ -53,7 +52,6 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 
 # Allowed os versions for SLE_BCI repo checks
 ALLOWED_BCI_REPO_OS_VERSIONS = (
-    "15.5",
     "15.6",
     "15.6-ai",
     "15.7",
@@ -67,7 +65,7 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.6", "15.7")
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "15.7", "tumbleweed")
 
 # Test base containers by default for these versions
-_DEFAULT_BASE_OS_VERSIONS = ("15.5", "15.6", "15.7", "16.0", "tumbleweed")
+_DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
 RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "15.6-ai")
@@ -459,8 +457,22 @@ else:
                 extra_marks=[pytest.mark.__getattr__(f"bci-base_{sp}-ltss")],
                 bci_type=ImageType.OS_LTSS,
             )
-            for sp in ("15.3", "15.4", "15.5")
+            for sp in ("15.3", "15.4")
         )
+        # Make Dan happy
+        if TARGET not in ("ibs-released",):
+            LTSS_BASE_CONTAINERS.extend(
+                create_BCI(
+                    build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle{sp}/bci-base:{OS_CONTAINER_TAG}",
+                    available_versions=[sp],
+                    image_type="kiwi",
+                    extra_marks=[
+                        pytest.mark.__getattr__(f"bci-base_{sp}-ltss")
+                    ],
+                    bci_type=ImageType.OS_LTSS,
+                )
+                for sp in ("15.5",)
+            )
         LTSS_BASE_FIPS_CONTAINERS.extend(
             create_BCI(
                 build_tag=f"{APP_CONTAINER_PREFIX}/ltss/sle{sp}/bci-base-fips:{OS_CONTAINER_TAG}",
@@ -523,19 +535,19 @@ GOLANG_CONTAINERS = (
 )
 
 OPENJDK_11_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:11", available_versions=["15.5", "tumbleweed"]
+    build_tag="bci/openjdk:11", available_versions=["tumbleweed"]
 )
 OPENJDK_DEVEL_11_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:11",
-    available_versions=["15.5", "tumbleweed"],
+    available_versions=["tumbleweed"],
     custom_entry_point="/bin/sh",
 )
 OPENJDK_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:17", available_versions=["15.5", "tumbleweed"]
+    build_tag="bci/openjdk:17", available_versions=["tumbleweed"]
 )
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:17",
-    available_versions=["15.5", "tumbleweed"],
+    available_versions=["tumbleweed"],
     custom_entry_point="/bin/sh",
 )
 OPENJDK_21_CONTAINER = create_BCI(
@@ -565,9 +577,6 @@ OPENJDK_CONTAINERS = [
     OPENJDK_DEVEL_23_CONTAINER,
 ]
 
-NODEJS_18_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:18", available_versions=["15.5"]
-)
 NODEJS_20_CONTAINER = create_BCI(
     build_tag="bci/nodejs:20",
     available_versions=["15.6"],
@@ -579,7 +588,6 @@ NODEJS_22_CONTAINER = create_BCI(
 )
 
 NODEJS_CONTAINERS = [
-    NODEJS_18_CONTAINER,
     NODEJS_20_CONTAINER,
     NODEJS_22_CONTAINER,
 ]
@@ -784,7 +792,7 @@ POSTGRESQL_CONTAINERS = [
     )
     for pg_ver, pg_versions in (
         (14, ["tumbleweed"]),
-        (15, ["15.5", "tumbleweed"]),
+        (15, ["tumbleweed"]),
         (16, _DEFAULT_NONBASE_OS_VERSIONS),
         (17, ["15.6", "tumbleweed"]),
     )
@@ -851,7 +859,7 @@ if OS_VERSION in ("16.0",):
 else:
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
-        available_versions=["15.5", "15.6", "15.7"],
+        available_versions=["15.6", "15.7"],
         bci_type=ImageType.OS,
     )
 
