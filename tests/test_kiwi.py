@@ -10,6 +10,7 @@ from pytest_container.container import ImageFormat
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import KIWI_CONTAINERS
+from bci_tester.fips import host_fips_enabled
 from bci_tester.runtime_choice import PODMAN_SELECTED
 from bci_tester.selinux import selinux_status
 
@@ -52,6 +53,10 @@ def test_kiwi_installation(auto_container):
 @pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",
     reason="test is atm x86_64 specific",
+)
+@pytest.mark.skipif(
+    host_fips_enabled(),
+    reason="https://github.com/OSInside/kiwi/issues/2696",
 )
 @pytest.mark.skipif(
     PODMAN_SELECTED and os.geteuid() != 0,
