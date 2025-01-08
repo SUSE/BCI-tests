@@ -208,6 +208,7 @@ jobs:
           python-version: "3.x"
       - name: Install tox
         run: |
+          sudo apt-get remove python3-packaging
           sudo apt-get install python3-pip
           python3 --version
           python3 -m pip install tox
