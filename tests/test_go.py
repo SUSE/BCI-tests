@@ -3,6 +3,7 @@
 import re
 
 import pytest
+from packaging import version
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
@@ -74,15 +75,37 @@ def test_build_kured(auto_container_per_test, container_git_clone):
     ],
     indirect=["container_git_clone"],
 )
-def test_build_helm(auto_container_per_test, container_git_clone):
+def test_build_helm(
+    auto_container_per_test: ContainerData, container_git_clone
+):
     """Try to build `helm <https://github.com/helm/helm.git>`_ inside the
     container with :command:`make` pre-installed.
 
     """
 
-    go_version = auto_container_per_test.connection.check_output("go version")
-    if "go1.20" in go_version or "go1.21" in go_version:
-        pytest.skip("Helm requires Go >= 1.22")
+    go_mod_path = (
+        auto_container_per_test.inspect.config.workingdir / "helm" / "go.mod"
+    )
+    go_mod = auto_container_per_test.connection.file(
+        str(go_mod_path)
+    ).content_string
+
+    required_version_match = re.search(
+        r"^go\s+(?P<version>(\d+\.)+\d+)$", go_mod, re.MULTILINE
+    )
+    assert required_version_match
+    required_go_version = version.parse(
+        required_version_match.group("version")
+    )
+
+    go_version = version.parse(
+        auto_container_per_test.inspect.config.env["GOLANG_VERSION"]
+    )
+
+    if required_go_version > go_version:
+        pytest.skip(
+            f"Helm requires Go >= {required_go_version}, but we have {go_version}"
+        )
 
     auto_container_per_test.connection.check_output(
         container_git_clone.test_command
