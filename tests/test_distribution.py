@@ -41,7 +41,7 @@ def test_registry_service(
     host.run_expect(
         [0],
         textwrap.dedent(
-            f"""cd {tmp_path} && {' '.join(container_runtime.build_command)} \
+            f"""cd {tmp_path} && {" ".join(container_runtime.build_command)} \
             -t {container_path} -f Containerfile .""",
         ),
     )

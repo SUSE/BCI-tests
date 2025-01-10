@@ -180,9 +180,9 @@ def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
     )
     from_line = from_line_regex.match(contents)
 
-    assert from_line and from_line.group(
-        "go_ver"
-    ), f"No valid FROM line found in Dockerfile.dapper: {contents}"
+    assert from_line and from_line.group("go_ver"), (
+        f"No valid FROM line found in Dockerfile.dapper: {contents}"
+    )
     go_version = container.connection.check_output("echo $GOLANG_VERSION")
     if not go_version.startswith(from_line.group("go_ver")):
         pytest.skip(

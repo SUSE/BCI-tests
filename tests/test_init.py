@@ -88,9 +88,9 @@ class TestSystemd:
         startup = extract_time(time.stdout, "Startup finished in ")
         assert startup <= startup_limit, "Startup threshold exceeded"
         target = extract_time(time.stdout, ".target reached after ")
-        assert (
-            target <= target_limit
-        ), "Reaching systemd target threshold exceeded"
+        assert target <= target_limit, (
+            "Reaching systemd target threshold exceeded"
+        )
 
     def test_systemd_nofailed_units(self, auto_container):
         """
@@ -99,9 +99,9 @@ class TestSystemd:
         output = auto_container.connection.run_expect(
             [0], "systemctl list-units --state=failed"
         )
-        assert (
-            "0 loaded units listed" in output.stdout
-        ), "failed systemd units detected"
+        assert "0 loaded units listed" in output.stdout, (
+            "failed systemd units detected"
+        )
 
     def test_systemd_detect_virt(self, auto_container, container_runtime):
         """
@@ -109,9 +109,9 @@ class TestSystemd:
         """
         output = auto_container.connection.check_output("systemd-detect-virt")
         runtime = container_runtime.runner_binary
-        assert (
-            runtime in output
-        ), f"systemd-detect-virt failed to detect {runtime}"
+        assert runtime in output, (
+            f"systemd-detect-virt failed to detect {runtime}"
+        )
 
     def test_journald(self, auto_container):
         """
@@ -122,9 +122,9 @@ class TestSystemd:
         journal = auto_container.connection.run_expect(
             [0], "journalctl --boot"
         )
-        assert (
-            "Reached target Multi-User System" in journal.stdout
-        ), "Multi-User target was not reached"
+        assert "Reached target Multi-User System" in journal.stdout, (
+            "Multi-User target was not reached"
+        )
 
     def test_hostnamectl(self, auto_container, container_runtime):
         """
@@ -143,9 +143,9 @@ class TestSystemd:
             if OS_VERSION == "tumbleweed"
             else "SUSE Linux Enterprise Server"
         )
-        assert (
-            expected_os in values["OperatingSystemPrettyName"]
-        ), "Missing SUSE tag in Operating system"
+        assert expected_os in values["OperatingSystemPrettyName"], (
+            "Missing SUSE tag in Operating system"
+        )
 
         virt_detected = auto_container.connection.run_expect(
             [0], "systemd-detect-virt -c"
@@ -159,9 +159,9 @@ class TestSystemd:
         Ensure :command:`timedatectl` works as expected and the container timezone is UTC
         """
         output = auto_container.connection.check_output("timedatectl")
-        assert re.search(
-            r"Time zone:.*(Etc/UTC|UTC)", output
-        ), "Time zone not set to UTC"
+        assert re.search(r"Time zone:.*(Etc/UTC|UTC)", output), (
+            "Time zone not set to UTC"
+        )
 
         # Check that the reported timestamp for UTC and local time match the system time
         def check_timestamp(pattern, timestamp, delta):
@@ -169,16 +169,16 @@ class TestSystemd:
             e.g. use the "Universal time" as pattern and datetime.utcnow() to check for the UTC time
             """
             grep = [line for line in output.split("\n") if pattern in line]
-            assert (
-                len(grep) == 1
-            ), f"{pattern} not present in timedatectl output"
+            assert len(grep) == 1, (
+                f"{pattern} not present in timedatectl output"
+            )
             tsp = (
                 grep[0].strip()[len(pattern) + 2 :].strip()
             )  # Extract actual timestamp
             tsp = datetime.datetime.strptime(tsp, "%a %Y-%m-%d %H:%M:%S UTC")
-            assert (
-                abs(tsp - timestamp) < delta
-            ), f"timedatectl diff exceeded for {pattern}"
+            assert abs(tsp - timestamp) < delta, (
+                f"timedatectl diff exceeded for {pattern}"
+            )
 
         check_timestamp(
             "Universal time",
@@ -197,6 +197,6 @@ class TestSystemd:
         Ensure :command:`loginctl` contains no logins
         """
         loginctl = auto_container.connection.run_expect([0], "loginctl")
-        assert (
-            "No sessions" in loginctl.stdout
-        ), "Assert no sessions are present failed"
+        assert "No sessions" in loginctl.stdout, (
+            "Assert no sessions are present failed"
+        )

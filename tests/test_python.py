@@ -103,12 +103,12 @@ def test_pipx(container_per_test):
     )
     run1 = container_per_test.connection.check_output("xkcdpass")
     run2 = container_per_test.connection.check_output("xkcdpass")
-    assert (
-        len(run1) > 20 and len(run2) > 20
-    ), "xkcdpass should output a passphrase with more than 20 characters"
-    assert (
-        run1 != run2
-    ), "xkcdpass should output a different passphrase each time"
+    assert len(run1) > 20 and len(run2) > 20, (
+        "xkcdpass should output a passphrase with more than 20 characters"
+    )
+    assert run1 != run2, (
+        "xkcdpass should output a different passphrase each time"
+    )
 
 
 def test_pip(auto_container):

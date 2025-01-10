@@ -194,9 +194,9 @@ def test_lifecycle(auto_container):
                 support_end = datetime.datetime.strptime(
                     entry_date, "%Y-%m-%d"
                 )
-                assert (
-                    datetime.datetime.now() < support_end
-                ), f"{entry_name} = {installed_binaries[entry_name]} installed but out of support since {entry_date}"
+                assert datetime.datetime.now() < support_end, (
+                    f"{entry_name} = {installed_binaries[entry_name]} installed but out of support since {entry_date}"
+                )
 
 
 @pytest.mark.skipif(
@@ -446,9 +446,9 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
 
     # we cannot check for an existing package if rpm is not installed
     if container.connection.exists("rpm"):
-        assert not container.connection.package(
-            "systemd"
-        ).is_installed, "systemd is installed in this container!"
+        assert not container.connection.package("systemd").is_installed, (
+            "systemd is installed in this container!"
+        )
 
 
 @pytest.mark.parametrize(
@@ -478,9 +478,9 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
         OS_VERSION in ALLOWED_BCI_REPO_OS_VERSIONS
         and OS_VERSION in RELEASED_SLE_VERSIONS
     ):
-        assert container.connection.file(
-            bci_license
-        ).exists, "BCI EULA is missing"
+        assert container.connection.file(bci_license).exists, (
+            "BCI EULA is missing"
+        )
         assert (
             "SUSE Linux Enterprise Base Container Image License"
             in container.connection.check_output(f"head -n 1 {bci_license}")
@@ -500,9 +500,9 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
         ):
             pytest.skip("Unmaintained bci-* base os containers are not tested")
 
-        assert not container.connection.file(
-            bci_license
-        ).exists, "BCI EULA shall not be in LTSS container"
+        assert not container.connection.file(bci_license).exists, (
+            "BCI EULA shall not be in LTSS container"
+        )
 
 
 @pytest.mark.skipif(
@@ -633,9 +633,9 @@ def test_container_build_and_repo(container_per_test, host):
 
             repos = get_repos_from_connection(container_per_test.connection)
 
-        assert (
-            len(repos) > 1
-        ), "On a registered host, we must have more than one repository on the host"
+        assert len(repos) > 1, (
+            "On a registered host, we must have more than one repository on the host"
+        )
     else:
         assert len(repos) <= len(expected_repos)
         assert not repo_names - expected_repos
@@ -670,12 +670,13 @@ def test_container_build_and_repo(container_per_test, host):
                 )
 
         assert (
-            ("SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names)
-            or (
-                "SLE_BCI_debug" not in repo_names
-                and "SLE_BCI_source" not in repo_names
-            )
-        ), "repos SLE_BCI_source and SLE_BCI_debug must either both be present or both missing"
+            "SLE_BCI_debug" in repo_names and "SLE_BCI_source" in repo_names
+        ) or (
+            "SLE_BCI_debug" not in repo_names
+            and "SLE_BCI_source" not in repo_names
+        ), (
+            "repos SLE_BCI_source and SLE_BCI_debug must either both be present or both missing"
+        )
 
     # check that all enabled repos are valid and can be refreshed
     container_per_test.connection.run_expect([0], "zypper -n ref")

@@ -291,9 +291,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
 ]
 
 
-assert len(ALL_CONTAINERS) == len(
-    IMAGES_AND_NAMES
-), "IMAGES_AND_NAMES must have all containers from ALL_CONTAINERS"
+assert len(ALL_CONTAINERS) == len(IMAGES_AND_NAMES), (
+    "IMAGES_AND_NAMES must have all containers from ALL_CONTAINERS"
+)
 
 
 @pytest.mark.parametrize(
@@ -375,9 +375,9 @@ def test_general_labels(
                 "https://www.suse.com/products/long-term-service-pack-support/",
             )
 
-        assert (
-            labels[f"{prefix}.url"] in expected_url
-        ), f"expected LABEL {prefix}.url = {expected_url} but is {labels[f'{prefix}.url']}"
+        assert labels[f"{prefix}.url"] in expected_url, (
+            f"expected LABEL {prefix}.url = {expected_url} but is {labels[f'{prefix}.url']}"
+        )
         assert labels[f"{prefix}.vendor"] == VENDOR
 
     if OS_VERSION == "tumbleweed":
@@ -507,9 +507,9 @@ def test_disturl_can_be_checked_out(
             pytest.skip(reason=f"Cannot connect to SUSE internal host: {e}")
         raise
     req.raise_for_status()
-    assert (
-        "kiwi" in req.text or "Dockerfile" in req.text
-    ), "Cannot find a valid build description"
+    assert "kiwi" in req.text or "Dockerfile" in req.text, (
+        "Cannot find a valid build description"
+    )
 
 
 @SKIP_IF_TW_MARK
@@ -559,9 +559,9 @@ def test_acc_label(container: ContainerData):
     ``com.suse.supportlevel`` set to ``acc``.
     Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
     """
-    assert (
-        container.inspect.config.labels["com.suse.supportlevel"] == "acc"
-    ), "acc images must be marked as acc"
+    assert container.inspect.config.labels["com.suse.supportlevel"] == "acc", (
+        "acc images must be marked as acc"
+    )
 
 
 @SKIP_IF_TW_MARK
@@ -571,9 +571,9 @@ def test_l3_label(container: ContainerData):
     ``com.suse.supportlevel`` set to ``l3``.
     Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
     """
-    assert (
-        container.inspect.config.labels["com.suse.supportlevel"] == "l3"
-    ), "image supportlevel must be marked as L3"
+    assert container.inspect.config.labels["com.suse.supportlevel"] == "l3", (
+        "image supportlevel must be marked as L3"
+    )
 
 
 @pytest.mark.parametrize(
@@ -680,15 +680,15 @@ def test_oci_base_refs(
     base_digest: str = labels["org.opencontainers.image.base.digest"]
     base_name: str = labels["org.opencontainers.image.base.name"]
 
-    assert (
-        ":" in base_name
-    ), f"`org.opencontainers.image.base.name` is not the expected format: {base_name}"
+    assert ":" in base_name, (
+        f"`org.opencontainers.image.base.name` is not the expected format: {base_name}"
+    )
     base_repository = base_name.partition(":")[0]
 
     assert base_name.startswith("registry.suse.com/")
-    assert (
-        f":{OS_VERSION_ID}" in base_name
-    ), "Base image reference is not the expected version"
+    assert f":{OS_VERSION_ID}" in base_name, (
+        "Base image reference is not the expected version"
+    )
     assert base_digest.startswith("sha256:")
 
     if PODMAN_SELECTED and container_runtime.version.major < 3:
