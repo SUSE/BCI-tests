@@ -81,8 +81,7 @@ from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
-from bci_tester.data import RUBY_25_CONTAINER
-from bci_tester.data import RUBY_33_CONTAINER
+from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SAC_PYTHON_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
@@ -155,8 +154,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             "openjdk.devel",
             ImageType.LANGUAGE_STACK,
         ),
-        (RUBY_25_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
-        (RUBY_33_CONTAINER, "ruby", ImageType.LANGUAGE_STACK),
         (INIT_CONTAINER, "init", ImageType.OS),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
@@ -165,6 +162,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     ]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
+    + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
     + [
         (c, "python", ImageType.SAC_LANGUAGE_STACK)
         for c in SAC_PYTHON_CONTAINERS
