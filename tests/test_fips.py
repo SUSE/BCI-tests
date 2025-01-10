@@ -151,9 +151,9 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
         dev_null_digest = container_per_test.connection.check_output(
             f"openssl {digest} /dev/null"
         )
-        assert (
-            f"= {NULL_DIGESTS[digest]}" in dev_null_digest
-        ), f"unexpected digest of hash {digest}: {dev_null_digest}"
+        assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
+            f"unexpected digest of hash {digest}: {dev_null_digest}"
+        )
 
 
 @pytest.mark.skipif(
@@ -218,9 +218,9 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
     for digest in NONFIPS_GNUTLS_DIGESTS:
         err_msg = c.run_expect([1], f"/bin/fips-test-gnutls {digest}").stderr
 
-        assert (
-            "Hash calculation failed" in err_msg
-        ), f"Hash calculation unexpectedly succeeded for {digest}"
+        assert "Hash calculation failed" in err_msg, (
+            f"Hash calculation unexpectedly succeeded for {digest}"
+        )
 
 
 @pytest.mark.parametrize(

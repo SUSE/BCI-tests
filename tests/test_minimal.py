@@ -105,9 +105,9 @@ def test_fat_packages_absent(container):
 )
 def test_rpm_absent_in_micro(container):
     """Ensure that rpm is not present in the micro container."""
-    assert not container.connection.exists(
-        "rpm"
-    ), "rpm must not be present in the micro container"
+    assert not container.connection.exists("rpm"), (
+        "rpm must not be present in the micro container"
+    )
 
 
 @pytest.mark.parametrize(
@@ -115,6 +115,6 @@ def test_rpm_absent_in_micro(container):
 )
 def test_rpm_present_in_minimal(container):
     """Ensure that rpm is present in the minimal container."""
-    assert container.connection.exists(
-        "rpm"
-    ), "rpm must be present in the minimal container"
+    assert container.connection.exists("rpm"), (
+        "rpm must be present in the minimal container"
+    )

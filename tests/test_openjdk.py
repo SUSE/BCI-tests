@@ -154,9 +154,9 @@ def test_java_home(auto_container: ContainerData):
         if line.strip().startswith("java.home"):
             assert line.strip().replace("java.home = ", "") == java_home_path
             java_home_setting_checked = True
-    assert (
-        java_home_setting_checked
-    ), f"java.home setting missing in the output of {java_props_cmd}"
+    assert java_home_setting_checked, (
+        f"java.home setting missing in the output of {java_props_cmd}"
+    )
 
 
 @dataclass(frozen=True)

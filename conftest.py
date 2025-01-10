@@ -53,9 +53,9 @@ def container_git_clone(
 
     assert isinstance(container_fixture, ContainerData)
 
-    assert (
-        container_fixture is not None
-    ), "No container fixture was passed to the test function, cannot execute `container_git_clone`"
+    assert container_fixture is not None, (
+        "No container fixture was passed to the test function, cannot execute `container_git_clone`"
+    )
 
     check_output(shlex.split(git_repo_build.clone_command), cwd=tmp_path)
 
