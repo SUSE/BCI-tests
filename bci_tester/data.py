@@ -586,7 +586,6 @@ PYTHON_WITH_PIPX_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.10", ["tumbleweed"]),
         ("3.12", ["15.6", "tumbleweed"]),
         ("3.13", ["15.7", "tumbleweed"]),
     )
