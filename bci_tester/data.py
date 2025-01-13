@@ -616,11 +616,11 @@ RUBY_25_CONTAINER = create_BCI(
     build_tag="bci/ruby:2.5", available_versions=["15.6"]
 )
 
-RUBY_34_CONTAINER = create_BCI(
-    build_tag="bci/ruby:3.4", available_versions=["tumbleweed"]
+RUBY_LATEST_CONTAINER = create_BCI(
+    build_tag="bci/ruby:latest", available_versions=["tumbleweed"]
 )
 
-RUBY_CONTAINERS = [RUBY_25_CONTAINER, RUBY_34_CONTAINER]
+RUBY_CONTAINERS = [RUBY_25_CONTAINER, RUBY_LATEST_CONTAINER]
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch != "x86_64",

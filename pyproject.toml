@@ -137,7 +137,7 @@ markers = [
     'python_3.6',
     'registry_2.8',
     'ruby_2.5',
-    'ruby_3.4',
+    'ruby_latest',
     'rust_oldstable',
     'rust_stable',
     'tumbleweed_latest',
