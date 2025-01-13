@@ -131,7 +131,6 @@ markers = [
     'prometheus_2',
     'prometheus_3',
     'python_3.9',
-    'python_3.10',
     'python_3.11',
     'python_3.12',
     'python_3.13',
