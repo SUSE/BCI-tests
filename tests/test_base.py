@@ -53,6 +53,15 @@ def test_iconv_working(auto_container):
 
 
 @pytest.mark.skipif(
+    OS_VERSION in ("15.3", "15.4", "15.5"),
+    reason="unfixed in LTSS codestreams",
+)
+def test_group_nobody_working(auto_container):
+    """Test that nobody group is available in the container (bsc#1212118)."""
+    assert auto_container.connection.check_output("getent group nobody")
+
+
+@pytest.mark.skipif(
     not PODMAN_SELECTED,
     reason="docker size reporting is dependent on underlying filesystem",
 )
