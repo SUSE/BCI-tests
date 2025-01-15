@@ -1,9 +1,11 @@
 """Tests for the Go language container."""
 
 import re
+from pathlib import Path
 
 import pytest
 from pytest_container import GitRepositoryBuild
+from pytest_container import get_extra_run_args
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
@@ -157,7 +159,13 @@ def test_build_generics_cache(
     LOCALHOST.system_info.arch not in ("x86_64", "aarch64"),
     reason=f"{LOCALHOST.system_info.arch} is not supported to build rancher",
 )
-def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
+def test_rancher_build(
+    host,
+    host_git_clone,
+    dapper,
+    container: ContainerData,
+    pytestconfig: pytest.Config,
+):
     """Regression test that we can build Rancher in the go container:
 
     - clone the `rancher/rancher <https://github.com/rancher/rancher>`_ repository
@@ -167,12 +175,10 @@ def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
 
     This test is only enabled for docker (dapper does not support podman).
     """
+    dest: Path
     dest, git_repo = host_git_clone
-    rancher_dir = dest / git_repo.repo_name
-    with open(
-        rancher_dir / "Dockerfile.dapper", encoding="utf-8"
-    ) as dapperfile:
-        contents = dapperfile.read(-1)
+    rancher_dir: Path = dest / git_repo.repo_name
+    contents = (rancher_dir / "Dockerfile.dapper").read_text()
 
     from_line_regex = re.compile(
         r"^from registry\.suse\.com/bci/golang:(?P<go_ver>.*)$",
@@ -183,11 +189,15 @@ def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
     assert from_line and from_line.group("go_ver"), (
         f"No valid FROM line found in Dockerfile.dapper: {contents}"
     )
-    go_version = container.connection.check_output("echo $GOLANG_VERSION")
+    go_version = container.inspect.config.env["GOLANG_VERSION"]
     if not go_version.startswith(from_line.group("go_ver")):
         pytest.skip(
             f"Dapper is only supported on {from_line.group('go_ver')}, got {go_version}"
         )
+
+    run_args = get_extra_run_args(pytestconfig)
+    if run_args:
+        contents += f"\nENV DAPPER_RUN_ARGS {' '.join(run_args)}\n"
 
     with open(
         rancher_dir / "Dockerfile.dapper", "w", encoding="utf-8"
@@ -196,4 +206,4 @@ def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
             from_line_regex.sub(f"FROM {container.image_url_or_id}", contents)
         )
 
-    host.run_expect([0], f"cd {rancher_dir} && {dapper} build")
+    host.check_output(f"cd {rancher_dir} && {dapper} build")
