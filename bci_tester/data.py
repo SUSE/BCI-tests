@@ -995,6 +995,16 @@ MILVUS_CONTAINER = create_BCI(
 )
 
 
+VALKEY_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/valkey:{tag}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=versions,
+        forwarded_ports=[PortForwarding(container_port=6379)],
+    )
+    for versions, tag in ((("tumbleweed",), "8.0"),)
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1065,6 +1075,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *POSTGRESQL_CONTAINERS,
     *MARIADB_CLIENT_CONTAINERS,
     *MARIADB_CONTAINERS,
+    *VALKEY_CONTAINERS,
 ]
 
 #: Containers with L3 support
@@ -1112,7 +1123,7 @@ else:
 
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS
 
-#: Containers that are directly pulled from registry.suse.de
+#: Containers pulled from registry.suse.de
 ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER
 
 
