@@ -5,7 +5,6 @@ JRE).
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
@@ -31,12 +30,9 @@ ENTRYPOINT ["/bin/bash"]
 """
 
 CONTAINER_IMAGES_EXTENDED = [
-    pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(container)[0],
-            containerfile=DOCKERF_EXTENDED,
-        ),
-        marks=container.marks,
+    DerivedContainer(
+        base=container,
+        containerfile=DOCKERF_EXTENDED,
     )
     for container in CONTAINER_IMAGES
 ]

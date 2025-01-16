@@ -10,7 +10,6 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container import Version
 from pytest_container.container import ContainerData
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import OPENJDK_11_CONTAINER
@@ -38,13 +37,9 @@ RUN zypper -n in mozilla-nss* java-$JAVA_VERSION-openjdk-devel
 
 FIPS_OPENJDK_IMAGES = []
 
-for param in [OPENJDK_17_CONTAINER, OPENJDK_21_CONTAINER]:
-    ctr, marks = container_and_marks_from_pytest_param(param)
-    tester_ctr = DerivedContainer(
-        containerfile=DOCKERFILE_OPENJDK_FIPS, base=ctr
-    )
+for ctr in [OPENJDK_17_CONTAINER, OPENJDK_21_CONTAINER]:
     FIPS_OPENJDK_IMAGES.append(
-        pytest.param(tester_ctr, marks=marks, id=param.id)
+        DerivedContainer(containerfile=DOCKERFILE_OPENJDK_FIPS, base=ctr)
     )
 
 CONTAINER_IMAGES = [
@@ -55,25 +50,17 @@ CONTAINER_IMAGES = [
 ]
 
 CONTAINER_IMAGES_EXTENDED = [
-    pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(container)[0],
-            containerfile=DOCKERF_EXTENDED,
-        ),
-        marks=container.marks,
-        id=container.id,
+    DerivedContainer(
+        base=container,
+        containerfile=DOCKERF_EXTENDED,
     )
     for container in CONTAINER_IMAGES
 ]
 
 CONTAINER_IMAGES_CASSANDRA = [
-    pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(container)[0],
-            containerfile=DOCKERF_CASSANDRA,
-        ),
-        marks=container.marks,
-        id=container.id,
+    DerivedContainer(
+        base=container,
+        containerfile=DOCKERF_CASSANDRA,
     )
     for container in [OPENJDK_11_CONTAINER]
 ]

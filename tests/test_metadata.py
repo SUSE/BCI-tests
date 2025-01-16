@@ -536,13 +536,15 @@ def test_disturl_can_be_checked_out(
     ]
     + [
         pytest.param(
-            BASE_CONTAINER.values,
-            marks=BASE_CONTAINER.marks
+            BASE_CONTAINER,
+            marks=list(BASE_CONTAINER.marks)
             + [
                 pytest.mark.xfail(
                     reason="Base container for SLE 15 SP6 is not using the techpreview label (https://build.suse.de/request/show/325200)"
                 )
-            ],
+            ]
+            if OS_VERSION == "15.6"
+            else [],
         )
     ],
     indirect=True,
