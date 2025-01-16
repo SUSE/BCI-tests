@@ -10,8 +10,8 @@ from typing import Tuple
 
 import pytest
 from _pytest.mark import ParameterSet
+from pytest_container import DerivedContainer
 from pytest_container import GitRepositoryBuild
-from pytest_container import container_and_marks_from_pytest_param
 
 from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_9_0_CONTAINER
@@ -36,13 +36,14 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def _generate_ctr_ver_param(ctr_ver: Tuple[ParameterSet, str]) -> ParameterSet:
+def _generate_ctr_ver_param(
+    ctr_ver: Tuple[DerivedContainer, str],
+) -> ParameterSet:
     """Converts a `(Container, Version)` tuple into a `pytest.param` that
     contains the exact same values but has the marks of the container.
 
     """
-    ctr, marks = container_and_marks_from_pytest_param(ctr_ver[0])
-    return pytest.param(ctr, ctr_ver[1], marks=marks or ())
+    return pytest.param(ctr_ver[0], ctr_ver[1], marks=ctr_ver[0].marks)
 
 
 @pytest.mark.parametrize(

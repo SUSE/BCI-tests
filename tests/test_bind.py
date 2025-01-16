@@ -15,7 +15,6 @@ from dns import resolver
 from dns.rrset import RRset
 from pytest_container import BindMount
 from pytest_container import DerivedContainer
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import EntrypointSelection
 
@@ -117,32 +116,28 @@ def test_env_variables_from_sysconfig_set(
     assert env_to_dict(env) == env_to_dict(env_with_source)
 
 
-_BIND_WITH_CUSTOM_CONF = []
-for param in BIND_CONTAINERS:
-    ctr, marks = container_and_marks_from_pytest_param(param)
+_BIND_WITH_CUSTOM_CONF: List[DerivedContainer] = []
+for ctr in BIND_CONTAINERS:
     _NAMED_CONF = "/etc/bind/named.conf"
     _BIND_WITH_CUSTOM_CONF.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                extra_environment_variables={"NAMED_CONF": _NAMED_CONF},
-                volume_mounts=[
-                    BindMount(
-                        container_path=_NAMED_CONF,
-                        host_path=str(
-                            Path(__file__).parent / "files" / "named.conf"
-                        ),
+        DerivedContainer(
+            base=ctr,
+            extra_environment_variables={"NAMED_CONF": _NAMED_CONF},
+            volume_mounts=[
+                BindMount(
+                    container_path=_NAMED_CONF,
+                    host_path=str(
+                        Path(__file__).parent / "files" / "named.conf"
                     ),
-                    BindMount(
-                        container_path="/etc/bind/db.blocked",
-                        host_path=str(
-                            Path(__file__).parent / "files" / "db.blocked"
-                        ),
+                ),
+                BindMount(
+                    container_path="/etc/bind/db.blocked",
+                    host_path=str(
+                        Path(__file__).parent / "files" / "db.blocked"
                     ),
-                ],
-                forwarded_ports=ctr.forwarded_ports,
-            ),
-            marks=marks,
+                ),
+            ],
+            forwarded_ports=ctr.forwarded_ports,
         )
     )
 
@@ -167,21 +162,16 @@ def test_custom_named_config(container: ContainerData) -> None:
     assert not empty_resp.answer
 
 
-_BIND_WITH_CUSTOM_CHECKER = []
+_BIND_WITH_CUSTOM_CHECKER: List[DerivedContainer] = []
 _CHECKER_TOUCHED_FILE = "/tmp/check-conf-worked"
-for param in BIND_CONTAINERS:
-    ctr, marks = container_and_marks_from_pytest_param(param)
-
+for ctr in BIND_CONTAINERS:
     _BIND_WITH_CUSTOM_CHECKER.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                extra_environment_variables={
-                    "NAMED_CHECKCONF_BIN": "/usr/bin/touch",
-                    "NAMED_CHECKCONF_ARGS": _CHECKER_TOUCHED_FILE,
-                },
-            ),
-            marks=marks,
+        DerivedContainer(
+            base=ctr,
+            extra_environment_variables={
+                "NAMED_CHECKCONF_BIN": "/usr/bin/touch",
+                "NAMED_CHECKCONF_ARGS": _CHECKER_TOUCHED_FILE,
+            },
         )
     )
 
@@ -198,20 +188,15 @@ def test_custom_checker(container: ContainerData) -> None:
     assert container.connection.file(_CHECKER_TOUCHED_FILE).exists
 
 
-_BIND_WITH_BASH = []
-for param in BIND_CONTAINERS:
-    ctr, marks = container_and_marks_from_pytest_param(param)
-
+_BIND_WITH_BASH: List[DerivedContainer] = []
+for ctr in BIND_CONTAINERS:
     _BIND_WITH_BASH.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                # don't launch bind as it chown's /var/lib/named
-                entry_point=EntrypointSelection.BASH,
-                # ignore healthcheck, bind is not running in this container
-                healthcheck_timeout=timedelta(seconds=-1),
-            ),
-            marks=marks,
+        DerivedContainer(
+            base=ctr,
+            # don't launch bind as it chown's /var/lib/named
+            entry_point=EntrypointSelection.BASH,
+            # ignore healthcheck, bind is not running in this container
+            healthcheck_timeout=timedelta(seconds=-1),
         )
     )
 

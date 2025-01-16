@@ -3,10 +3,8 @@
 import re
 
 import pytest
-from _pytest.mark import ParameterSet
 from pytest_container import DerivedContainer
 from pytest_container import GitRepositoryBuild
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
@@ -23,16 +21,10 @@ pytestmark = pytest.mark.skipif(
 _DRBD_VERSION = "9.2.11"
 
 
-def create_kernel_test(containerfile: str) -> ParameterSet:
-    return pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(
-                KERNEL_MODULE_CONTAINER
-            )[0],
-            containerfile=containerfile,
-        ),
-        marks=KERNEL_MODULE_CONTAINER.marks,
-        id=KERNEL_MODULE_CONTAINER.id,
+def create_kernel_test(containerfile: str) -> DerivedContainer:
+    return DerivedContainer(
+        base=KERNEL_MODULE_CONTAINER,
+        containerfile=containerfile,
     )
 
 

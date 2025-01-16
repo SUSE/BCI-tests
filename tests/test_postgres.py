@@ -10,7 +10,6 @@ import pytest
 from _pytest.mark import ParameterSet
 from pytest_container.container import ContainerData
 from pytest_container.container import DerivedContainer
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import POSTGRESQL_CONTAINERS
@@ -38,9 +37,8 @@ _POSTGRES_USER = "postgres"
 def _generate_test_matrix() -> List[ParameterSet]:
     params = []
 
-    for pg_cont_param in POSTGRESQL_CONTAINERS:
-        pg_cont = container_and_marks_from_pytest_param(pg_cont_param)[0]
-        marks = pg_cont_param.marks
+    for pg_cont in POSTGRESQL_CONTAINERS:
+        marks = pg_cont.marks
         ports = pg_cont.forwarded_ports
         params.append(
             pytest.param(pg_cont, None, POSTGRES_PASSWORD, None, marks=marks)
