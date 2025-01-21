@@ -572,7 +572,7 @@ NODEJS_20_CONTAINER = create_BCI(
 
 NODEJS_22_CONTAINER = create_BCI(
     build_tag="bci/nodejs:22",
-    available_versions=["tumbleweed", "15.7"],
+    available_versions=["tumbleweed", "15.6", "15.7"],
 )
 
 NODEJS_CONTAINERS = [

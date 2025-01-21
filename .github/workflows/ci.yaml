@@ -173,6 +173,8 @@ jobs:
           - toxenv: metadata
             os_version: 15.4
           - toxenv: all
+            os_version: "15.6"
+          - toxenv: node
             os_version: "15.7"
           - toxenv: base
             os_version: "15.7"
