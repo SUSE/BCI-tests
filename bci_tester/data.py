@@ -1076,6 +1076,18 @@ CONTAINERS_WITHOUT_ZYPPER = [
     STUNNEL_CONTAINER,
 ]
 
+
+# can't use sets here, because the list contents are mutable :-(
+for ctr_with_zypp in CONTAINERS_WITH_ZYPPER:
+    assert ctr_with_zypp not in CONTAINERS_WITHOUT_ZYPPER, (
+        f"Container '{ctr_with_zypp.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_ZYPPER"
+    )
+
+for ctr_without_zypp in CONTAINERS_WITHOUT_ZYPPER:
+    assert ctr_without_zypp not in CONTAINERS_WITH_ZYPPER, (
+        f"Container '{ctr_without_zypp.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_ZYPPER"
+    )
+
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
 # 15.7 is not yet released, so no l3 support either
