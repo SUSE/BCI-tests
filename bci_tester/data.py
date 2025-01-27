@@ -994,6 +994,14 @@ MILVUS_CONTAINER = create_BCI(
 )
 
 
+STUNNEL_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
+    bci_type=ImageType.APPLICATION,
+    custom_entry_point="/bin/sh",
+    available_versions=["15.6", "15.7", "tumbleweed"],
+)
+
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1064,7 +1072,20 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *POSTGRESQL_CONTAINERS,
     *MARIADB_CLIENT_CONTAINERS,
     *MARIADB_CONTAINERS,
+    STUNNEL_CONTAINER,
 ]
+
+
+# can't use sets here, because the list contents are mutable :-(
+for ctr_with_zypp in CONTAINERS_WITH_ZYPPER:
+    assert ctr_with_zypp not in CONTAINERS_WITHOUT_ZYPPER, (
+        f"Container '{ctr_with_zypp.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_ZYPPER"
+    )
+
+for ctr_without_zypp in CONTAINERS_WITHOUT_ZYPPER:
+    assert ctr_without_zypp not in CONTAINERS_WITH_ZYPPER, (
+        f"Container '{ctr_without_zypp.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_ZYPPER"
+    )
 
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
