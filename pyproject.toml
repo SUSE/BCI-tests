@@ -16,6 +16,7 @@ markers = [
     '389-ds_3.1',
     'alertmanager_0.26',
     'alertmanager_0.27',
+    'alertmanager_latest',
     'apache-tomcat_9-openjdk8',
     'apache-tomcat_9-openjdk11',
     'apache-tomcat_9-openjdk17',
