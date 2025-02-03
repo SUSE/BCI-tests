@@ -32,7 +32,6 @@ What do I need to contribute?
 * tox
 * go
 * docker and/or podman+buildah
-* vagrant (optional, can be used to test FIPS mode and registered hosts)
 
 How can I run the tests?
 ------------------------
@@ -163,19 +162,6 @@ and can be used to launch the tests of a single test suite in parallel via:
 .. code-block:: shell-session
 
     $ tox -e testname -- -n auto
-
-
-Testing on FIPS enabled systems
--------------------------------
-
-The base container tests execute a different set of tests on a FIPS enabled
-system. Currently, the CI does not run on such a system, so these must be
-executed manually. If you do not have access to such a system, you can use a
-prebuild vagrant box from the Open Build Service for this.
-
-Install `vagrant <https://www.vagrantup.com/downloads>`_ and run ``vagrant up``
-in the root directory of this repository. The provisioning script defined in the
-:file:`Vagrantfile` will automatically run the base container tests.
 
 
 Adding the pre-commit hook
