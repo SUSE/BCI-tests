@@ -176,3 +176,27 @@ prebuild vagrant box from the Open Build Service for this.
 Install `vagrant <https://www.vagrantup.com/downloads>`_ and run ``vagrant up``
 in the root directory of this repository. The provisioning script defined in the
 :file:`Vagrantfile` will automatically run the base container tests.
+
+
+Adding the pre-commit hook
+--------------------------
+
+You can setup the :file:`pre-commit.sh` script as a pre-commit hook in git, so
+that it runs each time before a commit is created. The script exits with a
+non-zero status on either of the most common mistakes:
+
+1. :command:`ruff` formating not applied
+
+2. A new container has been added or a version has been toggled, but the
+   respective marker in :file:`pyproject.toml` is missing
+
+
+To install the hook, execute the following commands from the top level project
+directory:
+
+.. code-block:: shell-session
+
+    $ pushd .git/hooks/
+    $ ln -s ../../pre-commit.sh pre-commit
+    $ popd
+

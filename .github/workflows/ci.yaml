@@ -22,9 +22,9 @@ jobs:
         run: |
           set -e
           sudo apt update
-          sudo apt -y install jo tox
-      - name: Test formatting with ruff
-        run: tox -e format -- --check
+          sudo apt -y install tox
+      - name: Test formatting with ruff & check the markers
+        run: ./pre-commit.sh
 
   gentestmatrix:
     name: Generate test matrix
