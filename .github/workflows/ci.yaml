@@ -24,7 +24,7 @@ jobs:
           sudo apt update
           sudo apt -y install tox
       - name: Test formatting with ruff & check the markers
-        run: ./pre-commit.sh
+        run: ./pre-commit-full.sh
 
   gentestmatrix:
     name: Generate test matrix
