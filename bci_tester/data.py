@@ -918,7 +918,7 @@ SPACK_CONTAINERS = [
         build_tag=f"{BCI_CONTAINER_PREFIX}/spack:{tag}",
         available_versions=[f"{ver}"],
     )
-    for ver, tag in (("15.6", "0.21"), ("15.7", "0.23"))
+    for ver, tag in (("15.6", "0.23"), ("15.7", "0.23"))
 ]
 
 PROMETHEUS_CONTAINERS = [
