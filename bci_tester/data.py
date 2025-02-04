@@ -2,6 +2,7 @@
 import enum
 import os
 from datetime import timedelta
+from pathlib import Path
 from typing import Iterable
 from typing import Optional
 from typing import Sequence
@@ -1137,11 +1138,19 @@ ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER
 
 
 if __name__ == "__main__":
-    import json
+    from typing import Set
+
+    import tomllib
+
+    custom_markers: Set[str] = set(
+        tomllib.loads(
+            (Path(__file__).parent.parent / "pyproject.toml").read_text()
+        )["tool"]["pytest"]["ini_options"]["markers"]
+    )
 
     def has_true_skipif(param: ParameterSet) -> bool:
         for mark in param.marks:
-            if mark.name == "skipif" and mark.args[0]:
+            if mark.name == "skipif" and mark.args and mark.args[0]:
                 return True
         return False
 
@@ -1151,12 +1160,15 @@ if __name__ == "__main__":
                 return True
         return False
 
-    print(
-        json.dumps(
-            [
-                container_and_marks_from_pytest_param(cont)[0].get_base().url
-                for cont in ALL_CONTAINERS
-                if (not has_true_skipif(cont) and not has_xfail(cont))
-            ]
-        )
-    )
+    for param in ALL_CONTAINERS:
+        # don't check containers which are known broken or excluded
+        if has_true_skipif(param) or has_xfail(param):
+            continue
+
+        ctr, marks = container_and_marks_from_pytest_param(param)
+        for mark in marks or []:
+            assert mark.name in custom_markers.union(
+                {"xfail", "skipif", "skip"}
+            ), (
+                f"marker '{mark.name}' of '{ctr.get_base().baseurl}' not found in pyproject.toml"
+            )
