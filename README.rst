@@ -169,13 +169,10 @@ Adding the pre-commit hook
 
 You can setup the :file:`pre-commit.sh` script as a pre-commit hook in git, so
 that it runs each time before a commit is created. The script exits with a
-non-zero status on either of the most common mistakes:
+non-zero status when the desired formatting is not applied.
 
-1. :command:`ruff` formating not applied
-
-2. A new container has been added or a version has been toggled, but the
-   respective marker in :file:`pyproject.toml` is missing
-
+The :file:`pre-commit-full.sh` script in addition also checks if any container
+marker in :file:`pyproject.toml` is missing. This checks takes some time.
 
 To install the hook, execute the following commands from the top level project
 directory:
@@ -183,6 +180,6 @@ directory:
 .. code-block:: shell-session
 
     $ pushd .git/hooks/
-    $ ln -s ../../pre-commit.sh pre-commit
+    $ ln -s ../../pre-commit.sh pre-commit   # use `pre-commit-full.sh` to also check container marks
     $ popd
 
