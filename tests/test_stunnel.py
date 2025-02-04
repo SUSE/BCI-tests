@@ -20,6 +20,7 @@ any content that you like.
 
 """
 
+import ssl
 from pathlib import Path
 
 import pytest
@@ -105,7 +106,12 @@ def test_stunnel_http_proxy(pod: PodData):
     def get_request_to_stunnel(route: str = "") -> requests.Response:
         resp = requests.get(
             f"https://127.0.0.1:{pod.forwarded_ports[0].host_port}/{route}",
-            verify=_SERVER_CRT,
+            # openssl older than 1.1.1l fails to validate a cert without CA
+            verify=(
+                _SERVER_CRT
+                if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF
+                else False
+            ),
             timeout=5,
         )
         resp.raise_for_status()
@@ -149,7 +155,12 @@ def test_http_tunnel_to_neverssl_com(container: ContainerData) -> None:
     def get_request_to_stunnel(route: str = "") -> requests.Response:
         resp = requests.get(
             f"https://127.0.0.1:{container.forwarded_ports[0].host_port}/{route}",
-            verify=_SERVER_CRT,
+            # openssl older than 1.1.1l fails to validate a cert without CA
+            verify=(
+                _SERVER_CRT
+                if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF
+                else False
+            ),
             timeout=5,
         )
         resp.raise_for_status()
