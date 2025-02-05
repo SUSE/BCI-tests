@@ -837,6 +837,25 @@ NGINX_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=80)],
 )
 
+_KUBECTL_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+    ("1.28", ("15.6", "15.7")),
+    ("1.30", ("15.7",)),
+    ("1.29", ("tumbleweed",)),
+    ("1.30", ("tumbleweed",)),
+    ("1.31", ("tumbleweed",)),
+    ("1.32", ("tumbleweed",)),
+)
+
+KUBECTL_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kubectl:{kubectl_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=os_versions,
+        custom_entry_point="/bin/sh",
+    )
+    for kubectl_ver, os_versions in _KUBECTL_VERSION_OS_MATRIX
+]
+
 if OS_VERSION in ("16.0",):
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle16-kernel-module-devel:{OS_CONTAINER_TAG}",
@@ -1074,6 +1093,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *MARIADB_CLIENT_CONTAINERS,
     *MARIADB_CONTAINERS,
     STUNNEL_CONTAINER,
+    *KUBECTL_CONTAINERS,
 ]
 
 
@@ -1129,6 +1149,7 @@ else:
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
+        + KUBECTL_CONTAINERS
     )
 
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS

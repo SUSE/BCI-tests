@@ -50,6 +50,7 @@ from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIWI_CONTAINERS
+from bci_tester.data import KUBECTL_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
@@ -288,6 +289,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
+    + [
+        (kubectl_container, "kubectl", ImageType.APPLICATION)
+        for kubectl_container in KUBECTL_CONTAINERS
+    ]
 ]
 
 
