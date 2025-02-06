@@ -1,12 +1,11 @@
 """Basic tests for the Python base container images."""
 
-import time
+import hashlib
 
 import packaging.version
 import pytest
 import requests
 from pytest_container import DerivedContainer
-from pytest_container import OciRuntimeBase
 from pytest_container import PortForwarding
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
@@ -27,16 +26,7 @@ APPDIR = "trainers/"
 OUTDIR = "output/"
 APPL1 = "tensorflow_examples.py"
 PORT1 = 8123
-t0 = time.time()
 
-
-DOCKERF_PY_T2 = f"""
-WORKDIR {BCDIR}
-RUN mkdir {APPDIR}
-RUN mkdir {OUTDIR}
-EXPOSE {PORT1}
-COPY {ORIG + APPDIR}/{APPL1}  {APPDIR}
-"""
 
 #: Base containers under test, input of auto_container fixture
 CONTAINER_IMAGES = PYTHON_CONTAINERS + SAC_PYTHON_CONTAINERS
@@ -61,13 +51,40 @@ HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localho
     for CONTAINER_T in CONTAINER_IMAGES
 ]
 
+REQUESTS_CONTAINER_IMAGES = [
+    pytest.param(
+        DerivedContainer(
+            base=container_and_marks_from_pytest_param(param)[0],
+            containerfile=f"""WORKDIR {BCDIR}
+RUN python3 -m venv .venv; source .venv/bin/activate; pip install requests
+""",
+        ),
+        marks=param.marks,
+        id=param.id,
+    )
+    for param in CONTAINER_IMAGES
+]
+
+#: URL of the SLE BCI Logo
+SLE_BCI_LOGO_URL = "https://opensource.suse.com/bci/SLE_BCI_logomark_green.svg"
+
+#: sha512 hexdigest of the SLE BCI Logo, output of
+#: :command:`curl $SLE_BCI_LOGO_URL|sha512sum`
+SLE_BCI_LOGO_SHA512_SUM = "6b4447f88be45ae335868b8c4c0200adfc26b85359cfa74965388571c51b4611454c9fb3d386c61d9bc312b5dad0a71dc3753303338a88db7bfdc8f94ac114a1"
+
 #: Derived containers, from custom Dockerfile including additional test files,
 #: input to container_per_test fixture
-CONTAINER_IMAGES_T2 = [
+TENSORFLOW_CONTAINER_IMAGES = [
     pytest.param(
         DerivedContainer(
             base=container_and_marks_from_pytest_param(CONTAINER_T)[0],
-            containerfile=DOCKERF_PY_T2,
+            containerfile=f"""
+WORKDIR {BCDIR}
+RUN mkdir {APPDIR}
+RUN mkdir {OUTDIR}
+EXPOSE {PORT1}
+COPY {ORIG + APPDIR}/{APPL1} {APPDIR}
+""",
         ),
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
@@ -225,63 +242,24 @@ def test_python_http_server_module(container_per_test: ContainerData) -> None:
     assert resp.text
 
 
-@pytest.mark.skipif(
-    OS_VERSION == "tumbleweed",
-    reason="pip --user not working due to PEP 668",
-)
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINER_IMAGES_T2, indirect=["container_per_test"]
+    "container_per_test", REQUESTS_CONTAINER_IMAGES, indirect=True
 )
-@pytest.mark.parametrize(
-    "destdir, appl2, url, xfilename",
-    [
-        (
-            BCDIR + OUTDIR,
-            "communication_examples.py",
-            "https://opensource.suse.com/bci/SLE_BCI_logomark_green.svg",
-            "SLE_BCI_logomark_green.svg",
-        )
-    ],
-)
-def test_python_webserver_2(
-    container_per_test: ContainerData,
-    host,
-    container_runtime: OciRuntimeBase,
-    destdir: str,
-    appl2: str,
-    url: str,
-    xfilename: str,
-) -> None:
-    """Test that the python `wget <https://pypi.org/project/wget/>`_ library,
-    coded in the appl2 module, is able to fetch files from a webserver
+def test_python_fetch_remote_file(container_per_test: ContainerData) -> None:
+    """Test that python's requests is able to fetch the SLE_BCI logo from
+    opensource.suse.com
+
     """
-
-    # install wget for python
-    container_per_test.connection.run_expect([0], "pip install wget")
-
-    # copy an application file from the local test-server into the running
-    # container under test
-    host.check_output(
-        f"{container_runtime.runner_binary} cp {ORIG + APPDIR + appl2} "
-        f"{container_per_test.container_id}:{BCDIR + APPDIR}",
+    logo_text: str = container_per_test.connection.check_output(
+        "source .venv/bin/activate; "
+        f"python -c \"import requests; resp = requests.get('{SLE_BCI_LOGO_URL}', timeout=120); "
+        'resp.raise_for_status(); print(resp.text)"'
     )
 
-    # check the test python module is present in the container
-    assert container_per_test.connection.file(BCDIR + APPDIR + appl2).is_file
-
-    # check expected file not present yet in the destination
-    assert not container_per_test.connection.file(destdir + xfilename).exists
-
-    # execution of the python module in the container
-    bci_python_wget = container_per_test.connection.check_output(
-        f"timeout --preserve-status 120s python3 {APPDIR + appl2} {url} {destdir}",
+    assert (
+        hashlib.sha512(logo_text.encode("utf-8")).hexdigest()
+        == SLE_BCI_LOGO_SHA512_SUM
     )
-
-    # run the test in the container and check expected keyword from the module
-    assert "PASS" in bci_python_wget
-
-    # check expected file present in the bci destination
-    assert container_per_test.connection.file(destdir + xfilename).exists
 
 
 @pytest.mark.skipif(
@@ -294,7 +272,7 @@ def test_python_webserver_2(
     reason="Tensorflow python library tested on x86_64",
 )
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINER_IMAGES_T2, indirect=["container_per_test"]
+    "container_per_test", TENSORFLOW_CONTAINER_IMAGES, indirect=True
 )
 def test_tensorf(container_per_test):
     """Test that the python tensorflow library, coded in the appl1 module,
