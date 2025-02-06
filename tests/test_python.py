@@ -269,8 +269,8 @@ def test_python_webserver_1(
         (
             BCDIR + OUTDIR,
             "communication_examples.py",
-            "https://www.suse.com/assets/img/suse-white-logo-green.svg",
-            "suse-white-logo-green.svg",
+            "https://opensource.suse.com/bci/SLE_BCI_logomark_green.svg",
+            "SLE_BCI_logomark_green.svg",
         )
     ],
 )
@@ -292,8 +292,7 @@ def test_python_webserver_2(
 
     # copy an application file from the local test-server into the running
     # container under test
-    host.run_expect(
-        [0],
+    host.check_output(
         f"{container_runtime.runner_binary} cp {ORIG + APPDIR + appl2} "
         f"{container_per_test.container_id}:{BCDIR + APPDIR}",
     )
