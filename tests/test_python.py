@@ -4,10 +4,12 @@ import time
 
 import packaging.version
 import pytest
+import requests
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
 from pytest_container import PortForwarding
 from pytest_container.container import ContainerData
+from pytest_container.container import ImageFormat
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import Version
@@ -27,11 +29,6 @@ APPL1 = "tensorflow_examples.py"
 PORT1 = 8123
 t0 = time.time()
 
-# copy tensorflow module trainer from the local application directory to the container
-DOCKERF_PY_T1 = f"""
-WORKDIR {BCDIR}
-EXPOSE {PORT1}
-"""
 
 DOCKERF_PY_T2 = f"""
 WORKDIR {BCDIR}
@@ -45,14 +42,18 @@ COPY {ORIG + APPDIR}/{APPL1}  {APPDIR}
 CONTAINER_IMAGES = PYTHON_CONTAINERS + SAC_PYTHON_CONTAINERS
 
 
-#: Derived containers, from custom Dockerfile including additional test files
-#: and extra args, input to container_per_test fixture
-CONTAINER_IMAGES_T1 = [
+#: Derived containers with the python http.server as CMD and a HEALTHCHECK
+#: ensuring that the server is up and running
+HTTP_SERVER_CONTAINER_IMAGES = [
     pytest.param(
         DerivedContainer(
             base=container_and_marks_from_pytest_param(CONTAINER_T)[0],
-            containerfile=DOCKERF_PY_T1,
+            containerfile=f"""RUN zypper -n in iproute2 curl && zypper -n clean
+CMD python3 -m http.server {PORT1}
+HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localhost:{PORT1}
+""",
             forwarded_ports=[PortForwarding(container_port=PORT1)],
+            image_format=ImageFormat.DOCKER,
         ),
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
@@ -207,53 +208,21 @@ def test_pip_install_source_cryptography(auto_container_per_test):
     reason="server port checks not compatible with old podman versions 1.x",
 )
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINER_IMAGES_T1, indirect=["container_per_test"]
+    "container_per_test", HTTP_SERVER_CONTAINER_IMAGES, indirect=True
 )
-@pytest.mark.parametrize("hmodule, retry", [("http.server", 10)])
-def test_python_webserver_1(
-    container_per_test: ContainerData, hmodule: str, retry: int
-) -> None:
+def test_python_http_server_module(container_per_test: ContainerData) -> None:
     """Test that the python webserver is able to open a given port"""
 
-    portstatus = False
-    t = 0
-    port = container_per_test.forwarded_ports[0].host_port
+    ctr_port = container_per_test.forwarded_ports[0].container_port
+    host_port = container_per_test.forwarded_ports[0].host_port
 
-    command = f"timeout --preserve-status 120 python3 -m {hmodule} {port} &"
-
-    # pkg needed to run socket/port check
-    if not container_per_test.connection.package("iproute2").is_installed:
-        container_per_test.connection.run_expect([0], "zypper -n in iproute2")
-
-    # checks that the expected port is Not listening yet
-    assert not container_per_test.connection.socket(
-        f"tcp://0.0.0.0:{port}"
+    assert container_per_test.connection.socket(
+        f"tcp://0.0.0.0:{ctr_port}"
     ).is_listening
 
-    t1 = time.time() - t0
-
-    # start of the python http server
-    container_per_test.connection.run_expect([0], command)
-
-    t2 = time.time() - t0
-
-    # port status inspection with timeout
-    for _ in range(retry):
-        time.sleep(1)
-        portstatus = container_per_test.connection.socket(
-            f"tcp://0.0.0.0:{port}"
-        ).is_listening
-
-        if portstatus:
-            break
-
-    t3 = time.time() - t0
-
-    # check inspection success or timeout
-    assert portstatus, (
-        "Timeout expired: expected port not listening. Time marks: before "
-        + f"server start {t1}s, after start {t2}s, after {t} loops {t3}s."
-    )
+    resp = requests.get(f"http://0.0.0.0:{host_port}", timeout=10)
+    resp.raise_for_status()
+    assert resp.text
 
 
 @pytest.mark.skipif(
