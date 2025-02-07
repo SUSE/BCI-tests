@@ -356,7 +356,7 @@ def test_general_labels(
         if version == "tumbleweed":
             assert OS_VERSION in labels[f"{prefix}.version"]
 
-        expected_url: Tuple[str] = (
+        expected_url: Tuple[str, ...] = (
             "https://www.suse.com/products/base-container-images/",
         ) + (
             ("https://www.suse.com/products/server/",)
