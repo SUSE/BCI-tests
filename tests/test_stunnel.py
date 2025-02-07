@@ -9,7 +9,6 @@ follows:
    $ openssl genrsa -out server.key 2048
    $ openssl req -new -key server.key -out server.csr
    $ openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt -extfile v3.ext
-   $ cat server.crt server.key > server.pem
 
 The :command:`openssl req` call will ask for some input, you may provide it with
 any content that you like.
@@ -21,6 +20,7 @@ any content that you like.
 
 """
 
+import ssl
 from pathlib import Path
 
 import pytest
@@ -48,13 +48,13 @@ for key in [
     _stunnel_kwargs.pop(key)
 
 _cert_dir = Path(__file__).parent / "files" / "stunnel"
-_SERVER_PEM = str(_cert_dir / "server.pem")
+_SERVER_CRT = str(_cert_dir / "server.crt")
 
 _stunnel_kwargs["volume_mounts"].extend(
     [
         BindMount(
             container_path="/etc/stunnel/stunnel.pem",
-            host_path=_SERVER_PEM,
+            host_path=_SERVER_CRT,
         ),
         BindMount(
             container_path="/etc/stunnel/stunnel.key",
@@ -106,7 +106,12 @@ def test_stunnel_http_proxy(pod: PodData):
     def get_request_to_stunnel(route: str = "") -> requests.Response:
         resp = requests.get(
             f"https://127.0.0.1:{pod.forwarded_ports[0].host_port}/{route}",
-            verify=_SERVER_PEM,
+            # openssl older than 1.1.1l fails to validate a cert without CA
+            verify=(
+                _SERVER_CRT
+                if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF
+                else False
+            ),
             timeout=5,
         )
         resp.raise_for_status()
@@ -150,7 +155,12 @@ def test_http_tunnel_to_neverssl_com(container: ContainerData) -> None:
     def get_request_to_stunnel(route: str = "") -> requests.Response:
         resp = requests.get(
             f"https://127.0.0.1:{container.forwarded_ports[0].host_port}/{route}",
-            verify=_SERVER_PEM,
+            # openssl older than 1.1.1l fails to validate a cert without CA
+            verify=(
+                _SERVER_CRT
+                if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF
+                else False
+            ),
             timeout=5,
         )
         resp.raise_for_status()
