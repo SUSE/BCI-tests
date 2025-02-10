@@ -91,6 +91,28 @@ _STUNNEL_POD = pytest.param(
 )
 
 
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
+)
+def get_request_to_stunnel_with_backoff(
+    *, route: str = "", port: int
+) -> requests.Response:
+    """Perform a GET to `127.0.0.1:$port/$route` with an exponential backoff in
+    case the response has a status other than 200 or times out.
+
+    """
+    resp = requests.get(
+        f"https://127.0.0.1:{port}/{route}",
+        # openssl older than 1.1.1l fails to validate a cert without CA
+        verify=(
+            _SERVER_CRT if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF else False
+        ),
+        timeout=5,
+    )
+    resp.raise_for_status()
+    return resp
+
+
 @pytest.mark.parametrize("pod", [_STUNNEL_POD], indirect=True)
 def test_stunnel_http_proxy(pod: PodData):
     """Smoke test for stunnel to wrap a python http server in a TLS connection
@@ -100,24 +122,12 @@ def test_stunnel_http_proxy(pod: PodData):
 
     """
 
-    @tenacity.retry(
-        stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
+    assert (
+        "hello world"
+        in get_request_to_stunnel_with_backoff(
+            port=pod.forwarded_ports[0].host_port
+        ).text
     )
-    def get_request_to_stunnel(route: str = "") -> requests.Response:
-        resp = requests.get(
-            f"https://127.0.0.1:{pod.forwarded_ports[0].host_port}/{route}",
-            # openssl older than 1.1.1l fails to validate a cert without CA
-            verify=(
-                _SERVER_CRT
-                if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF
-                else False
-            ),
-            timeout=5,
-        )
-        resp.raise_for_status()
-        return resp
-
-    assert "hello world" in get_request_to_stunnel().text
 
 
 _CTR_PORT = 8000
@@ -149,24 +159,9 @@ def test_http_tunnel_to_neverssl_com(container: ContainerData) -> None:
 
     """
 
-    @tenacity.retry(
-        stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
+    resp = get_request_to_stunnel_with_backoff(
+        port=container.forwarded_ports[0].host_port
     )
-    def get_request_to_stunnel(route: str = "") -> requests.Response:
-        resp = requests.get(
-            f"https://127.0.0.1:{container.forwarded_ports[0].host_port}/{route}",
-            # openssl older than 1.1.1l fails to validate a cert without CA
-            verify=(
-                _SERVER_CRT
-                if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF
-                else False
-            ),
-            timeout=5,
-        )
-        resp.raise_for_status()
-        return resp
-
-    resp = get_request_to_stunnel()
     assert resp.status_code == 200
     assert "neverssl" in resp.text.lower()
 
@@ -184,6 +179,10 @@ def test_stunnel_logging(container: ContainerData, log_level: int) -> None:
     `STUNNEL_DEBUG`.
 
     """
+    get_request_to_stunnel_with_backoff(
+        port=container.forwarded_ports[0].host_port
+    )
+
     _startup_log_levels = (5, 6)
     logs = container.read_container_logs()
 
