@@ -1022,6 +1022,34 @@ STUNNEL_CONTAINER = create_BCI(
 )
 
 
+# Kiosk containers: x11 + pulseaudio + firefox
+# we have to override the entrypoint so that they don't launch the full apps,
+# which would fail unless they are started together
+X11_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/x11:notaskbar",
+    bci_type=ImageType.APPLICATION,
+    custom_entry_point="/bin/sh",
+)
+PULSEAUDIO_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/pulseaudio:17",
+    bci_type=ImageType.APPLICATION,
+    custom_entry_point="/bin/sh",
+)
+FIREFOX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/firefox:{ff_ver}",
+        bci_type=ImageType.APPLICATION,
+        custom_entry_point="/bin/sh",
+        available_versions=[os_ver],
+    )
+    for (os_ver, ff_ver) in (
+        ("15.6", "128.7"),
+        ("15.7", "128.7"),
+        ("tumbleweed", "135.0"),
+    )
+]
+
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1032,6 +1060,8 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_CLI,
         PHP_8_FPM,
         OPENWEBUI_CONTAINER,
+        X11_CONTAINER,
+        PULSEAUDIO_CONTAINER,
     ]
     + ALERTMANAGER_CONTAINERS
     + BASE_FIPS_CONTAINERS
@@ -1053,6 +1083,7 @@ CONTAINERS_WITH_ZYPPER = (
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
+    + FIREFOX_CONTAINERS
 )
 
 #: all containers with zypper and with the flag to launch them as root

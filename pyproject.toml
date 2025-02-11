@@ -79,6 +79,8 @@ markers = [
     'dotnet-runtime_9.0',
     'dotnet-sdk_8.0',
     'dotnet-sdk_9.0',
+    'firefox_128.7',
+    'firefox_135.0',
     'gcc_7',
     'gcc_13',
     'gcc_14',
@@ -136,6 +138,7 @@ markers = [
     'postgres_17',
     'prometheus_2',
     'prometheus_3',
+    'pulseaudio_17',
     'python_3.9',
     'python_3.11',
     'python_3.12',
@@ -153,6 +156,7 @@ markers = [
     'bci-sle16-kernel-module-devel_16.0',
     'spack_0.23',
     'stunnel_5',
+    'x11_notaskbar',
 ]
 
 [tool.ruff]
