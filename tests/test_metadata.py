@@ -204,23 +204,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for gcc_container in GCC_CONTAINERS
     ]
     + [
-        (
-            mariab_container,
-            "mariadb"
-            if OS_VERSION in ("basalt", "tumbleweed")
-            else "rmt-mariadb",
-            ImageType.APPLICATION,
-        )
+        (mariab_container, "mariadb", ImageType.APPLICATION)
         for mariab_container in MARIADB_CONTAINERS
     ]
     + [
-        (
-            mariab_client_container,
-            "mariadb-client"
-            if OS_VERSION in ("basalt", "tumbleweed")
-            else "rmt-mariadb-client",
-            ImageType.APPLICATION,
-        )
+        (mariab_client_container, "mariadb-client", ImageType.APPLICATION)
         for mariab_client_container in MARIADB_CLIENT_CONTAINERS
     ]
     + [
