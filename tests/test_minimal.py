@@ -46,10 +46,15 @@ def test_minimal_image_size(container, container_runtime):
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
     ) // (1024 * 1024)
-    assert (
-        container_size
-        <= minimal_container_max_size[LOCALHOST.system_info.arch]
-    )
+    if container_size > minimal_container_max_size[LOCALHOST.system_info.arch]:
+        if OS_VERSION in ("tumbleweed",):
+            pytest.xfail(
+                "Tumbleweed Minimal image exceeds limit (boo#1236736)"
+            )
+        else:
+            pytest.fail(
+                "Container size f{container_size} exceeds f{minimal_container_max_size[LOCALHOST.system_info.arch]} MiB"
+            )
 
 
 @pytest.mark.skipif(
