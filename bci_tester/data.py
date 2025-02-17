@@ -986,8 +986,8 @@ GRAFANA_CONTAINERS = [
         available_versions=versions,
     )
     for versions, tag in (
-        (("15.6",), "9"),
-        (("15.7",), "9"),
+        (("15.6",), "10"),
+        (("15.7",), "10"),
         (("tumbleweed",), "11"),
     )
 ]
