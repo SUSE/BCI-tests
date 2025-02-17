@@ -95,7 +95,7 @@ markers = [
     'golang_stable',
     'golang_stable-openssl',
     'golang_unstable',
-    'grafana_9',
+    'grafana_10',
     'grafana_11',
     'kiwi_9.24',
     'kiwi_10.1',
