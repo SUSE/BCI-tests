@@ -856,6 +856,19 @@ KUBECTL_CONTAINERS = [
     for kubectl_ver, os_versions in _KUBECTL_VERSION_OS_MATRIX
 ]
 
+_KEA_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+    ("2.6", ("tumbleweed", "15.7")),
+)
+
+KEA_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kea:{kea_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=os_versions,
+    )
+    for kea_ver, os_versions in _KEA_VERSION_OS_MATRIX
+]
+
 if OS_VERSION in ("16.0",):
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle16-kernel-module-devel:{OS_CONTAINER_TAG}",
@@ -1053,6 +1066,7 @@ CONTAINERS_WITH_ZYPPER = (
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
+    + KEA_CONTAINERS
 )
 
 #: all containers with zypper and with the flag to launch them as root
