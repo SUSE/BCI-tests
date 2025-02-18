@@ -48,7 +48,6 @@ from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import GRAFANA_CONTAINERS
 from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import INIT_CONTAINER
-from bci_tester.data import KEA_CONTAINERS
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
@@ -276,15 +275,12 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (OLLAMA_CONTAINER, "ollama", ImageType.SAC_APPLICATION),
         (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
         (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
+        (PYTORCH_CONTAINER, "pytorch", ImageType.SAC_APPLICATION),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
     + [
         (kubectl_container, "kubectl", ImageType.APPLICATION)
         for kubectl_container in KUBECTL_CONTAINERS
-    ]
-    + [
-        (kea_container, "kea", ImageType.APPLICATION)
-        for kea_container in KEA_CONTAINERS
     ]
 ]
 

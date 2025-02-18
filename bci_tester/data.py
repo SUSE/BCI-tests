@@ -173,7 +173,6 @@ else:
         ibs_cr_project = (
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
-
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
@@ -856,19 +855,6 @@ KUBECTL_CONTAINERS = [
     for kubectl_ver, os_versions in _KUBECTL_VERSION_OS_MATRIX
 ]
 
-_KEA_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
-    ("2.6", ("tumbleweed", "15.7")),
-)
-
-KEA_CONTAINERS = [
-    create_BCI(
-        build_tag=f"{APP_CONTAINER_PREFIX}/kea:{kea_ver}",
-        bci_type=ImageType.APPLICATION,
-        available_versions=os_versions,
-    )
-    for kea_ver, os_versions in _KEA_VERSION_OS_MATRIX
-]
-
 if OS_VERSION in ("16.0",):
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle16-kernel-module-devel:{OS_CONTAINER_TAG}",
@@ -999,14 +985,14 @@ GRAFANA_CONTAINERS = [
         available_versions=versions,
     )
     for versions, tag in (
-        (("15.6",), "10"),
-        (("15.7",), "10"),
+        (("15.6",), "9"),
+        (("15.7",), "9"),
         (("tumbleweed",), "11"),
     )
 ]
 
 OLLAMA_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0.5",
+    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0.3",
     bci_type=ImageType.SAC_APPLICATION,
     available_versions=["15.6-ai"],
     forwarded_ports=[PortForwarding(container_port=11434)],
@@ -1026,6 +1012,12 @@ MILVUS_CONTAINER = create_BCI(
     custom_entry_point="/bin/bash",
 )
 
+PYTORCH_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/pytorch:2.5",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
 
 STUNNEL_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
@@ -1066,7 +1058,6 @@ CONTAINERS_WITH_ZYPPER = (
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
-    + KEA_CONTAINERS
 )
 
 #: all containers with zypper and with the flag to launch them as root
@@ -1101,6 +1092,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,
     OLLAMA_CONTAINER,
     MILVUS_CONTAINER,
+    PYTORCH_CONTAINER,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1145,6 +1137,7 @@ else:
             OLLAMA_CONTAINER,
             OPENWEBUI_CONTAINER,
             MILVUS_CONTAINER,
+            PYTORCH_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS

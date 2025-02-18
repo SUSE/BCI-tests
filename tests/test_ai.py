@@ -9,8 +9,9 @@ from tenacity import wait_exponential
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENWEBUI_CONTAINER
+from bci_tester.data import PYTORCH_CONTAINER
 
-CONTAINER_IMAGES = (OLLAMA_CONTAINER, OPENWEBUI_CONTAINER, MILVUS_CONTAINER)
+CONTAINER_IMAGES = (OLLAMA_CONTAINER, OPENWEBUI_CONTAINER, MILVUS_CONTAINER, PYTORCH_CONTAINER)
 
 
 @pytest.mark.parametrize(
@@ -71,3 +72,14 @@ def test_milvus_health(container_per_test):
     )
     container_per_test.connection.check_output("etcd --version")
     container_per_test.connection.check_output("milvus")
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    [PYTORCH_CONTAINER],
+    indirect=["container_per_test"],
+)
+def test_pytorch_health(container_per_test):
+    """Test the pytorch container."""
+
+    container_per_test.connection.check_output("python3.11 -c 'import torch; print(torch.__version__)'")
+    container_per_test.connection.check_output("git --version")    
