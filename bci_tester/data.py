@@ -1026,6 +1026,13 @@ MILVUS_CONTAINER = create_BCI(
     custom_entry_point="/bin/bash",
 )
 
+PYTORCH_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/pytorch:2.5",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
+
 
 STUNNEL_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
@@ -1101,6 +1108,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,
     OLLAMA_CONTAINER,
     MILVUS_CONTAINER,
+    PYTORCH_CONTAINER,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1145,6 +1153,7 @@ else:
             OLLAMA_CONTAINER,
             OPENWEBUI_CONTAINER,
             MILVUS_CONTAINER,
+            PYTORCH_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
