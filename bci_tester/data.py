@@ -722,7 +722,7 @@ MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
 _MARIADB_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
     ("10.11", ("15.6", "15.7")),
-    ("11.6", ("tumbleweed",)),
+    ("11.7", ("tumbleweed",)),
 )
 
 MARIADB_CONTAINERS = [
