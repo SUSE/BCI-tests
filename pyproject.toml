@@ -102,7 +102,6 @@ markers = [
     'kiwi_10.2',
     'kiwi_latest',
     'kubectl_1.28',
-    'kubectl_1.29',
     'kubectl_1.30',
     'kubectl_1.31',
     'kubectl_1.32',

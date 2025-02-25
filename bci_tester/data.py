@@ -844,7 +844,6 @@ NGINX_CONTAINER = create_BCI(
 _KUBECTL_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
     ("1.28", ("15.6", "15.7")),
     ("1.30", ("15.7",)),
-    ("1.29", ("tumbleweed",)),
     ("1.30", ("tumbleweed",)),
     ("1.31", ("tumbleweed",)),
     ("1.32", ("tumbleweed",)),
