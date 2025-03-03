@@ -762,7 +762,7 @@ POSTFIX_CONTAINERS = [
     )
     for postfix_ver, os_versions in (
         (3.8, ["15.6"]),
-        (3.9, ["tumbleweed"]),
+        ("3.10", ["tumbleweed"]),
     )
 ]
 
