@@ -83,6 +83,7 @@ from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
+from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SAC_PYTHON_CONTAINERS
@@ -276,6 +277,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (OLLAMA_CONTAINER, "ollama", ImageType.SAC_APPLICATION),
         (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
         (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
+        (PYTORCH_CONTAINER, "pytorch", ImageType.SAC_APPLICATION),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
     + [

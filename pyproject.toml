@@ -141,6 +141,7 @@ markers = [
     'python_3.12',
     'python_3.13',
     'python_3.6',
+    'pytorch_2.5',
     'registry_2.8',
     'ruby_2.5',
     'ruby_3.4',
