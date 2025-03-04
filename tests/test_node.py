@@ -30,14 +30,8 @@ def test_node_version(auto_container):
         pkg.to_pytest_param()
         for pkg in (
             GitRepositoryBuild(
-                repository_url="https://github.com/Microsoft/TypeScript",
-                build_command="npm ci && npm test -- --light --workers=$(($(nproc)<4?$(nproc):4))",
-                marks=[
-                    pytest.mark.skipif(
-                        LOCALHOST.system_info.arch != "x86_64",
-                        reason="typescript only works reliably on x86_64",
-                    )
-                ],
+                repository_url="https://github.com/caolan/async",
+                build_command="npm ci && npm test",
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/isaacs/node-glob",
@@ -93,8 +87,8 @@ def test_popular_npm_repos(
 
        * - package
          - build command
-       * - `TypeScript <https://github.com/Microsoft/TypeScript>`_
-         - :command:`npm ci && npm run build`, this test is excluded on non-x86_64
+       * - `Async <https://github.com/caolan/async>`_
+         - :command:`npm ci && npm test`
        * - `Glob <https://github.com/isaacs/node-glob>`_
          - :command:`npm ci && npm test`
        * - `Commander.js <https://github.com/tj/commander.js.git>`_
@@ -107,6 +101,6 @@ def test_popular_npm_repos(
          - :command:`npm install && npm run unit`
 
     """
-    auto_container_per_test.connection.run_expect(
-        [0], container_git_clone.test_command
+    auto_container_per_test.connection.check_output(
+        container_git_clone.test_command
     )

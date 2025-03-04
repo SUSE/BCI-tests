@@ -2,7 +2,10 @@ import os
 import shlex
 import tempfile
 import urllib.request
+from pathlib import Path
 from subprocess import check_output
+from typing import Iterator
+from typing import Tuple
 
 import pytest
 from _pytest.fixtures import SubRequest
@@ -86,7 +89,9 @@ def container_git_clone(
 
 
 @pytest.fixture(scope="function")
-def host_git_clone(request, host, tmp_path):
+def host_git_clone(
+    request, host, tmp_path: Path
+) -> Iterator[Tuple[Path, GitRepositoryBuild]]:
     """This fixture clones the `GitRepositoryBuild` into a temporary directory
     on the host system, `cd`'s into it and returns the path and the
     `GitRepositoryBuild` as a tuple to the test function requesting this it.

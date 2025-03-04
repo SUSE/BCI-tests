@@ -1,8 +1,11 @@
 """Tests for the Go language container."""
 
 import re
+from pathlib import Path
+from typing import Tuple
 
 import pytest
+from packaging import version
 from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
@@ -153,12 +156,19 @@ def test_build_generics_cache(
     LOCALHOST.system_info.arch not in ("x86_64", "aarch64"),
     reason=f"{LOCALHOST.system_info.arch} is not supported to build rancher",
 )
-def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
+def test_rancher_build(
+    host,
+    host_git_clone: Tuple[Path, GitRepositoryBuild],
+    dapper,
+    container: ContainerData,
+):
     """Regression test that we can build Rancher in the go container:
 
     - clone the `rancher/rancher <https://github.com/rancher/rancher>`_ repository
     - monkey patch their :file:`Dockerfile.dapper` replacing their container
       image with the url or id of the go container
+    - check that the go version from go.mod is smaller than the current go
+      compiler version, and if it isn't, skip this test
     - run :command:`dapper build`
 
     This test is only enabled for docker (dapper does not support podman).
@@ -179,17 +189,21 @@ def test_rancher_build(host, host_git_clone, dapper, container: ContainerData):
     assert from_line and from_line.group("go_ver"), (
         f"No valid FROM line found in Dockerfile.dapper: {contents}"
     )
-    go_version = container.connection.check_output("echo $GOLANG_VERSION")
-    if not go_version.startswith(from_line.group("go_ver")):
-        pytest.skip(
-            f"Dapper is only supported on {from_line.group('go_ver')}, got {go_version}"
-        )
 
-    with open(
-        rancher_dir / "Dockerfile.dapper", "w", encoding="utf-8"
-    ) as dapperfile:
-        dapperfile.write(
-            from_line_regex.sub(f"FROM {container.image_url_or_id}", contents)
-        )
+    go_version = container.inspect.config.env["GOLANG_VERSION"]
+    go_version_match = re.search(
+        r"^go\s+(?P<version>(\d+\.?)+)$",
+        (rancher_dir / "go.mod").read_text(),
+        re.MULTILINE,
+    )
+    assert go_version_match and go_version_match.group("version")
 
-    host.run_expect([0], f"cd {rancher_dir} && {dapper} build")
+    go_mod_version = version.parse(go_version_match.group("version"))
+    if go_mod_version > version.parse(go_version):
+        pytest.skip(f"Rancher requires {go_mod_version}, but got {go_version}")
+
+    (rancher_dir / "Dockerfile.dapper").write_text(
+        from_line_regex.sub(f"FROM {container.image_url_or_id}", contents)
+    )
+
+    host.check_output(f"cd {rancher_dir} && {dapper} build")
