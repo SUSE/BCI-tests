@@ -1009,7 +1009,7 @@ GRAFANA_CONTAINERS = [
 ]
 
 OLLAMA_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0.5",
+    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0",
     bci_type=ImageType.SAC_APPLICATION,
     available_versions=["15.6-ai"],
     forwarded_ports=[PortForwarding(container_port=11434)],
