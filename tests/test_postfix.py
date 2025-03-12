@@ -1,5 +1,7 @@
 """This module contains the tests for the postfix container, the image with postfix, sendmail and mailq pre-installed."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container import container_and_marks_from_pytest_param

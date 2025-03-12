@@ -1,5 +1,7 @@
 """This module contains the tests for the valkey container."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import socket
 
 from pytest_container.container import ContainerData

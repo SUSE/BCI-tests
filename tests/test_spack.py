@@ -1,5 +1,7 @@
 """Tests for Spack application build container images."""
 
+## Maintainer: BCI team (#proj-bci)
+
 from textwrap import dedent
 
 import pytest

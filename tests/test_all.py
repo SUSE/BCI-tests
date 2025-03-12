@@ -2,6 +2,8 @@
 This module contains tests that are run for **all** containers.
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import datetime
 import fnmatch
 import json

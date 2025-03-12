@@ -3,6 +3,8 @@ Microsoft's binaries.
 
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import re
 import xml.etree.ElementTree as ET
 from typing import List

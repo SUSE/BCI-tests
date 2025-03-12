@@ -1,5 +1,7 @@
 """Tests for the Go language container."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import re
 from pathlib import Path
 from typing import Tuple

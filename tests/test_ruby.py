@@ -1,5 +1,7 @@
 """Basic tests for the Ruby base container images."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import pytest
 
 from bci_tester.data import OS_VERSION

@@ -1,5 +1,7 @@
 """Tests for the tomcat containers."""
 
+## Maintainer: BCI team (#proj-bci)
+
 from pathlib import Path
 
 import pytest

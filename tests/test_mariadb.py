@@ -1,5 +1,7 @@
 """Tests for the MariaDB related application container images."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import os
 from itertools import product
 from pathlib import Path

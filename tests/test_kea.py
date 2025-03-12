@@ -1,3 +1,7 @@
+"""This module tests the kea DHCP server application."""
+
+## Maintainer: BCI team (#proj-bci)
+
 import json
 import os
 import re

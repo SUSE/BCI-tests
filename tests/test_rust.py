@@ -3,6 +3,8 @@
 Rust development containers include rust and cargo.
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import pytest
 from pytest_container import GitRepositoryBuild
 

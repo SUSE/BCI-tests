@@ -3,6 +3,8 @@ registry.suse.com)
 
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 from typing import Dict
 
 import pytest

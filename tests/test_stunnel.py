@@ -20,6 +20,8 @@ any content that you like.
 
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import ssl
 from pathlib import Path
 

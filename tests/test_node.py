@@ -1,5 +1,7 @@
 """Tests for the Node.js base container images."""
 
+## Maintainer: BCI team (#proj-bci)
+
 from textwrap import dedent
 
 import pytest

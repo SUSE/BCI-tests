@@ -3,6 +3,8 @@ be installed and ensure that we do not accidentally ship forbidden packages.
 
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import xml.etree.ElementTree as ET
 from typing import Callable
 from typing import List

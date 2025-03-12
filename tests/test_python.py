@@ -1,5 +1,7 @@
 """Basic tests for the Python base container images."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import hashlib
 
 import packaging.version

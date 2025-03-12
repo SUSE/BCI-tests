@@ -1,5 +1,7 @@
 """Tests for the minimal BCI container (the container without zypper but with rpm)."""
 
+## Maintainer: BCI team (#proj-bci)
+
 from typing import Dict
 
 import pytest
