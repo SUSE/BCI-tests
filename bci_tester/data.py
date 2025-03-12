@@ -1030,7 +1030,7 @@ MILVUS_CONTAINER = create_BCI(
 )
 
 PYTORCH_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/pytorch:2.5.0",
+    build_tag=f"{SAC_CONTAINER_PREFIX}/pytorch:2-nvidia",
     bci_type=ImageType.SAC_APPLICATION,
     available_versions=["15.6-ai"],
     custom_entry_point="/bin/bash",
