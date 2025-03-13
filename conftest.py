@@ -1,6 +1,8 @@
+import logging
 import os
 import shlex
 import tempfile
+import time
 import urllib.request
 from pathlib import Path
 from subprocess import check_output
@@ -130,6 +132,26 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     set_logging_level_from_cli_args(config)
+
+    if os.getenv("TESTINFRA_LOGGING"):
+        # log all calls performed by testinfra, so that we have a papertrail of what
+        # was executed.
+        # As an additional catch, we must take into account pytest-xdist
+        # (i.e. parallelization): if we are running in xdist mode, then we create a
+        # separate logfile for each worker as we'd potentially write into the same
+        # log.
+        worker_id = os.environ.get("PYTEST_XDIST_WORKER")
+        file_handler = logging.FileHandler(
+            f"commands-{int(time.time())}{'-' + worker_id if worker_id else ''}.txt"
+        )
+
+        logger = logging.getLogger("testinfra")
+        logger.setLevel("DEBUG")
+        formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s"
+        )
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
 
 @pytest.fixture(scope="module")
