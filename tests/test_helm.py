@@ -1,5 +1,7 @@
 """This module contains the tests for the helm container, the image with helm pre-installed."""
 
+## Maintainer: BCI team (#proj-bci)
+
 from bci_tester.data import HELM_CONTAINER
 
 CONTAINER_IMAGES = (HELM_CONTAINER,)

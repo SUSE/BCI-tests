@@ -1,5 +1,7 @@
 """This module contains the tests for the pcp container"""
 
+## Maintainer: BCI team (#proj-bci)
+
 import time
 
 import requests

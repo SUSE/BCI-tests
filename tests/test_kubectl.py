@@ -1,3 +1,7 @@
+"""This module tests the kubectl container."""
+
+## Maintainer: BCI team (#proj-bci)
+
 import json
 
 import pytest

@@ -1,5 +1,7 @@
 """Tests of the OpenJDK base container."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import os.path
 import re
 import time
