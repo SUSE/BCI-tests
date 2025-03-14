@@ -1016,7 +1016,7 @@ OLLAMA_CONTAINER = create_BCI(
 )
 
 OPENWEBUI_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui:0.3",
+    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui:0",
     bci_type=ImageType.SAC_APPLICATION,
     available_versions=["15.6-ai"],
     forwarded_ports=[PortForwarding(container_port=8080)],
