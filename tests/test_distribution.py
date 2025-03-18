@@ -1,5 +1,7 @@
 """Tests for the distribution container"""
 
+## Maintainer: BCI team (#proj-bci)
+
 import textwrap
 
 import requests

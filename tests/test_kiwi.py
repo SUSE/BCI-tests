@@ -1,5 +1,7 @@
 """This module contains the tests for the kiwi container, the image with kiwi package & dependencies pre-installed."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import os
 
 import pytest

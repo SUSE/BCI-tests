@@ -1,3 +1,7 @@
+"""Unit tests"""
+
+## Maintainer: BCI team (#proj-bci)
+
 from pathlib import Path
 
 from bci_tester.fips import host_fips_enabled

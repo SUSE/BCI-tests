@@ -1,5 +1,7 @@
 """Tests for the PostgreSQL related application container images."""
 
+## Maintainer: BCI team (#proj-bci)
+
 from datetime import timedelta
 from itertools import product
 from typing import List

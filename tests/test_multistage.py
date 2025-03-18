@@ -1,5 +1,7 @@
 """Integration tests via multistage container builds."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import pytest
 from _pytest.config import Config
 from pytest_container import GitRepositoryBuild
