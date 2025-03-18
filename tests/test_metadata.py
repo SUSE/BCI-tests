@@ -85,7 +85,6 @@ from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
-from bci_tester.data import SAC_PYTHON_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import TOMCAT_CONTAINERS
@@ -167,10 +166,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
-    + [
-        (c, "python", ImageType.SAC_LANGUAGE_STACK)
-        for c in SAC_PYTHON_CONTAINERS
-    ]
     + [(c, "base-fips", ImageType.OS) for c in BASE_FIPS_CONTAINERS]
     + [
         (container_pcp, "pcp", ImageType.APPLICATION)
