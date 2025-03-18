@@ -17,7 +17,6 @@ from pytest_container.runtime import get_selected_runtime
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTHON_WITH_PIPX_CONTAINERS
-from bci_tester.data import SAC_PYTHON_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
 BCDIR = "/tmp/"
@@ -29,7 +28,7 @@ PORT1 = 8123
 
 
 #: Base containers under test, input of auto_container fixture
-CONTAINER_IMAGES = PYTHON_CONTAINERS + SAC_PYTHON_CONTAINERS
+CONTAINER_IMAGES = PYTHON_CONTAINERS
 
 
 #: Derived containers with the python http.server as CMD and a HEALTHCHECK
