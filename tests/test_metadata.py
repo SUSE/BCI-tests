@@ -67,6 +67,7 @@ from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
 from bci_tester.data import OPENWEBUI_CONTAINER
+from bci_tester.data import OPENWEBUI_PIPELINES_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
@@ -264,6 +265,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (
             SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
             "suse-ai-observability-extension-runtime",
+            ImageType.SAC_APPLICATION,
+        ),
+        (
+            OPENWEBUI_PIPELINES_CONTAINER,
+            "open-webui-pipelines",
             ImageType.SAC_APPLICATION,
         ),
     ]

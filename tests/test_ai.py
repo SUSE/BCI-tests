@@ -9,6 +9,7 @@ from tenacity import wait_exponential
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENWEBUI_CONTAINER
+from bci_tester.data import OPENWEBUI_PIPELINES_CONTAINER
 from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
@@ -20,6 +21,7 @@ CONTAINER_IMAGES = (
     PYTORCH_CONTAINER,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
+    OPENWEBUI_PIPELINES_CONTAINER,
 )
 
 
@@ -96,3 +98,25 @@ def test_pytorch_health(container):
         "python3.11 -c 'import torch; print(torch.__version__)'"
     )
     container.connection.check_output("git --version")
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    [OPENWEBUI_PIPELINES_CONTAINER],
+    indirect=["container_per_test"],
+)
+def test_pipelines_health(container_per_test):
+    """Test that we can reach the port 9099 successfully."""
+    host_port = container_per_test.forwarded_ports[0].host_port
+
+    # Retry 5 times with exponential backoff delay
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(5),
+    )
+    def check_pipelines_response():
+        resp = requests.get(f"http://localhost:{host_port}/", timeout=30)
+        resp.raise_for_status()
+        assert ":true" in resp.text
+
+    check_pipelines_response()
