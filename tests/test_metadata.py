@@ -83,6 +83,7 @@ from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
+from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SAC_PYTHON_CONTAINERS
@@ -99,6 +100,10 @@ VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"
 SKIP_IF_TW_MARK = pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
     reason="no supportlevel labels on openSUSE containers",
+)
+
+SKIP_IF_AI_MARK = pytest.mark.skipif(
+    OS_VERSION == "15.6-ai", reason="no supportlevel labels on AI containers"
 )
 
 
@@ -277,6 +282,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (OLLAMA_CONTAINER, "ollama", ImageType.SAC_APPLICATION),
         (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
         (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
+        (PYTORCH_CONTAINER, "pytorch", ImageType.SAC_APPLICATION),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
     + [
@@ -516,6 +522,7 @@ def test_disturl_can_be_checked_out(
 
 
 @SKIP_IF_TW_MARK
+@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container",
     [
@@ -552,6 +559,7 @@ def test_techpreview_label(container: ContainerData):
 
 
 @SKIP_IF_TW_MARK
+@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container",
     list(ACC_CONTAINERS),
@@ -568,6 +576,7 @@ def test_acc_label(container: ContainerData):
 
 
 @SKIP_IF_TW_MARK
+@SKIP_IF_AI_MARK
 @pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label
