@@ -3,6 +3,8 @@ FIPS mode.
 
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import re
 from pathlib import Path
 

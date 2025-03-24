@@ -1,5 +1,7 @@
 """Tests for the Prometheus containers."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import pytest
 import requests
 from pytest_container.container import ContainerData

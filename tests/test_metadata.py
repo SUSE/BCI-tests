@@ -14,6 +14,8 @@ offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import urllib.parse
 from pathlib import Path
 from typing import List

@@ -1,5 +1,7 @@
 """This module contains the tests for the SUSE AI container."""
 
+## Maintainer: AI team (#help-ai-technical)
+
 import pytest
 import requests
 from tenacity import retry

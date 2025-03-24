@@ -1,5 +1,7 @@
 """This module contains the tests for the git container, the image with git pre-installed."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import pytest
 from pytest_container.container import DerivedContainer
 from pytest_container.container import ImageFormat
