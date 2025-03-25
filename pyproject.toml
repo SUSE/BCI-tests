@@ -70,6 +70,7 @@ markers = [
     'bci-minimal_15.7',
     'bci-minimal_16.0',
     'bci-minimal_latest',
+    'bind_9',
     'blackbox_exporter_0.24',
     'cosign_2.2',
     'cosign_2.4',
