@@ -1,0 +1,13 @@
+$TTL 86400
+@   IN  SOA localhost. root.localhost. (
+        2024032601   ; Serial
+        3600         ; Refresh
+        1800         ; Retry
+        604800       ; Expire
+        86400 )      ; Minimum TTL
+
+    IN  NS  localhost.
+
+; Block google.com by responding with NXDOMAIN
+google.com        CNAME   .
+*.google.com      CNAME   .
