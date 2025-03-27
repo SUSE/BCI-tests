@@ -18,10 +18,11 @@ NONFIPS_DIGESTS: Tuple[str, ...] = (
 # OpenSSL 3.x in Tumbleweed dropped those as they're beyond deprecated
 if OS_VERSION in ("15.3", "15.4", "15.5"):
     NONFIPS_DIGESTS += ("md4", "mdc2")
+elif OS_VERSION in ("16.0",):
+    NONFIPS_DIGESTS += ("sha1",)
 
 #: FIPS compliant openssl digests
 FIPS_DIGESTS: Tuple[str, ...] = (
-    "sha1",
     "sha224",
     "sha256",
     "sha3-224",
@@ -35,6 +36,9 @@ FIPS_DIGESTS: Tuple[str, ...] = (
     "shake128",
     "shake256",
 )
+
+if OS_VERSION not in ("16.0"):
+    FIPS_DIGESTS += ("sha1",)
 
 NULL_DIGESTS: Dict[str, str] = {
     "blake2b512": "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce",
