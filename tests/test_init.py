@@ -163,7 +163,9 @@ def test_timedatectl(auto_container: ContainerData):
     )
 
     # Check that the reported timestamp for UTC and local time match the system time
-    def check_timestamp(pattern, timestamp, delta):
+    def check_timestamp(
+        pattern: str, timestamp: datetime.datetime, delta: datetime.timedelta
+    ) -> None:
         """Checks the timedatectl output for the given pattern against the given timestamp
         e.g. use the "Universal time" as pattern and datetime.utcnow() to check for the UTC time
         """
