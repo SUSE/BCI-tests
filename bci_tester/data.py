@@ -125,7 +125,7 @@ else:
         (
             f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION} SP{OS_SP_VERSION}"
             if OS_MAJOR_VERSION == 15
-            else f"SUSE Linux Enterprise Server {OS_MAJOR_VERSION}.{OS_SP_VERSION}"
+            else f"SUSE Linux {OS_MAJOR_VERSION}.{OS_SP_VERSION}"
         ),
     )
 
