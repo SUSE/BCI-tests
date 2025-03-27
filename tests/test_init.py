@@ -8,6 +8,8 @@ import json
 import re
 
 import pytest
+from pytest_container import OciRuntimeBase
+from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import INIT_CONTAINER
@@ -126,32 +128,33 @@ class TestSystemd:
             "Multi-User target was not reached"
         )
 
-    def test_hostnamectl(self, auto_container, container_runtime):
+    def test_hostnamectl(
+        self, auto_container: ContainerData, container_runtime: OciRuntimeBase
+    ):
         """
         Ensure :command:`hostnamectl` works correctly by asserting expected values
         """
 
-        hostnamectl = auto_container.connection.run_expect(
-            [0], "hostnamectl --json=short"
+        hostnamectl = json.loads(
+            auto_container.connection.check_output("hostnamectl --json=short")
         )
-        # Process the printed values to a string map
-        values = json.loads(hostnamectl.stdout)
-        assert values["Chassis"] == "container", "Chassis mismatch"
+        assert hostnamectl["Chassis"] == "container", "Chassis mismatch"
 
-        expected_os = (
-            "openSUSE Tumbleweed"
-            if OS_VERSION == "tumbleweed"
-            else "SUSE Linux Enterprise Server"
-        )
-        assert expected_os in values["OperatingSystemPrettyName"], (
+        expected_os = "SUSE Linux Enterprise Server"
+        if OS_VERSION == "tumbleweed":
+            expected_os = "openSUSE Tumbleweed"
+        elif OS_VERSION in ("16.0",):
+            expected_os = "SUSE Linux " + OS_VERSION
+
+        assert expected_os in hostnamectl["OperatingSystemPrettyName"], (
             "Missing SUSE tag in Operating system"
         )
 
-        virt_detected = auto_container.connection.run_expect(
-            [0], "systemd-detect-virt -c"
-        )
         assert (
-            virt_detected.stdout.strip() == container_runtime.runner_binary
+            auto_container.connection.check_output(
+                "systemd-detect-virt -c"
+            ).strip()
+            == container_runtime.runner_binary
         ), "Virtualization tag mismatch"
 
     def test_timedatectl(self, auto_container):
