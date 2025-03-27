@@ -29,7 +29,7 @@ class TestSystemd:
     systemd test module for the bci-init container.
     """
 
-    def test_systemd_present(self, auto_container):
+    def test_systemd_present(self, auto_container: ContainerData):
         """Check that :command:`systemctl` is in ``$PATH``, that :command:`systemctl
         status` works and that :file:`/etc/machine-id` exists.
         """
@@ -37,13 +37,13 @@ class TestSystemd:
         assert auto_container.connection.file("/etc/machine-id").exists
         assert auto_container.connection.run_expect([0], "systemctl status")
 
-    def test_systemd_no_udev_present(self, auto_container):
+    def test_systemd_no_udev_present(self, auto_container: ContainerData):
         """https://jira.suse.com/browse/SLE-21856 - check that systemd is not pulling in
         udev.
         """
         assert not auto_container.connection.package("udev").is_installed
 
-    def test_systemd_boottime(self, auto_container):
+    def test_systemd_boottime(self, auto_container: ContainerData):
         """Ensure the container startup time is below 5 seconds"""
 
         # https://github.com/SUSE/BCI-tests/issues/647
@@ -94,7 +94,7 @@ class TestSystemd:
             "Reaching systemd target threshold exceeded"
         )
 
-    def test_systemd_nofailed_units(self, auto_container):
+    def test_systemd_nofailed_units(self, auto_container: ContainerData):
         """
         Ensure there are no failed systemd units
         """
@@ -105,7 +105,9 @@ class TestSystemd:
             "failed systemd units detected"
         )
 
-    def test_systemd_detect_virt(self, auto_container, container_runtime):
+    def test_systemd_detect_virt(
+        self, auto_container: ContainerData, container_runtime: OciRuntimeBase
+    ):
         """
         Ensure :command:`systemd-detect-virt` detects the container runtime
         """
@@ -115,7 +117,7 @@ class TestSystemd:
             f"systemd-detect-virt failed to detect {runtime}"
         )
 
-    def test_journald(self, auto_container):
+    def test_journald(self, auto_container: ContainerData):
         """
         Ensure :command:`journald` works correctly
         """
@@ -157,7 +159,7 @@ class TestSystemd:
             == container_runtime.runner_binary
         ), "Virtualization tag mismatch"
 
-    def test_timedatectl(self, auto_container):
+    def test_timedatectl(self, auto_container: ContainerData):
         """
         Ensure :command:`timedatectl` works as expected and the container timezone is UTC
         """
@@ -195,7 +197,7 @@ class TestSystemd:
             datetime.timedelta(seconds=59),
         )
 
-    def test_no_loginctl_sessions(self, auto_container):
+    def test_no_loginctl_sessions(self, auto_container: ContainerData):
         """
         Ensure :command:`loginctl` contains no logins
         """
