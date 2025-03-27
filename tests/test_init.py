@@ -172,20 +172,22 @@ def test_timedatectl(auto_container: ContainerData):
         tsp = (
             grep[0].strip()[len(pattern) + 2 :].strip()
         )  # Extract actual timestamp
-        tsp = datetime.datetime.strptime(tsp, "%a %Y-%m-%d %H:%M:%S UTC")
+        tsp = datetime.datetime.strptime(
+            tsp, "%a %Y-%m-%d %H:%M:%S UTC"
+        ).replace(tzinfo=datetime.timezone.utc)
         assert abs(tsp - timestamp) < delta, (
             f"timedatectl diff exceeded for {pattern}"
         )
 
     check_timestamp(
         "Universal time",
-        datetime.datetime.utcnow(),
+        datetime.datetime.now(datetime.timezone.utc),
         datetime.timedelta(seconds=59),
     )
     # In the container the Local time is expected to be UTC
     check_timestamp(
         "Local time",
-        datetime.datetime.utcnow(),
+        datetime.datetime.now(datetime.timezone.utc),
         datetime.timedelta(seconds=59),
     )
 
