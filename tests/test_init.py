@@ -35,7 +35,7 @@ class TestSystemd:
         """
         assert auto_container.connection.exists("systemctl")
         assert auto_container.connection.file("/etc/machine-id").exists
-        assert auto_container.connection.run_expect([0], "systemctl status")
+        assert auto_container.connection.check_output("systemctl status")
 
     def test_systemd_no_udev_present(self, auto_container: ContainerData):
         """https://jira.suse.com/browse/SLE-21856 - check that systemd is not pulling in
@@ -84,12 +84,10 @@ class TestSystemd:
                 return float(t[:-1])
             raise ValueError("time unit not recognized")
 
-        time = auto_container.connection.run_expect(
-            [0], "systemd-analyze time"
-        )
-        startup = extract_time(time.stdout, "Startup finished in ")
+        time = auto_container.connection.check_output("systemd-analyze time")
+        startup = extract_time(time, "Startup finished in ")
         assert startup <= startup_limit, "Startup threshold exceeded"
-        target = extract_time(time.stdout, ".target reached after ")
+        target = extract_time(time, ".target reached after ")
         assert target <= target_limit, (
             "Reaching systemd target threshold exceeded"
         )
@@ -98,10 +96,10 @@ class TestSystemd:
         """
         Ensure there are no failed systemd units
         """
-        output = auto_container.connection.run_expect(
-            [0], "systemctl list-units --state=failed"
+        output = auto_container.connection.check_output(
+            "systemctl list-units --state=failed"
         )
-        assert "0 loaded units listed" in output.stdout, (
+        assert "0 loaded units listed" in output, (
             "failed systemd units detected"
         )
 
@@ -123,10 +121,8 @@ class TestSystemd:
         """
 
         # Check that we reached at least the multiuser target
-        journal = auto_container.connection.run_expect(
-            [0], "journalctl --boot"
-        )
-        assert "Reached target Multi-User System" in journal.stdout, (
+        journal = auto_container.connection.check_output("journalctl --boot")
+        assert "Reached target Multi-User System" in journal, (
             "Multi-User target was not reached"
         )
 
@@ -201,7 +197,7 @@ class TestSystemd:
         """
         Ensure :command:`loginctl` contains no logins
         """
-        loginctl = auto_container.connection.run_expect([0], "loginctl")
-        assert "No sessions" in loginctl.stdout, (
+        loginctl = auto_container.connection.check_output("loginctl")
+        assert "No sessions" in loginctl, (
             "Assert no sessions are present failed"
         )
