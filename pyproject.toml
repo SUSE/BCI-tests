@@ -105,6 +105,8 @@ markers = [
     'kubectl_1.30',
     'kubectl_1.31',
     'kubectl_1.32',
+    'kubectl_oldstable',
+    'kubectl_stable',
     'mariadb_10.11',
     'mariadb_latest',
     'mariadb-client_10.11',
