@@ -841,14 +841,6 @@ NGINX_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=80)],
 )
 
-_KUBECTL_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
-    ("1.28", ("15.6", "15.7")),
-    ("1.30", ("15.7",)),
-    ("1.30", ("tumbleweed",)),
-    ("1.31", ("tumbleweed",)),
-    ("1.32", ("tumbleweed",)),
-)
-
 KUBECTL_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kubectl:{kubectl_ver}",
@@ -856,7 +848,13 @@ KUBECTL_CONTAINERS = [
         available_versions=os_versions,
         custom_entry_point="/bin/sh",
     )
-    for kubectl_ver, os_versions in _KUBECTL_VERSION_OS_MATRIX
+    for kubectl_ver, os_versions in (
+        ("oldstable", ("15.6", "15.7")),
+        ("stable", ("15.6", "15.7")),
+        ("1.30", ("tumbleweed",)),
+        ("1.31", ("tumbleweed",)),
+        ("1.32", ("tumbleweed",)),
+    )
 ]
 
 _KEA_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
