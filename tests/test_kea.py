@@ -5,7 +5,6 @@ import re
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerLauncher
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import OciRuntimeBase
 
 from bci_tester.data import BASE_CONTAINER
@@ -45,7 +44,7 @@ def test_kea_dhcp4(
     )
 
     dhcp_client_ctr = DerivedContainer(
-        base=container_and_marks_from_pytest_param(BASE_CONTAINER)[0],
+        base=BASE_CONTAINER,
         containerfile="RUN zypper refresh && zypper -n install dhcp-client iproute2 && zypper clean --all",
         custom_entry_point="/bin/sh",
         extra_launch_args=[f"--network={network_name}", "--privileged"],

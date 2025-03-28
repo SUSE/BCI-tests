@@ -10,7 +10,6 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_FIPS_CONTAINERS
@@ -49,8 +48,7 @@ CONTAINER_IMAGES_WITH_ZYPPER = []
 FIPS_TESTER_IMAGES = []
 FIPS_GNUTLS_TESTER_IMAGES = []
 FIPS_GCRYPT_TESTER_IMAGES = []
-for param in CONTAINERS_WITH_ZYPPER:
-    ctr, marks = container_and_marks_from_pytest_param(param)
+for ctr in CONTAINERS_WITH_ZYPPER:
     kwargs = {
         "base": ctr,
         "extra_environment_variables": ctr.extra_environment_variables,
@@ -68,34 +66,33 @@ for param in CONTAINERS_WITH_ZYPPER:
             else []
         ),
     }
-    tester_ctr = DerivedContainer(containerfile=DOCKERFILE, **kwargs)
-    gnutls_tester_ctr = DerivedContainer(
-        containerfile=DOCKERFILE_GNUTLS, **kwargs
-    )
-    gcrypt_tester_ctr = DerivedContainer(
-        containerfile=DOCKERFILE_GCRYPT, **kwargs
-    )
-
-    if param not in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
+    if ctr not in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
         # create a shallow copy here to avoid mutating the original params
-        marks = marks[:] + [
+        marks = [
             pytest.mark.skipif(
                 not host_fips_enabled(),
                 reason="The target must run in FIPS mode for the FIPS test suite",
             )
         ]
+    else:
+        marks = []
+
+    tester_ctr = DerivedContainer(
+        containerfile=DOCKERFILE, marks=marks, **kwargs
+    )
+    gnutls_tester_ctr = DerivedContainer(
+        containerfile=DOCKERFILE_GNUTLS, marks=marks, **kwargs
+    )
+    gcrypt_tester_ctr = DerivedContainer(
+        containerfile=DOCKERFILE_GCRYPT, marks=marks, **kwargs
+    )
+
     CONTAINER_IMAGES_WITH_ZYPPER.append(
-        pytest.param(ctr, marks=marks, id=param.id)
+        DerivedContainer(base=ctr, marks=marks)
     )
-    FIPS_TESTER_IMAGES.append(
-        pytest.param(tester_ctr, marks=marks, id=param.id)
-    )
-    FIPS_GNUTLS_TESTER_IMAGES.append(
-        pytest.param(gnutls_tester_ctr, marks=marks, id=param.id)
-    )
-    FIPS_GCRYPT_TESTER_IMAGES.append(
-        pytest.param(gcrypt_tester_ctr, marks=marks, id=param.id)
-    )
+    FIPS_TESTER_IMAGES.append(tester_ctr)
+    FIPS_GNUTLS_TESTER_IMAGES.append(gnutls_tester_ctr)
+    FIPS_GCRYPT_TESTER_IMAGES.append(gcrypt_tester_ctr)
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,6 @@
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 
 from bci_tester.data import GCC_CONTAINERS
@@ -22,13 +21,9 @@ RUN curl -sLO https://ftpmirror.gnu.org/hello/hello-{_HELLO_VERSION}.tar.gz && \
 """
 
 HELLO_CONTAINERS = [
-    pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(ctr)[0],
-            containerfile=CONTAINERFILE_HELLO,
-        ),
-        marks=ctr.marks,
-        id=ctr.id,
+    DerivedContainer(
+        base=ctr,
+        containerfile=CONTAINERFILE_HELLO,
     )
     for ctr in CONTAINER_IMAGES
 ]

@@ -4,6 +4,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 from typing import Iterable
+from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -11,7 +12,6 @@ from typing import Tuple
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 try:
@@ -292,7 +292,7 @@ def create_BCI(
     bci_type: ImageType = ImageType.LANGUAGE_STACK,
     container_user: Optional[str] = None,
     **kwargs,
-) -> ParameterSet:
+) -> DerivedContainer:
     """Creates a DerivedContainer wrapped in a pytest.param for the BCI with the
     given ``build_tag``.
 
@@ -395,14 +395,11 @@ def create_BCI(
         else:
             containerfile = _BCI_REPLACE_REPO_CONTAINERFILE
 
-    return pytest.param(
-        DerivedContainer(
-            base=baseurl,
-            containerfile=containerfile,
-            **kwargs,
-        ),
+    return DerivedContainer(
+        base=baseurl,
+        containerfile=containerfile,
         marks=marks,
-        id=f"{build_tag} from {baseurl}",
+        **kwargs,
     )
 
 
@@ -1086,23 +1083,19 @@ CONTAINERS_WITH_ZYPPER = (
 )
 
 #: all containers with zypper and with the flag to launch them as root
-CONTAINERS_WITH_ZYPPER_AS_ROOT = []
-for param in CONTAINERS_WITH_ZYPPER:
+CONTAINERS_WITH_ZYPPER_AS_ROOT: List[DerivedContainer] = []
+for ctr in CONTAINERS_WITH_ZYPPER:
     # only modify the user for containers where `USER` is explicitly set,
     # atm this is no container
-    if param not in []:
-        CONTAINERS_WITH_ZYPPER_AS_ROOT.append(param)
+    if ctr not in []:
+        CONTAINERS_WITH_ZYPPER_AS_ROOT.append(ctr)
     else:
-        ctr, marks = container_and_marks_from_pytest_param(param)
         CONTAINERS_WITH_ZYPPER_AS_ROOT.append(
-            pytest.param(
-                DerivedContainer(
-                    base=ctr,
-                    extra_launch_args=(
-                        (ctr.extra_launch_args or []) + ["--user", "root"]
-                    ),
+            DerivedContainer(
+                base=ctr,
+                extra_launch_args=(
+                    (ctr.extra_launch_args or []) + ["--user", "root"]
                 ),
-                marks=marks,
             )
         )
 
@@ -1214,13 +1207,12 @@ if __name__ == "__main__":
                 return True
         return False
 
-    for param in ALL_CONTAINERS:
+    for ctr in ALL_CONTAINERS:
         # don't check containers which are known broken or excluded
-        if has_true_skipif(param) or has_xfail(param):
+        if has_true_skipif(ctr) or has_xfail(ctr):
             continue
 
-        ctr, marks = container_and_marks_from_pytest_param(param)
-        for mark in marks or []:
+        for mark in ctr.marks or []:
             assert mark.name in custom_markers.union(
                 {"xfail", "skipif", "skip"}
             ), (

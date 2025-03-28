@@ -9,7 +9,6 @@ from pytest_container import DerivedContainer
 from pytest_container import PortForwarding
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 from pytest_container.runtime import Version
 from pytest_container.runtime import get_selected_runtime
@@ -35,34 +34,26 @@ CONTAINER_IMAGES = PYTHON_CONTAINERS + SAC_PYTHON_CONTAINERS
 #: Derived containers with the python http.server as CMD and a HEALTHCHECK
 #: ensuring that the server is up and running
 HTTP_SERVER_CONTAINER_IMAGES = [
-    pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(CONTAINER_T)[0],
-            containerfile=f"""RUN zypper -n in iproute2 curl && zypper -n clean
+    DerivedContainer(
+        base=CONTAINER_T,
+        containerfile=f"""RUN zypper -n in iproute2 curl && zypper -n clean
 CMD python3 -m http.server {PORT1}
 HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localhost:{PORT1}
 """,
-            forwarded_ports=[PortForwarding(container_port=PORT1)],
-            image_format=ImageFormat.DOCKER,
-        ),
-        marks=CONTAINER_T.marks,
-        id=CONTAINER_T.id,
+        forwarded_ports=[PortForwarding(container_port=PORT1)],
+        image_format=ImageFormat.DOCKER,
     )
     for CONTAINER_T in CONTAINER_IMAGES
 ]
 
 REQUESTS_CONTAINER_IMAGES = [
-    pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(param)[0],
-            containerfile=f"""WORKDIR {BCDIR}
+    DerivedContainer(
+        base=ctr,
+        containerfile=f"""WORKDIR {BCDIR}
 RUN python3 -m venv .venv; source .venv/bin/activate; pip install requests
 """,
-        ),
-        marks=param.marks,
-        id=param.id,
     )
-    for param in CONTAINER_IMAGES
+    for ctr in CONTAINER_IMAGES
 ]
 
 #: URL of the SLE BCI Logo
@@ -75,19 +66,15 @@ SLE_BCI_LOGO_SHA512_SUM = "6b4447f88be45ae335868b8c4c0200adfc26b85359cfa74965388
 #: Derived containers, from custom Dockerfile including additional test files,
 #: input to container_per_test fixture
 TENSORFLOW_CONTAINER_IMAGES = [
-    pytest.param(
-        DerivedContainer(
-            base=container_and_marks_from_pytest_param(CONTAINER_T)[0],
-            containerfile=f"""
+    DerivedContainer(
+        base=CONTAINER_T,
+        containerfile=f"""
 WORKDIR {BCDIR}
 RUN mkdir {APPDIR}
 RUN mkdir {OUTDIR}
 EXPOSE {PORT1}
 COPY {ORIG + APPDIR}/{APPL1} {APPDIR}
 """,
-        ),
-        marks=CONTAINER_T.marks,
-        id=CONTAINER_T.id,
     )
     for CONTAINER_T in CONTAINER_IMAGES
 ]

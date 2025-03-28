@@ -2,7 +2,6 @@
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
 
@@ -78,80 +77,68 @@ HEALTHCHECK --interval=5s --timeout=10s --start-period=30s --retries=3 \
 """
 
 
-for postfix_ctr in POSTFIX_CONTAINERS:
-    ctr, marks = container_and_marks_from_pytest_param(postfix_ctr)
+for ctr in POSTFIX_CONTAINERS:
     POSTFIX_WITH_MAILHOG.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                forwarded_ports=ctr.forwarded_ports,
-                containerfile=CONTAINERFILE_POSTFIX_WITH_MAILHOG,
-                extra_environment_variables={
-                    "SERVER_HOSTNAME": "localhost",
-                    "SMTP_RELAYHOST": "localhost",  # pointing to mailhog running locally
-                    "SMTP_PORT": "1025",
-                },
-                image_format=ImageFormat.DOCKER,
-            ),
-            marks=marks,
+        DerivedContainer(
+            base=ctr,
+            forwarded_ports=ctr.forwarded_ports,
+            containerfile=CONTAINERFILE_POSTFIX_WITH_MAILHOG,
+            extra_environment_variables={
+                "SERVER_HOSTNAME": "localhost",
+                "SMTP_RELAYHOST": "localhost",  # pointing to mailhog running locally
+                "SMTP_PORT": "1025",
+            },
+            image_format=ImageFormat.DOCKER,
         )
     )
 
 
-for postfix_ctr in POSTFIX_WITH_MAILHOG:
-    ctr, marks = container_and_marks_from_pytest_param(postfix_ctr)
+for ctr in POSTFIX_WITH_MAILHOG:
     POSTFIX_WITH_VIRTUAL_MBOX_ENABLED.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                forwarded_ports=ctr.forwarded_ports,
-                containerfile=CONTAINERFILE_POSTFIX_WITH_MAILHOG,
-                extra_environment_variables={
-                    "SERVER_HOSTNAME": "localhost",
-                    "SMTP_RELAYHOST": "localhost",  # pointing to mailhog running locally
-                    "SMTP_PORT": "1025",
-                    "VIRTUAL_MBOX": "1",
-                    "VMAIL_UID": "5000",
-                    "VIRTUAL_DOMAINS": "example.com example1.com",
-                    "VIRTUAL_USERS": "user1@example.com user2@example.com user@example1.com",
-                },
-                image_format=ImageFormat.DOCKER,
-            ),
-            marks=marks,
+        DerivedContainer(
+            base=ctr,
+            forwarded_ports=ctr.forwarded_ports,
+            containerfile=CONTAINERFILE_POSTFIX_WITH_MAILHOG,
+            extra_environment_variables={
+                "SERVER_HOSTNAME": "localhost",
+                "SMTP_RELAYHOST": "localhost",  # pointing to mailhog running locally
+                "SMTP_PORT": "1025",
+                "VIRTUAL_MBOX": "1",
+                "VMAIL_UID": "5000",
+                "VIRTUAL_DOMAINS": "example.com example1.com",
+                "VIRTUAL_USERS": "user1@example.com user2@example.com user@example1.com",
+            },
+            image_format=ImageFormat.DOCKER,
         )
     )
 
 
-for postfix_ctr in POSTFIX_WITH_VIRTUAL_MBOX_ENABLED:
-    ctr, marks = container_and_marks_from_pytest_param(postfix_ctr)
+for ctr in POSTFIX_WITH_VIRTUAL_MBOX_ENABLED:
     POSTFIX_WITH_LDAP_ENABLED.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                forwarded_ports=ctr.forwarded_ports,
-                containerfile=CONTAINERFILE_POSTFIX_WITH_LDAP_ENABLED,
-                extra_environment_variables={
-                    "SERVER_HOSTNAME": "localhost",
-                    "SMTP_RELAYHOST": "localhost",  # pointing to mailhog running locally
-                    "SMTP_PORT": "1025",
-                    "VIRTUAL_MBOX": "1",
-                    "VMAIL_UID": "5000",
-                    "USE_LDAP": "1",
-                    "LDAP_BASE_DN": "dc=example,dc=com",
-                    "LDAP_BIND_DN": "cn=admin,dc=example,dc=com",
-                    "LDAP_BIND_PASSWORD": "admin",
-                    "LDAP_USE_TLS": "0",
-                    "LDAP_TLS": "0",
-                    "LDAP_DOMAIN": "example.com",
-                    "LDAP_ADMIN_PASSWORD": "admin",
-                    "LDAP_CONFIG_PASSWORD": "config",
-                    "SETUP_FOR_MAILSERVER": "1",
-                    "MAIL_ACCOUNT_READER_PASSWORD": "admin",
-                    "LDAP_SERVER_URL": "ldap://localhost",
-                },
-                image_format=ImageFormat.DOCKER,
-            ),
-            marks=marks,
+        DerivedContainer(
+            base=ctr,
+            forwarded_ports=ctr.forwarded_ports,
+            containerfile=CONTAINERFILE_POSTFIX_WITH_LDAP_ENABLED,
+            extra_environment_variables={
+                "SERVER_HOSTNAME": "localhost",
+                "SMTP_RELAYHOST": "localhost",  # pointing to mailhog running locally
+                "SMTP_PORT": "1025",
+                "VIRTUAL_MBOX": "1",
+                "VMAIL_UID": "5000",
+                "USE_LDAP": "1",
+                "LDAP_BASE_DN": "dc=example,dc=com",
+                "LDAP_BIND_DN": "cn=admin,dc=example,dc=com",
+                "LDAP_BIND_PASSWORD": "admin",
+                "LDAP_USE_TLS": "0",
+                "LDAP_TLS": "0",
+                "LDAP_DOMAIN": "example.com",
+                "LDAP_ADMIN_PASSWORD": "admin",
+                "LDAP_CONFIG_PASSWORD": "config",
+                "SETUP_FOR_MAILSERVER": "1",
+                "MAIL_ACCOUNT_READER_PASSWORD": "admin",
+                "LDAP_SERVER_URL": "ldap://localhost",
+            },
+            image_format=ImageFormat.DOCKER,
         )
     )
 
