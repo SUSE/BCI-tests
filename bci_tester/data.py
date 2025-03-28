@@ -603,16 +603,6 @@ PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
     )
 ]
 
-# Python containers on SUSE Application Collection
-SAC_PYTHON_CONTAINERS = [
-    create_BCI(
-        build_tag=f"{SAC_CONTAINER_PREFIX}/python:{ver}",
-        available_versions=versions,
-        bci_type=ImageType.SAC_LANGUAGE_STACK,
-    )
-    for ver, versions in (("3.9", ["15.6"]), ("3.11", ["15.6"]))
-]
-
 RUBY_25_CONTAINER = create_BCI(
     build_tag="bci/ruby:2.5", available_versions=["15.6"]
 )
@@ -755,15 +745,12 @@ MARIADB_CLIENT_CONTAINERS = [
 POSTFIX_CONTAINERS = [
     create_BCI(
         build_tag=f"{SAC_CONTAINER_PREFIX}/postfix:{postfix_ver}",
-        bci_type=ImageType.SAC_APPLICATION,
+        bci_type=ImageType.APPLICATION,
         available_versions=os_versions,
         forwarded_ports=[PortForwarding(container_port=25)],
         extra_environment_variables={"SERVER_HOSTNAME": "localhost"},
     )
-    for postfix_ver, os_versions in (
-        (3.8, ["15.6"]),
-        ("3.10", ["tumbleweed"]),
-    )
+    for postfix_ver, os_versions in (("3.10", ["tumbleweed"]),)
 ]
 
 POSTGRES_PASSWORD = "n0ts3cr3t"
@@ -896,15 +883,6 @@ GCC_CONTAINERS = [
 
 APACHE_TOMCAT_10_CONTAINERS = [
     create_BCI(
-        build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:10.1-openjdk{openjdk_version}",
-        bci_type=ImageType.SAC_APPLICATION,
-        available_versions=("15.6",),
-        forwarded_ports=[PortForwarding(container_port=8080)],
-        container_user="tomcat",
-    )
-    for openjdk_version in (21, 17, 11)
-] + [
-    create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/apache-tomcat:10.1-openjdk{openjdk_version}",
         bci_type=ImageType.APPLICATION,
         available_versions=("tumbleweed",),
@@ -914,15 +892,6 @@ APACHE_TOMCAT_10_CONTAINERS = [
 ]
 
 APACHE_TOMCAT_9_CONTAINERS = [
-    create_BCI(
-        build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:9-openjdk{openjdk_version}",
-        bci_type=ImageType.SAC_APPLICATION,
-        available_versions=("15.6",),
-        forwarded_ports=[PortForwarding(container_port=8080)],
-        container_user="tomcat",
-    )
-    for openjdk_version in (21, 17, 11, 8)
-] + [
     create_BCI(
         build_tag=f"{SAC_CONTAINER_PREFIX}/apache-tomcat:9-openjdk{openjdk_version}",
         bci_type=ImageType.APPLICATION,
@@ -1077,7 +1046,6 @@ CONTAINERS_WITH_ZYPPER = (
     + PCP_CONTAINERS
     + PROMETHEUS_CONTAINERS
     + PYTHON_CONTAINERS
-    + SAC_PYTHON_CONTAINERS
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
@@ -1178,7 +1146,6 @@ else:
         + OPENJDK_CONTAINERS
         + PCP_CONTAINERS
         + PYTHON_CONTAINERS
-        + SAC_PYTHON_CONTAINERS
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
