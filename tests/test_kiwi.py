@@ -4,7 +4,6 @@ import os
 
 import pytest
 from pytest_container import DerivedContainer
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
 from pytest_container.runtime import LOCALHOST
@@ -22,17 +21,13 @@ CONTAINERFILE_KIWI_EXTENDED = """
 RUN curl -Lsf -o - https://github.com/OSInside/kiwi/archive/refs/heads/master.tar.gz | tar --no-same-permissions --no-same-owner -xzf - | true
 """
 
-for kiwi_ctr in KIWI_CONTAINERS:
-    ctr, marks = container_and_marks_from_pytest_param(kiwi_ctr)
+for ctr in KIWI_CONTAINERS:
     KIWI_CONTAINER_EXTENDED.append(
-        pytest.param(
-            DerivedContainer(
-                base=ctr,
-                containerfile=CONTAINERFILE_KIWI_EXTENDED,
-                image_format=ImageFormat.DOCKER,
-                extra_launch_args=["--privileged", "-v", "/dev:/dev"],
-            ),
-            marks=marks,
+        DerivedContainer(
+            base=ctr,
+            containerfile=CONTAINERFILE_KIWI_EXTENDED,
+            image_format=ImageFormat.DOCKER,
+            extra_launch_args=["--privileged", "-v", "/dev:/dev"],
         )
     )
 

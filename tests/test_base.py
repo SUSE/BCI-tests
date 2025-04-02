@@ -8,7 +8,6 @@ from typing import Dict
 import pytest
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerData
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
@@ -241,20 +240,18 @@ def test_all_openssl_hashes_known(auto_container):
 
 #: This is the base container with additional launch arguments applied to it so
 #: that docker can be launched inside the container
-DIND_CONTAINER = pytest.param(
-    DerivedContainer(
-        base=container_and_marks_from_pytest_param(BASE_CONTAINER)[0],
-        **{
-            x: getattr(BASE_CONTAINER.values[0], x)
-            for x in BASE_CONTAINER.values[0].__dict__
-            if x not in ("extra_launch_args", "base")
-        },
-        extra_launch_args=[
-            "--privileged=true",
-            "-v",
-            "/var/run/docker.sock:/var/run/docker.sock",
-        ],
-    ),
+DIND_CONTAINER = DerivedContainer(
+    base=BASE_CONTAINER,
+    **{
+        x: getattr(BASE_CONTAINER, x)
+        for x in BASE_CONTAINER.dict()
+        if x not in ("extra_launch_args", "base")
+    },
+    extra_launch_args=[
+        "--privileged=true",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+    ],
 )
 
 

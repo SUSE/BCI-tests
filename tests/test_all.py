@@ -14,7 +14,6 @@ from _pytest.config import Config
 from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container import MultiStageBuild
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container.container import BindMount
@@ -240,16 +239,12 @@ def test_glibc_present(auto_container):
 # the host instead of passing it on via stdout which pollutes the logs making
 # them unreadable
 _CONTAINERS_WITH_VOLUME_MOUNT = []
-for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
-    ctr, marks = container_and_marks_from_pytest_param(param)
+for ctr in CONTAINERS_WITH_ZYPPER_AS_ROOT:
     new_vol_mounts = (ctr.volume_mounts or []) + [BindMount("/solv/")]
-    kwargs = {**ctr.__dict__}
+    kwargs = {**ctr.dict()}
     kwargs.pop("volume_mounts")
     _CONTAINERS_WITH_VOLUME_MOUNT.append(
-        pytest.param(
-            DerivedContainer(volume_mounts=new_vol_mounts, **kwargs),
-            marks=marks,
-        )
+        DerivedContainer(volume_mounts=new_vol_mounts, **kwargs),
     )
 
 

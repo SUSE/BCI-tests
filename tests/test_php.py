@@ -9,7 +9,6 @@ import pytest
 import requests
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 from pytest_container.container import ImageFormat
 from pytest_container.container import PortForwarding
@@ -33,7 +32,7 @@ _MEDIAWIKI_VERSION = "1.39.10"
 _MEDIAWIKI_MAJOR_VERSION = ".".join(_MEDIAWIKI_VERSION.split(".")[:2])
 
 MEDIAWIKI_APACHE_CONTAINER = DerivedContainer(
-    base=container_and_marks_from_pytest_param(PHP_8_APACHE)[0],
+    base=PHP_8_APACHE,
     forwarded_ports=[PortForwarding(container_port=80)],
     image_format=ImageFormat.DOCKER,
     containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
@@ -65,7 +64,7 @@ EXPOSE 80
 
 
 MEDIAWIKI_FPM_CONTAINER = DerivedContainer(
-    base=container_and_marks_from_pytest_param(PHP_8_FPM)[0],
+    base=PHP_8_FPM,
     containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
 ENV MEDIAWIKI_MAJOR_VERSION={_MEDIAWIKI_MAJOR_VERSION}"""
     + r"""
