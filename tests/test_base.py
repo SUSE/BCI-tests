@@ -176,6 +176,13 @@ def test_gost_digest_disable(auto_container):
     )
 
 
+def test_ca_certs_working(auto_container):
+    """Checks that the mozilla certificate bundle is known to openssl."""
+    auto_container.connection.check_output(
+        "openssl s_client -verify_return_error -connect public-dl.suse.com:443 < /dev/null"
+    )
+
+
 @without_fips
 @pytest.mark.parametrize(
     "container",
