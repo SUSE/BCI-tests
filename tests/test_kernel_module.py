@@ -1,5 +1,7 @@
 """Tests for the SLE15 kernel-module container."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import re
 
 import pytest

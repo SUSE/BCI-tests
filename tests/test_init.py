@@ -3,6 +3,8 @@ systemd pre-installed.
 
 """
 
+## Maintainer: BCI team (#proj-bci)
+
 import datetime
 import json
 import re

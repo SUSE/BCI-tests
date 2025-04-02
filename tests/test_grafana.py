@@ -1,5 +1,7 @@
 """Tests for the Grafana containers."""
 
+## Maintainer: BCI team (#proj-bci)
+
 import pytest
 import requests
 import tenacity
