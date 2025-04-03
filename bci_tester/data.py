@@ -47,6 +47,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-pr",
     "15.7",
     "16.0",
     "tumbleweed",
@@ -56,6 +57,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-pr",
     "15.7",
     "tumbleweed",
 )
@@ -70,7 +72,15 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "15.7", "tumbleweed")
 _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
-RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "15.6-ai", "15.7")
+RELEASED_SLE_VERSIONS = (
+    "15.3",
+    "15.4",
+    "15.5",
+    "15.6",
+    "15.6-ai",
+    "15.6-pr",
+    "15.7",
+)
 
 assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS), (
     f"list ALLOWED_BASE_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
@@ -177,6 +187,11 @@ else:
         )
         ibs_released = "dp.apps.rancher.io"
 
+    if OS_VERSION == "15.6-pr":
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
+        )
+
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
@@ -251,6 +266,8 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return ""
     if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
         return "images/"
+    if OS_VERSION == "15.6-pr" and TARGET == "ibs-cr":
+        return "containerfile/"
     if not OS_VERSION.startswith("16") and TARGET == "ibs-cr":
         return "images/"
     if TARGET in ("factory-totest", "factory-arm-totest"):
@@ -828,11 +845,25 @@ COSIGN_CONTAINERS = [
 
 _NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
 
-NGINX_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
-    bci_type=ImageType.APPLICATION,
-    forwarded_ports=[PortForwarding(container_port=80)],
-)
+PR_NGINX_CONTAINERS = [
+    create_BCI(
+        build_tag="private-registry/harbor-nginx:1.21",
+        bci_type=ImageType.APPLICATION,
+        available_versions=("15.6-pr",),
+        forwarded_ports=[PortForwarding(container_port=80)],
+        custom_entry_point="/bin/sh",
+    ),
+]
+
+APP_NGINX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=80)],
+    ),
+]
+
+NGINX_CONTAINERS = APP_NGINX_CONTAINERS + PR_NGINX_CONTAINERS
 
 KUBECTL_CONTAINERS = [
     create_BCI(
@@ -1031,7 +1062,7 @@ SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME = create_BCI(
     custom_entry_point="/bin/bash",
 )
 
-VALKEY_CONTAINERS = [
+APP_VALKEY_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/valkey:{tag}",
         bci_type=ImageType.APPLICATION,
@@ -1040,6 +1071,17 @@ VALKEY_CONTAINERS = [
     )
     for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
 ]
+
+PR_VALKEY_CONTAINERS = [
+    create_BCI(
+        build_tag="private-registry/harbor-valkey:latest",
+        bci_type=ImageType.APPLICATION,
+        available_versions=("15.6-pr",),
+        forwarded_ports=[PortForwarding(container_port=6379)],
+    )
+]
+
+VALKEY_CONTAINERS = APP_VALKEY_CONTAINERS + PR_VALKEY_CONTAINERS
 
 BIND_CONTAINERS = [
     create_BCI(
@@ -1057,7 +1099,6 @@ CONTAINERS_WITH_ZYPPER = (
         BASE_CONTAINER,
         INIT_CONTAINER,
         KERNEL_MODULE_CONTAINER,
-        NGINX_CONTAINER,
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
@@ -1070,6 +1111,8 @@ CONTAINERS_WITH_ZYPPER = (
     + KIWI_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
+    + APP_NGINX_CONTAINERS
+    + PR_NGINX_CONTAINERS
     + NODEJS_CONTAINERS
     + OPENJDK_CONTAINERS
     + OPENJDK_DEVEL_CONTAINERS
@@ -1086,8 +1129,7 @@ CONTAINERS_WITH_ZYPPER = (
 CONTAINERS_WITH_ZYPPER_AS_ROOT = []
 for param in CONTAINERS_WITH_ZYPPER:
     # only modify the user for containers where `USER` is explicitly set,
-    # atm this is no container
-    if param not in []:
+    if param not in PR_NGINX_CONTAINERS:
         CONTAINERS_WITH_ZYPPER_AS_ROOT.append(param)
     else:
         ctr, marks = container_and_marks_from_pytest_param(param)
@@ -1160,7 +1202,6 @@ else:
             INIT_CONTAINER,
             MICRO_CONTAINER,
             MINIMAL_CONTAINER,
-            NGINX_CONTAINER,
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
@@ -1169,6 +1210,7 @@ else:
             MILVUS_CONTAINER,
             PYTORCH_CONTAINER,
         ]
+        + APP_NGINX_CONTAINERS
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
         + COSIGN_CONTAINERS
@@ -1187,10 +1229,10 @@ else:
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
-        + VALKEY_CONTAINERS
+        + APP_VALKEY_CONTAINERS
     )
 
-ACC_CONTAINERS = POSTGRESQL_CONTAINERS
+ACC_CONTAINERS = POSTGRESQL_CONTAINERS + PR_NGINX_CONTAINERS
 
 #: Containers pulled from registry.suse.de
 ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER

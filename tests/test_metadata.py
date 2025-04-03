@@ -29,6 +29,8 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import APP_NGINX_CONTAINERS
+from bci_tester.data import APP_VALKEY_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import BIND_CONTAINERS
@@ -61,7 +63,6 @@ from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import NGINX_CONTAINER
 from bci_tester.data import NODEJS_CONTAINERS
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
@@ -77,6 +78,8 @@ from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
+from bci_tester.data import PR_NGINX_CONTAINERS
+from bci_tester.data import PR_VALKEY_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RUBY_CONTAINERS
@@ -86,7 +89,6 @@ from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
 from bci_tester.data import TOMCAT_CONTAINERS
-from bci_tester.data import VALKEY_CONTAINERS
 from bci_tester.data import ImageType
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
@@ -139,13 +141,14 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
-        (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
         (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
         for c in OPENJDK_DEVEL_CONTAINERS
     ]
+    + [(c, "nginx", ImageType.APPLICATION) for c in APP_NGINX_CONTAINERS]
+    + [(c, "harbor", ImageType.APPLICATION) for c in PR_NGINX_CONTAINERS]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
@@ -276,9 +279,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (kea_container, "kea", ImageType.APPLICATION)
         for kea_container in KEA_CONTAINERS
     ]
+    + [(c, "valkey", ImageType.APPLICATION) for c in APP_VALKEY_CONTAINERS]
     + [
-        (valkey_container, "valkey", ImageType.APPLICATION)
-        for valkey_container in VALKEY_CONTAINERS
+        (c, "harbor-valkey", ImageType.APPLICATION)
+        for c in PR_VALKEY_CONTAINERS
     ]
     + [
         (bind_ctr, "bind", ImageType.APPLICATION)
@@ -336,6 +340,11 @@ def test_general_labels(
                     "based on SUSE Linux Enterprise Server 15"
                     in labels[f"{prefix}.description"]
                     or "based on the SLE LTSS Base Container Image"
+                    in labels[f"{prefix}.description"]
+                )
+            elif OS_VERSION in ("15.6-pr",):
+                assert (
+                    "for SUSE Private Registry"
                     in labels[f"{prefix}.description"]
                 )
             else:
@@ -591,7 +600,7 @@ def test_reference(
         ]
         == reference
     )
-    if container_type != ImageType.OS_LTSS:
+    if OS_VERSION not in ("15.6-pr",) and container_type != ImageType.OS_LTSS:
         reference_name = container_name.replace(".", "-")
         # the BCI-base container is actually identifying itself as the os container
         # Fixed by creating bci-base from dockerfile-generator on 15.6+
@@ -609,6 +618,9 @@ def test_reference(
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
+    elif OS_VERSION in ("15.6-pr",):
+        # published nonstandardly to /private-registry
+        pass
     else:
         if container_type in (
             ImageType.SAC_LANGUAGE_STACK,
@@ -651,7 +663,15 @@ def test_reference(
 
 
 @SKIP_IF_TW_MARK
-@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+@pytest.mark.parametrize(
+    "container",
+    [
+        c
+        for c in ALL_CONTAINERS
+        if c not in PR_VALKEY_CONTAINERS + PR_NGINX_CONTAINERS
+    ],
+    indirect=True,
+)
 def test_oci_base_refs(
     container: ContainerData,
     container_runtime: OciRuntimeBase,

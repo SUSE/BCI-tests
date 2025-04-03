@@ -99,6 +99,8 @@ markers = [
     'golang_unstable',
     'grafana_10',
     'grafana_11',
+    'harbor-nginx_1.21',
+    'harbor-valkey_latest',
     'kea_2.6',
     'kiwi_9.24',
     'kiwi_10.2',
