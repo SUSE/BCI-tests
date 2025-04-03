@@ -47,6 +47,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-pr",
     "15.7",
     "16.0",
     "tumbleweed",
@@ -56,6 +57,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-pr",
     "15.7",
     "tumbleweed",
 )
@@ -175,6 +177,11 @@ else:
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
 
+    if OS_VERSION == "15.6-pr":
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
+        )
+
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
@@ -249,6 +256,8 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return ""
     if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
         return "images/"
+    if OS_VERSION == "15.6-pr" and TARGET == "ibs-cr":
+        return "containerfile/"
     if not OS_VERSION.startswith("16") and TARGET == "ibs-cr":
         return "images/"
     if TARGET in ("factory-totest", "factory-arm-totest"):
@@ -823,11 +832,19 @@ COSIGN_CONTAINERS = [
 
 _NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
 
-NGINX_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
-    bci_type=ImageType.APPLICATION,
-    forwarded_ports=[PortForwarding(container_port=80)],
-)
+NGINX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=80)],
+    ),
+    create_BCI(
+        build_tag="private-registry/harbor-nginx:1.21",
+        bci_type=ImageType.APPLICATION,
+        available_versions=("15.6-pr",),
+        forwarded_ports=[PortForwarding(container_port=80)],
+    ),
+]
 
 KUBECTL_CONTAINERS = [
     create_BCI(
@@ -1019,6 +1036,13 @@ VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
+] + [
+    create_BCI(
+        build_tag="private-registry/harbor-valkey:latest",
+        bci_type=ImageType.APPLICATION,
+        available_versions=("15.6-pr",),
+        forwarded_ports=[PortForwarding(container_port=6379)],
+    )
 ]
 
 BIND_CONTAINERS = [
@@ -1037,7 +1061,6 @@ CONTAINERS_WITH_ZYPPER = (
         BASE_CONTAINER,
         INIT_CONTAINER,
         KERNEL_MODULE_CONTAINER,
-        NGINX_CONTAINER,
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
@@ -1053,6 +1076,7 @@ CONTAINERS_WITH_ZYPPER = (
     + KIWI_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
+    + NGINX_CONTAINERS
     + NODEJS_CONTAINERS
     + OPENJDK_CONTAINERS
     + PCP_CONTAINERS
@@ -1137,7 +1161,6 @@ else:
             INIT_CONTAINER,
             MICRO_CONTAINER,
             MINIMAL_CONTAINER,
-            NGINX_CONTAINER,
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
@@ -1156,6 +1179,7 @@ else:
         + LTSS_BASE_FIPS_CONTAINERS
         + MARIADB_CLIENT_CONTAINERS
         + MARIADB_CONTAINERS
+        + NGINX_CONTAINERS
         + NODEJS_CONTAINERS
         + OPENJDK_CONTAINERS
         + PCP_CONTAINERS
