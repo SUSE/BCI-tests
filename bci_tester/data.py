@@ -194,6 +194,11 @@ else:
         )
         obs_project = "registry.suse.de/devel/scc/privateregistry"
 
+    if OS_VERSION == "15.6-pr":
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
+        )
+
     BASEURL = {
         "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
@@ -1072,6 +1077,13 @@ APP_VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
+] + [
+    create_BCI(
+        build_tag="private-registry/harbor-valkey:latest",
+        bci_type=ImageType.APPLICATION,
+        available_versions=("15.6-pr",),
+        forwarded_ports=[PortForwarding(container_port=6379)],
+    )
 ]
 
 PR_VALKEY_CONTAINERS = [
@@ -1223,6 +1235,7 @@ else:
         + LTSS_BASE_FIPS_CONTAINERS
         + MARIADB_CLIENT_CONTAINERS
         + MARIADB_CONTAINERS
+        + NGINX_CONTAINERS
         + NODEJS_CONTAINERS
         + OPENJDK_CONTAINERS
         + OPENJDK_DEVEL_CONTAINERS
