@@ -31,6 +31,7 @@ from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BASE_FIPS_CONTAINERS
+from bci_tester.data import BIND_CONTAINERS
 from bci_tester.data import BLACKBOX_CONTAINERS
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
@@ -291,6 +292,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (valkey_container, "valkey", ImageType.APPLICATION)
         for valkey_container in VALKEY_CONTAINERS
+    ]
+    + [
+        (bind_ctr, "bind", ImageType.APPLICATION)
+        for bind_ctr in BIND_CONTAINERS
     ]
 ]
 
