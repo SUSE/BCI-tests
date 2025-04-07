@@ -12,6 +12,7 @@ from pytest_container import DerivedContainer
 from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
 from pytest_container.container import container_and_marks_from_pytest_param
+from pytest_container.inspect import NetworkProtocol
 from pytest_container.runtime import LOCALHOST
 
 try:
@@ -1020,6 +1021,17 @@ VALKEY_CONTAINERS = [
     for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
 ]
 
+BIND_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/bind:9",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
+        forwarded_ports=[
+            PortForwarding(container_port=53, protocol=NetworkProtocol.UDP)
+        ],
+    )
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1051,6 +1063,7 @@ CONTAINERS_WITH_ZYPPER = (
     + SPACK_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
     + KEA_CONTAINERS
+    + BIND_CONTAINERS
 )
 
 #: all containers with zypper and with the flag to launch them as root
