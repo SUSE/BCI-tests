@@ -1,5 +1,7 @@
 """This module contains the tests for the cosign container, the image with cosign pre-installed."""
 
+## Maintainer: BCI team (#proj-bci)
+
 from bci_tester.data import COSIGN_CONTAINERS
 
 CONTAINER_IMAGES = COSIGN_CONTAINERS

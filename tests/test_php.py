@@ -1,5 +1,7 @@
 """Tests for the PHP-cli, -apache and -fpm containers."""
 
+## Maintainer: BCI team (#proj-bci)
+
 try:
     from typing import Literal
 except ImportError:
