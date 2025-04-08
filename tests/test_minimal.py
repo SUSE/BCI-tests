@@ -53,7 +53,7 @@ def test_minimal_image_size(container, container_runtime):
             )
         else:
             pytest.fail(
-                "Container size f{container_size} exceeds f{minimal_container_max_size[LOCALHOST.system_info.arch]} MiB"
+                f"Container size {container_size} exceeds {minimal_container_max_size[LOCALHOST.system_info.arch]} MiB"
             )
 
 
