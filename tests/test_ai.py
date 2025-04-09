@@ -10,12 +10,16 @@ from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENWEBUI_CONTAINER
 from bci_tester.data import PYTORCH_CONTAINER
+from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME_CONTAINER
+from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP_CONTAINER
 
 CONTAINER_IMAGES = (
     OLLAMA_CONTAINER,
     OPENWEBUI_CONTAINER,
     MILVUS_CONTAINER,
     PYTORCH_CONTAINER,
+    SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME_CONTAINER,
+    SUSE_AI_OBSERVABILITY_EXTENSION_SETUP_CONTAINER,
 )
 
 
@@ -92,3 +96,60 @@ def test_pytorch_health(container):
         "python3.11 -c 'import torch; print(torch.__version__)'"
     )
     container.connection.check_output("git --version")
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    [SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME_CONTAINER],
+    indirect=["container_per_test"],
+)
+def test_suse_ai_observability_extenstion_runtime_health(container_per_test):
+    """Test the SUSE AI Observability Extension runtime container."""
+
+    # the container is not meant to run outside kubernetes, only basic checks will be performed
+    # it's expected to fail without configuration provided by environment variables
+    result = container_per_test.connection.run_expect(
+        [1], "/usr/bin/suse-ai-observability-extension-runtime"
+    )
+    assert (
+        "failed to initialize error=\"Key: 'Configuration.StackState'"
+        in result.stderr
+    )
+    assert "Key: 'Configuration.Kubernetes.Cluster'" in result.stderr
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    [SUSE_AI_OBSERVABILITY_EXTENSION_SETUP_CONTAINER],
+    indirect=["container_per_test"],
+)
+def test_suse_ai_observability_extenstion_setup_health(container_per_test):
+    """Test the SUSE AI Observability Extension setup container."""
+
+    # the container is not meant to run outside kubernetes, only basic checks will be performed
+    # check that the necessary tools are available
+    container_per_test.connection.check_output("sts")
+    container_per_test.connection.check_output("jq")
+
+    # check that the necessary files are available
+    expected_files = [
+        "mnt/init.sh",
+        "mnt/menu/llm.yaml",
+        "mnt/overview/genai_system.yaml",
+        "mnt/overview/gpu_nodes.yaml",
+        "mnt/overview/vector_db_system.yaml",
+        "mnt/overview/genai_apps.yaml",
+        "mnt/components/genai_system_ollama.yaml",
+        "mnt/components/genai_system_openai.yaml",
+        "mnt/components/genai_dbsystem_milvus.yaml",
+        "mnt/metrics/gpu_nodes.yaml",
+        "mnt/metrics/gpu_pods.yaml",
+        "mnt/metrics/genai_systems.yaml",
+        "mnt/metrics/db_systems.yaml",
+        "mnt/metrics/genai_apps.yaml",
+    ]
+
+    for file in expected_files:
+        assert container_per_test.connection.file(file).is_file, (
+            f"{file} not found"
+        )
