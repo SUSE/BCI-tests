@@ -23,24 +23,24 @@ def test_minimal_image_size(container, container_runtime):
     """
     if OS_VERSION in ("tumbleweed",):
         minimal_container_max_size: Dict[str, int] = {
-            "aarch64": 63,
-            "ppc64le": 58,
-            "s390x": 41,
-            "x86_64": 49,
+            "aarch64": 51,
+            "ppc64le": 74,
+            "s390x": 36,
+            "x86_64": 42,
         }
     elif OS_VERSION in ("16.0",):
         minimal_container_max_size: Dict[str, int] = {
             "aarch64": 38,
-            "ppc64le": 45,
-            "s390x": 35,
-            "x86_64": 36,
+            "ppc64le": 44,
+            "s390x": 34,
+            "x86_64": 35,
         }
     else:
         minimal_container_max_size: Dict[str, int] = {
-            "x86_64": 49,
-            "aarch64": 51,
-            "s390x": 49,
-            "ppc64le": 59,
+            "x86_64": 48,
+            "aarch64": 50,
+            "s390x": 48,
+            "ppc64le": 58,
         }
 
     container_size = container_runtime.get_image_size(
