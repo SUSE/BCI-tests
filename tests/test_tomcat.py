@@ -49,7 +49,12 @@ def test_tomcat_launches(container: ContainerData) -> None:
 
 @pytest.mark.parametrize("container", TOMCAT_CONTAINERS, indirect=True)
 def test_tomcat_logs(container: ContainerData) -> None:
-    """"""
+    """Verify that Tomcat's startup logs contain expected messages.
+
+    This test checks the container logs after Tomcat has started to ensure
+    that specific log messages related to the server's startup and logging
+    configuration are present.
+    """
     _tomcat_launch_test_fn(container)
     logs = container.read_container_logs()
     assert (
