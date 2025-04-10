@@ -139,8 +139,9 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     all non-fips hash algorithms fail.
 
     """
+    c = container_per_test.connection
     for digest in NONFIPS_DIGESTS:
-        cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
+        cmd = c.run(f"openssl {digest} /dev/null")
         assert cmd.rc != 0
         assert (
             "is not a known digest" in cmd.stderr
@@ -148,12 +149,39 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
         )
 
     for digest in FIPS_DIGESTS:
-        dev_null_digest = container_per_test.connection.check_output(
-            f"openssl {digest} /dev/null"
-        )
+        dev_null_digest = c.check_output(f"openssl {digest} /dev/null")
         assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
             f"unexpected digest of hash {digest}: {dev_null_digest}"
         )
+
+    if OS_VERSION == "15.6":
+        # Removal of default version openSSL3
+        c.check_output("zypper --non-interactive rm --clean-deps openssl")
+
+        # Download and extract the openSSL1.1 legacy version
+        arch = LOCALHOST.system_info.arch
+        legacy_repourl = f"https://download.suse.de/ibs/SUSE/Products/SLE-Module-Legacy/15-SP6/{arch}/product"
+        rpm_name = c.check_output(
+            f"curl -Lsk \"{legacy_repourl}/INDEX.gz\" | gzip -cd | grep -o 'openssl-1_1[^[:space:]]*\\.rpm'"
+        )
+        c.check_output(f"curl -skLO {legacy_repourl}/{arch}/{rpm_name}")
+        c.check_output(f"rpm2cpio {rpm_name} | cpio -idmv")
+        c.check_output("cp ./usr/bin/openssl-1_1 /usr/local/bin")
+
+        # Repeat the digest tests with openSSL1.1
+        for digest in NONFIPS_DIGESTS:
+            cmd = c.run(f"openssl-1_1 {digest} /dev/null")
+            assert cmd.rc != 0
+            assert (
+                "is not a known digest" in cmd.stderr
+                or "Error setting digest" in cmd.stderr
+            )
+
+        for digest in FIPS_DIGESTS:
+            dev_null_digest = c.check_output(f"openssl-1_1 {digest} /dev/null")
+            assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
+                f"unexpected digest of hash {digest}: {dev_null_digest}"
+            )
 
 
 @pytest.mark.skipif(
