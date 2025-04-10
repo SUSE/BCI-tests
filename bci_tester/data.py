@@ -1206,6 +1206,11 @@ if __name__ == "__main__":
     )
 
     def has_true_skipif(param: ParameterSet) -> bool:
+        """Check if a ParameterSet has a 'skipif' mark with a truthy condition.
+        Returns:
+            True if a 'skipif' mark with a truthy condition is found, False
+            otherwise.
+        """
         for mark in param.marks:
             if mark.name == "skipif" and mark.args and mark.args[0]:
                 return True
