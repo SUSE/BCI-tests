@@ -7,6 +7,7 @@ except ImportError:
 
 import pytest
 import requests
+import tenacity
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
 from pytest_container import container_and_marks_from_pytest_param
@@ -331,8 +332,21 @@ def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
     checks if the pod is reachable using requests.
 
     """
-    resp = requests.get(
-        f"http://localhost:{pod_per_test.forwarded_ports[0].host_port}",
-        timeout=30,
+
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
     )
+    def connect(port: int) -> requests.Response:
+        return requests.get(
+            f"http://0.0.0.0:{port}/index.php",
+            timeout=3,
+            allow_redirects=False,
+        )
+
+    resp = connect(pod_per_test.forwarded_ports[0].host_port)
     resp.raise_for_status()
+
+    assert (
+        "GET /index.php"
+        in pod_per_test.container_data[0].read_container_logs()
+    )
