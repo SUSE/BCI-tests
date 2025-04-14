@@ -89,7 +89,7 @@ RUN set -eux; \
                 ctype \
                 fileinfo \
                 dom ; \
-        pecl install APCu-5.1.21; \
+        pecl install APCu-5.1.24; \
         docker-php-ext-enable apcu; \
         rm -r /tmp/pear
 
