@@ -2,6 +2,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Dict
 from typing import Optional
+from typing import Union
 
 import dns.query
 import pytest
@@ -56,7 +57,7 @@ def test_basic_resolution(
     assert resp.answer
 
     def find_record_in_answer(
-        answer: resolver.Answer | RRset,
+        answer: Union[resolver.Answer, RRset],
     ) -> Optional[str]:
         for rdata in answer:
             if rdata.rdtype == record_type:
