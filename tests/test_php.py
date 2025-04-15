@@ -7,6 +7,7 @@ except ImportError:
 
 import pytest
 import requests
+import tenacity
 from pytest_container import DerivedContainer
 from pytest_container import OciRuntimeBase
 from pytest_container import container_and_marks_from_pytest_param
@@ -29,7 +30,7 @@ CONTAINER_IMAGES_WITH_FLAVORS = [
     for t in ((PHP_8_APACHE, "apache"), (PHP_8_FPM, "fpm"), (PHP_8_CLI, "cli"))
 ]
 _PHP_MAJOR_VERSION = 8
-_MEDIAWIKI_VERSION = "1.39.10"
+_MEDIAWIKI_VERSION = "1.43.1"
 _MEDIAWIKI_MAJOR_VERSION = ".".join(_MEDIAWIKI_VERSION.split(".")[:2])
 
 MEDIAWIKI_APACHE_CONTAINER = DerivedContainer(
@@ -89,7 +90,7 @@ RUN set -eux; \
                 ctype \
                 fileinfo \
                 dom ; \
-        pecl install APCu-5.1.21; \
+        pecl install APCu-5.1.24; \
         docker-php-ext-enable apcu; \
         rm -r /tmp/pear
 
@@ -331,8 +332,21 @@ def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
     checks if the pod is reachable using requests.
 
     """
-    resp = requests.get(
-        f"http://localhost:{pod_per_test.forwarded_ports[0].host_port}",
-        timeout=30,
+
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
     )
+    def connect(port: int) -> requests.Response:
+        return requests.get(
+            f"http://0.0.0.0:{port}/index.php",
+            timeout=3,
+            allow_redirects=False,
+        )
+
+    resp = connect(pod_per_test.forwarded_ports[0].host_port)
     resp.raise_for_status()
+
+    assert (
+        "GET /index.php"
+        in pod_per_test.container_data[0].read_container_logs()
+    )
