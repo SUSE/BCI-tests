@@ -7,6 +7,9 @@ import fnmatch
 import json
 import pathlib
 import xml.etree.ElementTree as ET
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 
 import packaging.version
 import pytest
@@ -680,3 +683,77 @@ def test_container_build_and_repo(container_per_test, host):
 
     # check that all enabled repos are valid and can be refreshed
     container_per_test.connection.run_expect([0], "zypper -n ref")
+
+
+_USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
+    "nobody": (65534, 65534),
+    "root": (0, 0),
+    "wwwrun": (None, 485),
+    "prometheus": (None, 486),
+    "messagebus": (None, 486),
+    "pesign": (None, 486),
+    "grafana": (None, 486),
+    "nginx": (None, 486),
+    "registry": (None, 486),
+    "named": (44, 44),
+    "app": (1654, 1654),
+    "mysql": (60, 60),
+    "dirsrv": (None, 486),
+    "stunnel": (None, 65533),
+    "polkitd": (498, 485),
+    "postgres": (None, 486),
+    "pcp": (498, 484),
+    "pcpqa": (496, 496),
+    "ldap": (498, 498),
+    "systemd-coredump": (497, 497),
+    "postfix": (51, 51),
+    "sa-milter": (497, 497),
+    "keadhcp": (None, 486),
+}
+
+# special cases for TW & SLE 16
+if OS_VERSION in ("tumbleweed", "16.0"):
+    # these users don't use the non-default GID on TW
+    for username in (
+        "prometheus",
+        "nginx",
+        "messagebus",
+        "grafana",
+        "dirsrv",
+        "postgres",
+        "registry",
+        "keadhcp",
+    ):
+        del _USERNAME_UID_GID_MAP[username]
+
+    # completely different UID & GID on TW
+    _USERNAME_UID_GID_MAP["pcp"] = (498, 498)
+    _USERNAME_UID_GID_MAP["wwwrun"] = (None, 498)
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_uids_stable(container: ContainerData) -> None:
+    """Check that every user in :file:`/etc/passwd` has a stable uid & gid as
+    defined in ``_USERNAME_UID_GID_MAP``.
+
+    """
+    passwd: str = container.connection.file("/etc/passwd").content_string
+
+    assert container.connection.user("root").exists, "root user does not exist"
+
+    for userline in passwd.splitlines():
+        tmp = userline.split(":")
+        name, uid, gid = tmp[0], int(tmp[2]), int(tmp[3])
+
+        expected_uid, expected_gid = _USERNAME_UID_GID_MAP.get(
+            name, (499, 499)
+        )
+        expected_uid = 499 if expected_uid is None else expected_uid
+        expected_gid = 499 if expected_gid is None else expected_gid
+
+        assert uid == expected_uid, (
+            f"Expected user {name} to have uid {expected_uid} but got {uid}"
+        )
+        assert gid == expected_gid, (
+            f"Expected user {name} to have gid {expected_gid} but got {gid}"
+        )
