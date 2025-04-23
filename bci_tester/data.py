@@ -198,6 +198,7 @@ else:
         ibs_cr_project = (
             "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
         )
+        obs_project = "registry.suse.de/devel/scc/privateregistry"
 
     BASEURL = {
         "obs": obs_project,
