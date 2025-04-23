@@ -177,6 +177,7 @@ else:
 
     ibs_released = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
+    obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}/test"
@@ -191,9 +192,10 @@ else:
         ibs_cr_project = (
             "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
         )
+        obs_project = "registry.suse.de/devel/scc/privateregistry"
 
     BASEURL = {
-        "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
+        "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "factory-arm-totest": "registry.opensuse.org/opensuse/factory/arm/totest",
         "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
