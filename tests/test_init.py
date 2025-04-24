@@ -139,7 +139,7 @@ def test_hostnamectl(
     if OS_VERSION == "tumbleweed":
         expected_os = "openSUSE Tumbleweed"
     elif OS_VERSION in ("16.0",):
-        expected_os = "SUSE Linux " + OS_VERSION
+        expected_os = "SUSE Linux Enterprise Server" + OS_VERSION
 
     assert expected_os in hostnamectl["OperatingSystemPrettyName"], (
         "Missing SUSE tag in Operating system"
