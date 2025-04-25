@@ -13,7 +13,7 @@ from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import INIT_CONTAINER
-from bci_tester.data import OS_VERSION
+from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 CONTAINER_IMAGES = [INIT_CONTAINER]
@@ -135,13 +135,7 @@ def test_hostnamectl(
     )
     assert hostnamectl["Chassis"] == "container", "Chassis mismatch"
 
-    expected_os = "SUSE Linux Enterprise Server"
-    if OS_VERSION == "tumbleweed":
-        expected_os = "openSUSE Tumbleweed"
-    elif OS_VERSION in ("16.0",):
-        expected_os = "SUSE Linux " + OS_VERSION
-
-    assert expected_os in hostnamectl["OperatingSystemPrettyName"], (
+    assert OS_PRETTY_NAME in hostnamectl["OperatingSystemPrettyName"], (
         "Missing SUSE tag in Operating system"
     )
 
