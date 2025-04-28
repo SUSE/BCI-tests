@@ -1,3 +1,5 @@
+"""Tests for the BCI ISC Bind (DNS) container"""
+
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict
@@ -236,12 +238,12 @@ def test_tmpfiles_d_created(container: ContainerData) -> None:
 
         # directories
         if tp == "d":
-            dir = container.connection.file(path)
-            assert dir.exists
-            assert dir.is_directory
-            assert dir.user == owner
-            assert dir.group == group
-            assert oct(dir.mode) == f"0o{mode}"
+            tmpfile_dir = container.connection.file(path)
+            assert tmpfile_dir.exists
+            assert tmpfile_dir.is_directory
+            assert tmpfile_dir.user == owner
+            assert tmpfile_dir.group == group
+            assert oct(tmpfile_dir.mode) == f"0o{mode}"
 
         # created files
         elif tp == "C":
