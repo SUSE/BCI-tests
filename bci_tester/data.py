@@ -716,7 +716,8 @@ PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
 MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
 _MARIADB_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
-    ("10.11", ("15.6", "15.7")),
+    ("10.11", ("15.6",)),
+    ("11.4", ("15.7",)),
     ("latest", ("tumbleweed",)),
 )
 
