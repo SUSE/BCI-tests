@@ -6,7 +6,9 @@ import datetime
 import fnmatch
 import json
 import pathlib
+import shlex
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from typing import Dict
 from typing import Optional
 from typing import Tuple
@@ -757,3 +759,97 @@ def test_uids_stable(container: ContainerData) -> None:
         assert gid == expected_gid, (
             f"Expected user {name} to have gid {expected_gid} but got {gid}"
         )
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_all_users_provided_by_sysusers(container: ContainerData) -> None:
+    """Check that all users from :file:`/etc/passwd` are provided by a
+    corresponding conf file in :file:`/usr/lib/sysusers.d/`.
+
+    Additionally we verify that
+
+    """
+    passwd: str = container.connection.file("/etc/passwd").content_string
+
+    @dataclass
+    class SysUser:
+        """Class representing a user defined in a sysusers.d config file."""
+
+        username: str
+        uid: Optional[int] = None
+        home: Optional[str] = None
+        shell: Optional[str] = None
+
+    sysusers_d = "/usr/lib/sysusers.d/"
+
+    all_users: Dict[str, SysUser] = {}
+
+    # can't use file(_SYSUSERS_D).listdir() because that uses `ls -1 -q` which
+    # is unsupported by busybox 🙄
+    for fname in (
+        container.connection.check_output(f"ls -1 {sysusers_d}")
+        .strip()
+        .splitlines()
+    ):
+        if not fname.endswith(".conf"):
+            continue
+
+        for line in container.connection.file(
+            f"{sysusers_d}{fname}"
+        ).content_string.splitlines():
+            if not line.startswith("u"):
+                continue
+
+            parsed = shlex.split(line)
+
+            assert parsed[0] in ("u", "u!")
+
+            uid = parsed[2]
+            user = SysUser(
+                username=parsed[1], uid=int(uid) if uid != "-" else None
+            )
+
+            if len(parsed) > 4 and parsed[4] != "-":
+                user.home = parsed[4]
+
+            if len(parsed) > 5:
+                user.shell = (
+                    parsed[5] if parsed[5] != "-" else "/usr/sbin/nologin"
+                )
+
+            all_users[user.username] = user
+
+    for userline in passwd.splitlines():
+        name, _, uid, _, _, home, shell = userline.split(":")
+
+        users_not_via_sysusers_d = ("app", "tomcat", "stunnel")
+        if OS_VERSION in ("15.6", "15.7"):
+            users_not_via_sysusers_d += ("pesign",)
+        if name in users_not_via_sysusers_d:
+            pytest.xfail(
+                f"user {name} is known to not be provided via sysusers.d"
+            )
+
+        assert name in all_users
+        sys_user = all_users[name]
+
+        if sys_user.uid is not None:
+            assert int(uid) == sys_user.uid
+
+        if sys_user.home is not None:
+            assert sys_user.home == home
+
+        if sys_user.shell is not None:
+            # bci-busybox does not include /bin/bash, but system-user-root
+            # defines /bin/bash as the shell and the container uses /bin/sh
+            # instead
+            if (
+                OS_VERSION == "tumbleweed"
+                and (container.container.get_base().baseurl or "").endswith(
+                    "bci-busybox:latest"
+                )
+                and name == "root"
+            ):
+                assert shell == "/bin/sh"
+            else:
+                assert sys_user.shell == shell
