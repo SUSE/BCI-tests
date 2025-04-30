@@ -42,11 +42,20 @@ DOCKERFILE_GCRYPT = """WORKDIR /src/
 COPY tests/files/fips-test-gcrypt.c /src/
 """
 
+DOCKERFILE_OPENSSL_1_1_15SP6 = """
+ENV ADDITIONAL_MODULES sle-module-legacy
+RUN zypper se openssl-1_1 1>&2
+RUN zypper info openssl-1_1 1>&2
+RUN zypper -n rm --clean-deps openssl \
+    && zypper -n in openssl-1_1 \
+    && zypper -n clean
+"""
 
 _zypp_credentials_dir: str = "/etc/zypp/credentials.d"
 
 CONTAINER_IMAGES_WITH_ZYPPER = []
 FIPS_TESTER_IMAGES = []
+FIPS_OPENSSL_TESTER_IMAGES = []
 FIPS_GNUTLS_TESTER_IMAGES = []
 FIPS_GCRYPT_TESTER_IMAGES = []
 for param in CONTAINERS_WITH_ZYPPER:
@@ -97,9 +106,35 @@ for param in CONTAINERS_WITH_ZYPPER:
         pytest.param(gcrypt_tester_ctr, marks=marks, id=param.id)
     )
 
+kwargs = {
+    "base": "bci/bci-base-fips:15.6",
+    "volume_mounts": (
+        [
+            BindMount(
+                _zypp_credentials_dir,
+                host_path=_zypp_credentials_dir,
+                flags=[],
+            )
+        ]
+        if Path(_zypp_credentials_dir).exists()
+        else []
+    ),
+}
+
+openssl_1_1_15SP6_tester_ctr = DerivedContainer(
+    containerfile=DOCKERFILE_OPENSSL_1_1_15SP6, **kwargs
+)
+
+FIPS_OPENSSL_TESTER_IMAGES = FIPS_TESTER_IMAGES.copy()
+FIPS_OPENSSL_TESTER_IMAGES.append(
+    pytest.param(
+        openssl_1_1_15SP6_tester_ctr, id="openssl_1_1_15SP6_tester_ctr"
+    )
+)
+
 
 @pytest.mark.parametrize(
-    "container_per_test", FIPS_TESTER_IMAGES, indirect=True
+    "container_per_test", FIPS_OPENSSL_TESTER_IMAGES, indirect=True
 )
 def test_openssl_binary(container_per_test: ContainerData) -> None:
     """Check that a binary linked against OpenSSL obeys the host's FIPS mode
