@@ -42,6 +42,11 @@ DOCKERFILE_GCRYPT = """WORKDIR /src/
 COPY tests/files/fips-test-gcrypt.c /src/
 """
 
+DOCKERFILE_OPENSSL_1_1_15SP6 = """
+ENV ADDITIONAL_MODULES sle-module-legacy
+
+RUN --mount=type=secret,id=SCCcredentials zypper -n rm --clean-deps openssl && zypper -n in openssl-1_1 && zypper -n clean
+"""
 
 _zypp_credentials_dir: str = "/etc/zypp/credentials.d"
 
@@ -49,6 +54,7 @@ CONTAINER_IMAGES_WITH_ZYPPER = []
 FIPS_TESTER_IMAGES = []
 FIPS_GNUTLS_TESTER_IMAGES = []
 FIPS_GCRYPT_TESTER_IMAGES = []
+FIPS_OPENSSL_1_1_15SP6_TESTER_IMAGES = []
 for param in CONTAINERS_WITH_ZYPPER:
     ctr, marks = container_and_marks_from_pytest_param(param)
     kwargs = {
@@ -75,6 +81,9 @@ for param in CONTAINERS_WITH_ZYPPER:
     gcrypt_tester_ctr = DerivedContainer(
         containerfile=DOCKERFILE_GCRYPT, **kwargs
     )
+    openssl_1_1_15SP6_tester_ctr = DerivedContainer(
+        containerfile=DOCKERFILE_OPENSSL_1_1_15SP6, **kwargs
+    )
 
     if param not in LTSS_BASE_FIPS_CONTAINERS + BASE_FIPS_CONTAINERS:
         # create a shallow copy here to avoid mutating the original params
@@ -95,6 +104,9 @@ for param in CONTAINERS_WITH_ZYPPER:
     )
     FIPS_GCRYPT_TESTER_IMAGES.append(
         pytest.param(gcrypt_tester_ctr, marks=marks, id=param.id)
+    )
+    FIPS_OPENSSL_1_1_15SP6_TESTER_IMAGES.append(
+        pytest.param(openssl_1_1_15SP6_tester_ctr, marks=marks, id=param.id)
     )
 
 
@@ -138,6 +150,31 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     hash algorithms can be invoked via :command:`openssl $digest /dev/null` and
     all non-fips hash algorithms fail.
 
+    """
+    for digest in NONFIPS_DIGESTS:
+        cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
+        assert cmd.rc != 0
+        assert (
+            "is not a known digest" in cmd.stderr
+            or "Error setting digest" in cmd.stderr
+        )
+
+    for digest in FIPS_DIGESTS:
+        dev_null_digest = container_per_test.connection.check_output(
+            f"openssl {digest} /dev/null"
+        )
+        assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
+            f"unexpected digest of hash {digest}: {dev_null_digest}"
+        )
+
+
+@pytest.mark.parametrize(
+    "container_per_test", FIPS_OPENSSL_1_1_15SP6_TESTER_IMAGES, indirect=True
+)
+def openssl_1_1_15sp6_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
+    """In 15 SP6, there's need to test also openSSL 1.1, which is not the default
+    This test runs in a container with openSSL3 removed and 1.1 enabled.
+    
     """
     for digest in NONFIPS_DIGESTS:
         cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
