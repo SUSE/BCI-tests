@@ -171,10 +171,12 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
 @pytest.mark.parametrize(
     "container_per_test", FIPS_OPENSSL_1_1_15SP6_TESTER_IMAGES, indirect=True
 )
-def openssl_1_1_15sp6_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
+def openssl_1_1_15sp6_fips_hashes_test_fnct(
+    container_per_test: ContainerData,
+) -> None:
     """In 15 SP6, there's need to test also openSSL 1.1, which is not the default
     This test runs in a container with openSSL3 removed and 1.1 enabled.
-    
+
     """
     for digest in NONFIPS_DIGESTS:
         cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
