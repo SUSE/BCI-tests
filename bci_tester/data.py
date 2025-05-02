@@ -1015,6 +1015,20 @@ STUNNEL_CONTAINER = create_BCI(
     available_versions=["15.6", "15.7", "tumbleweed"],
 )
 
+SUSE_AI_OBSERVABILITY_EXTENSION_SETUP = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/suse-ai-observability-extension-setup:1",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
+
+SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/suse-ai-observability-extension-runtime:1",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
+
 VALKEY_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/valkey:{tag}",
