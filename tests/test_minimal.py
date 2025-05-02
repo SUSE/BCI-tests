@@ -6,6 +6,7 @@ import pytest
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import MICRO_CONTAINER
+from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.runtime_choice import PODMAN_SELECTED
@@ -111,7 +112,9 @@ def test_micro_image_size(container, container_runtime):
 
 
 @pytest.mark.parametrize(
-    "container", [MICRO_CONTAINER, MINIMAL_CONTAINER], indirect=True
+    "container",
+    [MICRO_CONTAINER, MICRO_FIPS_CONTAINER, MINIMAL_CONTAINER],
+    indirect=True,
 )
 def test_fat_packages_absent(container):
     """Verify that the following binaries do not exist:
@@ -127,7 +130,9 @@ def test_fat_packages_absent(container):
 
 
 @pytest.mark.parametrize(
-    "container", [MICRO_CONTAINER], indirect=["container"]
+    "container",
+    [MICRO_CONTAINER, MICRO_FIPS_CONTAINER],
+    indirect=["container"],
 )
 def test_rpm_absent_in_micro(container):
     """Ensure that rpm is not present in the micro container."""
