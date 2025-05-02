@@ -498,6 +498,11 @@ MICRO_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-micro:{OS_CONTAINER_TAG}",
     bci_type=ImageType.OS,
 )
+MICRO_FIPS_CONTAINER = create_BCI(
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-micro-fips:{OS_CONTAINER_TAG}",
+    bci_type=ImageType.OS,
+)
+
 BUSYBOX_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-busybox:{OS_CONTAINER_TAG}",
     image_type="kiwi",
@@ -1174,6 +1179,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *KIOSK_FIREFOX_CONTAINERS,
     *KIOSK_XORG_CONTAINERS,
     MICRO_CONTAINER,
+    MICRO_FIPS_CONTAINER,
     MINIMAL_CONTAINER,
     OLLAMA_CONTAINER,
     MILVUS_CONTAINER,
@@ -1221,6 +1227,7 @@ else:
             HELM_CONTAINER,
             INIT_CONTAINER,
             MICRO_CONTAINER,
+            MICRO_FIPS_CONTAINER,
             MINIMAL_CONTAINER,
             NGINX_CONTAINER,
             PHP_8_APACHE,
