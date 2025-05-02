@@ -479,7 +479,6 @@ MINIMAL_CONTAINER = create_BCI(
 )
 MICRO_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-micro:{OS_CONTAINER_TAG}",
-    image_type="kiwi",
     bci_type=ImageType.OS,
 )
 BUSYBOX_CONTAINER = create_BCI(
