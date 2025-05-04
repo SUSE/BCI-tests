@@ -48,6 +48,34 @@ RUN set -euxo pipefail; \
 )
 
 
+# the commit hash and the download link for the sources need to be updated together
+# there is no significance to the chosen hash, it is simple the tip of tree with the
+# corresponding sources to fetch.
+KMP_CONTAINER = create_kernel_test(
+    r"""WORKDIR /src
+RUN set -euxo pipefail; \
+    curl -sf https://src.opensuse.org/pool/vhba-kmp/archive/a5848539656e86e460a43f7027c40cec49868876460bc21c7302b0f1d9e1e5ef.tar.gz | tar -xzf - ; \
+    cp -a vhba-kmp/* /usr/src/packages/SOURCES; cd /usr/src/packages/SOURCES ; \
+    curl -LO https://downloads.sf.net/cdemu/vhba-module-20240917.tar.xz ; \
+    rpmbuild -bb vhba-kmp.spec ; \
+    openssl req -new -x509 -newkey rsa:2048 -sha256 -keyout key.asc -out cert.der \
+            -outform der -nodes -days 4745 -addext "extendedKeyUsage=codeSigning" \
+            -subj "/CN=Donut Eat/" ; \
+    modsign-repackage -c ./cert.der -k ./key.asc /usr/src/packages/RPMS/$(uname -m)/vhba-kmp-default-*.rpm ; \
+    rpm -i --nodeps RPMS/$(uname -m)/vhba-kmp-default-*.rpm
+""",
+)
+
+
+@pytest.mark.parametrize("container", [KMP_CONTAINER], indirect=True)
+def test_kmp_builds(container: ContainerData) -> None:
+    """Test that we can build a SUSE Kernel Module Package with signed modules."""
+
+    assert "Donut Eat" in container.connection.check_output(
+        "modinfo /lib/modules/*-default/*/vhba.ko"
+    )
+
+
 @pytest.mark.skipif(
     OS_VERSION in ("16.0",),
     reason="can't install additional packages yet on 16",
