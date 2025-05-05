@@ -1068,7 +1068,6 @@ CONTAINERS_WITH_ZYPPER = (
     + SPACK_CONTAINERS
     + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
     + KEA_CONTAINERS
-    + BIND_CONTAINERS
 )
 
 #: all containers with zypper and with the flag to launch them as root
@@ -1112,6 +1111,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     STUNNEL_CONTAINER,
     *KUBECTL_CONTAINERS,
     *VALKEY_CONTAINERS,
+    *BIND_CONTAINERS,
 ]
 
 
