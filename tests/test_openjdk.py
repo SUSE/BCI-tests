@@ -16,7 +16,8 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 from bci_tester.data import OPENJDK_21_CONTAINER
-from bci_tester.data import OPENJDK_23_CONTAINER
+from bci_tester.data import OPENJDK_24_CONTAINER
+from bci_tester.data import OPENJDK_CONTAINERS
 
 CONTAINER_TEST_DIR = "/tmp/"
 HOST_TEST_DIR = "tests/trainers/java/"
@@ -47,12 +48,7 @@ for param in [OPENJDK_17_CONTAINER, OPENJDK_21_CONTAINER]:
         pytest.param(tester_ctr, marks=marks, id=param.id)
     )
 
-CONTAINER_IMAGES = [
-    OPENJDK_11_CONTAINER,
-    OPENJDK_17_CONTAINER,
-    OPENJDK_21_CONTAINER,
-    OPENJDK_23_CONTAINER,
-]
+CONTAINER_IMAGES = OPENJDK_CONTAINERS
 
 CONTAINER_IMAGES_EXTENDED = [
     pytest.param(
@@ -92,7 +88,7 @@ CONTAINER_IMAGES_CASSANDRA = [
             OPENJDK_21_CONTAINER, "21", marks=OPENJDK_21_CONTAINER.marks
         ),
         pytest.param(
-            OPENJDK_23_CONTAINER, "23", marks=OPENJDK_23_CONTAINER.marks
+            OPENJDK_24_CONTAINER, "24", marks=OPENJDK_24_CONTAINER.marks
         ),
     ],
     indirect=["container"],

@@ -64,14 +64,8 @@ from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
 from bci_tester.data import NODEJS_CONTAINERS
 from bci_tester.data import OLLAMA_CONTAINER
-from bci_tester.data import OPENJDK_11_CONTAINER
-from bci_tester.data import OPENJDK_17_CONTAINER
-from bci_tester.data import OPENJDK_21_CONTAINER
-from bci_tester.data import OPENJDK_23_CONTAINER
-from bci_tester.data import OPENJDK_DEVEL_11_CONTAINER
-from bci_tester.data import OPENJDK_DEVEL_17_CONTAINER
-from bci_tester.data import OPENJDK_DEVEL_21_CONTAINER
-from bci_tester.data import OPENJDK_DEVEL_23_CONTAINER
+from bci_tester.data import OPENJDK_CONTAINERS
+from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
 from bci_tester.data import OPENWEBUI_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
@@ -139,35 +133,16 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             ),
             ImageType.OS,
         ),
-        (OPENJDK_11_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
-        (
-            OPENJDK_DEVEL_11_CONTAINER,
-            "openjdk.devel",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (OPENJDK_17_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
-        (
-            OPENJDK_DEVEL_17_CONTAINER,
-            "openjdk.devel",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (OPENJDK_21_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
-        (
-            OPENJDK_DEVEL_21_CONTAINER,
-            "openjdk.devel",
-            ImageType.LANGUAGE_STACK,
-        ),
-        (OPENJDK_23_CONTAINER, "openjdk", ImageType.LANGUAGE_STACK),
-        (
-            OPENJDK_DEVEL_23_CONTAINER,
-            "openjdk.devel",
-            ImageType.LANGUAGE_STACK,
-        ),
         (INIT_CONTAINER, "init", ImageType.OS),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
         (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
+    ]
+    + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
+    + [
+        (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
+        for c in OPENJDK_DEVEL_CONTAINERS
     ]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
