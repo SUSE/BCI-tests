@@ -189,6 +189,9 @@ def test_lifecycle(auto_container):
             continue
 
         entry_name, entry_version, entry_date = entry.split(",")
+        if entry_name.startswith("cpp13"):
+            pytest.xfail("https://bugzilla.suse.com/show_bug.cgi?id=1242170")
+
         if entry_name in installed_binaries:
             if fnmatch.fnmatch(installed_binaries[entry_name], entry_version):
                 support_end = datetime.datetime.strptime(
