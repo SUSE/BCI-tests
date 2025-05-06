@@ -503,22 +503,7 @@ def test_disturl_can_be_checked_out(
     [
         cont
         for cont in ALL_CONTAINERS
-        if (
-            cont not in L3_CONTAINERS
-            and cont not in ACC_CONTAINERS
-            and cont != BASE_CONTAINER
-        )
-    ]
-    + [
-        pytest.param(
-            BASE_CONTAINER.values,
-            marks=BASE_CONTAINER.marks
-            + [
-                pytest.mark.xfail(
-                    reason="Base container for SLE 15 SP6 is not using the techpreview label (https://build.suse.de/request/show/325200)"
-                )
-            ],
-        )
+        if (cont not in L3_CONTAINERS and cont not in ACC_CONTAINERS)
     ],
     indirect=True,
 )
