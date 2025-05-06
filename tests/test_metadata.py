@@ -414,13 +414,15 @@ def test_disturl(
     labels = container.inspect.config.labels
 
     disturl = labels["org.openbuildservice.disturl"]
+    baseurl = urllib.parse.urlparse(
+        f"oci://{container.container.get_base().url}"
+    )
     assert (
         disturl
         == labels[
             f"{_get_container_label_prefix(container_name, container_type)}.disturl"
         ]
     )
-
     if OS_VERSION == "tumbleweed":
         assert any(
             (
@@ -429,7 +431,7 @@ def test_disturl(
             )
         )
     elif OS_VERSION == "16.0":
-        if "opensuse.org" in container.container.get_base().url:
+        if baseurl.netloc == "registry.opensuse.org":
             assert (
                 f"obs://build.opensuse.org/devel:BCI:16.{OS_SP_VERSION}"
                 in disturl
@@ -440,7 +442,7 @@ def test_disturl(
                 in disturl
             )
     else:
-        if "opensuse.org" in container.container.get_base().url:
+        if baseurl.netloc == "registry.opensuse.org":
             assert (
                 f"obs://build.opensuse.org/devel:BCI:SLE-15-SP{OS_SP_VERSION}"
                 in disturl
