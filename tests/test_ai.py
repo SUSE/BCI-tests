@@ -10,12 +10,16 @@ from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENWEBUI_CONTAINER
 from bci_tester.data import PYTORCH_CONTAINER
+from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
+from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
 
 CONTAINER_IMAGES = (
     OLLAMA_CONTAINER,
     OPENWEBUI_CONTAINER,
     MILVUS_CONTAINER,
     PYTORCH_CONTAINER,
+    SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
+    SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
 )
 
 
@@ -92,3 +96,8 @@ def test_pytorch_health(container):
         "python3.11 -c 'import torch; print(torch.__version__)'"
     )
     container.connection.check_output("git --version")
+
+
+def test_noop_ai_container_test(auto_container):
+    """Skip any testing of the container."""
+    pass
