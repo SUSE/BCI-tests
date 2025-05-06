@@ -106,6 +106,14 @@ def test_fat_packages_absent(container):
 
 
 @pytest.mark.parametrize(
+    "container", [MICRO_CONTAINER, MINIMAL_CONTAINER], indirect=True
+)
+def test_ca_certs_working(container):
+    """Checks that the mozilla certificate bundle is available to openssl."""
+    container.connection.exists("/var/lib/ca-certificates/openssl/c90bc37d.0")
+
+
+@pytest.mark.parametrize(
     "container", [MICRO_CONTAINER], indirect=["container"]
 )
 def test_rpm_absent_in_micro(container):

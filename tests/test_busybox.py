@@ -92,6 +92,13 @@ def test_base32_64(auto_container):
     )
 
 
+def test_ca_certs_working(auto_container):
+    """Checks that the mozilla certificate bundle is available to openssl."""
+    auto_container.connection.exists(
+        "/var/lib/ca-certificates/openssl/c90bc37d.0"
+    )
+
+
 @pytest.mark.parametrize(
     "container_per_test", [BUSYBOX_CONTAINER], indirect=True
 )
