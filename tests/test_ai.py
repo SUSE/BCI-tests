@@ -96,8 +96,3 @@ def test_pytorch_health(container):
         "python3.11 -c 'import torch; print(torch.__version__)'"
     )
     container.connection.check_output("git --version")
-
-
-def test_noop_ai_container_test(auto_container):
-    """Skip any testing of the container."""
-    pass
