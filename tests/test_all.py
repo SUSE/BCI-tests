@@ -6,7 +6,12 @@ import datetime
 import fnmatch
 import json
 import pathlib
+import shlex
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 
 import packaging.version
 import pytest
@@ -684,3 +689,192 @@ def test_container_build_and_repo(container_per_test, host):
 
     # check that all enabled repos are valid and can be refreshed
     container_per_test.connection.run_expect([0], "zypper -n ref")
+
+
+# all containers but with /bin/sh as their entrypoint.
+# this circumvents some containers like pcp & init from creating additional
+# users that are not defined via systemd-sysusers
+_CONTAINERS_WITH_SH_ENTRYPOINT = []
+for param in ALL_CONTAINERS:
+    ctr, marks = container_and_marks_from_pytest_param(param)
+
+    _CONTAINERS_WITH_SH_ENTRYPOINT.append(
+        pytest.param(
+            DerivedContainer(
+                base=ctr,
+                custom_entry_point="/bin/sh",
+                healthcheck_timeout=datetime.timedelta(seconds=-1),
+            ),
+            marks=marks,
+            id=param.id,
+        )
+    )
+
+
+_USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
+    "nobody": (65534, 65534),
+    "root": (0, 0),
+    "wwwrun": (None, 485),
+    "prometheus": (None, 486),
+    "messagebus": (None, 486),
+    "pesign": (None, 486),
+    "grafana": (None, 486),
+    "nginx": (None, 486),
+    "registry": (None, 486),
+    "named": (44, 44),
+    "app": (1654, 1654),
+    "mysql": (60, 60),
+    "dirsrv": (None, 486),
+    "stunnel": (None, 65533),
+    "polkitd": (498, 485),
+    "postgres": (None, 486),
+    "pcp": (498, 484),
+    "pcpqa": (483, 483),
+    "ldap": (498, 498),
+    "systemd-coredump": (497, 497),
+    "postfix": (51, 51),
+    "sa-milter": (497, 497),
+    "keadhcp": (None, 486),
+}
+
+# special cases for TW & SLE 16
+if OS_VERSION in ("tumbleweed", "16.0"):
+    # these users don't use the non-default GID on TW
+    for username in (
+        "prometheus",
+        "nginx",
+        "messagebus",
+        "grafana",
+        "dirsrv",
+        "postgres",
+        "registry",
+        "keadhcp",
+    ):
+        del _USERNAME_UID_GID_MAP[username]
+
+    # completely different UID & GID on TW
+    _USERNAME_UID_GID_MAP["pcp"] = (498, 498)
+    _USERNAME_UID_GID_MAP["pcpqa"] = (496, 496)
+    _USERNAME_UID_GID_MAP["wwwrun"] = (None, 498)
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_uids_stable(container: ContainerData) -> None:
+    """Check that every user in :file:`/etc/passwd` has a stable uid & gid as
+    defined in ``_USERNAME_UID_GID_MAP``.
+
+    """
+    passwd: str = container.connection.file("/etc/passwd").content_string
+
+    assert container.connection.user("root").exists, "root user does not exist"
+
+    for userline in passwd.splitlines():
+        tmp = userline.split(":")
+        name, uid, gid = tmp[0], int(tmp[2]), int(tmp[3])
+
+        expected_uid, expected_gid = _USERNAME_UID_GID_MAP.get(
+            name, (499, 499)
+        )
+        expected_uid = 499 if expected_uid is None else expected_uid
+        expected_gid = 499 if expected_gid is None else expected_gid
+
+        assert uid == expected_uid, (
+            f"Expected user {name} to have uid {expected_uid} but got {uid}"
+        )
+        assert gid == expected_gid, (
+            f"Expected user {name} to have gid {expected_gid} but got {gid}"
+        )
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_all_users_provided_by_sysusers(container: ContainerData) -> None:
+    """Check that all users from :file:`/etc/passwd` are provided by a
+    corresponding conf file in :file:`/usr/lib/sysusers.d/`.
+
+    Additionally we verify that
+
+    """
+    passwd: str = container.connection.file("/etc/passwd").content_string
+
+    @dataclass
+    class SysUser:
+        """Class representing a user defined in a sysusers.d config file."""
+
+        username: str
+        uid: Optional[int] = None
+        home: Optional[str] = None
+        shell: Optional[str] = None
+
+    sysusers_d = "/usr/lib/sysusers.d/"
+
+    all_users: Dict[str, SysUser] = {}
+
+    # can't use file(_SYSUSERS_D).listdir() because that uses `ls -1 -q` which
+    # is unsupported by busybox 🙄
+    for fname in (
+        container.connection.check_output(f"ls -1 {sysusers_d}")
+        .strip()
+        .splitlines()
+    ):
+        if not fname.endswith(".conf"):
+            continue
+
+        for line in container.connection.file(
+            f"{sysusers_d}{fname}"
+        ).content_string.splitlines():
+            if not line.startswith("u"):
+                continue
+
+            parsed = shlex.split(line)
+
+            assert parsed[0] in ("u", "u!")
+
+            uid = parsed[2]
+            user = SysUser(
+                username=parsed[1], uid=int(uid) if uid != "-" else None
+            )
+
+            if len(parsed) > 4 and parsed[4] != "-":
+                user.home = parsed[4]
+
+            if len(parsed) > 5:
+                user.shell = (
+                    parsed[5] if parsed[5] != "-" else "/usr/sbin/nologin"
+                )
+
+            all_users[user.username] = user
+
+    for userline in passwd.splitlines():
+        name, _, uid, _, _, home, shell = userline.split(":")
+
+        users_not_via_sysusers_d = ("app", "tomcat", "stunnel")
+        if OS_VERSION in ("15.6", "15.7"):
+            users_not_via_sysusers_d += ("pesign",)
+        if name in users_not_via_sysusers_d:
+            pytest.xfail(
+                f"user {name} is known to not be provided via sysusers.d"
+            )
+
+        assert name in all_users
+        sys_user = all_users[name]
+
+        if sys_user.uid is not None:
+            assert int(uid) == sys_user.uid
+
+        if sys_user.home is not None:
+            assert sys_user.home == home
+
+        if sys_user.shell is not None:
+            # bci-busybox does not include /bin/bash, but system-user-root
+            # defines /bin/bash as the shell and the container uses /bin/sh
+            # instead
+            if (
+                OS_VERSION == "tumbleweed"
+                and (container.container.get_base().baseurl or "").endswith(
+                    "bci-busybox:latest"
+                )
+                and name == "root"
+            ):
+                assert shell == "/bin/sh"
+            else:
+                assert sys_user.shell == shell
