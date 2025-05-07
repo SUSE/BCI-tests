@@ -59,6 +59,7 @@ from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
+from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
@@ -123,6 +124,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (HELM_CONTAINER, "helm", ImageType.APPLICATION),
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
         (MICRO_CONTAINER, "micro", ImageType.OS),
+        (MICRO_FIPS_CONTAINER, "micro-fips", ImageType.OS),
         (BUSYBOX_CONTAINER, "busybox", ImageType.OS),
         (
             KERNEL_MODULE_CONTAINER,
