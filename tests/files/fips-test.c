@@ -9,6 +9,10 @@
 #include <assert.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
+#if OPENSSL_VERSION_MAJOR >= 3
+#    include <openssl/params.h>
+#    include <openssl/core_names.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 
@@ -20,6 +24,13 @@ int main(int argc, char *argv[]) {
   char *err_msg = NULL;
   unsigned char md_value[EVP_MAX_MD_SIZE];
   unsigned int md_len, i;
+#if OPENSSL_VERSION_MAJOR >= 3
+  int xoflen = 0;
+  OSSL_PARAM digst_params[] = {
+    OSSL_PARAM_int(OSSL_DIGEST_PARAM_XOFLEN, &xoflen),
+    OSSL_PARAM_END
+  };
+#endif
 
 #define FAIL(msg)                                                              \
   err_msg = msg;                                                               \
@@ -42,6 +53,17 @@ int main(int argc, char *argv[]) {
   if (1 != EVP_DigestInit_ex(mdctx, md, NULL)) {
     FAIL("EVP_DigestInit_ex was not successful");
   }
+
+#if OPENSSL_VERSION_MAJOR >= 3
+  if (EVP_MD_get_type(md) == NID_shake128 ||
+      EVP_MD_get_type(md) == NID_shake256) {
+    xoflen = EVP_MD_get_type(md) == NID_shake128 ? 32 : 64;
+    if (1 != EVP_MD_CTX_set_params(mdctx, digst_params)) {
+      FAIL("EVP_MD_CTX_set_params was not successfull");
+    }
+  }
+#endif
+
   if ((1 != EVP_DigestUpdate(mdctx, mess1, strlen(mess1))) ||
       (1 != EVP_DigestUpdate(mdctx, mess2, strlen(mess2)))) {
     FAIL("EVP_DigestUpdate was not successful");
