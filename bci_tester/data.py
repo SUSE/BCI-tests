@@ -165,6 +165,7 @@ else:
     else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
 
+    ibs_released = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = (
@@ -174,6 +175,7 @@ else:
         ibs_cr_project = (
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
+        ibs_released = "dp.apps.rancher.io"
 
     BASEURL = {
         "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
@@ -182,7 +184,7 @@ else:
         "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
         "dso": "registry1.dso.mil/ironbank/suse",
         "ibs-cr": ibs_cr_project,
-        "ibs-released": "registry.suse.com",
+        "ibs-released": ibs_released,
     }[TARGET]
 
 

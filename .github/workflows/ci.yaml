@@ -163,6 +163,12 @@ jobs:
           - toxenv: metadata
             testing_target: ibs-released
             os_version: 15.5
+          - toxenv: ai
+            testing_target: ibs-released
+            os_version: 15.6-ai
+          - toxenv: metadata
+            testing_target: ibs-released
+            os_version: 15.6-ai
           - toxenv: all
             os_version: 15.3
           - toxenv: base
@@ -372,6 +378,17 @@ jobs:
         env:
           REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
           REGISTRY_LOGIN_PASSWORD: ${{ secrets.REGISTRY_LOGIN_PASSWORD }}
+
+      - name: Login to dp.apps.rancher.io as CI user
+        run: |
+          if [ -n "${APPCO_USERNAME}" ]; then
+            echo $APPCO_PASSWORD | docker login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
+            echo $APPCO_PASSWORD | podman login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
+          fi
+        if: ${{ matrix.testing_target == 'ibs-released' && matrix.os_version == '15.6-ai' }}
+        env:
+          APPCO_USERNAME: ${{ secrets.APPCO_USERNAME }}
+          APPCO_PASSWORD: ${{ secrets.APPCO_PASSWORD }}
 
       - name: setup SCC credentials
         run: |
