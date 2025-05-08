@@ -1052,6 +1052,28 @@ BIND_CONTAINERS = [
     )
 ]
 
+KIOSK_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/firefox-esr:esr",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        custom_entry_point="/bin/sh",
+    ),
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/pulseaudio:17",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        custom_entry_point="/bin/sh",
+    ),
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/xorg:21",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        custom_entry_point="/bin/sh",
+    ),
+]
+
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
