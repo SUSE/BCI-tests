@@ -21,6 +21,7 @@ from typing import Tuple
 
 import pytest
 import requests
+import tenacity
 from _pytest.mark.structures import ParameterSet
 from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
@@ -391,6 +392,30 @@ def test_general_labels(
         else:
             assert labels["com.suse.eula"] == "sle-bci"
             assert "BCI" in labels[f"{prefix}.title"]
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_readmes(container: ContainerData) -> None:
+    """Smoke test checking that the readmes of each image can be fetched via the
+    url in the ``io.artifacthub.package.readme-url`` label.
+
+    """
+    labels = container.inspect.config.labels
+
+    assert "io.artifacthub.package.readme-url" in labels, (
+        "readme url missing in labels"
+    )
+    readme_url = labels["io.artifacthub.package.readme-url"]
+
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
+    )
+    def fetch_readme() -> str:
+        resp = requests.get(readme_url, timeout=30)
+        resp.raise_for_status()
+        return resp.text
+
+    fetch_readme()
 
 
 @pytest.mark.parametrize(
