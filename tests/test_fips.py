@@ -98,6 +98,21 @@ for param in CONTAINERS_WITH_ZYPPER:
     )
 
 
+def digest_xoflen(digest: str) -> str:
+    """return the openssl parameters to set the desired output function length
+    for variable-length hash functions."""
+    param: str = ""
+
+    if OS_VERSION in ("15.3", "15.4", "15.5"):
+        return param
+
+    if digest in ("shake128",):
+        param = " -xoflen 32"
+    elif digest in ("shake256",):
+        param = " -xoflen 64"
+    return param
+
+
 @pytest.mark.parametrize(
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
@@ -149,7 +164,7 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
 
     for digest in FIPS_DIGESTS:
         dev_null_digest = container_per_test.connection.check_output(
-            f"openssl {digest} /dev/null"
+            f"openssl {digest}{digest_xoflen(digest)} /dev/null"
         )
         assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
             f"unexpected digest of hash {digest}: {dev_null_digest}"

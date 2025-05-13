@@ -23,6 +23,7 @@ from bci_tester.fips import host_fips_enabled
 from bci_tester.fips import target_fips_enforced
 from bci_tester.runtime_choice import DOCKER_SELECTED
 from bci_tester.runtime_choice import PODMAN_SELECTED
+from tests.test_fips import digest_xoflen
 from tests.test_fips import openssl_fips_hashes_test_fnct
 
 CONTAINER_IMAGES = [
@@ -192,7 +193,9 @@ def test_openssl_hashes(container):
 
     """
     for digest in ALL_DIGESTS:
-        container.connection.run_expect([0], f"openssl {digest} /dev/null")
+        container.connection.run_expect(
+            [0], f"openssl {digest}{digest_xoflen(digest)} /dev/null"
+        )
 
 
 @pytest.mark.parametrize(
