@@ -217,6 +217,11 @@ jobs:
           command -v ldapwhoami
         if: ${{ matrix.toxenv == '389ds' }}
 
+      - uses: actions/cache@v4
+        with:
+            path: .tox
+            key: tox--${{ hashFiles('tox.ini') }}
+
       - name: Install new podman from OBS
         if: false
         run: |
