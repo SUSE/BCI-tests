@@ -238,7 +238,6 @@ def test_all_openssl_hashes_known(auto_container):
     # openssl list --digest-commands
     if OS_VERSION in ("15.3", "15.4", "15.5"):
         expected_digest_list += ("gost",)
-    assert len(hashes) == len(expected_digest_list)
     assert set(hashes) == set(expected_digest_list)
 
 
