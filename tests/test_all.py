@@ -32,6 +32,8 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KERNEL_MODULE_CONTAINER
+from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
+from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
@@ -334,7 +336,7 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     [
         c
         for c in CONTAINERS_WITH_ZYPPER_AS_ROOT
-        if c not in LTSS_BASE_CONTAINERS
+        if c not in LTSS_BASE_CONTAINERS + KIOSK_PULSEAUDIO_CONTAINERS
     ],
     indirect=True,
 )
@@ -436,6 +438,8 @@ def test_zypper_not_present_in_containers_without_it(
             not in PCP_CONTAINERS
             + [INIT_CONTAINER]
             + KIWI_CONTAINERS
+            + KIOSK_PULSEAUDIO_CONTAINERS
+            + KIOSK_XORG_CONTAINERS
             + ([KERNEL_MODULE_CONTAINER] if OS_VERSION == "16.0" else [])
         )
     ],

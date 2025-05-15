@@ -1052,6 +1052,39 @@ BIND_CONTAINERS = [
     )
 ]
 
+KIOSK_FIREFOX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/firefox-esr:esr",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        custom_entry_point="/bin/sh",
+    )
+]
+
+KIOSK_PULSEAUDIO_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/pulseaudio:17",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        custom_entry_point="/bin/sh",
+    )
+]
+
+KIOSK_XORG_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/xorg:21",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        custom_entry_point="/bin/sh",
+    )
+]
+
+KIOSK_CONTAINERS = (
+    KIOSK_FIREFOX_CONTAINERS
+    + KIOSK_PULSEAUDIO_CONTAINERS
+    + KIOSK_XORG_CONTAINERS
+)
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1068,6 +1101,7 @@ CONTAINERS_WITH_ZYPPER = (
     + GCC_CONTAINERS
     + GOLANG_CONTAINERS
     + KIWI_CONTAINERS
+    + KIOSK_PULSEAUDIO_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
     + NODEJS_CONTAINERS
@@ -1115,6 +1149,8 @@ CONTAINERS_WITHOUT_ZYPPER = [
     HELM_CONTAINER,
     *COSIGN_CONTAINERS,
     *KUBECTL_CONTAINERS,
+    *KIOSK_FIREFOX_CONTAINERS,
+    *KIOSK_XORG_CONTAINERS,
     MICRO_CONTAINER,
     MINIMAL_CONTAINER,
     OLLAMA_CONTAINER,
@@ -1174,6 +1210,7 @@ else:
         + COSIGN_CONTAINERS
         + GCC_CONTAINERS
         + GOLANG_CONTAINERS
+        + KIOSK_CONTAINERS
         + KUBECTL_CONTAINERS
         + LTSS_BASE_CONTAINERS
         + LTSS_BASE_FIPS_CONTAINERS
