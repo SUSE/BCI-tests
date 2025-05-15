@@ -9,4 +9,5 @@
    :maxdepth: 2
    :caption: Contents:
 
+   setup
    testdoc
