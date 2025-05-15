@@ -83,6 +83,8 @@ from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
+from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
+from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
 from bci_tester.data import ImageType
@@ -254,6 +256,16 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
         (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
         (PYTORCH_CONTAINER, "pytorch", ImageType.SAC_APPLICATION),
+        (
+            SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
+            "suse-ai-observability-extension-setup",
+            ImageType.SAC_APPLICATION,
+        ),
+        (
+            SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
+            "suse-ai-observability-extension-runtime",
+            ImageType.SAC_APPLICATION,
+        ),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
     + [
@@ -353,6 +365,7 @@ def test_general_labels(
         ):
             expected_url = (
                 f"https://apps.rancher.io/applications/{container_name}",
+                f"https://apps.rancher.io/applications/{container_name.rpartition('-')[0]}",
             )
         elif container_type == ImageType.OS_LTSS:
             expected_url = (
