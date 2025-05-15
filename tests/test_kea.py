@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 
 import pytest
 from pytest_container import DerivedContainer
@@ -80,19 +81,30 @@ def test_kea_dhcp4(
             assert received_ip is not None
 
             kea_con = kea_launcher.container_data.connection
-            log_lines = kea_con.file("/tmp/kea-dhcp4.log").content_string
-            # Matches DHCP4 lease allocation log entries (e.g., "DHCP4_LEASE_ALLOC [hwtype=1 02:42:ac:19:00:03], cid=[no info], tid=0x7379cf19: lease 172.25.1.100") and captures MAC and IP.
-            pattern = r"DHCP4_LEASE_ALLOC .*?hwtype=1 (?P<mac>[\da-f:]+).*?lease (?P<ip>[\d.]+)"
-            match = re.search(pattern, log_lines)
-            if not match:
+            res, mac, ip = wait_for_lease_allocation(kea_con)
+            if not res:
                 pytest.fail("IP is not allocated by the kea dhcp server")
-
-            mac = match.group("mac")
-            ip = match.group("ip")
 
             assert mac == client_mac
             assert ip == received_ip
     finally:
         host.check_output(
-            f"{container_runtime.runner_binary} network rm {network_name}"
+            f"{container_runtime.runner_binary} network rm -f {network_name}"
         )
+
+
+def wait_for_lease_allocation(kea_con) -> tuple[bool, str, str]:
+    """Wait up to 60 seconds for lease allocation."""
+
+    for _ in range(60):
+        log_lines = kea_con.file("/tmp/kea-dhcp4.log").content_string
+        # Matches DHCP4 lease allocation log entries (e.g., "DHCP4_LEASE_ALLOC [hwtype=1 02:42:ac:19:00:03], cid=[no info], tid=0x7379cf19: lease 172.25.1.100") and captures MAC and IP.
+        pattern = r"DHCP4_LEASE_ALLOC .*?hwtype=1 (?P<mac>[\da-f:]+).*?lease (?P<ip>[\d.]+)"
+        match = re.search(pattern, log_lines)
+        if match:
+            mac = match.group("mac")
+            ip = match.group("ip")
+            return True, mac, ip
+        time.sleep(5)
+
+    return False, "", ""
