@@ -1010,6 +1010,13 @@ PYTORCH_CONTAINER = create_BCI(
     custom_entry_point="/bin/bash",
 )
 
+OPENWEBUI_PIPELINES_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui-pipelines:0",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    forwarded_ports=[PortForwarding(container_port=9099)],
+)
+
 STUNNEL_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
     bci_type=ImageType.APPLICATION,
@@ -1120,6 +1127,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     OLLAMA_CONTAINER,
     MILVUS_CONTAINER,
     PYTORCH_CONTAINER,
+    OPENWEBUI_PIPELINES_CONTAINER,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1168,6 +1176,7 @@ else:
             OPENWEBUI_CONTAINER,
             MILVUS_CONTAINER,
             PYTORCH_CONTAINER,
+            OPENWEBUI_PIPELINES_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
