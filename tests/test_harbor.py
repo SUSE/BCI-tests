@@ -161,18 +161,25 @@ def test_harbor_in_pod(pod_per_test: PodData) -> None:
     )
     def get_health(port: int) -> requests.Response:
         headers = {"accept": "application/json"}
-        return requests.get(
+        r = requests.get(
             f"http://0.0.0.0:{port}/api/v2.0/health",
             headers=headers,
             timeout=3,
             allow_redirects=True,
         )
+        r.raise_for_status()
+        return r
 
-    # breakpoint()
-    resp = get_health(pod_per_test.forwarded_ports[0].host_port)
-    assert resp.status_code == requests.codes.ok, "Could not get health status"
+    @tenacity.retry(
+        stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
+    )
+    def check_health(port: int):
+        resp = get_health(port)
+        data = resp.json()
+        if data["status"] != "healthy":
+            raise RuntimeError("FAIL: Status is not healthy")
+        return True
 
-    print(resp.text)
-
-    data = resp.json()
-    assert data["status"] == "healthy", "Status is not healthy"
+    assert check_health(pod_per_test.forwarded_ports[0].host_port), (
+        "Status is not healthy"
+    )
