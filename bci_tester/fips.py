@@ -123,18 +123,6 @@ if OS_VERSION != "15.3":
     )
 
 
-def host_fips_supported(
-    fipsfile: str = "/proc/sys/crypto/fips_enabled",
-) -> bool:
-    """Returns a boolean whether FIPS mode is supported on this machine.
-
-    Parameters:
-    fipsfile: path to the file in :file:`/proc` determining whether FIPS mode is enabled
-
-    """
-    return os.path.exists(fipsfile)
-
-
 def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled") -> bool:
     """Returns a boolean indicating whether FIPS mode is enabled on this
     machine.
@@ -143,7 +131,7 @@ def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled") -> bool:
     fipsfile: path to the file in :file:`/proc` determining whether FIPS mode is enabled
 
     """
-    if not host_fips_supported(fipsfile):
+    if not os.path.exists(fipsfile):
         return False
 
     with open(fipsfile, encoding="utf8") as fipsfile_fd:
