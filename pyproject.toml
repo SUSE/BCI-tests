@@ -80,6 +80,7 @@ markers = [
     'dotnet-runtime_9.0',
     'dotnet-sdk_8.0',
     'dotnet-sdk_9.0',
+    'firefox-esr_esr',
     'gcc_7',
     'gcc_13',
     'gcc_14',
@@ -143,6 +144,7 @@ markers = [
     'postgres_17',
     'prometheus_2',
     'prometheus_3',
+    'pulseaudio_17',
     'python_3.9',
     'python_3.11',
     'python_3.12',
@@ -165,6 +167,7 @@ markers = [
     'suse-ai-observability-extension-runtime_1',
     'suse-ai-observability-extension-setup_1',
     'valkey_8.0',
+    'xorg_21',
 ]
 
 [tool.ruff]

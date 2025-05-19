@@ -51,6 +51,9 @@ from bci_tester.data import HELM_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KEA_CONTAINERS
 from bci_tester.data import KERNEL_MODULE_CONTAINER
+from bci_tester.data import KIOSK_FIREFOX_CONTAINERS
+from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
+from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
@@ -147,6 +150,15 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
         for c in OPENJDK_DEVEL_CONTAINERS
     ]
+    + [
+        (c, "firefox-esr", ImageType.APPLICATION)
+        for c in KIOSK_FIREFOX_CONTAINERS
+    ]
+    + [
+        (c, "pulseaudio", ImageType.APPLICATION)
+        for c in KIOSK_PULSEAUDIO_CONTAINERS
+    ]
+    + [(c, "xorg", ImageType.APPLICATION) for c in KIOSK_XORG_CONTAINERS]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
