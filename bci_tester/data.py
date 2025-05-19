@@ -1147,7 +1147,10 @@ for ctr_without_zypp in CONTAINERS_WITHOUT_ZYPPER:
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
 # 15.7 is not yet released, so no l3 support either
-if OS_VERSION in ("tumbleweed", "16.0", "15.7"):
+if OS_VERSION in (
+    "tumbleweed",
+    "16.0",
+):
     L3_CONTAINERS = ()
 else:
     L3_CONTAINERS = (
