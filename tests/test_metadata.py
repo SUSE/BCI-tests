@@ -63,10 +63,6 @@ from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-<<<<<<< HEAD
-=======
-from bci_tester.data import NGINX_CONTAINERS
->>>>>>> b380251 (Initial testing for PrivateRegistry)
 from bci_tester.data import NODEJS_CONTAINERS
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
