@@ -124,6 +124,7 @@ _forwarded_ports = [
 OBS_PROJECT = (
     "registry.suse.de/devel/scc/privateregistry/containerfile/private-registry"
 )
+# OBS_PROJECT = "registry.suse.de/devel/scc/staging/privateregistry/ci/mr-15/containerfile/private-registry"
 
 HARBOR_CONTAINERS = [
     Container(
@@ -134,28 +135,17 @@ HARBOR_CONTAINERS = [
     )
     for img, name in (
         ("db", "postgresql"),
-        ("valkey", "valkey"),
+        ("valkey", "redis"),
         ("registry", "registry"),
         ("registryctl", "registryctl"),
         ("core", "core"),
-        ("jobservice", "jobservice"),
         ("portal", "portal"),
-        ("nginx", "proxy"),
-        ("trivy-adapter", "trivy-adapter"),
+        ("jobservice", "jobservice"),
         ("exporter", "exporter"),
+        ("trivy-adapter", "trivy-adapter"),
+        ("nginx", "proxy"),
     )
 ]
-
-# @pytest.mark.parametrize("ctr_images", [HARBOR_CONTAINERS])
-# def test_harbor(host, ctr_images: List[Container])
-#     network_name = "harbor"
-#     network_create_cmd = f"{container_runtime.runner_binary} network create "
-#     # if DOCKER_SELECTED or os.getuid() == 0:
-#     #     network_create_cmd += "--driver macvlan "
-#     # else:
-#     #     network_create_cmd += "--internal "
-#     host.check_output(network_create_cmd)
-
 
 HARBOR_POD = Pod(
     containers=HARBOR_CONTAINERS, forwarded_ports=_forwarded_ports
@@ -172,12 +162,13 @@ def test_harbor_in_pod(pod_per_test: PodData) -> None:
     def get_health(port: int) -> requests.Response:
         headers = {"accept": "application/json"}
         return requests.get(
-            f"http://localhost:{port}/api/v2.0/health",
+            f"http://0.0.0.0:{port}/api/v2.0/health",
             headers=headers,
             timeout=3,
             allow_redirects=True,
         )
 
+    # breakpoint()
     resp = get_health(pod_per_test.forwarded_ports[0].host_port)
     assert resp.status_code == requests.codes.ok, "Could not get health status"
 

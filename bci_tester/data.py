@@ -1109,6 +1109,79 @@ BIND_CONTAINERS = [
     )
 ]
 
+HARBOR_CORE_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-core:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_DB_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-db:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_EXPORTER_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-exporter:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_JOBSERVICE_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-jobservice:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+HARBOR_NGINX_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-nginx:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_PORTAL_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-portal:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+    forwarded_ports=[PortForwarding(container_port=80)],
+)
+
+HARBOR_REGISTRY_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-registry:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_REGISTRYCTL_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-registryctl:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_TRIVY_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-trivy:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_VALKEY_CONTAINER = create_BCI(
+    build_tag="private-registry/harbor-valkey:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("15.6-pr",),
+)
+
+HARBOR_CONTAINERS = [
+    HARBOR_CORE_CONTAINER,
+    HARBOR_DB_CONTAINER,
+    HARBOR_EXPORTER_CONTAINER,
+    HARBOR_JOBSERVICE_CONTAINER,
+    HARBOR_NGINX_CONTAINER,
+    HARBOR_PORTAL_CONTAINER,
+    HARBOR_REGISTRYCTL_CONTAINER,
+    HARBOR_REGISTRY_CONTAINER,
+    HARBOR_TRIVY_CONTAINER,
+    HARBOR_VALKEY_CONTAINER,
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,

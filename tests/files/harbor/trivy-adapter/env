@@ -1,3 +1,4 @@
+SCANNER_API_SERVER_ADDR=:8086
 SCANNER_LOG_LEVEL=info
 SCANNER_REDIS_URL=redis://redis:6379/5?idle_timeout_seconds=30
 SCANNER_STORE_REDIS_URL=redis://redis:6379/5?idle_timeout_seconds=30

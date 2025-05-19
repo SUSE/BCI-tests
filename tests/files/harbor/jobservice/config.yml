@@ -3,7 +3,7 @@
 protocol: "http"
 
 #Server listening port
-port: 8080
+port: 8083
 
 #Worker pool
 worker_pool:
@@ -38,7 +38,7 @@ loggers:
 metric:
   enabled: true
   path: /metrics
-  port: 9090
+  port: 9093
 
 reaper:
   # the max time to wait for a task to finish, if unfinished after max_update_hours, the task will be mark as error, but the task will continue to run, default value is 24,

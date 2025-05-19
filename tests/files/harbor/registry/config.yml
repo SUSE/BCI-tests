@@ -31,7 +31,7 @@ http:
   addr: :5000
   secret: placeholder
   debug:
-    addr: :9090
+    addr: :9094
     prometheus:
       enabled: true
       path: /metrics
