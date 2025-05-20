@@ -78,7 +78,8 @@ def test_drbd_builds(container: ContainerData) -> None:
     "container_git_clone",
     [
         GitRepositoryBuild(
-            repository_url="https://dpdk.org/git/dpdk-kmods",
+            # repository_url="https://dpdk.org/git/dpdk-kmods",
+            repository_url="https://github.com/InterfaceMasters/dpdk-kmods.git",
             repository_tag="main",
             build_command="""cd linux/igb_uio/;
                 make KSRC=/usr/src/linux-obj/$(uname -m)/default""",
