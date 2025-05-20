@@ -19,6 +19,7 @@ from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import ALL_CONTAINERS
@@ -273,9 +274,17 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     of any package already installed in the container as that would throw
     a question to the user and break the builds.
     """
-
     conn = container.connection
-    conn.run_expect([0], "timeout 2m zypper ref && zypper -n in libsolv-tools")
+
+    zypper_ref = conn.check_output("timeout 2m zypper ref")
+    # bsc1243360: Check for errors in container-suseconnect-zypper. This check must be limited to SLES hosts
+    if "SLES" in LOCALHOST.check_output("cat /etc/os-release"):
+        assert (
+            "Skipping service 'container-suseconnect-zypp' because of the above error"
+            not in zypper_ref
+        )
+
+    conn.run_expect([0], "zypper -n in libsolv-tools")
 
     conn.check_output(
         "dumpsolv -j /var/cache/zypp/solv/@System/solv > /solv/system"
