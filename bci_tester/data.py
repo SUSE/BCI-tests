@@ -1078,13 +1078,6 @@ APP_VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
-] + [
-    create_BCI(
-        build_tag="private-registry/harbor-valkey:latest",
-        bci_type=ImageType.APPLICATION,
-        available_versions=("15.6-pr",),
-        forwarded_ports=[PortForwarding(container_port=6379)],
-    )
 ]
 
 PR_VALKEY_CONTAINERS = [
