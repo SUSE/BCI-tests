@@ -17,6 +17,7 @@ from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
+from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import FIPS_GCRYPT_DIGESTS
 from bci_tester.fips import FIPS_GNUTLS_DIGESTS
@@ -43,8 +44,6 @@ COPY tests/files/fips-test-gcrypt.c /src/
 """
 
 
-_zypp_credentials_dir: str = "/etc/zypp/credentials.d"
-
 CONTAINER_IMAGES_WITH_ZYPPER = []
 FIPS_TESTER_IMAGES = []
 FIPS_GNUTLS_TESTER_IMAGES = []
@@ -59,12 +58,12 @@ for param in CONTAINERS_WITH_ZYPPER:
         "volume_mounts": (
             [
                 BindMount(
-                    _zypp_credentials_dir,
-                    host_path=_zypp_credentials_dir,
+                    ZYPP_CREDENTIALS_DIR,
+                    host_path=ZYPP_CREDENTIALS_DIR,
                     flags=[],
                 )
             ]
-            if Path(_zypp_credentials_dir).exists()
+            if Path(ZYPP_CREDENTIALS_DIR).exists()
             else []
         ),
     }
