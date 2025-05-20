@@ -149,6 +149,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     ]
     + [(c, "nginx", ImageType.APPLICATION) for c in APP_NGINX_CONTAINERS]
     + [(c, "harbor", ImageType.APPLICATION) for c in PR_NGINX_CONTAINERS]
+    + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
+    + [
+        (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
+        for c in OPENJDK_DEVEL_CONTAINERS
+    ]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]

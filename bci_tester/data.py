@@ -194,6 +194,12 @@ else:
         )
         obs_project = "registry.suse.de/devel/scc/privateregistry"
 
+    if OS_VERSION == "15.6-pr":
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
+        )
+        obs_project = "registry.suse.de/devel/scc/privateregistry"
+
     BASEURL = {
         "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
@@ -848,13 +854,13 @@ COSIGN_CONTAINERS = [
 _NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
 
 PR_NGINX_CONTAINERS = [
-    create_BCI(
-        build_tag="private-registry/harbor-nginx:1.21",
-        bci_type=ImageType.APPLICATION,
-        available_versions=("15.6-pr",),
-        forwarded_ports=[PortForwarding(container_port=80)],
-        custom_entry_point="/bin/sh",
-    ),
+    # create_BCI(
+    #     build_tag="private-registry/harbor-nginx:1.21",
+    #     bci_type=ImageType.APPLICATION,
+    #     available_versions=("15.6-pr",),
+    #     forwarded_ports=[PortForwarding(container_port=80)],
+    #     custom_entry_point="/bin/sh",
+    # ),
 ]
 
 APP_NGINX_CONTAINERS = [
@@ -1075,12 +1081,12 @@ APP_VALKEY_CONTAINERS = [
 ]
 
 PR_VALKEY_CONTAINERS = [
-    create_BCI(
-        build_tag="private-registry/harbor-valkey:latest",
-        bci_type=ImageType.APPLICATION,
-        available_versions=("15.6-pr",),
-        forwarded_ports=[PortForwarding(container_port=6379)],
-    )
+    # create_BCI(
+    #     build_tag="private-registry/harbor-valkey:latest",
+    #     bci_type=ImageType.APPLICATION,
+    #     available_versions=("15.6-pr",),
+    #     forwarded_ports=[PortForwarding(container_port=6379)],
+    # )
 ]
 
 VALKEY_CONTAINERS = APP_VALKEY_CONTAINERS + PR_VALKEY_CONTAINERS
@@ -1095,6 +1101,79 @@ BIND_CONTAINERS = [
         ],
     )
 ]
+
+# HARBOR_CORE_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-core:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_DB_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-db:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_EXPORTER_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-exporter:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_JOBSERVICE_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-jobservice:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+# HARBOR_NGINX_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-nginx:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_PORTAL_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-portal:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+#     forwarded_ports=[PortForwarding(container_port=80)],
+# )
+#
+# HARBOR_REGISTRY_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-registry:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_REGISTRYCTL_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-registryctl:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_TRIVY_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-trivy:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_VALKEY_CONTAINER = create_BCI(
+#     build_tag="private-registry/harbor-valkey:latest",
+#     bci_type=ImageType.APPLICATION,
+#     available_versions=("15.6-pr",),
+# )
+#
+# HARBOR_CONTAINERS = [
+#     HARBOR_CORE_CONTAINER,
+#     HARBOR_DB_CONTAINER,
+#     HARBOR_EXPORTER_CONTAINER,
+#     HARBOR_JOBSERVICE_CONTAINER,
+#     HARBOR_NGINX_CONTAINER,
+#     HARBOR_PORTAL_CONTAINER,
+#     HARBOR_REGISTRYCTL_CONTAINER,
+#     HARBOR_REGISTRY_CONTAINER,
+#     HARBOR_TRIVY_CONTAINER,
+#     HARBOR_VALKEY_CONTAINER,
+# ]
 
 CONTAINERS_WITH_ZYPPER = (
     [
@@ -1223,6 +1302,7 @@ else:
         + LTSS_BASE_FIPS_CONTAINERS
         + MARIADB_CLIENT_CONTAINERS
         + MARIADB_CONTAINERS
+        + NGINX_CONTAINERS
         + NODEJS_CONTAINERS
         + OPENJDK_CONTAINERS
         + OPENJDK_DEVEL_CONTAINERS
