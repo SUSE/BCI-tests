@@ -72,6 +72,9 @@ _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
 # List the released versions of SLE, used for supportabilty and EULA tests
 RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "15.6-ai", "15.7")
 
+#: directory of the SCC credentials stored by zypper
+ZYPP_CREDENTIALS_DIR: str = "/etc/zypp/credentials.d"
+
 assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS), (
     f"list ALLOWED_BASE_OS_VERSIONS must be sorted, but got {ALLOWED_BASE_OS_VERSIONS}"
 )

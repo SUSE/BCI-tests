@@ -19,6 +19,7 @@ from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
+from pytest_container.container import VolumeFlag
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import ALL_CONTAINERS
@@ -43,6 +44,7 @@ from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import RELEASED_SLE_VERSIONS
+from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.util import get_repos_from_connection
 
 CONTAINER_IMAGES = ALL_CONTAINERS
@@ -688,3 +690,58 @@ def test_container_build_and_repo(container_per_test, host):
 
     # check that all enabled repos are valid and can be refreshed
     container_per_test.connection.run_expect([0], "zypper -n ref")
+
+
+_CONTAINERS_WITH_ZYPP_CREDENTIALS_MOUNTED = []
+for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
+    if param in LTSS_BASE_CONTAINERS:
+        # LTSS containers are broken with the SLE BCI repo
+        continue
+
+    ctr, marks = container_and_marks_from_pytest_param(param)
+    new_vol_mounts = (ctr.volume_mounts or []) + [
+        BindMount(
+            container_path=ZYPP_CREDENTIALS_DIR,
+            host_path=ZYPP_CREDENTIALS_DIR,
+            flags=[VolumeFlag.READ_ONLY],
+        )
+    ]
+    kwargs = {**ctr.__dict__}
+    kwargs.pop("volume_mounts")
+
+    _CONTAINERS_WITH_ZYPP_CREDENTIALS_MOUNTED.append(
+        pytest.param(
+            DerivedContainer(**kwargs, volume_mounts=new_vol_mounts),
+            marks=marks,
+            id=param.id,
+        )
+    )
+
+
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="no included BCI repository - can't test",
+)
+@pytest.mark.skipif(
+    OS_VERSION in ("tumbleweed",),
+    reason="openSUSE based containers have no subscriptions",
+)
+@pytest.mark.skipif(
+    not pathlib.Path(ZYPP_CREDENTIALS_DIR).exists(),
+    reason=f"{ZYPP_CREDENTIALS_DIR} does not exist",
+)
+@pytest.mark.parametrize(
+    "container_per_test",
+    _CONTAINERS_WITH_ZYPP_CREDENTIALS_MOUNTED,
+    indirect=True,
+)
+def test_container_suseconnect_adds_repos(container_per_test: ContainerData):
+    """Simple smoke test for :command:`container-suseconnect`: it runs only on
+    containers where the :file:`/etc/zypp/credentials.d` exists and thus zypper
+    should automatically discover more repositories than the three BCI ones
+    (SLE_BCI, SLE_BCI_debug and SLE_BCI_source).
+
+    """
+    container_per_test.connection.check_output("zypper -n ref")
+    repos = get_repos_from_connection(container_per_test.connection)
+    assert len(repos) > 3
