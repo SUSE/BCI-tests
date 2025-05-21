@@ -7,6 +7,7 @@ import fnmatch
 import json
 import pathlib
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import packaging.version
 import pytest
@@ -727,8 +728,8 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
     reason="openSUSE based containers have no subscriptions",
 )
 @pytest.mark.skipif(
-    not pathlib.Path(ZYPP_CREDENTIALS_DIR).exists(),
-    reason=f"{ZYPP_CREDENTIALS_DIR} does not exist",
+    "SLES" not in Path("/etc/os-release").read_text(),
+    reason="subscription tests must only run on SLES hosts",
 )
 @pytest.mark.parametrize(
     "container_per_test",
