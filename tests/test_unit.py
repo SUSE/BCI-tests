@@ -1,19 +1,8 @@
 from pathlib import Path
 
 from bci_tester.fips import host_fips_enabled
-from bci_tester.fips import host_fips_supported
 from bci_tester.selinux import selinux_status
 from bci_tester.util import get_repos_from_zypper_xmlout
-
-
-def test_host_fips_supported(tmp_path):
-    """Check that ``host_fips_supported`` correctly returns True if the fips
-    file exists.
-
-    """
-    fipsfile = tmp_path / "fips"
-    fipsfile.write_text("")
-    assert host_fips_supported(f"{fipsfile}")
 
 
 def test_host_fips_enabled(tmp_path):
