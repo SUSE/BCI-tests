@@ -44,7 +44,6 @@ COPY tests/files/fips-test-gcrypt.c /src/
 """
 
 
-CONTAINER_IMAGES_WITH_ZYPPER = []
 FIPS_TESTER_IMAGES = []
 FIPS_GNUTLS_TESTER_IMAGES = []
 FIPS_GCRYPT_TESTER_IMAGES = []
@@ -83,9 +82,6 @@ for param in CONTAINERS_WITH_ZYPPER:
                 reason="The target must run in FIPS mode for the FIPS test suite",
             )
         ]
-    CONTAINER_IMAGES_WITH_ZYPPER.append(
-        pytest.param(ctr, marks=marks, id=param.id)
-    )
     FIPS_TESTER_IMAGES.append(
         pytest.param(tester_ctr, marks=marks, id=param.id)
     )
@@ -153,25 +149,43 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     all non-fips hash algorithms fail.
 
     """
-    for digest in NONFIPS_DIGESTS:
-        cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
-        assert cmd.rc != 0, (
-            f"expected 'openssl {digest}' to return nonzero exit code"
-        )
-        assert (
-            "is not a known digest" in cmd.stderr
-            or "Error setting digest" in cmd.stderr
-        ), (
-            f"openssl {digest} does not produce expected failure message on stderr"
-        )
+    con = container_per_test.connection
 
-    for digest in FIPS_DIGESTS:
-        dev_null_digest = container_per_test.connection.check_output(
-            f"openssl {digest}{digest_xoflen(digest)} /dev/null"
+    def run_digest_tests(command_prefix: str):
+        for digest in NONFIPS_DIGESTS:
+            cmd = container_per_test.connection.run(
+                f"{command_prefix} {digest} /dev/null"
+            )
+            assert cmd.rc != 0, (
+                f"expected 'openssl {digest}' to return nonzero exit code"
+            )
+            assert (
+                "is not a known digest" in cmd.stderr
+                or "Error setting digest" in cmd.stderr
+            )
+        for digest in FIPS_DIGESTS:
+            # The --xoflen flag is only available in OpenSSL v3
+            xoflen_flag = (
+                ""
+                if command_prefix == "openssl-1_1"
+                else digest_xoflen(digest)
+            )
+            dev_null_digest = con.check_output(
+                f"{command_prefix} {digest}{xoflen_flag} /dev/null"
+            )
+            assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
+                f"unexpected digest of hash {digest}: {dev_null_digest}"
+            )
+
+    run_digest_tests("openssl")
+
+    # SLE 15-SP6 has to be tested with OpenSSL v1.1 and v3
+    if OS_VERSION == "15.6":
+        con.check_output(
+            "export ADDITIONAL_MODULES=sle-module-legacy && \
+             zypper -n in openssl-1_1"
         )
-        assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
-            f"unexpected digest of hash {digest}: {dev_null_digest}"
-        )
+        run_digest_tests("openssl-1_1")
 
 
 @pytest.mark.skipif(
@@ -186,7 +200,7 @@ def fips_mode_setup_check(container_per_test: ContainerData) -> None:
 
 
 @pytest.mark.parametrize(
-    "container_per_test", CONTAINER_IMAGES_WITH_ZYPPER, indirect=True
+    "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
 def test_openssl_fips_hashes(container_per_test: ContainerData):
     openssl_fips_hashes_test_fnct(container_per_test)

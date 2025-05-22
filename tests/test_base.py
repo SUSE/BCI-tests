@@ -3,10 +3,12 @@ registry.suse.com)
 
 """
 
+from pathlib import Path
 from typing import Dict
 
 import pytest
 from pytest_container import DerivedContainer
+from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
@@ -17,6 +19,7 @@ from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
 from bci_tester.data import TARGET
+from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.fips import ALL_DIGESTS
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import host_fips_enabled
@@ -32,6 +35,37 @@ CONTAINER_IMAGES = [
     *LTSS_BASE_CONTAINERS,
     *LTSS_BASE_FIPS_CONTAINERS,
 ]
+
+DOCKERFILE = """WORKDIR /src/
+COPY tests/files/fips-test.c /src/
+"""
+
+FIPS_TESTER_IMAGES = []
+for param in [*LTSS_BASE_FIPS_CONTAINERS, *BASE_FIPS_CONTAINERS] + (
+    [BASE_CONTAINER] if TARGET in ("dso",) else []
+):
+    ctr, marks = container_and_marks_from_pytest_param(param)
+    kwargs = {
+        "base": ctr,
+        "extra_environment_variables": ctr.extra_environment_variables,
+        "extra_launch_args": ctr.extra_launch_args,
+        "custom_entry_point": ctr.custom_entry_point,
+        "volume_mounts": (
+            [
+                BindMount(
+                    ZYPP_CREDENTIALS_DIR,
+                    host_path=ZYPP_CREDENTIALS_DIR,
+                    flags=[],
+                )
+            ]
+            if Path(ZYPP_CREDENTIALS_DIR).exists()
+            else []
+        ),
+    }
+    tester_ctr = DerivedContainer(containerfile=DOCKERFILE, **kwargs)
+    FIPS_TESTER_IMAGES.append(
+        pytest.param(tester_ctr, marks=marks, id=param.id)
+    )
 
 
 def test_passwd_present(auto_container):
@@ -199,10 +233,7 @@ def test_openssl_hashes(container):
 
 
 @pytest.mark.parametrize(
-    "container_per_test",
-    [*LTSS_BASE_FIPS_CONTAINERS, *BASE_FIPS_CONTAINERS]
-    + ([BASE_CONTAINER] if TARGET in ("dso",) else []),
-    indirect=True,
+    "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
 def test_openssl_fips_hashes(container_per_test):
     """Check that all FIPS allowed hashes perform correctly."""
