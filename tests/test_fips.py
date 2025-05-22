@@ -153,21 +153,34 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     all non-fips hash algorithms fail.
 
     """
-    for digest in NONFIPS_DIGESTS:
-        cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
-        assert cmd.rc != 0
-        assert (
-            "is not a known digest" in cmd.stderr
-            or "Error setting digest" in cmd.stderr
-        )
 
-    for digest in FIPS_DIGESTS:
-        dev_null_digest = container_per_test.connection.check_output(
-            f"openssl {digest}{digest_xoflen(digest)} /dev/null"
+    def run_digest_tests(command_prefix: str):
+        for digest in NONFIPS_DIGESTS:
+            cmd = container_per_test.connection.run(
+                f"{command_prefix} {digest} /dev/null"
+            )
+            assert cmd.rc != 0
+            assert (
+                "is not a known digest" in cmd.stderr
+                or "Error setting digest" in cmd.stderr
+            )
+
+        for digest in FIPS_DIGESTS:
+            dev_null_digest = container_per_test.connection.check_output(
+                f"{command_prefix} {digest}{digest_xoflen(digest)} /dev/null"
+            )
+            assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
+                f"unexpected digest of hash {digest}: {dev_null_digest}"
+            )
+
+    run_digest_tests("openssl")
+
+    if OS_VERSION == "15.6":
+        container_per_test.connection.check_output(
+            "export ADDITIONAL_MODULES=sle-module-legacy && \
+             zypper -n in openssl-1_1"
         )
-        assert f"= {NULL_DIGESTS[digest]}" in dev_null_digest, (
-            f"unexpected digest of hash {digest}: {dev_null_digest}"
-        )
+        run_digest_tests("openssl-1_1")
 
 
 @pytest.mark.skipif(
