@@ -22,6 +22,7 @@ def test_kea_dhcp4(
 ) -> None:
     network_name = "macvlan-network"
     kea_config_file = "tests/files/kea-dhcp4.conf"
+    dhclient_config_file_path = "/etc/dhclient.conf"
     with open(kea_config_file, "r") as f:
         config = json.load(f)
     subnet = config["Dhcp4"]["subnet4"][0]["subnet"]
@@ -59,13 +60,34 @@ def test_kea_dhcp4(
         ) as cli_launcher:
             kea_launcher.launch_container()
             cli_launcher.launch_container()
-
             cli_con = cli_launcher.container_data.connection
+
+            # To reject DHCP OFFER from other DHCP servers in the network
+            # export REJECT_DHCP_OFFERS_FROM=172.25.0.2,172.25.0.5,192.168.1.1
+            reject_dhcp_offers_from = (
+                os.getenv("REJECT_DHCP_OFFERS_FROM").split(",")
+                if os.getenv("REJECT_DHCP_OFFERS_FROM")
+                else []
+            )
+            if reject_dhcp_offers_from:
+                for ip in reject_dhcp_offers_from:
+                    cli_con.run_expect(
+                        [0],
+                        'echo "reject '
+                        + ip
+                        + ';" >> '
+                        + dhclient_config_file_path,
+                    )
+
             default_interface = cli_con.check_output(
                 "ip route show | grep default | cut -d' ' -f5"
             )
             client_log = cli_con.run_expect(
-                [0], "dhclient -v " + default_interface
+                [0],
+                "dhclient -cf "
+                + dhclient_config_file_path
+                + " -v "
+                + default_interface,
             ).stderr
             # Extracts a MAC address (e.g., 00:1A:2B:3C:4D:5E) from a string like 'LPF/eth0/00:1A:2B:3C:4D:5E' using named group 'mac'.
             mac_pattern = r"LPF/\S+/(?P<mac>[0-9a-fA-F:]+)"
