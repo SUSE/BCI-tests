@@ -3,7 +3,7 @@
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict
-from typing import Optional
+from typing import List
 from typing import Union
 
 import dns.query
@@ -37,21 +37,22 @@ def _make_dns_request(
 @pytest.mark.parametrize(
     "record_type",
     (
-        rdatatype.RdataType.A,
-        rdatatype.RdataType.AAAA,
-        rdatatype.RdataType.MX,
+        pytest.param(rdatatype.RdataType.A, id="A Record"),
+        pytest.param(rdatatype.RdataType.AAAA, id="AAA Record"),
+        pytest.param(rdatatype.RdataType.MX, id="MX Record"),
     ),
 )
 def test_basic_resolution(
     auto_container: ContainerData, record_type: rdatatype.RdataType
 ) -> None:
     """Test that the bind9 in the container responds with the same DNS records
-    for the ``suse.com`` domain for the ``A``, ``AAAA`` and ``MX`` records.
+    for the ``opensuse.org`` domain for the ``A``, ``AAAA`` and ``MX`` records.
 
     """
-    domain = "suse.com"
+    domain = "opensuse.org"
     resp = _make_dns_request(
         port=auto_container.forwarded_ports[0].host_port,
+        domain=domain,
         record_type=record_type,
     )
 
@@ -60,12 +61,13 @@ def test_basic_resolution(
 
     def find_record_in_answer(
         answer: Union[resolver.Answer, RRset],
-    ) -> Optional[str]:
+    ) -> List[str]:
+        res: List[str] = []
         for rdata in answer:
             if rdata.rdtype == record_type:
-                return str(rdata)
+                res.append(str(rdata))
 
-        return None
+        return sorted(res)
 
     record = None
     for answer in resp.answer:
