@@ -90,6 +90,7 @@ from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
+from bci_tester.data import TARGET
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
 from bci_tester.data import ImageType
@@ -425,6 +426,41 @@ def test_general_labels(
             assert "BCI" in labels[f"{prefix}.title"]
 
 
+@pytest.mark.parametrize(
+    "container",
+    [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
+    indirect=True,
+)
+def test_artifacthub_urls(container: ContainerData) -> None:
+    """Smoke test checking that the artifacthub.io labelling is passing sanity checks"""
+    labels = container.inspect.config.labels
+
+    assert "io.artifacthub.package.readme-url" in labels, (
+        "readme url missing in labels"
+    )
+    readme_url = urllib.parse.urlparse(
+        labels["io.artifacthub.package.readme-url"]
+    )
+
+    assert readme_url.scheme == "https"
+    assert readme_url.netloc in (
+        "github.com",
+        "build.opensuse.org",
+        "sources.suse.com",
+    ), f"readme-url points to unexpected host {readme_url.netloc}"
+    assert readme_url.port is None
+
+    # for devel projects we pass it as a query
+    assert readme_url.path.endswith(".md")
+    assert "/README" in readme_url.path
+    assert "//" not in readme_url.path and "//" not in readme_url.path
+    # TODO(dmllr): add testing for logo-url
+
+
+@pytest.mark.skipif(
+    TARGET == "custom",
+    reason="disturl can be anything if TARGET=custom",
+)
 @pytest.mark.parametrize(
     "container,container_name,container_type",
     IMAGES_AND_NAMES,
