@@ -20,6 +20,6 @@ def test_cosign_verify(auto_container, host, container_runtime):
     """Test that we can invoke `cosign verify` on a bci-container."""
     assert "cosign container image signature" in host.check_output(
         f"{container_runtime.runner_binary} run --rm {auto_container.image_url_or_id} "
-        "verify --key https://ftp.suse.com/pub/projects/security/keys/container-key.pem "
+        "verify --key /usr/share/pki/containers/suse-container-key.pem "
         "registry.suse.com/bci/bci-micro:latest"
     )
