@@ -14,6 +14,7 @@ offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
 
+import datetime
 import urllib.parse
 from pathlib import Path
 from typing import List
@@ -422,6 +423,31 @@ def test_general_labels(
         else:
             assert labels["com.suse.eula"] == "sle-bci"
             assert "BCI" in labels[f"{prefix}.title"]
+
+
+@pytest.mark.parametrize(
+    "container,container_name,container_type",
+    IMAGES_AND_NAMES,
+    indirect=["container"],
+)
+def test_support_end_in_future(
+    container: ContainerData, container_name: str, container_type: ImageType
+):
+    labels = container.inspect.config.labels
+    if "com.suse.supportlevel.until" in labels:
+        if container_type in (
+            ImageType.SAC_APPLICATION,
+            ImageType.SAC_LANGUAGE_STACK,
+        ):
+            pytest.skip(
+                reason="SAC containers do not properly define a supportlevel"
+            )
+        support_end = datetime.datetime.fromisoformat(
+            labels["com.suse.supportlevel.until"]
+        )
+        assert datetime.datetime.now() < support_end, (
+            f"container out of {support_end}"
+        )
 
 
 @pytest.mark.parametrize(
