@@ -457,6 +457,10 @@ def test_artifacthub_urls(container: ContainerData) -> None:
     # TODO(dmllr): add testing for logo-url
 
 
+@pytest.mark.skipif(
+    TARGET == "custom",
+    reason="disturl can be anything if TARGET=custom",
+)
 @pytest.mark.parametrize(
     "container,container_name,container_type",
     IMAGES_AND_NAMES,
