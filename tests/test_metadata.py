@@ -89,6 +89,7 @@ from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
+from bci_tester.data import TARGET
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
 from bci_tester.data import ImageType
@@ -455,6 +456,10 @@ def test_artifacthub_urls(container: ContainerData) -> None:
     # TODO(dmllr): add testing for logo-url
 
 
+@pytest.mark.skipif(
+    TARGET == "custom",
+    reason="disturl can be anything if TARGET=custom",
+)
 @pytest.mark.parametrize(
     "container,container_name,container_type",
     IMAGES_AND_NAMES,
