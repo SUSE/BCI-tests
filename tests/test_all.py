@@ -606,14 +606,16 @@ def test_container_build_and_repo(container_per_test, host):
     check that the URIs are valid.
 
     """
-    # container-suseconnect will inject the correct repositories on registered
-    # SLES hosts
-    # => if the host is registered, we will have multiple repositories in the
-    # container, otherwise we will just have the SLE_BCI repository
     suseconnect_injects_repos: bool = (
-        host.system_info.type == "linux"
-        and host.system_info.distribution == "sles"
-        and host.file("/etc/zypp/credentials.d/SCCcredentials").exists
+        container_per_test.connection.file(
+            "/usr/lib/zypp/plugins/services/container-suseconnect-zypp"
+        ).exists
+        and len(
+            container_per_test.connection.check_output(
+                "container-suseconnect lm"
+            ).splitlines()
+        )
+        > 3
     )
 
     repos = get_repos_from_connection(container_per_test.connection)
