@@ -442,9 +442,15 @@ def test_support_end_in_future(
             pytest.skip(
                 reason="SAC containers do not properly define a supportlevel"
             )
-        support_end = datetime.datetime.fromisoformat(
-            labels["com.suse.supportlevel.until"]
-        )
+        try:
+            # python 3.7+
+            support_end: datetime.datetime = datetime.datetime.fromisoformat(
+                labels["com.suse.supportlevel.until"]
+            )
+        except AttributeError:
+            support_end = datetime.datetime.strptime(
+                labels["com.suse.supportlevel.until"], "%Y-%m-%d"
+            )
         assert datetime.datetime.now() < support_end, (
             f"container out of {support_end}"
         )
