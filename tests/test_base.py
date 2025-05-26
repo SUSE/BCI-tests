@@ -216,7 +216,7 @@ def test_all_openssl_hashes_known(auto_container):
     """
     fips_mode: bool = (
         auto_container.connection.check_output(
-            "echo ${OPENSSL_FIPS:-0}"
+            "echo ${OPENSSL_FORCE_FIPS_MODE:-0}"
         ).strip()
         == "1"
     )
