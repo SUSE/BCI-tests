@@ -155,10 +155,14 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
     """
     for digest in NONFIPS_DIGESTS:
         cmd = container_per_test.connection.run(f"openssl {digest} /dev/null")
-        assert cmd.rc != 0
+        assert cmd.rc != 0, (
+            f"expected 'openssl {digest}' to return nonzero exit code"
+        )
         assert (
             "is not a known digest" in cmd.stderr
             or "Error setting digest" in cmd.stderr
+        ), (
+            f"openssl {digest} does not produce expected failure message on stderr"
         )
 
     for digest in FIPS_DIGESTS:

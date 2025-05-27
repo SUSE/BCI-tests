@@ -254,8 +254,8 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return ""
     if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
         return "images/"
-    if not OS_VERSION.startswith("16") and TARGET == "ibs-cr":
-        return "images/"
+    if TARGET == "ibs-cr":
+        return "containerfile/" if OS_VERSION.startswith("16") else "images/"
     if TARGET in ("factory-totest", "factory-arm-totest"):
         return "containers/"
     if image_type == "dockerfile":

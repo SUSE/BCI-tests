@@ -216,7 +216,7 @@ def test_all_openssl_hashes_known(auto_container):
     """
     fips_mode: bool = (
         auto_container.connection.check_output(
-            "echo ${OPENSSL_FIPS:-0}"
+            "echo ${OPENSSL_FORCE_FIPS_MODE:-0}"
         ).strip()
         == "1"
     )
@@ -228,8 +228,8 @@ def test_all_openssl_hashes_known(auto_container):
         .split()
     )
     expected_digest_list = ALL_DIGESTS
-    # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
 
+    # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
     if OS_VERSION not in ("15.3", "15.4", "15.5"):
         if host_fips_enabled() or target_fips_enforced() or fips_mode:
             expected_digest_list = FIPS_DIGESTS
@@ -238,7 +238,10 @@ def test_all_openssl_hashes_known(auto_container):
     # openssl list --digest-commands
     if OS_VERSION in ("15.3", "15.4", "15.5"):
         expected_digest_list += ("gost",)
-    assert set(hashes) == set(expected_digest_list)
+
+    assert set(hashes) == set(expected_digest_list), (
+        f"openssl list --digest-commands returned {hashes} but expected {expected_digest_list}"
+    )
 
 
 #: This is the base container with additional launch arguments applied to it so
