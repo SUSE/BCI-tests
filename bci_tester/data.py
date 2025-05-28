@@ -401,6 +401,18 @@ def create_BCI(
         else:
             containerfile = _BCI_REPLACE_REPO_CONTAINERFILE
 
+    if (
+        "SCC_CREDENTIAL_USERNAME" in os.environ
+        and "SCC_CREDENTIAL_PASSWORD" in os.environ
+    ):
+        kwargs.setdefault("extra_environment_variables", {})
+        kwargs["extra_environment_variables"]["SCC_CREDENTIAL_USERNAME"] = (
+            os.environ["SCC_CREDENTIAL_USERNAME"]
+        )
+        kwargs["extra_environment_variables"]["SCC_CREDENTIAL_PASSWORD"] = (
+            os.environ["SCC_CREDENTIAL_PASSWORD"]
+        )
+
     return pytest.param(
         DerivedContainer(
             base=baseurl,
