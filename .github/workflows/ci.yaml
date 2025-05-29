@@ -399,13 +399,13 @@ jobs:
         run: |
           sudo install -d -m 755 /etc/zypp/credentials.d
           cat << EOF | sudo tee /etc/zypp/credentials.d/SCCcredentials
-          username=$SCC_SYSTEM_USERNAME
-          password=$SCC_SYSTEM_PASSWORD
+          username=$SCC_CREDENTIAL_USERNAME
+          password=$SCC_CREDENTIAL_PASSWORD
           EOF
-        if: ${{ matrix.testing_target == 'ibs-released' }}
+        if: ${{ matrix.testing_target == 'ibs-released' || matrix.toxenv == 'fips' }}
         env:
-          SCC_SYSTEM_USERNAME: ${{ secrets.SCC_SYSTEM_USERNAME }}
-          SCC_SYSTEM_PASSWORD: ${{ secrets.SCC_SYSTEM_PASSWORD }}
+          SCC_CREDENTIAL_USERNAME: ${{ secrets.SCC_SYSTEM_USERNAME }}
+          SCC_CREDENTIAL_PASSWORD: ${{ secrets.SCC_SYSTEM_PASSWORD }}
 
       - name: Add /etc/host entries
         run: |
