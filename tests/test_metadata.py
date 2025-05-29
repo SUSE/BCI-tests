@@ -90,6 +90,7 @@ from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
+from bci_tester.data import TARGET
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
 from bci_tester.data import ImageType
@@ -493,6 +494,8 @@ def test_disturl(
                 "obs://build.opensuse.org/openSUSE:Factory" in disturl,
             )
         )
+    elif OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
+        assert "obs://build.suse.de/Devel:AI" in disturl
     elif OS_VERSION == "16.0":
         if baseurl.netloc == "registry.opensuse.org":
             assert (
@@ -686,8 +689,12 @@ def test_reference(
             else f"{name}:{OS_VERSION}"
         )
     else:
-        version = list(version_release.split("-"))[0]
-        ref = f"{name}:{version}"
+        non_release_ref = (
+            version_release.rpartition("-")[0]
+            if "-" in version_release
+            else version_release
+        )
+        ref = f"{name}:{non_release_ref}"
 
     # Skip testing containers that have not yet been released to avoid unnecessary failures
     if not container.container.baseurl.startswith(ref.partition(":")[0]):
