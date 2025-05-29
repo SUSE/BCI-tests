@@ -168,20 +168,22 @@ else:
     else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
 
-    ibs_released = "registry.suse.com"
+    obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
+    ibs_released: str = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}/test"
         )
-    if OS_VERSION == "15.6-ai":
+    elif OS_VERSION == "15.6-ai":
+        obs_project = "registry.suse.de/devel/ai"
         ibs_cr_project = (
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
         ibs_released = "dp.apps.rancher.io"
 
-    BASEURL = {
-        "obs": f"registry.opensuse.org/devel/bci/{DISTNAME}",
+    BASEURL: str = {
+        "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "factory-arm-totest": "registry.opensuse.org/opensuse/factory/arm/totest",
         "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
@@ -252,6 +254,8 @@ _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET in ("dso", "ibs-released"):
         return ""
+    if OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
+        return "containers/"
     if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
         return "images/"
     if TARGET == "ibs-cr":
