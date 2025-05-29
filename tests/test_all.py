@@ -611,9 +611,9 @@ def test_container_build_and_repo(container_per_test, host):
             "/usr/lib/zypp/plugins/services/container-suseconnect-zypp"
         ).exists
         and len(
-            container_per_test.connection.check_output(
-                "container-suseconnect lm"
-            ).splitlines()
+            container_per_test.connection.run_expect(
+                [0, 1], "container-suseconnect lm"
+            ).stdout.splitlines()
         )
         > 3
     )
