@@ -37,6 +37,10 @@ for kiwi_ctr in KIWI_CONTAINERS:
     )
 
 
+@pytest.mark.xfail(
+    host_fips_enabled(),
+    reason="https://bugzilla.suse.com/show_bug.cgi?id=1243830",
+)
 def test_kiwi_installation(auto_container):
     """check if kiwi package is installed inside the container"""
     assert (
