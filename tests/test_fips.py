@@ -84,7 +84,7 @@ for param in CONTAINERS_WITH_ZYPPER:
             )
         ]
     CONTAINER_IMAGES_WITH_ZYPPER.append(
-        pytest.param(ctr, marks=marks, id=param.id)
+        pytest.param(tester_ctr, marks=marks, id=param.id)
     )
     FIPS_TESTER_IMAGES.append(
         pytest.param(tester_ctr, marks=marks, id=param.id)
