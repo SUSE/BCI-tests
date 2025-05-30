@@ -163,6 +163,18 @@ and can be used to launch the tests of a single test suite in parallel via:
 
     $ tox -e testname -- -n auto
 
+Reject external DHCP offers for kea tests
+-----------------------------------------
+
+External DHCP servers in the newtork can fail the kea tests as the testing 
+client might be receiving ip from external servers. To ignore the external
+DHCP OFFERS, ``REJECT_DHCP_OFFERS_FROM`` has to be exported.
+
+.. code-block:: shell-session
+
+    $ export REJECT_DHCP_OFFERS_FROM=external_dhcp_server_ip1,external_dhcp_server_ip2,...external_dhcp_server_ipn
+    $ tox -e kea
+
 
 Adding the pre-commit hook
 --------------------------
