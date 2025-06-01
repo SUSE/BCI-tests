@@ -84,6 +84,7 @@ from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTORCH_CONTAINER
+from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
@@ -106,6 +107,9 @@ SKIP_IF_TW_MARK = pytest.mark.skipif(
 
 SKIP_IF_AI_MARK = pytest.mark.skipif(
     OS_VERSION == "15.6-ai", reason="no supportlevel labels on AI containers"
+)
+SKIP_IF_LTSS_VERSION = pytest.mark.skipif(
+    OS_VERSION in RELEASED_LTSS_VERSIONS, reason="LTSS container"
 )
 
 
@@ -426,6 +430,8 @@ def test_general_labels(
             assert "BCI" in labels[f"{prefix}.title"]
 
 
+@SKIP_IF_AI_MARK
+@SKIP_IF_LTSS_VERSION
 @pytest.mark.parametrize(
     "container",
     [cont for cont in ALL_CONTAINERS if cont != BASE_CONTAINER],
