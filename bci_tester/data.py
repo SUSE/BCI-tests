@@ -984,7 +984,16 @@ BLACKBOX_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9115)],
         available_versions=versions,
     )
-    for versions, tag in ((("15.6", "15.7", "tumbleweed"), "0.24"),)
+    for versions, tag in (
+        (
+            (
+                "15.6",
+                "15.7",
+            ),
+            "0.24",
+        ),
+        (("tumbleweed",), "latest"),
+    )
 ]
 
 GRAFANA_CONTAINERS = [

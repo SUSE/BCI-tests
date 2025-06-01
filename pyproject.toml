@@ -72,6 +72,7 @@ markers = [
     'bci-minimal_latest',
     'bind_9',
     'blackbox_exporter_0.24',
+    'blackbox_exporter_latest',
     'cosign_2.5',
     'cosign_latest',
     'dotnet-aspnet_8.0',
