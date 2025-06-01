@@ -24,6 +24,8 @@ def test_prometheus_healthy(container: ContainerData) -> None:
     resp = _fetch_grafana_health()
     resp.raise_for_status()
     data = resp.json()
+    if "+" in data["version"]:
+        data["version"] = data["version"].partition("+")[0]
     grafana_version = container.inspect.config.labels[
         "org.opencontainers.image.version"
     ]
