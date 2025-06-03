@@ -376,7 +376,7 @@ def create_BCI(
         else:
             available_versions = list(_DEFAULT_BASE_OS_VERSIONS)
 
-    if available_versions:
+    if available_versions and OS_VERSION not in available_versions:
         marks.append(create_container_version_mark(available_versions))
 
     # only try to grab the mark from the build tag for containers that are
