@@ -853,16 +853,6 @@ COSIGN_CONTAINERS = [
 
 _NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
 
-PR_NGINX_CONTAINERS = [
-    # create_BCI(
-    #     build_tag="private-registry/harbor-nginx:1.21",
-    #     bci_type=ImageType.APPLICATION,
-    #     available_versions=("15.6-pr",),
-    #     forwarded_ports=[PortForwarding(container_port=80)],
-    #     custom_entry_point="/bin/sh",
-    # ),
-]
-
 APP_NGINX_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
@@ -870,8 +860,6 @@ APP_NGINX_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=80)],
     ),
 ]
-
-NGINX_CONTAINERS = APP_NGINX_CONTAINERS + PR_NGINX_CONTAINERS
 
 KUBECTL_CONTAINERS = [
     create_BCI(
@@ -1080,17 +1068,6 @@ APP_VALKEY_CONTAINERS = [
     for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
 ]
 
-PR_VALKEY_CONTAINERS = [
-    # create_BCI(
-    #     build_tag="private-registry/harbor-valkey:latest",
-    #     bci_type=ImageType.APPLICATION,
-    #     available_versions=("15.6-pr",),
-    #     forwarded_ports=[PortForwarding(container_port=6379)],
-    # )
-]
-
-VALKEY_CONTAINERS = APP_VALKEY_CONTAINERS + PR_VALKEY_CONTAINERS
-
 BIND_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/bind:9",
@@ -1101,79 +1078,6 @@ BIND_CONTAINERS = [
         ],
     )
 ]
-
-# HARBOR_CORE_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-core:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_DB_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-db:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_EXPORTER_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-exporter:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_JOBSERVICE_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-jobservice:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-# HARBOR_NGINX_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-nginx:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_PORTAL_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-portal:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-#     forwarded_ports=[PortForwarding(container_port=80)],
-# )
-#
-# HARBOR_REGISTRY_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-registry:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_REGISTRYCTL_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-registryctl:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_TRIVY_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-trivy:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_VALKEY_CONTAINER = create_BCI(
-#     build_tag="private-registry/harbor-valkey:latest",
-#     bci_type=ImageType.APPLICATION,
-#     available_versions=("15.6-pr",),
-# )
-#
-# HARBOR_CONTAINERS = [
-#     HARBOR_CORE_CONTAINER,
-#     HARBOR_DB_CONTAINER,
-#     HARBOR_EXPORTER_CONTAINER,
-#     HARBOR_JOBSERVICE_CONTAINER,
-#     HARBOR_NGINX_CONTAINER,
-#     HARBOR_PORTAL_CONTAINER,
-#     HARBOR_REGISTRYCTL_CONTAINER,
-#     HARBOR_REGISTRY_CONTAINER,
-#     HARBOR_TRIVY_CONTAINER,
-#     HARBOR_VALKEY_CONTAINER,
-# ]
 
 CONTAINERS_WITH_ZYPPER = (
     [
@@ -1193,7 +1097,6 @@ CONTAINERS_WITH_ZYPPER = (
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
     + APP_NGINX_CONTAINERS
-    + PR_NGINX_CONTAINERS
     + NODEJS_CONTAINERS
     + OPENJDK_CONTAINERS
     + OPENJDK_DEVEL_CONTAINERS
@@ -1210,7 +1113,8 @@ CONTAINERS_WITH_ZYPPER = (
 CONTAINERS_WITH_ZYPPER_AS_ROOT = []
 for param in CONTAINERS_WITH_ZYPPER:
     # only modify the user for containers where `USER` is explicitly set,
-    if param not in PR_NGINX_CONTAINERS:
+    # atm this is no container
+    if param not in []:
         CONTAINERS_WITH_ZYPPER_AS_ROOT.append(param)
     else:
         ctr, marks = container_and_marks_from_pytest_param(param)
@@ -1250,7 +1154,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *MARIADB_CONTAINERS,
     *PROMETHEUS_CONTAINERS,
     STUNNEL_CONTAINER,
-    *VALKEY_CONTAINERS,
+    *APP_VALKEY_CONTAINERS,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
 ]
@@ -1302,7 +1206,6 @@ else:
         + LTSS_BASE_FIPS_CONTAINERS
         + MARIADB_CLIENT_CONTAINERS
         + MARIADB_CONTAINERS
-        + NGINX_CONTAINERS
         + NODEJS_CONTAINERS
         + OPENJDK_CONTAINERS
         + OPENJDK_DEVEL_CONTAINERS
@@ -1314,7 +1217,7 @@ else:
         + APP_VALKEY_CONTAINERS
     )
 
-ACC_CONTAINERS = POSTGRESQL_CONTAINERS + PR_NGINX_CONTAINERS
+ACC_CONTAINERS = POSTGRESQL_CONTAINERS
 
 #: Containers pulled from registry.suse.de
 ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER

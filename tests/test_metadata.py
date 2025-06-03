@@ -28,7 +28,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
-from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import ALL_CONTAINERS  # atm this is no container
 from bci_tester.data import APP_NGINX_CONTAINERS
 from bci_tester.data import APP_VALKEY_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
@@ -78,8 +78,6 @@ from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
-from bci_tester.data import PR_NGINX_CONTAINERS
-from bci_tester.data import PR_VALKEY_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RUBY_CONTAINERS
@@ -148,12 +146,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for c in OPENJDK_DEVEL_CONTAINERS
     ]
     + [(c, "nginx", ImageType.APPLICATION) for c in APP_NGINX_CONTAINERS]
-    + [(c, "harbor", ImageType.APPLICATION) for c in PR_NGINX_CONTAINERS]
-    + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
-    + [
-        (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
-        for c in OPENJDK_DEVEL_CONTAINERS
-    ]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
@@ -285,10 +277,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for kea_container in KEA_CONTAINERS
     ]
     + [(c, "valkey", ImageType.APPLICATION) for c in APP_VALKEY_CONTAINERS]
-    + [
-        (c, "harbor-valkey", ImageType.APPLICATION)
-        for c in PR_VALKEY_CONTAINERS
-    ]
     + [
         (bind_ctr, "bind", ImageType.APPLICATION)
         for bind_ctr in BIND_CONTAINERS
@@ -668,15 +656,7 @@ def test_reference(
 
 
 @SKIP_IF_TW_MARK
-@pytest.mark.parametrize(
-    "container",
-    [
-        c
-        for c in ALL_CONTAINERS
-        if c not in PR_VALKEY_CONTAINERS + PR_NGINX_CONTAINERS
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
 def test_oci_base_refs(
     container: ContainerData,
     container_runtime: OciRuntimeBase,
