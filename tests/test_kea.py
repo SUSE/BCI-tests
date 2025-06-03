@@ -22,6 +22,8 @@ def test_kea_dhcp4(
 ) -> None:
     network_name = "macvlan-network"
     kea_config_file = "tests/files/kea-dhcp4.conf"
+    dhclient_config_file_path = "/etc/dhclient.conf"
+    request_ip = "172.25.1.107"
     with open(kea_config_file, "r") as f:
         config = json.load(f)
     subnet = config["Dhcp4"]["subnet4"][0]["subnet"]
@@ -46,7 +48,7 @@ def test_kea_dhcp4(
 
     dhcp_client_ctr = DerivedContainer(
         base=container_and_marks_from_pytest_param(BASE_CONTAINER)[0],
-        containerfile="RUN zypper refresh && zypper -n install dhcp-client iproute2 && zypper clean --all",
+        containerfile="RUN zypper refresh && zypper -n install dhcp-client jq && zypper clean --all",
         custom_entry_point="/bin/sh",
         extra_launch_args=[f"--network={network_name}", "--privileged"],
     )
@@ -61,12 +63,32 @@ def test_kea_dhcp4(
             cli_launcher.launch_container()
 
             cli_con = cli_launcher.container_data.connection
+            # get the default interface name
             default_interface = cli_con.check_output(
-                "ip route show | grep default | cut -d' ' -f5"
+                "ip -j link show up | jq -r '.[] | select(.link_type == \"ether\") | .ifname'"
+            ).strip()
+
+            # configure dhcp client to request a specific ip i.e in the range specified in kea-dhcp
+            # configuration file to make sure that ip is received from kea server
+            cli_con.check_output(
+                "echo -e 'interface \""
+                + default_interface
+                + '" {\n send dhcp-requested-address '
+                + request_ip
+                + ";\n }' >> "
+                + dhclient_config_file_path,
             )
+
+            # request a specific ip by passing the configuration file
             client_log = cli_con.run_expect(
-                [0], "dhclient -v " + default_interface
+                [0],
+                "timeout 1m "
+                + "dhclient -cf "
+                + dhclient_config_file_path
+                + " -v "
+                + default_interface,
             ).stderr
+
             # Extracts a MAC address (e.g., 00:1A:2B:3C:4D:5E) from a string like 'LPF/eth0/00:1A:2B:3C:4D:5E' using named group 'mac'.
             mac_pattern = r"LPF/\S+/(?P<mac>[0-9a-fA-F:]+)"
             mac_match = re.search(mac_pattern, client_log)
@@ -77,10 +99,12 @@ def test_kea_dhcp4(
             ip_pattern = r"bound to (?P<ip>\d+\.\d+\.\d+\.\d+)"
             ip_match = re.search(ip_pattern, client_log)
             received_ip = ip_match.group("ip") if ip_match else None
-            assert received_ip is not None
+            assert received_ip == request_ip
 
             kea_con = kea_launcher.container_data.connection
-            log_lines = kea_con.file("/tmp/kea-dhcp4.log").content_string
+            log_lines = kea_con.file(
+                "/var/log/kea/kea-dhcp4.log"
+            ).content_string
             # Matches DHCP4 lease allocation log entries (e.g., "DHCP4_LEASE_ALLOC [hwtype=1 02:42:ac:19:00:03], cid=[no info], tid=0x7379cf19: lease 172.25.1.100") and captures MAC and IP.
             pattern = r"DHCP4_LEASE_ALLOC .*?hwtype=1 (?P<mac>[\da-f:]+).*?lease (?P<ip>[\d.]+)"
             match = re.search(pattern, log_lines)
@@ -89,9 +113,8 @@ def test_kea_dhcp4(
 
             mac = match.group("mac")
             ip = match.group("ip")
-
             assert mac == client_mac
-            assert ip == received_ip
+            assert ip == request_ip
     finally:
         host.check_output(
             f"{container_runtime.runner_binary} network rm {network_name}"
