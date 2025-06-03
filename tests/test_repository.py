@@ -219,8 +219,8 @@ def test_codestream_lifecycle(container_per_test):
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
-    reason="no included BCI repository",
+    not OS_VERSION.startswith("15"),
+    reason="SLE BCI 15.x specific checks for packages",
 )
 @pytest.mark.skipif(
     OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
