@@ -8,6 +8,7 @@ import json
 import pathlib
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import List
 
 import packaging.version
 import pytest
@@ -15,7 +16,6 @@ from _pytest.config import Config
 from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container import MultiStageBuild
-from pytest_container import container_and_marks_from_pytest_param
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container.container import BindMount
@@ -249,16 +249,12 @@ def test_glibc_present(auto_container):
 # the host instead of passing it on via stdout which pollutes the logs making
 # them unreadable
 _CONTAINERS_WITH_VOLUME_MOUNT = []
-for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
-    ctr, marks = container_and_marks_from_pytest_param(param)
+for ctr in CONTAINERS_WITH_ZYPPER_AS_ROOT:
     new_vol_mounts = (ctr.volume_mounts or []) + [BindMount("/solv/")]
-    kwargs = {**ctr.__dict__}
+    kwargs = {**ctr.dict()}
     kwargs.pop("volume_mounts")
     _CONTAINERS_WITH_VOLUME_MOUNT.append(
-        pytest.param(
-            DerivedContainer(volume_mounts=new_vol_mounts, **kwargs),
-            marks=marks,
-        )
+        DerivedContainer(volume_mounts=new_vol_mounts, **kwargs),
     )
 
 
@@ -593,7 +589,7 @@ def test_certificates_are_present(
     ],
     indirect=True,
 )
-def test_container_build_and_repo(container_per_test, host):
+def test_container_build_and_repo(container_per_test: ContainerData):
     """Test all containers with zypper in them whether at least the ``SLE_BCI``
     repository is present (if the host is unregistered). If a custom value for
     the repository url has been supplied, then check that it is correct.
@@ -695,13 +691,12 @@ def test_container_build_and_repo(container_per_test, host):
     container_per_test.connection.run_expect([0], "zypper -n ref")
 
 
-_CONTAINERS_WITH_ZYPP_CREDENTIALS_MOUNTED = []
-for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
-    if param in LTSS_BASE_CONTAINERS:
+_CONTAINERS_WITH_ZYPP_CREDENTIALS_MOUNTED: List[DerivedContainer] = []
+for ctr in CONTAINERS_WITH_ZYPPER_AS_ROOT:
+    if ctr in LTSS_BASE_CONTAINERS:
         # LTSS containers are broken with the SLE BCI repo
         continue
 
-    ctr, marks = container_and_marks_from_pytest_param(param)
     new_vol_mounts = (ctr.volume_mounts or []) + [
         BindMount(
             container_path=ZYPP_CREDENTIALS_DIR,
@@ -709,15 +704,11 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
             flags=[VolumeFlag.READ_ONLY],
         )
     ]
-    kwargs = {**ctr.__dict__}
+    kwargs = {**ctr.dict()}
     kwargs.pop("volume_mounts")
 
     _CONTAINERS_WITH_ZYPP_CREDENTIALS_MOUNTED.append(
-        pytest.param(
-            DerivedContainer(**kwargs, volume_mounts=new_vol_mounts),
-            marks=marks,
-            id=param.id,
-        )
+        DerivedContainer(**kwargs, volume_mounts=new_vol_mounts)
     )
 
 

@@ -17,7 +17,6 @@ from pytest_container.container import ContainerData
 from pytest_container.container import ContainerLauncher
 from pytest_container.container import ContainerVolume
 from pytest_container.container import DerivedContainer
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 from pytest_container.runtime import LOCALHOST
@@ -33,6 +32,9 @@ from bci_tester.data import OS_VERSION
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
 CONTAINER_IMAGES = MARIADB_CONTAINERS
+
+
+assert isinstance(MARIADB_CONTAINERS[0], ParameterSet)
 
 
 def test_entry_point(auto_container: ContainerData) -> None:
@@ -57,9 +59,7 @@ _TEST_DB = "bcitest"
 def _generate_test_matrix() -> List[ParameterSet]:
     params = []
 
-    for db_cont_param in MARIADB_CONTAINERS:
-        db_cont, marks = container_and_marks_from_pytest_param(db_cont_param)
-        ports = db_cont.forwarded_ports
+    for db_cont in MARIADB_CONTAINERS:
         for db_user, db_pw, root_pw in product(
             ("user", _OTHER_DB_USER),
             (_SOME_ROOT_PW, _OTHER_DB_PW),
@@ -79,13 +79,13 @@ def _generate_test_matrix() -> List[ParameterSet]:
                 pytest.param(
                     DerivedContainer(
                         base=db_cont,
-                        forwarded_ports=ports,
+                        forwarded_ports=db_cont.forwarded_ports,
                         extra_environment_variables=env,
                     ),
                     db_user,
                     db_pw,
                     root_pw,
-                    marks=marks,
+                    marks=db_cont.marks,
                 )
             )
 
@@ -202,22 +202,19 @@ def test_mariadb_client(container_per_test: ContainerData) -> None:
 
 
 MARIADB_PODS = [
-    pytest.param(
-        Pod(
-            containers=[
-                container_and_marks_from_pytest_param(client_db_cont)[0],
-                DerivedContainer(
-                    base=container_and_marks_from_pytest_param(db_cont)[0],
-                    extra_environment_variables={
-                        "MARIADB_USER": _OTHER_DB_USER,
-                        "MARIADB_PASSWORD": _OTHER_DB_PW,
-                        "MARIADB_DATABASE": _TEST_DB,
-                        "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD,
-                    },
-                ),
-            ]
-        ),
-        marks=[*db_cont.marks, *client_db_cont.marks],
+    Pod(
+        containers=[
+            client_db_cont,
+            DerivedContainer(
+                base=db_cont,
+                extra_environment_variables={
+                    "MARIADB_USER": _OTHER_DB_USER,
+                    "MARIADB_PASSWORD": _OTHER_DB_PW,
+                    "MARIADB_DATABASE": _TEST_DB,
+                    "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD,
+                },
+            ),
+        ]
     )
     for db_cont, client_db_cont in zip(
         MARIADB_CONTAINERS, MARIADB_CLIENT_CONTAINERS

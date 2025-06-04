@@ -3,7 +3,6 @@
 import pytest
 from pytest_container.container import DerivedContainer
 from pytest_container.container import ImageFormat
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 from pytest_container.runtime import LOCALHOST
@@ -96,16 +95,9 @@ GIT_SERVER_CONTAINER = DerivedContainer(
     extra_launch_args=["--cap-add", "AUDIT_WRITE"],
 )
 
-_git_container, _marks = container_and_marks_from_pytest_param(GIT_CONTAINER)
 
-GIT_POD = pytest.param(
-    Pod(
-        containers=[
-            GIT_SERVER_CONTAINER,
-            _git_container,
-        ],
-    ),
-    marks=_marks,
+GIT_POD = Pod(
+    containers=[GIT_SERVER_CONTAINER, GIT_CONTAINER],
 )
 
 
