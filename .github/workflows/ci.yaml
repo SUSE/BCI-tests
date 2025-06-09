@@ -402,7 +402,7 @@ jobs:
           username=$SCC_CREDENTIAL_USERNAME
           password=$SCC_CREDENTIAL_PASSWORD
           EOF
-        if: ${{ matrix.testing_target == 'ibs-released' || matrix.toxenv == 'fips' }}
+        if: ${{ matrix.testing_target == 'ibs-released' || matrix.toxenv == 'fips' || matrix.toxenv == 'base' }}
         env:
           SCC_CREDENTIAL_USERNAME: ${{ secrets.SCC_SYSTEM_USERNAME }}
           SCC_CREDENTIAL_PASSWORD: ${{ secrets.SCC_SYSTEM_PASSWORD }}
