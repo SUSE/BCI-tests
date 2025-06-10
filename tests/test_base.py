@@ -119,6 +119,11 @@ def test_base_size(container: ContainerData, container_runtime):
         or TARGET in ("dso",)
     )
 
+    # Size limits determined by running
+    # img=<locationtoimage>;  for arch in x86_64 aarch64 ppc64le s390x; do
+    #   podman pull --arch=$arch $img > /dev/null; echo -n "## $arch: ";
+    #   echo "$(podman  image inspect -f '{{.Size}}' $img )"/1024/1024 | bc -l;
+    # done
     #: size limits of the base container per arch in MiB
     if is_fips_ctr:
         # SP4+ is a lot larger as it pulls in python3 and
@@ -131,23 +136,23 @@ def test_base_size(container: ContainerData, container_runtime):
             base_container_max_size["x86_64"] += 10
     elif OS_VERSION in ("tumbleweed",):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 100,
-            "aarch64": 126,
-            "ppc64le": 138,
-            "s390x": 99,
+            "x86_64": 99,
+            "aarch64": 115,
+            "ppc64le": 126,
+            "s390x": 91,
         }
     elif OS_VERSION in ("16.0",):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 101,
-            "aarch64": 126,
-            "ppc64le": 138,
-            "s390x": 99,
+            "x86_64": 95,
+            "aarch64": 100,
+            "ppc64le": 114,
+            "s390x": 92,
         }
     elif OS_VERSION in ("15.7",):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 121,
             "aarch64": 135,
-            "ppc64le": 159,
+            "ppc64le": 158,
             "s390x": 122,
         }
     elif OS_VERSION in ("15.6",):
