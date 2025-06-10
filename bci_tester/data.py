@@ -870,6 +870,7 @@ KUBECTL_CONTAINERS = [
         ("1.30", ("tumbleweed",)),
         ("1.31", ("tumbleweed",)),
         ("1.32", ("tumbleweed",)),
+        ("1.33", ("tumbleweed",)),
     )
 ]
 
