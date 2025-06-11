@@ -156,7 +156,7 @@ def test_java_home(auto_container: ContainerData):
 
 
 @dataclass(frozen=True)
-class TestExtendedParams:
+class ExtendedTestParams:
     """
     A class used to pass parameters and options to test_jdk_extended
 
@@ -187,32 +187,32 @@ class TestExtendedParams:
     [
         (
             "threads_concurrency_and_sleep",
-            TestExtendedParams(
+            ExtendedTestParams(
                 expected_strings=["I am the thread 1", "I am the thread 2"]
             ),
         ),
-        ("time", TestExtendedParams(expected_strings=["All OK"])),
-        ("garbage_collector", TestExtendedParams()),
+        ("time", ExtendedTestParams(expected_strings=["All OK"])),
+        ("garbage_collector", ExtendedTestParams()),
         (
             "system_exit",
-            TestExtendedParams(expected_exit_status=[2], arguments="2"),
+            ExtendedTestParams(expected_exit_status=[2], arguments="2"),
         ),
         (
             "system_env",
-            TestExtendedParams(
+            ExtendedTestParams(
                 expected_strings=["test"], environment="ENV1=test"
             ),
         ),
         (
             "subprocesses",
-            TestExtendedParams(expected_strings=["tmp", "usr"]),
+            ExtendedTestParams(expected_strings=["tmp", "usr"]),
         ),
     ],
 )
 def test_jdk_extended(
     container_per_test,
     test_to_run: str,
-    params: TestExtendedParams,
+    params: ExtendedTestParams,
 ):
     """Executes a set of java files stored on test/trainers/java/ directory.
     It covers:
