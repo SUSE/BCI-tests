@@ -557,19 +557,20 @@ OPENJDK_DEVEL_11_CONTAINER = create_BCI(
     custom_entry_point="/bin/sh",
 )
 OPENJDK_17_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:17", available_versions=["tumbleweed", "15.6"]
+    build_tag="bci/openjdk:17",
+    available_versions=["tumbleweed"],
 )
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:17",
-    available_versions=["tumbleweed", "15.6"],
+    available_versions=["tumbleweed"],
     custom_entry_point="/bin/sh",
 )
 OPENJDK_21_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:21", available_versions=["15.6", "tumbleweed"]
+    build_tag="bci/openjdk:21", available_versions=_DEFAULT_NONBASE_OS_VERSIONS
 )
 OPENJDK_DEVEL_21_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:21",
-    available_versions=["15.6", "tumbleweed"],
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
     custom_entry_point="/bin/sh",
 )
 OPENJDK_24_CONTAINER = create_BCI(
@@ -596,12 +597,12 @@ OPENJDK_DEVEL_CONTAINERS = [
 
 NODEJS_20_CONTAINER = create_BCI(
     build_tag="bci/nodejs:20",
-    available_versions=["15.6"],
+    available_versions=("15.6",),
 )
 
 NODEJS_22_CONTAINER = create_BCI(
     build_tag="bci/nodejs:22",
-    available_versions=["tumbleweed", "15.6", "15.7"],
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
 
 NODEJS_CONTAINERS = [
@@ -626,13 +627,13 @@ PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.6", ["15.6"]),
+        ("3.6", _DEFAULT_NONBASE_SLE_VERSIONS),
         ("3.11", _DEFAULT_NONBASE_OS_VERSIONS),
     )
 ]
 
 RUBY_25_CONTAINER = create_BCI(
-    build_tag="bci/ruby:2.5", available_versions=["15.6"]
+    build_tag="bci/ruby:2.5", available_versions=_DEFAULT_NONBASE_SLE_VERSIONS
 )
 
 RUBY_34_CONTAINER = create_BCI(
@@ -716,7 +717,7 @@ PCP_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
     )
     for ver, os_ver in (
-        ("6", ["15.6"]),
+        ("6", _DEFAULT_NONBASE_SLE_VERSIONS),
         ("6", ["tumbleweed"]),
     )
 ]
@@ -725,14 +726,15 @@ CONTAINER_389DS_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/389-ds:{ver}",
         bci_type=ImageType.APPLICATION,
-        available_versions=[os_ver],
+        available_versions=os_ver,
         healthcheck_timeout=timedelta(seconds=240),
         extra_environment_variables={"SUFFIX_NAME": "dc=example,dc=com"},
         forwarded_ports=[PortForwarding(container_port=3389)],
     )
     for ver, os_ver in (
-        ("2.2", "15.6"),
-        ("3.1", "tumbleweed"),
+        ("2.5", ("15.7",)),
+        ("2.2", ("15.6",)),
+        ("3.1", ("tumbleweed",)),
     )
 ]
 
@@ -802,7 +804,7 @@ POSTGRESQL_CONTAINERS = [
         (14, ["tumbleweed"]),
         (15, ["tumbleweed"]),
         (16, _DEFAULT_NONBASE_OS_VERSIONS),
-        (17, ["15.6", "tumbleweed"]),
+        (17, _DEFAULT_NONBASE_OS_VERSIONS),
     )
 ]
 
@@ -820,7 +822,10 @@ DISTRIBUTION_CONTAINER = create_BCI(
     ),
 )
 
-if OS_VERSION in ("15.6", "15.7", "basalt"):
+if OS_VERSION in (
+    "15.6",
+    "15.7",
+):
     _GIT_APP_VERSION = "2.43"
 elif OS_VERSION in ("15.5", "15.4"):
     _GIT_APP_VERSION = "2.35"
@@ -896,7 +901,7 @@ if OS_VERSION in ("16.0",):
 else:
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
-        available_versions=["15.6", "15.7"],
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
         bci_type=ImageType.OS,
     )
 
@@ -907,7 +912,7 @@ GCC_CONTAINERS = [
     )
     for gcc_version, os_versions in (
         (13, ("tumbleweed",)),
-        (14, ("15.6", "15.7", "tumbleweed")),
+        (14, _DEFAULT_NONBASE_OS_VERSIONS),
         (15, ("16.0", "tumbleweed")),
     )
 ]
@@ -961,10 +966,9 @@ PROMETHEUS_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9090)],
         available_versions=versions,
     )
-    for versions, tag in (
-        (("15.6",), "2"),
-        (("15.7",), "2"),
-        (("tumbleweed",), "3"),
+    for tag, versions in (
+        ("2", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("3", ("tumbleweed",)),
     )
 ]
 
@@ -975,10 +979,9 @@ ALERTMANAGER_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9093)],
         available_versions=versions,
     )
-    for versions, tag in (
-        (("15.6",), "0.26"),
-        (("15.7",), "0.26"),
-        (("tumbleweed",), "latest"),
+    for tag, versions in (
+        ("0.26", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("latest", ("tumbleweed",)),
     )
 ]
 
@@ -989,15 +992,9 @@ BLACKBOX_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=9115)],
         available_versions=versions,
     )
-    for versions, tag in (
-        (
-            (
-                "15.6",
-                "15.7",
-            ),
-            "0.24",
-        ),
-        (("tumbleweed",), "latest"),
+    for tag, versions in (
+        ("0.24", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("latest", ("tumbleweed",)),
     )
 ]
 
@@ -1008,10 +1005,9 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for versions, tag in (
-        (("15.6",), "10"),
-        (("15.7",), "10"),
-        (("tumbleweed",), "11"),
+    for tag, versions in (
+        ("10", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("11", ("tumbleweed",)),
     )
 ]
 

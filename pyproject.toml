@@ -13,6 +13,7 @@ xfail_strict = true
 addopts = "--strict-markers"
 markers = [
     '389-ds_2.2',
+    '389-ds_2.5',
     '389-ds_3.1',
     'alertmanager_0.26',
     'alertmanager_0.27',
