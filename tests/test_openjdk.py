@@ -33,7 +33,7 @@ RUN zypper -n in tar gzip git-core util-linux
 
 DOCKERFILE_OPENJDK_FIPS = """WORKDIR /src/
 COPY tests/files/Tcheck.java tests/files/JCEProviderInfo.java /src/
-ENV NSS_FIPS 1
+ENV NSS_FIPS=1
 RUN zypper -n in mozilla-nss* java-$JAVA_VERSION-openjdk-devel
 """
 
