@@ -7,15 +7,19 @@ import re
 from pathlib import Path
 
 import pytest
+from _pytest.config import Config
 from pytest_container import DerivedContainer
+from pytest_container import MultiStageBuild
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
+from pytest_container.helpers import get_extra_run_args
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
+from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.fips import FIPS_DIGESTS
@@ -125,22 +129,63 @@ def test_openssl_binary(container_per_test: ContainerData) -> None:
     """
     container_per_test.connection.check_output(
         "zypper --gpg-auto-import-keys -n ref && zypper -n install gcc libopenssl-devel && zypper -n clean &&"
-        "gcc -O2 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test && "
-        "mv fips-test /bin/fips-test"
+        "gcc -O2 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o /usr/local/bin/fips-test"
     )
 
     for digest in FIPS_DIGESTS:
-        container_per_test.connection.check_output(f"/bin/fips-test {digest}")
+        container_per_test.connection.check_output(
+            f"/usr/local/bin/fips-test {digest}"
+        )
 
     for digest in NONFIPS_DIGESTS:
         err_msg = container_per_test.connection.run_expect(
-            [1], f"/bin/fips-test {digest}"
+            [1], f"/usr/local/bin/fips-test {digest}"
         ).stderr
 
         assert (
             f"Unknown message digest {digest}" in err_msg
             or "EVP_DigestInit_ex was not successful" in err_msg
         ), f"non-fips digest {digest} unexpected output {err_msg}"
+
+
+@pytest.mark.parametrize(
+    "container_per_test", [MICRO_FIPS_CONTAINER], indirect=True
+)
+def test_openssl_binary_on_micro(
+    container_per_test: ContainerData, container_runtime, tmp_path, pytestconfig: Config
+) -> None:
+    """Check that a binary linked against OpenSSL works in fips mode on bci-micro-fips"""
+
+    multi_stage_build = MultiStageBuild(
+        containers={
+            "builder": "registry.suse.com/bci/gcc",
+            "runner": container_per_test,
+        },
+        containerfile_template="""
+FROM {container_per_test.container} AS target
+FROM registry.suse.com/bci/gcc AS base
+
+WORKDIR /src/
+COPY tests/files/fips-test.c /src/
+gcc -O2 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o /usr/local/bin/fips-test
+
+FROM {container_per_test.container}
+COPY --from=base /usr/local/bin/fips-test /usr/local/bin/fips-test
+
+""",
+    )
+
+    build_args = get_extra_run_args(pytestconfig)
+
+    runner_id = multi_stage_build.build(
+        tmp_path, pytestconfig, container_runtime, extra_build_args=build_args
+    )
+    # Run resulting container and test whether zsh is running
+    assert host.check_output(
+        f"{container_runtime.runner_binary} run --rm "
+        f"{' '.join(get_extra_build_args(pytestconfig))} "
+        f"{runner_id} /usr/local/bin/fips-test ",
+    )
 
 
 def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
