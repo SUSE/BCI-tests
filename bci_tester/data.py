@@ -563,11 +563,11 @@ OPENJDK_DEVEL_11_CONTAINER = create_BCI(
 )
 OPENJDK_17_CONTAINER = create_BCI(
     build_tag="bci/openjdk:17",
-    available_versions=["tumbleweed"],
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
 OPENJDK_DEVEL_17_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:17",
-    available_versions=["tumbleweed"],
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
     custom_entry_point="/bin/sh",
 )
 OPENJDK_21_CONTAINER = create_BCI(
