@@ -60,7 +60,8 @@ def _generate_test_matrix() -> List[ParameterSet]:
     for db_cont_param in MARIADB_CONTAINERS:
         db_cont, marks = container_and_marks_from_pytest_param(db_cont_param)
         ports = db_cont.forwarded_ports
-        for db_user, db_pw, root_pw in product(
+        for username, db_user, db_pw, root_pw in product(
+            (None, "mysql"),
             ("user", _OTHER_DB_USER),
             (_SOME_ROOT_PW, _OTHER_DB_PW),
             (MARIADB_ROOT_PASSWORD, None),
@@ -81,6 +82,9 @@ def _generate_test_matrix() -> List[ParameterSet]:
                         base=db_cont,
                         forwarded_ports=ports,
                         extra_environment_variables=env,
+                        extra_launch_args=(
+                            ["--user", username] if username else []
+                        ),
                     ),
                     db_user,
                     db_pw,
@@ -125,11 +129,10 @@ def test_mariadb_db_env_vars(
 
     dbdir_f = container_per_test.connection.file(dbdir)
     assert dbdir_f.exists
-    # owner is root under docker and mysql under podman
-    # assert dbdir_f.user == "mysql"
-    assert dbdir_f.mode == 0o755
-
-    assert container_per_test.connection.check_output("id -un") == ("root")
+    assert dbdir_f.user == "mysql", (
+        f"expected {dbdir} to be owned by user mysql"
+    )
+    assert dbdir_f.mode == 0o700, f"expected {dbdir} to have mode 0o700"
 
     _wait_for_server(container_per_test.connection)
 
