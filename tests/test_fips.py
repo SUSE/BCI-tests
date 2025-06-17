@@ -179,8 +179,13 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
 
     run_digest_tests("openssl")
 
-    # SLE 15-SP6 has to be tested with OpenSSL v1.1 and v3
-    if OS_VERSION == "15.6":
+    # SLE 15-SP6 has to be tested with OpenSSL v1.1 and v3.
+    # Test module required Legacy Modules so this can only run on SLES hosts
+    if (
+        "SUSE Linux Enterprise Server"
+        in LOCALHOST.check_output("grep PRETTY_NAME /etc/os-release")
+        and OS_VERSION == "15.6"
+    ):
         con.check_output(
             "export ADDITIONAL_MODULES=sle-module-legacy && \
              zypper -n in openssl-1_1"
