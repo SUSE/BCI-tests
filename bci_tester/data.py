@@ -1124,6 +1124,46 @@ KIOSK_CONTAINERS = (
     + KIOSK_XORG_CONTAINERS
 )
 
+_SAMBA_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+    ("4.19", ("15.6",)),
+    ("4.21", ("15.7",)),
+    ("latest", ("tumbleweed",)),
+)
+
+SAMBA_SERVER_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/samba-server:{tag}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=445)],
+        available_versions=versions,
+    )
+    for tag, versions in _SAMBA_VERSION_OS_MATRIX
+]
+
+SAMBA_CLIENT_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/samba-client:{tag}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=versions,
+    )
+    for tag, versions in _SAMBA_VERSION_OS_MATRIX
+]
+
+SAMBA_TOOLBOX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/samba-toolbox:{tag}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=versions,
+    )
+    for tag, versions in _SAMBA_VERSION_OS_MATRIX
+]
+
+SAMBA_CONTAINERS = (
+    SAMBA_SERVER_CONTAINERS
+    + SAMBA_CLIENT_CONTAINERS
+    + SAMBA_TOOLBOX_CONTAINERS
+)
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1203,6 +1243,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *MARIADB_CLIENT_CONTAINERS,
     *MARIADB_CONTAINERS,
     *PROMETHEUS_CONTAINERS,
+    *SAMBA_CONTAINERS,
     STUNNEL_CONTAINER,
     *VALKEY_CONTAINERS,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
@@ -1269,6 +1310,7 @@ else:
         + PYTHON_CONTAINERS
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
+        + SAMBA_CONTAINERS
         + SPACK_CONTAINERS
         + VALKEY_CONTAINERS
     )
