@@ -16,6 +16,7 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
+from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.fips import FIPS_DIGESTS
@@ -106,6 +107,25 @@ def digest_xoflen(digest: str) -> str:
     elif digest in ("shake256",):
         param = " -xoflen 64"
     return param
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    FIPS_TESTER_IMAGES + [MICRO_FIPS_CONTAINER],
+    indirect=True,
+)
+def test_fips_env(container_per_test: ContainerData) -> None:
+    """Check that the FIPS environment variables are in place"""
+    env = container_per_test.connection.check_output("env")
+    for expected in (
+        "LIBGCRYPT_FORCE_FIPS_MODE",
+        "GNUTLS_FORCE_FIPS_MODE",
+        "OPENSSL_FORCE_FIPS_MODE",
+        "OPENSSL_FIPS",
+        "LIBICA_FIPS_FLAG",
+        "NSS_FIPS",
+    ):
+        assert f"{expected}=1" in env, f"{expected} is not set to 1 in env"
 
 
 @pytest.mark.parametrize(
