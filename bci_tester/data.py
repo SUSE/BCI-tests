@@ -30,7 +30,7 @@ from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
-OS_VERSION = os.getenv("OS_VERSION", "15.6")
+OS_VERSION = os.getenv("OS_VERSION", "15.7")
 
 # Allowed os versions for base (non lang/non-app) containers
 ALLOWED_BASE_OS_VERSIONS = (
@@ -61,10 +61,10 @@ ALLOWED_BCI_REPO_OS_VERSIONS = (
 )
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.6", "15.7")
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.7",)
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.6", "15.7", "tumbleweed")
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "tumbleweed")
 
 # Test base containers by default for these versions
 _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
@@ -435,7 +435,6 @@ def create_BCI(
 KIWI_CONTAINERS = [
     create_BCI(build_tag=f"bci/kiwi:{tag}", available_versions=(ver,))
     for ver, tag in (
-        ("15.6", "9.24"),
         ("15.7", "9.24"),
         ("16.0", "10.2"),
         ("tumbleweed", "latest"),
@@ -738,7 +737,6 @@ CONTAINER_389DS_CONTAINERS = [
     )
     for ver, os_ver in (
         ("2.5", ("15.7",)),
-        ("2.2", ("15.6",)),
         ("3.1", ("tumbleweed",)),
     )
 ]
@@ -875,8 +873,8 @@ KUBECTL_CONTAINERS = [
         custom_entry_point="/bin/sh",
     )
     for kubectl_ver, os_versions in (
-        ("oldstable", ("15.6", "15.7")),
-        ("stable", ("15.6", "15.7")),
+        ("oldstable", ("15.7",)),
+        ("stable", ("15.7",)),
         ("1.30", ("tumbleweed",)),
         ("1.31", ("tumbleweed",)),
         ("1.32", ("tumbleweed",)),
@@ -906,7 +904,7 @@ if OS_VERSION in ("16.0",):
 else:
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        available_versions=("15.6", "15.7"),
         bci_type=ImageType.OS,
     )
 
@@ -961,7 +959,7 @@ SPACK_CONTAINERS = [
         build_tag=f"{BCI_CONTAINER_PREFIX}/spack:{tag}",
         available_versions=[f"{ver}"],
     )
-    for ver, tag in (("15.6", "0.23"), ("15.7", "0.23"))
+    for ver, tag in (("15.7", "0.23"),)
 ]
 
 PROMETHEUS_CONTAINERS = [
@@ -1055,7 +1053,7 @@ STUNNEL_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
-    available_versions=["15.6", "15.7", "tumbleweed"],
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
 
 SUSE_AI_OBSERVABILITY_EXTENSION_SETUP = create_BCI(
@@ -1080,7 +1078,7 @@ VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in (
-        (("15.6", "15.7"), "8.0"),
+        (("15.7",), "8.0"),
         (("tumbleweed",), "latest"),
     )
 ]

@@ -126,7 +126,6 @@ jobs:
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
         os_version:
-          - 15.6
           - 15.7
           - "tumbleweed"
         include:
@@ -169,6 +168,20 @@ jobs:
           - toxenv: metadata
             testing_target: ibs-released
             os_version: 15.6-ai
+          - toxenv: all
+            os_version: 15.6
+          - toxenv: base
+            os_version: 15.6
+          - toxenv: metadata
+            os_version: 15.6
+          - toxenv: node
+            os_version: 15.6
+          - toxenv: python
+            os_version: 15.6
+          - toxenv: fips
+            os_version: 15.6
+          - toxenv: mariadb
+            os_version: 15.6
           - toxenv: all
             os_version: 15.3
           - toxenv: base
