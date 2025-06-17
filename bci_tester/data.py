@@ -1079,7 +1079,10 @@ VALKEY_CONTAINERS = [
         available_versions=versions,
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
-    for versions, tag in ((("tumbleweed", "15.6", "15.7"), "8.0"),)
+    for versions, tag in (
+        (("15.6", "15.7"), "8.0"),
+        (("tumbleweed",), "latest"),
+    )
 ]
 
 BIND_CONTAINERS = [

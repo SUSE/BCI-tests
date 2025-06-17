@@ -173,6 +173,7 @@ markers = [
     'suse-ai-observability-extension-runtime_1',
     'suse-ai-observability-extension-setup_1',
     'valkey_8.0',
+    'valkey_latest',
     'xorg_21',
 ]
 
