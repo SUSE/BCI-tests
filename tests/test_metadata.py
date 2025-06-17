@@ -88,6 +88,9 @@ from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
+from bci_tester.data import SAMBA_CLIENT_CONTAINERS
+from bci_tester.data import SAMBA_SERVER_CONTAINERS
+from bci_tester.data import SAMBA_TOOLBOX_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
@@ -309,6 +312,18 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (bind_ctr, "bind", ImageType.APPLICATION)
         for bind_ctr in BIND_CONTAINERS
+    ]
+    + [
+        (samba_ctr, "samba-server", ImageType.APPLICATION)
+        for samba_ctr in SAMBA_SERVER_CONTAINERS
+    ]
+    + [
+        (samba_ctr, "samba-client", ImageType.APPLICATION)
+        for samba_ctr in SAMBA_CLIENT_CONTAINERS
+    ]
+    + [
+        (samba_ctr, "samba-toolbox", ImageType.APPLICATION)
+        for samba_ctr in SAMBA_TOOLBOX_CONTAINERS
     ]
 ]
 
