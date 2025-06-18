@@ -103,7 +103,7 @@ def get_request_to_stunnel_with_backoff(
     """
     resp = requests.get(
         f"https://127.0.0.1:{port}/{route}",
-        headers={"Host": "updates.suse.com"} if host else {},
+        headers={"Host": host} if host else {},
         # openssl older than 1.1.1l fails to validate a cert without CA
         verify=(
             _SERVER_CRT if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF else False
