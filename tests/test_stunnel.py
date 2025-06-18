@@ -95,7 +95,7 @@ _STUNNEL_POD = pytest.param(
     stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
 )
 def get_request_to_stunnel_with_backoff(
-    *, route: str = "", port: int
+    *, host: str = None, route: str = "", port: int
 ) -> requests.Response:
     """Perform a GET to `127.0.0.1:$port/$route` with an exponential backoff in
     case the response has a status other than 200 or times out.
@@ -103,6 +103,7 @@ def get_request_to_stunnel_with_backoff(
     """
     resp = requests.get(
         f"https://127.0.0.1:{port}/{route}",
+        headers={"Host": "updates.suse.com"} if host else {},
         # openssl older than 1.1.1l fails to validate a cert without CA
         verify=(
             _SERVER_CRT if ssl.OPENSSL_VERSION_NUMBER >= 0x101010CF else False
@@ -140,9 +141,9 @@ def _create_http_forward_ctr(log_level: str = "info") -> ParameterSet:
             forwarded_ports=[PortForwarding(container_port=_CTR_PORT)],
             extra_environment_variables={
                 "STUNNEL_DEBUG": log_level,
-                "STUNNEL_SERVICE_NAME": "neverssl",
+                "STUNNEL_SERVICE_NAME": "test",
                 "STUNNEL_ACCEPT": f"0.0.0.0:{_CTR_PORT}",
-                "STUNNEL_CONNECT": "neverssl.com:80",
+                "STUNNEL_CONNECT": "updates.suse.com:80",
             },
         ),
         marks=_marks,
@@ -153,17 +154,19 @@ def _create_http_forward_ctr(log_level: str = "info") -> ParameterSet:
 @pytest.mark.parametrize(
     "container", [_create_http_forward_ctr()], indirect=True
 )
-def test_http_tunnel_to_neverssl_com(container: ContainerData) -> None:
+def test_http_tunnel_to_updates_suse_com(container: ContainerData) -> None:
     """Simple smoke test of stunnel wrapping the HTTP connection to
-    neverssl.com with TLS.
+    updates.suse.com with TLS.
 
     """
 
     resp = get_request_to_stunnel_with_backoff(
-        port=container.forwarded_ports[0].host_port
+        host="updates.suse.com",
+        port=container.forwarded_ports[0].host_port,
+        route="/-/healthy",
     )
     assert resp.status_code == 200
-    assert "neverssl" in resp.text.lower()
+    assert "OK" in resp.text
 
 
 @pytest.mark.parametrize(
@@ -180,7 +183,7 @@ def test_stunnel_logging(container: ContainerData, log_level: int) -> None:
 
     """
     get_request_to_stunnel_with_backoff(
-        port=container.forwarded_ports[0].host_port
+        host="updates.suse.com", port=container.forwarded_ports[0].host_port
     )
 
     _startup_log_levels = (5, 6)
