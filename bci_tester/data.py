@@ -996,7 +996,7 @@ BLACKBOX_CONTAINERS = [
         available_versions=versions,
     )
     for tag, versions in (
-        ("0.24", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("0.26", _DEFAULT_NONBASE_SLE_VERSIONS),
         ("latest", ("tumbleweed",)),
     )
 ]
@@ -1008,10 +1008,7 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for tag, versions in (
-        ("10", _DEFAULT_NONBASE_SLE_VERSIONS),
-        ("11", ("tumbleweed",)),
-    )
+    for tag, versions in (("11", _DEFAULT_NONBASE_OS_VERSIONS),)
 ]
 
 OLLAMA_CONTAINER = create_BCI(
