@@ -178,6 +178,10 @@ jobs:
             os_version: 15.6
           - toxenv: python
             os_version: 15.6
+          - toxenv: kernel_module
+            os_version: 15.6
+          - toxenv: repository
+            os_version: 15.6
           - toxenv: fips
             os_version: 15.6
           - toxenv: mariadb
