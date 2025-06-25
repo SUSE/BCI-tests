@@ -11,8 +11,6 @@ from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 
 from bci_tester.data import BASEURL
-from bci_tester.data import OS_VERSION
-from bci_tester.data import TARGET
 
 _conf_dir = Path(__file__).parent / "files" / "harbor"
 
@@ -168,18 +166,6 @@ HARBOR_POD = Pod(
 
 @pytest.mark.parametrize(
     "pod_per_test", [HARBOR_POD], indirect=["pod_per_test"]
-)
-@pytest.mark.skipif(
-    OS_VERSION not in ("15.6-pr",),
-    reason="Harbor tested for SUSE Private Registry only",
-)
-@pytest.mark.skipif(
-    TARGET
-    not in (
-        "obs",
-        "ibs-cr",
-    ),
-    reason="Harbor not avalable for this target",
 )
 def test_harbor_in_pod(pod_per_test: PodData) -> None:
     def get_health(port: int) -> requests.Response:

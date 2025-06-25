@@ -24,6 +24,7 @@ import requests
 from _pytest.mark.structures import ParameterSet
 from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ACC_CONTAINERS
@@ -77,6 +78,7 @@ from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
+from bci_tester.data import PRIV_REG_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTORCH_CONTAINER
@@ -281,8 +283,17 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (bind_ctr, "bind", ImageType.APPLICATION)
         for bind_ctr in BIND_CONTAINERS
     ]
+    + [
+        (
+            pr_ctr,
+            container_and_marks_from_pytest_param(pr_ctr)[0]
+            .baseurl.rpartition("/")[2]
+            .rpartition(":")[0],
+            ImageType.APPLICATION,
+        )
+        for pr_ctr in PRIV_REG_CONTAINERS
+    ]
 ]
-
 
 assert len(ALL_CONTAINERS) == len(IMAGES_AND_NAMES), (
     "IMAGES_AND_NAMES must have all containers from ALL_CONTAINERS"

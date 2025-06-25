@@ -166,6 +166,16 @@ markers = [
     'suse-ai-observability-extension-runtime_1',
     'suse-ai-observability-extension-setup_1',
     'valkey_8.0',
+    'harbor-db_latest',
+    'harbor-registry_latest',
+    'harbor-valkey_latest',
+    'harbor-registryctl_latest',
+    'harbor-core_latest',
+    'harbor-portal_latest',
+    'harbor-jobservice_latest',
+    'harbor-exporter_latest',
+    'harbor-trivy-adapter_latest',
+    'harbor-nginx_latest',
 ]
 
 [tool.ruff]

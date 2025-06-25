@@ -8,6 +8,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
+from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
@@ -187,12 +188,6 @@ else:
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
         ibs_released = "dp.apps.rancher.io"
-
-    if OS_VERSION == "15.6-pr":
-        ibs_cr_project = (
-            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
-        )
-        obs_project = "registry.suse.de/devel/scc/privateregistry"
 
     if OS_VERSION == "15.6-pr":
         ibs_cr_project = (
@@ -427,6 +422,51 @@ def create_BCI(
         DerivedContainer(
             base=baseurl,
             containerfile=containerfile,
+            **kwargs,
+        ),
+        marks=marks,
+        id=f"{build_tag} from {baseurl}",
+    )
+
+
+def create_PRI(
+    build_tag: str,
+    extra_marks: Optional[Sequence[MarkDecorator]] = None,
+    **kwargs,
+) -> ParameterSet:
+    build_tag_base = build_tag.rpartition("/")[2]
+    marks = []
+    if extra_marks:
+        for m in extra_marks:
+            marks.append(m)
+
+    if TARGET not in (
+        "obs",
+        "ibs-cr",
+    ):
+        marks.append(
+            pytest.mark.skip(
+                reason="Harbor not avalable for this target",
+            )
+        )
+
+    available_versions = ["15.6-pr"]
+    marks.append(create_container_version_mark(available_versions))
+
+    if OS_VERSION in (available_versions):
+        marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
+    else:
+        marks.append(
+            pytest.mark.skip(
+                reason="Harbor tested for SUSE Private Registry only",
+            )
+        )
+
+    baseurl = f"{BASEURL}/{_get_repository_name('dockerfile')}{build_tag}"
+
+    return pytest.param(
+        Container(
+            url=baseurl,
             **kwargs,
         ),
         marks=marks,
@@ -1079,6 +1119,24 @@ BIND_CONTAINERS = [
     )
 ]
 
+PRIV_REG_CONTAINERS = [
+    create_PRI(
+        build_tag=f"private-registry/harbor-{img}:latest",
+    )
+    for img in (
+        "db",
+        "valkey",
+        "registry",
+        "registryctl",
+        "core",
+        "portal",
+        "jobservice",
+        "exporter",
+        "trivy-adapter",
+        "nginx",
+    )
+]
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1157,6 +1215,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *APP_VALKEY_CONTAINERS,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
+    *PRIV_REG_CONTAINERS,
 ]
 
 
