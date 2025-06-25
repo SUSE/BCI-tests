@@ -1309,7 +1309,6 @@ else:
         + PYTHON_CONTAINERS
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
-        + SAMBA_CONTAINERS
         + SPACK_CONTAINERS
         + VALKEY_CONTAINERS
     )
