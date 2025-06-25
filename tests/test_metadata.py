@@ -24,11 +24,12 @@ import requests
 from _pytest.mark.structures import ParameterSet
 from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
-from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import ALL_CONTAINERS  # atm this is no container
 from bci_tester.data import APP_NGINX_CONTAINERS
 from bci_tester.data import APP_VALKEY_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
@@ -77,9 +78,8 @@ from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
 from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
+from bci_tester.data import PRIV_REG_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
-from bci_tester.data import PR_NGINX_CONTAINERS
-from bci_tester.data import PR_VALKEY_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RUBY_CONTAINERS
@@ -148,7 +148,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for c in OPENJDK_DEVEL_CONTAINERS
     ]
     + [(c, "nginx", ImageType.APPLICATION) for c in APP_NGINX_CONTAINERS]
-    + [(c, "harbor", ImageType.APPLICATION) for c in PR_NGINX_CONTAINERS]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
@@ -281,15 +280,20 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     ]
     + [(c, "valkey", ImageType.APPLICATION) for c in APP_VALKEY_CONTAINERS]
     + [
-        (c, "harbor-valkey", ImageType.APPLICATION)
-        for c in PR_VALKEY_CONTAINERS
-    ]
-    + [
         (bind_ctr, "bind", ImageType.APPLICATION)
         for bind_ctr in BIND_CONTAINERS
     ]
+    + [
+        (
+            pr_ctr,
+            container_and_marks_from_pytest_param(pr_ctr)[0]
+            .baseurl.rpartition("/")[2]
+            .rpartition(":")[0],
+            ImageType.APPLICATION,
+        )
+        for pr_ctr in PRIV_REG_CONTAINERS
+    ]
 ]
-
 
 assert len(ALL_CONTAINERS) == len(IMAGES_AND_NAMES), (
     "IMAGES_AND_NAMES must have all containers from ALL_CONTAINERS"
@@ -663,15 +667,7 @@ def test_reference(
 
 
 @SKIP_IF_TW_MARK
-@pytest.mark.parametrize(
-    "container",
-    [
-        c
-        for c in ALL_CONTAINERS
-        if c not in PR_VALKEY_CONTAINERS + PR_NGINX_CONTAINERS
-    ],
-    indirect=True,
-)
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
 def test_oci_base_refs(
     container: ContainerData,
     container_runtime: OciRuntimeBase,
