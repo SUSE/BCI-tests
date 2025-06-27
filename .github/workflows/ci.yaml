@@ -72,7 +72,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 3.6: SLE15
+        # 3.6: SLE12
         # 3.9: RHEL/Centos/Liberty 9
         # 3.11: Tumbleweed
         # 3.12: Ubuntu 24.04
