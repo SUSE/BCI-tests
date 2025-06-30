@@ -54,6 +54,7 @@ from bci_tester.data import KEA_CONTAINERS
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIOSK_FIREFOX_CONTAINERS
 from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
+from bci_tester.data import KIOSK_XORG_CLIENT_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
@@ -170,6 +171,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for c in KIOSK_PULSEAUDIO_CONTAINERS
     ]
     + [(c, "xorg", ImageType.APPLICATION) for c in KIOSK_XORG_CONTAINERS]
+    + [
+        (c, "xorg-client", ImageType.APPLICATION)
+        for c in KIOSK_XORG_CLIENT_CONTAINERS
+    ]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
     + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]

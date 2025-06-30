@@ -183,6 +183,7 @@ markers = [
     'valkey_8.0',
     'valkey_latest',
     'xorg_21',
+    'xorg-client_21',
 ]
 
 [tool.ruff]
