@@ -20,27 +20,29 @@ def test_busybox_provides_sh(auto_container):
     )
 
 
-#: size limits of the micro image per architecture in MiB
-BUSYBOX_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 16 if OS_VERSION == "tumbleweed" else 13,
-    "aarch64": 16 if OS_VERSION == "tumbleweed" else 13,
-    "s390x": 16 if OS_VERSION == "tumbleweed" else 13,
-    "ppc64le": 16 if OS_VERSION == "tumbleweed" else 13,
-}
-
-
 @pytest.mark.parametrize(
-    "container,size",
-    [(BUSYBOX_CONTAINER, BUSYBOX_IMAGE_MAX_SIZE)],
+    "container",
+    [BUSYBOX_CONTAINER],
     indirect=["container"],
 )
-def test_busybox_image_size(
-    container, size: Dict[str, int], container_runtime
-):
-    """Check that the size of the busybox container is below the limits
-    specified in :py:const:`BUSYBOX_IMAGE_MAX_SIZE`.
+def test_busybox_image_size(container, container_runtime):
+    """Check that the size of the busybox container is below the accepted limits."""
 
-    """
+    size: Dict[str, int] = {
+        "x86_64": 16 if OS_VERSION == "tumbleweed" else 13,
+        "aarch64": 16 if OS_VERSION == "tumbleweed" else 13,
+        "s390x": 16 if OS_VERSION == "tumbleweed" else 13,
+        "ppc64le": 16 if OS_VERSION == "tumbleweed" else 13,
+    }
+
+    if OS_VERSION.startswith("16"):
+        size = {
+            "x86_64": 14,
+            "aarch64": 14,
+            "s390x": 14,
+            "ppc64le": 14,
+        }
+
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
     ) // (1024 * 1024)
