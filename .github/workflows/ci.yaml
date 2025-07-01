@@ -219,6 +219,8 @@ jobs:
             os_version: "16.0"
           - toxenv: kiwi
             os_version: "16.0"
+          - toxenv: repository
+            os_version: "16.0"
 
     steps:
       - name: Clean up disk space to maximize available space
