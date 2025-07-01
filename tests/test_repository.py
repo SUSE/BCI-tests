@@ -230,6 +230,7 @@ def test_codestream_lifecycle(container_per_test):
     [
         "libsnmp30",  # bsc#1209442
         "aws-cli",  # disappeared after python311 switch due to unresolvables
+        "mercurial",  # PED-2420
         "python3-azure-sdk",  # might also become unresolvable
         "uuidd",  # reported as missing by ironbank user
         "java-11-openjdk-headless",  # provide java11 until 2026-12-31 see jsc#PED-9926/jsc#NVSHAS-8819
