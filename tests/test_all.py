@@ -163,6 +163,21 @@ def test_product(auto_container):
 
 
 @pytest.mark.skipif(
+    OS_VERSION in ("15.3", "15.4", "15.5", "tumbleweed"),
+    reason="suse trademark only available in certain SLE versions",
+)
+def test_suse_trademark(auto_container):
+    """
+    check that the :file:`/usr/share/licenses/product/BCI/SUSE.svg` exists which
+    is needed to ensure SUSE trademarks apply.
+    """
+
+    assert auto_container.connection.file(
+        "/usr/share/licenses/product/BCI/SUSE.svg"
+    ).exists
+
+
+@pytest.mark.skipif(
     OS_VERSION == "tumbleweed",
     reason="lifecycle data only available for SLE",
 )
