@@ -94,6 +94,14 @@ for param in CONTAINERS_WITH_ZYPPER:
     )
 
 
+pytestmark = pytest.mark.skipif(
+    OS_VERSION in ("16.0",)
+    and "SUSE Linux Enterprise Server"
+    not in LOCALHOST.check_output("grep PRETTY_NAME /etc/os-release"),
+    reason="FIPS test runs require SLES subscription (only provided on SLES hosts)"
+)
+
+
 def digest_xoflen(digest: str) -> str:
     """return the openssl parameters to set the desired output function length
     for variable-length hash functions."""
