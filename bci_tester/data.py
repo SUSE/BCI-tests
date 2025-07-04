@@ -811,8 +811,14 @@ POSTGRESQL_CONTAINERS = [
     )
 ]
 
+_DISTRIBUTION_VERSION = "latest"
+if OS_VERSION in ("15.7",):
+    _DISTRIBUTION_VERSION = "2.8"
+elif OS_VERSION in ("16.0",):
+    _DISTRIBUTION_VERSION = "3.0"
+
 DISTRIBUTION_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/registry:2.8",
+    build_tag=f"{APP_CONTAINER_PREFIX}/registry:{_DISTRIBUTION_VERSION}",
     bci_type=ImageType.APPLICATION,
     image_type="kiwi",
     forwarded_ports=[PortForwarding(container_port=5000)],
