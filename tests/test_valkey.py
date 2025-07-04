@@ -7,9 +7,9 @@ from tenacity import retry
 from tenacity import stop_after_attempt
 from tenacity import wait_exponential
 
-from bci_tester.data import VALKEY_CONTAINERS
-
-CONTAINER_IMAGES = VALKEY_CONTAINERS
+from bci_tester.data import (
+    APP_VALKEY_CONTAINERS as CONTAINER_IMAGES,  # noqa: F401
+)
 
 
 def test_valkey_ping(auto_container: ContainerData):

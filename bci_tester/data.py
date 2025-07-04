@@ -8,8 +8,11 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
+from pytest_container import BindMount
+from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerVolume
+from pytest_container.container import EntrypointSelection
 from pytest_container.container import PortForwarding
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.inspect import NetworkProtocol
@@ -47,6 +50,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-pr",
     "15.7",
     "16.0",
     "tumbleweed",
@@ -56,6 +60,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-pr",
     "15.7",
     "tumbleweed",
 )
@@ -70,7 +75,15 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "tumbleweed")
 _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
-RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "15.6-ai", "15.7")
+RELEASED_SLE_VERSIONS = (
+    "15.3",
+    "15.4",
+    "15.5",
+    "15.6",
+    "15.6-ai",
+    "15.6-pr",
+    "15.7",
+)
 
 # List the LTSS versions of SLE
 RELEASED_LTSS_VERSIONS = ("15.3", "15.4", "15.5")
@@ -175,6 +188,7 @@ else:
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     ibs_released: str = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
+    obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}/test"
@@ -186,7 +200,13 @@ else:
         )
         ibs_released = "dp.apps.rancher.io"
 
-    BASEURL: str = {
+    if OS_VERSION == "15.6-pr":
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
+        )
+        obs_project = "registry.suse.de/devel/scc/privateregistry"
+
+    BASEURL = {
         "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "factory-arm-totest": "registry.opensuse.org/opensuse/factory/arm/totest",
@@ -264,6 +284,10 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         return "images/"
     if TARGET == "ibs-cr":
         return "containerfile/" if OS_VERSION.startswith("16") else "images/"
+    if OS_VERSION == "15.6-pr" and TARGET == "ibs-cr":
+        return "containerfile/"
+    if not OS_VERSION.startswith("16") and TARGET == "ibs-cr":
+        return "images/"
     if TARGET in ("factory-totest", "factory-arm-totest"):
         return "containers/"
     if image_type == "dockerfile":
@@ -425,6 +449,65 @@ def create_BCI(
         DerivedContainer(
             base=baseurl,
             containerfile=containerfile,
+            **kwargs,
+        ),
+        marks=marks,
+        id=f"{build_tag} from {baseurl}",
+    )
+
+    """Creates a Container wrapped in a pytest.param for Private Registry images with the
+    given ``build_tag`` and sets SPR specific marks.
+
+    Args:
+        build_tag: the main build tag set for this image (it can be found at the
+            top of the :file:`Dockerfile` or :file:`kiwi.xml`)
+
+        extra_marks: an optional sequence of marks that should be applied to
+            this container image (e.g. to skip it on certain architectures)
+
+        **kwargs: additional keyword arguments are forwarded to the constructor
+            of the :py:class:`~pytest_container.DerivedContainer`
+    """
+
+
+def create_SPRI(
+    build_tag: str,
+    extra_marks: Optional[Sequence[MarkDecorator]] = None,
+    **kwargs,
+) -> ParameterSet:
+    build_tag_base = build_tag.rpartition("/")[2]
+    marks = []
+    if extra_marks:
+        for m in extra_marks:
+            marks.append(m)
+
+    if TARGET not in (
+        "obs",
+        "ibs-cr",
+    ):
+        marks.append(
+            pytest.mark.skip(
+                reason="Harbor not avalable for this target",
+            )
+        )
+
+    available_versions = ["15.6-pr"]
+    marks.append(create_container_version_mark(available_versions))
+
+    if OS_VERSION in (available_versions):
+        marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
+    else:
+        marks.append(
+            pytest.mark.skip(
+                reason="Harbor tested for SUSE Private Registry only",
+            )
+        )
+
+    baseurl = f"{BASEURL}/{_get_repository_name('dockerfile')}{build_tag}"
+
+    return pytest.param(
+        Container(
+            url=baseurl,
             **kwargs,
         ),
         marks=marks,
@@ -865,11 +948,13 @@ COSIGN_CONTAINERS = [
 
 _NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
 
-NGINX_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
-    bci_type=ImageType.APPLICATION,
-    forwarded_ports=[PortForwarding(container_port=80)],
-)
+APP_NGINX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
+        bci_type=ImageType.APPLICATION,
+        forwarded_ports=[PortForwarding(container_port=80)],
+    ),
+]
 
 KUBECTL_CONTAINERS = [
     create_BCI(
@@ -1073,7 +1158,7 @@ SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME = create_BCI(
     custom_entry_point="/bin/bash",
 )
 
-VALKEY_CONTAINERS = [
+APP_VALKEY_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/valkey:{tag}",
         bci_type=ImageType.APPLICATION,
@@ -1179,12 +1264,174 @@ SAMBA_CONTAINERS = (
     + SAMBA_TOOLBOX_CONTAINERS
 )
 
+SPR_CONFIG_DIR = Path(__file__).parent.parent / "tests" / "files" / "spr"
+SPR_CONFIG = {
+    "db": {
+        "name": "postgresql",
+        "volumes": [ContainerVolume("/var/lib/postgresql/data")],
+    },
+    "valkey": {
+        "name": "redis",
+        "volumes": [ContainerVolume("/var/lib/valkey")],
+    },
+    "registry": {
+        "volumes": [
+            ContainerVolume("/storage"),
+            BindMount(
+                "/etc/registry", host_path=str(SPR_CONFIG_DIR / "registry")
+            ),
+            BindMount(
+                "/etc/registry/root.crt",
+                host_path=str(
+                    SPR_CONFIG_DIR / "secret" / "registry" / "root.crt"
+                ),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "registryctl": {
+        "volumes": [
+            ContainerVolume("/storage"),
+            BindMount(
+                "/etc/registry", host_path=str(SPR_CONFIG_DIR / "registry")
+            ),
+            BindMount(
+                "/etc/registryctl/config.yml",
+                host_path=str(SPR_CONFIG_DIR / "registryctl" / "config.yml"),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "core": {
+        "volumes": [
+            ContainerVolume("/data"),
+            ContainerVolume("/etc/core/ca"),
+            BindMount(
+                "/etc/core/app.conf",
+                host_path=str(SPR_CONFIG_DIR / "core" / "app.conf"),
+            ),
+            BindMount(
+                "/etc/core/certificates",
+                host_path=str(SPR_CONFIG_DIR / "core" / "certificates"),
+            ),
+            BindMount(
+                "/etc/core/private_key.pem",
+                host_path=str(
+                    SPR_CONFIG_DIR / "secret" / "core" / "private_key.pem"
+                ),
+            ),
+            BindMount(
+                "/etc/core/key",
+                host_path=str(
+                    SPR_CONFIG_DIR / "secret" / "keys" / "secretkey"
+                ),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "portal": {
+        "volumes": [
+            BindMount(
+                "/etc/nginx/nginx.conf",
+                host_path=str(SPR_CONFIG_DIR / "portal" / "nginx.conf"),
+            ),
+        ]
+    },
+    "jobservice": {
+        "volumes": [
+            ContainerVolume("/var/log/jobs"),
+            BindMount(
+                "/etc/jobservice/config.yml",
+                host_path=str(SPR_CONFIG_DIR / "jobservice" / "config.yml"),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "exporter": {
+        "volumes": [
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "trivy-adapter": {
+        "volumes": [
+            ContainerVolume("/home/scanner/.cache/trivy"),
+            ContainerVolume("/home/scanner/.cache/reports"),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "nginx": {
+        "name": "proxy",
+        "volumes": [
+            BindMount("/etc/nginx", host_path=str(SPR_CONFIG_DIR / "nginx")),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+}
+
+SPR_CONTAINERS = []
+
+for img, conf in SPR_CONFIG.items():
+    name = conf.get("name", img)
+    launch_args = [f"--name={name}"]
+
+    env_file = SPR_CONFIG_DIR / img / "env"
+    if env_file.is_file():
+        launch_args.append(f"--env-file={env_file}")
+
+    SPR_CONTAINERS.append(
+        create_SPRI(
+            build_tag=f"private-registry/harbor-{img}:latest",
+            volume_mounts=conf["volumes"],
+            extra_launch_args=launch_args,
+            # SPR containers except 'db' need bash as entrypoint to run standalone, needed for metadata & all tests
+            entry_point=(
+                EntrypointSelection.AUTO
+                if img == "db"
+                else EntrypointSelection.BASH
+            ),
+        )
+    )
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
         INIT_CONTAINER,
         KERNEL_MODULE_CONTAINER,
-        NGINX_CONTAINER,
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
@@ -1198,6 +1445,7 @@ CONTAINERS_WITH_ZYPPER = (
     + KIOSK_PULSEAUDIO_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
+    + APP_NGINX_CONTAINERS
     + NODEJS_CONTAINERS
     + OPENJDK_CONTAINERS
     + OPENJDK_DEVEL_CONTAINERS
@@ -1261,9 +1509,10 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *PROMETHEUS_CONTAINERS,
     *SAMBA_CONTAINERS,
     STUNNEL_CONTAINER,
-    *VALKEY_CONTAINERS,
+    *APP_VALKEY_CONTAINERS,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
+    *SPR_CONTAINERS,
 ]
 
 
@@ -1298,7 +1547,6 @@ else:
             MICRO_CONTAINER,
             MICRO_FIPS_CONTAINER,
             MINIMAL_CONTAINER,
-            NGINX_CONTAINER,
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
@@ -1308,6 +1556,7 @@ else:
             PYTORCH_CONTAINER,
             OPENWEBUI_PIPELINES_CONTAINER,
         ]
+        + APP_NGINX_CONTAINERS
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
         + COSIGN_CONTAINERS
@@ -1327,7 +1576,7 @@ else:
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
-        + VALKEY_CONTAINERS
+        + APP_VALKEY_CONTAINERS
     )
 
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS
