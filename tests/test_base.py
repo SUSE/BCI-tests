@@ -300,10 +300,6 @@ DIND_CONTAINER = pytest.param(
 
 
 @pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
-@pytest.mark.xfail(
-    OS_VERSION in ("16.0",),
-    reason="SLE BCI repository not yet available",
-)
 @pytest.mark.skipif(
     not DOCKER_SELECTED,
     reason="Docker in docker can only be tested when using the docker runtime",

@@ -257,8 +257,15 @@ if BCI_DEVEL_REPO is None:
         BCI_DEVEL_REPO = "http://download.opensuse.org/tumbleweed/repo/oss/"
     else:
         # from SLE 15 SP6 onward we use the unauthenticated CDN
-        cdn_prefix = "public-dl" if OS_SP_VERSION >= 6 else "updates"
-        BCI_DEVEL_REPO = f"https://{cdn_prefix}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
+        cdn_prefix = (
+            "public-dl"
+            if OS_SP_VERSION >= 6 or OS_MAJOR_VERSION > 15
+            else "updates"
+        )
+        if OS_MAJOR_VERSION > 15:
+            BCI_DEVEL_REPO = f"https://{cdn_prefix}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}.{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
+        else:
+            BCI_DEVEL_REPO = f"https://{cdn_prefix}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
     _BCI_REPLACE_REPO_CONTAINERFILE = ""
 else:
     bci_repo_path = f"/etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
@@ -894,8 +901,14 @@ POSTGRESQL_CONTAINERS = [
     )
 ]
 
+_DISTRIBUTION_VERSION = "latest"
+if OS_VERSION in ("15.7",):
+    _DISTRIBUTION_VERSION = "2.8"
+elif OS_VERSION in ("16.0",):
+    _DISTRIBUTION_VERSION = "3.0"
+
 DISTRIBUTION_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/registry:2.8",
+    build_tag=f"{APP_CONTAINER_PREFIX}/registry:{_DISTRIBUTION_VERSION}",
     bci_type=ImageType.APPLICATION,
     image_type="kiwi",
     forwarded_ports=[PortForwarding(container_port=5000)],
