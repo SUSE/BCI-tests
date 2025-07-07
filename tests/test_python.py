@@ -165,8 +165,14 @@ def test_packaged_tox(auto_container_per_test):
     ):
         pytest.skip("packaged tox not available")
 
+    ppython = "python3"
+    if version.startswith("3.11"):
+        ppython = "python311"
+    elif version.startswith("3.13"):
+        ppython = "python313"
+
     auto_container_per_test.connection.check_output(
-        f"zypper --non-interactive in {'python311' if version.startswith('3.11') else 'python3'}-tox && tox --version"
+        f"zypper --non-interactive in {ppython}-tox && tox --version"
     )
 
 
