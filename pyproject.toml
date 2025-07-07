@@ -106,6 +106,7 @@ markers = [
     'golang_unstable',
     'grafana_11',
     'kea_2.6',
+    'kea_3.0',
     'kiwi_9.24',
     'kiwi_10.2',
     'kiwi_latest',

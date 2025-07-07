@@ -895,17 +895,13 @@ KUBECTL_CONTAINERS = [
     )
 ]
 
-_KEA_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
-    ("2.6", ("tumbleweed", "15.7")),
-)
-
 KEA_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kea:{kea_ver}",
         bci_type=ImageType.APPLICATION,
         available_versions=os_versions,
     )
-    for kea_ver, os_versions in _KEA_VERSION_OS_MATRIX
+    for kea_ver, os_versions in (("2.6", ("15.7",)), ("3.0", ("tumbleweed",)))
 ]
 
 if OS_VERSION in ("16.0",):
