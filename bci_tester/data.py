@@ -488,16 +488,6 @@ def create_SPRI(
         for m in extra_marks:
             marks.append(m)
 
-    if TARGET not in (
-        "obs",
-        "ibs-cr",
-    ):
-        marks.append(
-            pytest.mark.skip(
-                reason="Harbor not avalable for this target",
-            )
-        )
-
     available_versions = ["15.6-pr"]
     marks.append(create_container_version_mark(available_versions))
 
