@@ -5,9 +5,9 @@ from tenacity import retry
 from tenacity import stop_after_attempt
 from tenacity import wait_exponential
 
-from bci_tester.data import NGINX_CONTAINER
-
-CONTAINER_IMAGES = (NGINX_CONTAINER,)
+from bci_tester.data import (
+    APP_NGINX_CONTAINERS as CONTAINER_IMAGES,  # noqa: F401
+)
 
 
 def test_nginx_welcome_page(auto_container):
