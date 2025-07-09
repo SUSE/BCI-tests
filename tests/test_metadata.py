@@ -811,22 +811,9 @@ def test_oci_base_refs(
     base_repository = base_name.partition(":")[0]
 
     assert base_name.startswith("registry.suse.com/")
-
-    # Skip this test for images based on the nginx image
-    # abusing the title label to get the container name
-    if OS_VERSION in ("15.6-pr",) and any(
-        lbl in labels
-        for lbl in (
-            "com.suse.application.harbor-nginx.title",
-            "com.suse.application.harbor-portal.title",
-        )
-    ):
-        pass
-    else:
-        assert f":{OS_VERSION_ID}" in base_name, (
-            "Base image reference is not the expected version"
-        )
-
+    assert f":{OS_VERSION_ID}" in base_name, (
+        "Base image reference is not the expected version"
+    )
     assert base_digest.startswith("sha256:")
 
     if PODMAN_SELECTED and container_runtime.version.major < 3:
