@@ -9,19 +9,173 @@ provided by the core container and test for the overall status being "healthy".
 import pytest
 import requests
 import tenacity
-from pytest_container.container import EntrypointSelection
+from pytest_container import BindMount
+from pytest_container import Container
+from pytest_container.container import ContainerVolume
 from pytest_container.container import PortForwarding
-from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 
-from bci_tester.data import SPR_CONTAINERS
+from bci_tester.data import BASEURL
+from bci_tester.data import SPR_CONFIG_DIR
+
+SPR_CONFIG = {
+    "db": {
+        "name": "postgresql",
+        "volumes": [ContainerVolume("/var/lib/postgresql/data")],
+    },
+    "valkey": {
+        "name": "redis",
+        "volumes": [ContainerVolume("/var/lib/valkey")],
+    },
+    "registry": {
+        "volumes": [
+            ContainerVolume("/storage"),
+            BindMount(
+                "/etc/registry", host_path=str(SPR_CONFIG_DIR / "registry")
+            ),
+            BindMount(
+                "/etc/registry/root.crt",
+                host_path=str(
+                    SPR_CONFIG_DIR / "secret" / "registry" / "root.crt"
+                ),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "registryctl": {
+        "volumes": [
+            ContainerVolume("/storage"),
+            BindMount(
+                "/etc/registry", host_path=str(SPR_CONFIG_DIR / "registry")
+            ),
+            BindMount(
+                "/etc/registryctl/config.yml",
+                host_path=str(SPR_CONFIG_DIR / "registryctl" / "config.yml"),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "core": {
+        "volumes": [
+            ContainerVolume("/data"),
+            ContainerVolume("/etc/core/ca"),
+            BindMount(
+                "/etc/core/app.conf",
+                host_path=str(SPR_CONFIG_DIR / "core" / "app.conf"),
+            ),
+            BindMount(
+                "/etc/core/certificates",
+                host_path=str(SPR_CONFIG_DIR / "core" / "certificates"),
+            ),
+            BindMount(
+                "/etc/core/private_key.pem",
+                host_path=str(
+                    SPR_CONFIG_DIR / "secret" / "core" / "private_key.pem"
+                ),
+            ),
+            BindMount(
+                "/etc/core/key",
+                host_path=str(
+                    SPR_CONFIG_DIR / "secret" / "keys" / "secretkey"
+                ),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "portal": {
+        "volumes": [
+            BindMount(
+                "/etc/nginx/nginx.conf",
+                host_path=str(SPR_CONFIG_DIR / "portal" / "nginx.conf"),
+            ),
+        ]
+    },
+    "jobservice": {
+        "volumes": [
+            ContainerVolume("/var/log/jobs"),
+            BindMount(
+                "/etc/jobservice/config.yml",
+                host_path=str(SPR_CONFIG_DIR / "jobservice" / "config.yml"),
+            ),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "exporter": {
+        "volumes": [
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "trivy-adapter": {
+        "volumes": [
+            ContainerVolume("/home/scanner/.cache/trivy"),
+            ContainerVolume("/home/scanner/.cache/reports"),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+    "nginx": {
+        "name": "proxy",
+        "volumes": [
+            BindMount("/etc/nginx", host_path=str(SPR_CONFIG_DIR / "nginx")),
+            BindMount(
+                "/harbor_cust_cert",
+                host_path=str(
+                    SPR_CONFIG_DIR / "shared" / "trust-certificates"
+                ),
+            ),
+        ],
+    },
+}
 
 SPR_CONTAINERS_FOR_POD = []
-for param in SPR_CONTAINERS:
-    ctr = container_and_marks_from_pytest_param(param)[0]
-    ctr.entry_point = EntrypointSelection.AUTO
-    SPR_CONTAINERS_FOR_POD.append(ctr)
+
+for img, conf in SPR_CONFIG.items():
+    build_tag = f"private-registry/harbor-{img}:latest"
+    baseurl = f"{BASEURL}/containerfile/{build_tag}"
+
+    launch_args = [f"--name={conf.get('name', img)}"]
+
+    env_file = SPR_CONFIG_DIR / img / "env"
+    if env_file.is_file():
+        launch_args.append(f"--env-file={env_file}")
+
+    SPR_CONTAINERS_FOR_POD.append(
+        Container(
+            url=baseurl,
+            volume_mounts=conf["volumes"],
+            extra_launch_args=launch_args,
+        )
+    )
 
 HARBOR_POD = Pod(
     containers=SPR_CONTAINERS_FOR_POD,
