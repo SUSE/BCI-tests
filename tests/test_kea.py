@@ -29,8 +29,16 @@ def test_kea_dhcp4(
     subnet = config["Dhcp4"]["subnet4"][0]["subnet"]
     gateway = config["Dhcp4"]["subnet4"][0]["option-data"][0]["data"]
     network_create_cmd = f"{container_runtime.runner_binary} network create "
+    dummy_nic = "dummy0"
+    use_macvlan_dummy = os.getenv("USE_MACVLAN_DUMMY") == "1"
     if DOCKER_SELECTED or os.getuid() == 0:
         network_create_cmd += "--driver macvlan "
+        if use_macvlan_dummy:
+            host.check_output(f"ip link delete {dummy_nic} || true")
+            host.check_output(
+                f"ip link add {dummy_nic} type dummy && ip link set {dummy_nic} up"
+            )
+            network_create_cmd += f"-o parent={dummy_nic} "
     else:
         network_create_cmd += "--internal "
     network_create_cmd += (
@@ -116,6 +124,8 @@ def test_kea_dhcp4(
             assert mac == client_mac
             assert ip == request_ip
     finally:
+        if use_macvlan_dummy:
+            host.check_output(f"ip link delete {dummy_nic}")
         host.check_output(
             f"{container_runtime.runner_binary} network rm {network_name}"
         )
