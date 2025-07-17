@@ -265,13 +265,11 @@ _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET in ("dso", "ibs-released"):
         return ""
-    if OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
-        return "containers/"
-    if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
-        return "images/"
     if TARGET == "ibs-cr":
         return "containerfile/" if OS_VERSION.startswith("16") else "images/"
-    if TARGET in ("factory-totest", "factory-arm-totest"):
+    if (TARGET in ("factory-totest", "factory-arm-totest")) or (
+        TARGET in ("ibs", "obs") and OS_VERSION == "15.6-ai"
+    ):
         return "containers/"
     if image_type == "dockerfile":
         return "containerfile/"
