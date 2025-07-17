@@ -743,7 +743,7 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
     reason="openSUSE based containers have no subscriptions",
 )
 @pytest.mark.skipif(
-    "SLES" not in Path("/etc/os-release").read_text(),
+    "SLES" not in Path("/etc/os-release").read_text(encoding="utf8"),
     reason="subscription tests must only run on SLES hosts",
 )
 @pytest.mark.parametrize(

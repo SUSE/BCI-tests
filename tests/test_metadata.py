@@ -130,6 +130,25 @@ def _get_container_label_prefix(
     return f"com.suse.{container_type}.{container_name}"
 
 
+def _get_container_ref(
+    container_reference: str, container_type: ImageType
+) -> str:
+    name, version_release = container_reference.split(":")
+    if container_type == ImageType.OS:
+        return (
+            f"{name}:latest"
+            if OS_VERSION == "tumbleweed"
+            else f"{name}:{OS_VERSION}"
+        )
+
+    non_release_ref = (
+        version_release.rpartition("-")[0]
+        if "-" in version_release
+        else version_release
+    )
+    return f"{name}:{non_release_ref}"
+
+
 #: List of all containers and their respective names which are used in the image
 #: labels ``com.suse.bci.$name``.
 IMAGES_AND_NAMES: List[ParameterSet] = [
@@ -393,34 +412,6 @@ def test_general_labels(
         if version == "tumbleweed":
             assert OS_VERSION in labels[f"{prefix}.version"]
 
-        expected_url: Tuple[str, ...] = (
-            "https://www.suse.com/products/base-container-images/",
-        ) + (
-            ("https://www.suse.com/products/server/",)
-            if container_name in ("base",)
-            else ()
-        )
-        if OS_VERSION == "tumbleweed":
-            expected_url = (
-                "https://www.opensuse.org",
-                "https://www.opensuse.org/",
-            )
-        elif container_type in (
-            ImageType.SAC_LANGUAGE_STACK,
-            ImageType.SAC_APPLICATION,
-        ):
-            expected_url = (
-                f"https://apps.rancher.io/applications/{container_name}",
-                f"https://apps.rancher.io/applications/{container_name.rpartition('-')[0]}",
-            )
-        elif container_type == ImageType.OS_LTSS:
-            expected_url = (
-                "https://www.suse.com/products/long-term-service-pack-support/",
-            )
-
-        assert labels[f"{prefix}.url"] in expected_url, (
-            f"expected LABEL {prefix}.url = {expected_url} but is {labels[f'{prefix}.url']}"
-        )
         assert labels[f"{prefix}.vendor"] == VENDOR
 
     if OS_VERSION == "tumbleweed":
@@ -450,6 +441,56 @@ def test_general_labels(
         else:
             assert labels["com.suse.eula"] == "sle-bci"
             assert "BCI" in labels[f"{prefix}.title"]
+
+
+@pytest.mark.parametrize(
+    "container,container_name,container_type",
+    IMAGES_AND_NAMES,
+    indirect=["container"],
+)
+def test_url(
+    container: ContainerData,
+    container_name: str,
+    container_type: ImageType,
+):
+    """
+    Check if label ``com.suse.bci.$name.url`` equals :py:const:`URL`
+    """
+
+    labels = container.inspect.config.labels
+
+    for prefix in (
+        _get_container_label_prefix(container_name, container_type),
+        "org.opencontainers.image",
+    ):
+        expected_url: Tuple[str, ...] = (
+            "https://www.suse.com/products/base-container-images/",
+        ) + (
+            ("https://www.suse.com/products/server/",)
+            if container_name in ("base",)
+            else ()
+        )
+        if OS_VERSION == "tumbleweed":
+            expected_url = (
+                "https://www.opensuse.org",
+                "https://www.opensuse.org/",
+            )
+        elif container_type in (
+            ImageType.SAC_LANGUAGE_STACK,
+            ImageType.SAC_APPLICATION,
+        ):
+            expected_url = (
+                f"https://apps.rancher.io/applications/{container_name}",
+                f"https://apps.rancher.io/applications/{container_name.rpartition('-')[0]}",
+            )
+        elif container_type == ImageType.OS_LTSS:
+            expected_url = (
+                "https://www.suse.com/products/long-term-service-pack-support/",
+            )
+
+        assert labels[f"{prefix}.url"] in expected_url, (
+            f"expected LABEL {prefix}.url = {expected_url} but is {labels[f'{prefix}.url']}"
+        )
 
 
 @SKIP_IF_AI_MARK
@@ -485,17 +526,15 @@ def test_artifacthub_urls(container: ContainerData) -> None:
     # TODO(dmllr): add testing for logo-url
 
 
-@pytest.mark.skipif(
-    TARGET == "custom",
-    reason="disturl can be anything if TARGET=custom",
-)
 @pytest.mark.parametrize(
     "container,container_name,container_type",
     IMAGES_AND_NAMES,
     indirect=["container"],
 )
 def test_support_end_in_future(
-    container: ContainerData, container_name: str, container_type: ImageType
+    container: ContainerData,
+    container_name: str,
+    container_type: ImageType,  # pylint: disable=unused-argument
 ):
     labels = container.inspect.config.labels
     if "com.suse.supportlevel.until" in labels:
@@ -520,6 +559,10 @@ def test_support_end_in_future(
         )
 
 
+@pytest.mark.skipif(
+    TARGET == "custom",
+    reason="disturl can be anything if TARGET=custom",
+)
 @pytest.mark.parametrize(
     "container,container_name,container_type",
     IMAGES_AND_NAMES,
@@ -744,20 +787,7 @@ def test_reference(
     # current full version + release, which is unpublished in the public registry
     # at the time of testing. Hence we fetch the current major version of the OS
     # for this container and compare that.
-    name, version_release = reference.split(":")
-    if container_type == ImageType.OS:
-        ref = (
-            f"{name}:latest"
-            if OS_VERSION == "tumbleweed"
-            else f"{name}:{OS_VERSION}"
-        )
-    else:
-        non_release_ref = (
-            version_release.rpartition("-")[0]
-            if "-" in version_release
-            else version_release
-        )
-        ref = f"{name}:{non_release_ref}"
+    ref = _get_container_ref(reference, container_type)
 
     # Skip testing containers that have not yet been released to avoid unnecessary failures
     if not container.container.baseurl.startswith(ref.partition(":")[0]):
