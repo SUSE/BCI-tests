@@ -25,6 +25,7 @@ import requests
 from _pytest.mark.structures import ParameterSet
 from pytest_container import OciRuntimeBase
 from pytest_container.container import ContainerData
+from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import ACC_CONTAINERS
@@ -93,6 +94,7 @@ from bci_tester.data import SAMBA_CLIENT_CONTAINERS
 from bci_tester.data import SAMBA_SERVER_CONTAINERS
 from bci_tester.data import SAMBA_TOOLBOX_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
+from bci_tester.data import SPR_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
@@ -349,8 +351,17 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (samba_ctr, "samba-toolbox", ImageType.APPLICATION)
         for samba_ctr in SAMBA_TOOLBOX_CONTAINERS
     ]
+    + [
+        (
+            pr_ctr,
+            container_and_marks_from_pytest_param(pr_ctr)[0]
+            .baseurl.rpartition("/")[2]
+            .rpartition(":")[0],
+            ImageType.APPLICATION,
+        )
+        for pr_ctr in SPR_CONTAINERS
+    ]
 ]
-
 
 assert len(ALL_CONTAINERS) == len(IMAGES_AND_NAMES), (
     "IMAGES_AND_NAMES must have all containers from ALL_CONTAINERS"
@@ -401,6 +412,11 @@ def test_general_labels(
                     "based on SUSE Linux Enterprise Server 15"
                     in labels[f"{prefix}.description"]
                     or "based on the SLE LTSS Base Container Image"
+                    in labels[f"{prefix}.description"]
+                )
+            elif OS_VERSION in ("15.6-spr",):
+                assert (
+                    "for SUSE Private Registry"
                     in labels[f"{prefix}.description"]
                 )
             else:
@@ -602,6 +618,8 @@ def test_disturl(
         )
     elif OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:AI" in disturl
+    elif OS_VERSION == "15.6-spr" and TARGET in ("ibs", "obs"):
+        assert "obs://build.suse.de/Devel:SCC:PrivateRegistry" in disturl
     elif OS_VERSION == "16.0":
         if baseurl.netloc == "registry.opensuse.org":
             assert (
@@ -768,6 +786,8 @@ def test_reference(
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
+    elif OS_VERSION in ("15.6-spr",):
+        assert reference.startswith("registry.suse.com/private-registry/")
     else:
         if container_type in (
             ImageType.SAC_LANGUAGE_STACK,
