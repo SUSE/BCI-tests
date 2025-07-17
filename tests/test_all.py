@@ -412,6 +412,7 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "sle-module-basesystem-release",
         "sle-module-python3-release",
         "sle-module-server-applications-release",
+        "system-user-harbor",
     }.union(monitoring_stack_packages).union(python39_stack_packages)
     assert not orphaned_packages.difference(known_orphaned_packages)
 

@@ -186,6 +186,16 @@ markers = [
     'valkey_8.0',
     'valkey_latest',
     'xorg_21',
+    'harbor-core_latest',
+    'harbor-db_latest',
+    'harbor-exporter_latest',
+    'harbor-jobservice_latest',
+    'harbor-nginx_latest',
+    'harbor-portal_latest',
+    'harbor-registry_latest',
+    'harbor-registryctl_latest',
+    'harbor-trivy-adapter_latest',
+    'harbor-valkey_latest',
     'xorg-client_21',
 ]
 
