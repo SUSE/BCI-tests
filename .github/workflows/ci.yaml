@@ -52,7 +52,7 @@ jobs:
 
       - id: setmatrix
         run: |
-          set stringified_matrix (tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/ai/d' | jo -a)
+          set stringified_matrix (tox -l | sed -e '/unit/d' -e '/get_urls/d' -e '/doc/d' -e '/lint/d' -e '/ai/d' -e '/spr/d' | jo -a)
 
           # grep the [CI:TOXENVS] line and print everything after it.
           # the sed call removes additional whitespace after a comma as
@@ -168,6 +168,12 @@ jobs:
           - toxenv: metadata
             testing_target: ibs-released
             os_version: 15.6-ai
+          - toxenv: spr
+            testing_target: ibs-released
+            os_version: 15.6-pr
+          - toxenv: metadata
+            testing_target: ibs-released
+            os_version: 15.6-pr
           - toxenv: all
             os_version: 15.6
           - toxenv: base

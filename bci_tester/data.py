@@ -8,8 +8,10 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
+from pytest_container import Container
 from pytest_container import DerivedContainer
 from pytest_container.container import ContainerVolume
+from pytest_container.container import EntrypointSelection
 from pytest_container.container import PortForwarding
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.inspect import NetworkProtocol
@@ -47,6 +49,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-spr",
     "15.7",
     "16.0",
     "tumbleweed",
@@ -56,6 +59,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-spr",
     "15.7",
     "tumbleweed",
 )
@@ -70,7 +74,15 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "tumbleweed")
 _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
-RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "15.6-ai", "15.7")
+RELEASED_SLE_VERSIONS = (
+    "15.3",
+    "15.4",
+    "15.5",
+    "15.6",
+    "15.6-ai",
+    "15.6-spr",
+    "15.7",
+)
 
 # List the LTSS versions of SLE
 RELEASED_LTSS_VERSIONS = ("15.3", "15.4", "15.5")
@@ -175,6 +187,7 @@ else:
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     ibs_released: str = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
+    obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}/test"
@@ -185,8 +198,13 @@ else:
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
         ibs_released = "dp.apps.rancher.io"
+    elif OS_VERSION == "15.6-spr":
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
+        )
+        obs_project = "registry.suse.de/devel/scc/privateregistry"
 
-    BASEURL: str = {
+    BASEURL = {
         "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "factory-arm-totest": "registry.opensuse.org/opensuse/factory/arm/totest",
@@ -430,6 +448,54 @@ def create_BCI(
         DerivedContainer(
             base=baseurl,
             containerfile=containerfile,
+            **kwargs,
+        ),
+        marks=marks,
+        id=f"{build_tag} from {baseurl}",
+    )
+
+
+def create_SPRI(
+    build_tag: str,
+    extra_marks: Optional[Sequence[MarkDecorator]] = None,
+    **kwargs,
+) -> ParameterSet:
+    """Creates a Container wrapped in a pytest.param for Private Registry images with the
+    given ``build_tag`` and sets SPR specific marks.
+
+    Args:
+        build_tag: the main build tag set for this image (it can be found at the
+            top of the :file:`Dockerfile` or :file:`kiwi.xml`)
+
+        extra_marks: an optional sequence of marks that should be applied to
+            this container image (e.g. to skip it on certain architectures)
+
+        **kwargs: additional keyword arguments are forwarded to the constructor
+            of the :py:class:`~pytest_container.DerivedContainer`
+    """
+    build_tag_base = build_tag.rpartition("/")[2]
+    marks = []
+    if extra_marks:
+        for m in extra_marks:
+            marks.append(m)
+
+    available_versions = ["15.6-spr"]
+    marks.append(create_container_version_mark(available_versions))
+
+    if OS_VERSION in (available_versions):
+        marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
+    else:
+        marks.append(
+            pytest.mark.skip(
+                reason="Harbor tested for SUSE Private Registry only",
+            )
+        )
+
+    baseurl = f"{BASEURL}/{_get_repository_name('dockerfile')}{build_tag}"
+
+    return pytest.param(
+        Container(
+            url=baseurl,
             **kwargs,
         ),
         marks=marks,
@@ -1180,6 +1246,42 @@ SAMBA_CONTAINERS = (
     + SAMBA_TOOLBOX_CONTAINERS
 )
 
+SPR_CONFIG_DIR = Path(__file__).parent.parent / "tests" / "files" / "spr"
+
+SPR_CONTAINERS = []
+
+for img in (
+    "db",
+    "valkey",
+    "registry",
+    "registryctl",
+    "core",
+    "portal",
+    "jobservice",
+    "exporter",
+    "trivy-adapter",
+    "nginx",
+):
+    launch_args = []
+    build_tag = f"private-registry/harbor-{img}:latest"
+
+    env_file = SPR_CONFIG_DIR / img / "env"
+    if env_file.is_file():
+        launch_args.append(f"--env-file={env_file}")
+
+    SPR_CONTAINERS.append(
+        create_SPRI(
+            build_tag=build_tag,
+            extra_launch_args=launch_args,
+            # SPR containers except 'db' need bash as entrypoint to run standalone, needed for metadata & all tests
+            entry_point=(
+                EntrypointSelection.AUTO
+                if img == "db"
+                else EntrypointSelection.BASH
+            ),
+        )
+    )
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1265,6 +1367,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *VALKEY_CONTAINERS,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
+    *SPR_CONTAINERS,
 ]
 
 
