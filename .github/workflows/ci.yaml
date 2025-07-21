@@ -170,10 +170,13 @@ jobs:
             os_version: 15.6-ai
           - toxenv: spr
             testing_target: ibs-released
-            os_version: 15.6-pr
+            os_version: 15.6-spr
+          - toxenv: all
+            testing_target: ibs-released
+            os_version: 15.6-spr
           - toxenv: metadata
             testing_target: ibs-released
-            os_version: 15.6-pr
+            os_version: 15.6-spr
           - toxenv: all
             os_version: 15.6
           - toxenv: base
