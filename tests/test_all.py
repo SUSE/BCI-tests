@@ -399,6 +399,7 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
         "sle-module-basesystem-release",
         "sle-module-python3-release",
         "sle-module-server-applications-release",
+        "system-user-harbor",
     }.union(monitoring_stack_packages).union(python39_stack_packages)
     assert not orphaned_packages.difference(known_orphaned_packages)
 
@@ -730,7 +731,7 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
     reason="openSUSE based containers have no subscriptions",
 )
 @pytest.mark.skipif(
-    "SLES" not in Path("/etc/os-release").read_text(),
+    "SLES" not in Path("/etc/os-release").read_text(encoding="utf8"),
     reason="subscription tests must only run on SLES hosts",
 )
 @pytest.mark.parametrize(
