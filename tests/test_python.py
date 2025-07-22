@@ -92,6 +92,30 @@ COPY {ORIG + APPDIR}/{APPL1} {APPDIR}
 ]
 
 
+FLASK_PIPX_NON_ROOT_IMAGES = [
+    pytest.param(
+        DerivedContainer(
+            base=container_and_marks_from_pytest_param(CONTAINER_T)[0],
+            containerfile="""
+RUN zypper -n in iproute2 curl && zypper -n clean
+RUN mkdir /app
+RUN pipx install flask
+COPY tests/trainers/flask_hello_example.py /app/app.py
+WORKDIR /app
+USER 1000:1000
+EXPOSE 5000
+CMD ["flask", "--app", "app", "run", "--host=0.0.0.0"]
+HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localhost:5000
+""",
+            forwarded_ports=[PortForwarding(container_port=5000)],
+        ),
+        marks=CONTAINER_T.marks,
+        id=CONTAINER_T.id,
+    )
+    for CONTAINER_T in PYTHON_WITH_PIPX_CONTAINERS
+]
+
+
 def test_python_version(auto_container):
     """Test that the python version equals the value from the environment variable
     ``PYTHON_VERSION``.
@@ -126,6 +150,25 @@ def test_pipx(container_per_test):
     assert run1 != run2, (
         "xkcdpass should output a different passphrase each time"
     )
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    FLASK_PIPX_NON_ROOT_IMAGES,
+    indirect=["container_per_test"],
+)
+def test_pipx_non_root(container_per_test):
+    """Test that the Flask webserver is able to open a given port"""
+    ctr_port = container_per_test.forwarded_ports[0].container_port
+    host_port = container_per_test.forwarded_ports[0].host_port
+
+    assert container_per_test.connection.socket(
+        f"tcp://0.0.0.0:{ctr_port}"
+    ).is_listening
+
+    resp = requests.get(f"http://0.0.0.0:{host_port}", timeout=10)
+    resp.raise_for_status()
+    assert "Hello from Flask" in resp.text
 
 
 def test_pip(auto_container):
