@@ -117,7 +117,7 @@ def test_os_release(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5", "basalt"),
+    OS_VERSION in ("15.3", "15.4", "15.5"),
     reason="branding packages are known to not be installed",
 )
 @pytest.mark.parametrize(
@@ -133,7 +133,7 @@ def test_branding(container):
     branding = "SLE"
     if OS_VERSION == "tumbleweed":
         branding = "openSUSE"
-    if OS_VERSION in ("basalt", "tumbleweed"):
+    if OS_VERSION in ("tumbleweed",):
         location = "/usr/etc/SUSE-brand"
     assert container.connection.file(location).exists
     assert branding in container.connection.file(location).content_string
@@ -148,8 +148,6 @@ def test_product(auto_container):
     prodfname = "SLES"
     if OS_VERSION == "tumbleweed":
         prodfname = "openSUSE"
-    if OS_VERSION == "basalt":
-        prodfname = "ALP"
     product_file = f"/etc/products.d/{prodfname}.prod"
 
     assert auto_container.connection.file(product_file).is_file
@@ -160,6 +158,21 @@ def test_product(auto_container):
         auto_container.connection.file("/etc/products.d/baseproduct").linked_to
         == product_file
     )
+
+
+@pytest.mark.skipif(
+    OS_VERSION in ("15.3", "15.4", "15.5", "tumbleweed"),
+    reason="suse trademark only available in certain SLE versions",
+)
+def test_suse_trademark(auto_container):
+    """
+    check that the :file:`/usr/share/licenses/product/BCI/SUSE.svg` exists which
+    is needed to ensure SUSE trademarks apply.
+    """
+
+    assert auto_container.connection.file(
+        "/usr/share/licenses/product/BCI/SUSE.svg"
+    ).exists
 
 
 @pytest.mark.skipif(
