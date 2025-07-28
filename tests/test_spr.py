@@ -6,6 +6,8 @@ provided by the core container and test for the overall status being "healthy".
 
 """
 
+from pathlib import Path
+
 import pytest
 import requests
 import tenacity
@@ -18,8 +20,9 @@ from pytest_container.pod import PodData
 
 from bci_tester.data import BASEURL
 from bci_tester.data import OS_VERSION
-from bci_tester.data import SPR_CONFIG_DIR
 from bci_tester.data import TARGET
+
+SPR_CONFIG_DIR = Path(__file__).parent.parent / "tests" / "files" / "spr"
 
 SPR_CONFIG = {
     "db": {
@@ -219,7 +222,7 @@ def test_harbor_in_pod(pod_per_test: PodData) -> None:
         return r
 
     @tenacity.retry(
-        stop=tenacity.stop_after_attempt(5), wait=tenacity.wait_exponential()
+        stop=tenacity.stop_after_attempt(8), wait=tenacity.wait_exponential()
     )
     def check_health(port: int):
         resp = get_health(port)
