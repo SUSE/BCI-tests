@@ -228,7 +228,6 @@ def test_harbor_in_pod(pod_per_test: PodData) -> None:
             raise RuntimeError("FAIL: Status is not healthy")
         return True
 
-    # breakpoint()
     assert check_health(pod_per_test.forwarded_ports[0].host_port), (
         "Status is not healthy"
     )
