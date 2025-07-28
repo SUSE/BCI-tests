@@ -5,7 +5,7 @@ SYNC_QUOTA=true
 _REDIS_URL_REG=redis://redis:6379/1?idle_timeout_seconds=30
 
 LOG_LEVEL=info
-EXT_ENDPOINT=http://boltzmann.suse.de
+EXT_ENDPOINT=http://harbor.core.domain
 DATABASE_TYPE=postgresql
 POSTGRESQL_HOST=postgresql
 POSTGRESQL_PORT=5432
@@ -22,8 +22,8 @@ PORTAL_URL=http://portal:8082
 TOKEN_SERVICE_URL=http://core:8081/service/token
 HARBOR_ADMIN_PASSWORD=Harbor12345
 MAX_JOB_WORKERS=10
-CORE_SECRET=By1031ZfgIqBMBja
-JOBSERVICE_SECRET=27FFgQ7Kk4yBADzr
+CORE_SECRET=n0ts3cr3t
+JOBSERVICE_SECRET=a1s0n0ts3cr3t
 WITH_TRIVY=True
 CORE_URL=http://core:8081
 CORE_LOCAL_URL=http://127.0.0.1:8081
@@ -34,8 +34,8 @@ READ_ONLY=false
 RELOAD_KEY=
 REGISTRY_CONTROLLER_URL=http://registryctl:8084
 REGISTRY_CREDENTIAL_USERNAME=harbor_registry_user
-REGISTRY_CREDENTIAL_PASSWORD=R50XrGdEJOpGxY2Qq4xWg252uzORLf58
-CSRF_KEY=8SHn7n27J7L6pYlhi3FdCBhsDFBe4M6d
+REGISTRY_CREDENTIAL_PASSWORD=n0ts3cr3t
+CSRF_KEY=n0ts3cr3t
 ROBOT_SCANNER_NAME_PREFIX=pDoSAAsR
 PERMITTED_REGISTRY_TYPES_FOR_PROXY_CACHE=docker-hub,harbor,azure-acr,ali-acr,aws-ecr,google-gcr,quay,docker-registry,github-ghcr,jfrog-artifactory
 
