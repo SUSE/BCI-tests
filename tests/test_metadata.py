@@ -576,6 +576,10 @@ def test_support_end_in_future(
 
 
 @pytest.mark.skipif(
+    OS_VERSION == "15.6-spr",
+    reason="SPR publishes out of the devel project",
+)
+@pytest.mark.skipif(
     TARGET == "custom",
     reason="disturl can be anything if TARGET=custom",
 )
