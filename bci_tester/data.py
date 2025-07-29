@@ -47,6 +47,7 @@ ALLOWED_BASE_OS_VERSIONS = (
 ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-spr",
     "15.7",
     "16.0",
     "tumbleweed",
@@ -56,6 +57,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.6",
     "15.6-ai",
+    "15.6-spr",
     "15.7",
     "tumbleweed",
 )
@@ -70,7 +72,15 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "tumbleweed")
 _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
-RELEASED_SLE_VERSIONS = ("15.3", "15.4", "15.5", "15.6", "15.6-ai", "15.7")
+RELEASED_SLE_VERSIONS = (
+    "15.3",
+    "15.4",
+    "15.5",
+    "15.6",
+    "15.6-ai",
+    "15.6-spr",
+    "15.7",
+)
 
 # List the LTSS versions of SLE
 RELEASED_LTSS_VERSIONS = ("15.3", "15.4", "15.5")
@@ -175,6 +185,7 @@ else:
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     ibs_released: str = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
+    obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}/test"
@@ -185,8 +196,13 @@ else:
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
         ibs_released = "dp.apps.rancher.io"
+    elif OS_VERSION == "15.6-spr":
+        ibs_cr_project = (
+            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
+        )
+        obs_project = "registry.suse.de/devel/scc/privateregistry"
 
-    BASEURL: str = {
+    BASEURL = {
         "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "factory-arm-totest": "registry.opensuse.org/opensuse/factory/arm/totest",
@@ -265,13 +281,13 @@ _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET in ("dso", "ibs-released"):
         return ""
-    if OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
-        return "containers/"
-    if OS_VERSION == "15.6-ai" and TARGET == "ibs-cr":
-        return "images/"
+    if TARGET in ("ibs-cr",) and OS_VERSION == "15.6-spr":
+        return "containerfile/"
     if TARGET == "ibs-cr":
         return "containerfile/" if OS_VERSION.startswith("16") else "images/"
-    if TARGET in ("factory-totest", "factory-arm-totest"):
+    if (TARGET in ("factory-totest", "factory-arm-totest")) or (
+        TARGET in ("ibs", "obs") and OS_VERSION == "15.6-ai"
+    ):
         return "containers/"
     if image_type == "dockerfile":
         return "containerfile/"
@@ -1182,6 +1198,31 @@ SAMBA_CONTAINERS = (
     + SAMBA_TOOLBOX_CONTAINERS
 )
 
+SPR_CONTAINERS = [
+    create_BCI(
+        build_tag=f"private-registry/harbor-{img}:latest",
+        bci_type=ImageType.APPLICATION,
+        available_versions=["15.6-spr"],
+        custom_entry_point="/bin/sh" if img != "db" else "",
+        extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD}
+        if img == "db"
+        else {},
+    )
+    for img in (
+        "db",
+        "valkey",
+        "registry",
+        "registryctl",
+        "core",
+        "portal",
+        "jobservice",
+        "exporter",
+        "trivy-adapter",
+        "nginx",
+    )
+]
+
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1267,6 +1308,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *VALKEY_CONTAINERS,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
+    *SPR_CONTAINERS,
 ]
 
 
