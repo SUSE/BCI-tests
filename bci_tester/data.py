@@ -197,9 +197,7 @@ else:
         )
         ibs_released = "dp.apps.rancher.io"
     elif OS_VERSION == "15.6-spr":
-        ibs_cr_project = (
-            "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry"
-        )
+        ibs_cr_project = "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry/totest"
         obs_project = "registry.suse.de/devel/scc/privateregistry"
 
     BASEURL = {
@@ -281,8 +279,6 @@ _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
 def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET in ("dso", "ibs-released"):
         return ""
-    if TARGET in ("ibs-cr",) and OS_VERSION == "15.6-spr":
-        return "containerfile/"
     if TARGET == "ibs-cr":
         return "containerfile/" if OS_VERSION.startswith("16") else "images/"
     if (TARGET in ("factory-totest", "factory-arm-totest")) or (
