@@ -20,7 +20,7 @@ from pytest_container.pod import PodData
 
 from bci_tester.data import BASEURL
 from bci_tester.data import OS_VERSION
-from bci_tester.data import TARGET
+from bci_tester.data import _get_repository_name
 
 SPR_CONFIG_DIR = Path(__file__).parent.parent / "tests" / "files" / "spr"
 
@@ -163,17 +163,9 @@ SPR_CONFIG = {
 }
 
 
-def _get_repo() -> str:
-    return "" if TARGET in ("ibs-released",) else "containerfile/"
-
-
 SPR_CONTAINERS_FOR_POD = []
 
 for img, conf in SPR_CONFIG.items():
-    # Disable pylint check because I don't classify these as constants. Sorry
-    build_tag = f"private-registry/harbor-{img}:latest"  # pylint: disable=C0103
-    baseurl = f"{BASEURL}/{_get_repo()}{build_tag}"  # pylint: disable=C0103
-
     launch_args = [f"--name={conf.get('name', img)}"]
 
     env_file = SPR_CONFIG_DIR / img / "env"
@@ -182,7 +174,7 @@ for img, conf in SPR_CONFIG.items():
 
     SPR_CONTAINERS_FOR_POD.append(
         Container(
-            url=baseurl,
+            url=f"{BASEURL}/{_get_repository_name('dockerfile')}private-registry/harbor-{img}:latest",
             volume_mounts=conf["volumes"],
             extra_launch_args=launch_args,
         )
