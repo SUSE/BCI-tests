@@ -95,8 +95,13 @@ def test_base32_64(auto_container):
 @pytest.mark.parametrize(
     "container_per_test", [BUSYBOX_CONTAINER], indirect=True
 )
-def test_busybox_adduser(container_per_test):
-    """Ensure the adduser command works and a new user can be created"""
+def test_busybox_adduser(container_per_test, host):
+    getenforce_cmd = host.run("getenforce")
+    selinux_enabled = getenforce_cmd.succeeded and getenforce_cmd.stdout.strip().lower() != "disabled"
+
+    if selinux_enabled:
+        host.check_output("setsebool container_modify_selinux_labels on")
+
     container_per_test.connection.run_expect([0], "adduser -D foo")
     getent_passwd = container_per_test.connection.run_expect(
         [0], "getent passwd foo"
