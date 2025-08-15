@@ -191,14 +191,10 @@ def test_repo_content_licensing(container_per_test) -> None:
 
 
 @pytest.mark.skipif(
-    (
-        not OS_VERSION.startswith("15")
-        or OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS
-    ),
-    reason="no included BCI repository",
+    not OS_VERSION.startswith("15."), reason="SLE15 specific test"
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
-def test_codestream_lifecycle(container_per_test):
+def test_sle15_lifecycle(container_per_test):
     """Check that the codestream lifecycle information is available
     and has the expected value."""
 
@@ -219,11 +215,32 @@ def test_codestream_lifecycle(container_per_test):
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
-    reason="no included BCI repository",
+    not OS_VERSION.startswith("16."), reason="SL16 specific test"
 )
+@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+def test_sl16_lifecycle(container_per_test):
+    """Check that the codestream lifecycle information is available
+    and has the expected value."""
+
+    zypper_lifecycle_xml = ET.fromstring(
+        container_per_test.connection.check_output(
+            "zypper --xmlout -i pd --xmlfwd codestream"
+        )
+    )
+    lifecycle = zypper_lifecycle_xml.find(
+        ".//product[@name='SLES']/xmlfwd/codestream/endoflife"
+    )
+    assert lifecycle is not None, (
+        "No endoflife information found in product description"
+    )
+    # https://bugzilla.suse.com/show_bug.cgi?id=1244022#c7
+    assert lifecycle.text == "2035-11-30", (
+        f"Expected end of life 2035-11-30, but got {lifecycle.text}"
+    )
+
+
 @pytest.mark.skipif(
-    OS_VERSION == "tumbleweed", reason="No testing for openSUSE"
+    not OS_VERSION.startswith("15."), reason="SLE15 specific test"
 )
 @pytest.mark.parametrize(
     "pkg",
@@ -246,6 +263,26 @@ def test_sle15_packages(container_per_test, pkg):
 
     if OS_VERSION not in ("15.6",) and pkg in ("java-11-openjdk-headless",):
         pytest.skip(reason="Only available for SP6")
+
+    container_per_test.connection.check_output(
+        f"{_RM_ZYPPSERVICE}; zypper -n in --dry-run -r {BCI_REPO_NAME} {pkg}"
+    )
+
+
+@pytest.mark.skipif(
+    not OS_VERSION.startswith("16."), reason="SL16 specific test"
+)
+@pytest.mark.parametrize(
+    "pkg",
+    [
+        "mercurial",  # PED-2420
+    ],
+)
+@pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
+def test_sl16_packages(container_per_test, pkg):
+    """Test that packages that we received reports by users for as missing/broken
+    remain installable and available.
+    """
 
     container_per_test.connection.check_output(
         f"{_RM_ZYPPSERVICE}; zypper -n in --dry-run -r {BCI_REPO_NAME} {pkg}"
