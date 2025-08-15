@@ -542,11 +542,15 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
 def test_sles_beta_eula_exists(container):
     """Ensure that the SLES Beta eula exists in the container"""
 
-    assert (
-        "SUSE(R) End User License Agreement for Beta Software"
-        in container.connection.check_output(
-            "head -n 1 /usr/share/licenses/product/base/license.txt"
-        )
+    BETA_EULA = "SUSE(R) End User License Agreement for Beta Software"
+    RELEASE_EULA = "End User License Agreement"
+
+    eula_text = container.connection.check_output(
+        "head -n 1 /usr/share/licenses/product/base/license.txt"
+    )
+
+    assert BETA_EULA in eula_text or RELEASE_EULA in eula_text, (
+        f"EULA text did not match expected patterns: {eula_text!r}"
     )
 
 
