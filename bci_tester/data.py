@@ -80,6 +80,7 @@ RELEASED_SLE_VERSIONS = (
     "15.6-ai",
     "15.6-spr",
     "15.7",
+    "16.0",
 )
 
 # List the LTSS versions of SLE
