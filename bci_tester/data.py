@@ -1201,21 +1201,21 @@ SPR_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
         available_versions=["15.6-spr"],
         custom_entry_point="/bin/sh" if img != "db" else "",
-        extra_environment_variables={"POSTGRES_PASSWORD": POSTGRES_PASSWORD}
-        if img == "db"
-        else {},
+        extra_environment_variables=(
+            {"POSTGRES_PASSWORD": POSTGRES_PASSWORD} if img == "db" else {}
+        ),
     )
     for img in (
+        "core",
         "db",
-        "valkey",
+        "exporter",
+        "jobservice",
+        "nginx",
+        "portal",
         "registry",
         "registryctl",
-        "core",
-        "portal",
-        "jobservice",
-        "exporter",
         "trivy-adapter",
-        "nginx",
+        "valkey",
     )
 ]
 
