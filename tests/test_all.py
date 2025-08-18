@@ -44,6 +44,7 @@ from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
+from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RELEASED_SLE_VERSIONS
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.util import get_repos_from_connection
@@ -516,7 +517,7 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
     # are running tests for the bci-* base os containers which are not LTSS
     # and still contain a BCI license. As they are out of maintenance, we
     # need to ignore them
-    if OS_VERSION in RELEASED_SLE_VERSIONS:
+    if OS_VERSION in RELEASED_LTSS_VERSIONS:
         if container.container in (
             BASE_CONTAINER.values[0],
             INIT_CONTAINER.values[0],
