@@ -127,6 +127,7 @@ jobs:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
         os_version:
           - 15.7
+          - "16.0"
           - "tumbleweed"
         include:
           - toxenv: fips
