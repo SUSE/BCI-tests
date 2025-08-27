@@ -31,6 +31,11 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Unknown message digest %s\n", argv[1]);
         return ret_code;
     }
+    // check if the algorithm is FIPS compliant to the service indicator
+    if (gcry_control(GCRYCTL_FIPS_SERVICE_INDICATOR_MD, algo) != GPG_ERR_NO_ERROR) {
+        fprintf(stderr, "Algorithm %s is not FIPS compliant\n", argv[1]);
+        return ret_code;
+    }
 
     if (gcry_md_open(&md_hd, algo, GCRY_MD_FLAG_SECURE) != 0) {
         fprintf(stderr, "Failed to create hash context\n");

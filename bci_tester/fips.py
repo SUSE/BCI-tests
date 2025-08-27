@@ -100,12 +100,8 @@ NONFIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
     "md5",
 )
 
-if OS_VERSION != "15.3":
-    NONFIPS_GCRYPT_DIGESTS += ("sm3",)
-
 #: FIPS compliant gcrypt digests
 FIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
-    "sha1",
     "sha224",
     "sha256",
     "sha384",
@@ -121,6 +117,14 @@ if OS_VERSION != "15.3":
         "sha512_224",
         "sha512_256",
     )
+    NONFIPS_GCRYPT_DIGESTS += ("sm3",)
+
+
+# sha1 is non-FIPS in 15.6
+if OS_VERSION == "15.6":
+    NONFIPS_GCRYPT_DIGESTS += ("sha1",)
+else:
+    FIPS_GCRYPT_DIGESTS += ("sha1",)
 
 
 def host_fips_enabled(fipsfile: str = "/proc/sys/crypto/fips_enabled") -> bool:

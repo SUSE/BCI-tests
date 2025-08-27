@@ -343,21 +343,14 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
 
     for digest in NONFIPS_GCRYPT_DIGESTS:
         non_fips_call = c.run_expect([0, 1], f"/bin/fips-test-gcrypt {digest}")
-        if non_fips_call.rc != 1 and non_fips_call.stdout.strip().startswith(
-            "Digest is: "
-        ):
-            if OS_VERSION == "15.6" and digest == "md5":
-                pytest.xfail(
-                    "libgcrypt successfully calculates md5 digest in FIPS mode, bsc#1229903"
-                )
 
-            pytest.xfail(
-                "libgcrypt mistakenly calculates message digests for Non FIPS algorithms, bsc#1229856"
-            )
+        expected_msg = (
+            "Failed to create hash context",
+            f"Algorithm {digest} is not FIPS compliant",
+        )
 
-        assert (
-            non_fips_call.rc == 1
-            and "Failed to create hash context" in non_fips_call.stderr
+        assert non_fips_call.rc == 1 and any(
+            msg in non_fips_call.stderr for msg in expected_msg
         ), f"Hash calculation unexpectedly succeeded for {digest}"
 
 
