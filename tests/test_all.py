@@ -6,8 +6,13 @@ import datetime
 import fnmatch
 import json
 import pathlib
+import shlex
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 
 import packaging.version
 import pytest
@@ -763,3 +768,240 @@ def test_container_suseconnect_adds_repos(container_per_test: ContainerData):
     container_per_test.connection.check_output("zypper -n ref")
     repos = get_repos_from_connection(container_per_test.connection)
     assert len(repos) > 3
+
+
+_USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
+    "nobody": (65534, 65534),
+    "root": (0, 0),
+    "wwwrun": (None, 485),
+    "prometheus": (499, 499),
+    "messagebus": (499, 486),
+    "pesign": (None, 486),
+    "grafana": (499, 499),
+    "nginx": (None, 486),
+    "registry": (None, 486),
+    "named": (44, 44),
+    "app": (1654, 1654),
+    "mysql": (60, 60),
+    "dirsrv": (None, 486),
+    "stunnel": (None, 65533),
+    "polkitd": (498, 485),
+    "postgres": (None, 486),
+    "pcp": (496, 484),
+    "pcpqa": (483, 483),
+    "ldap": (498, 498),
+    "systemd-coredump": (497, 100),
+    "postfix": (51, 51),
+    "sa-milter": (497, 497),
+    "keadhcp": (None, 486),
+    "user": (1000, 1000),
+    "pulse": (498, 484),
+    "systemd-timesync": (482, 482),
+    "rtkit": (480, 480),
+}
+
+# special cases for TW & SLE 16
+if OS_VERSION in ("tumbleweed", "16.0"):
+    # these users don't use the non-default GID on TW
+    for username in (
+        "prometheus",
+        "nginx",
+        "grafana",
+        "messagebus",
+        "dirsrv",
+        "postgres",
+        "registry",
+        "keadhcp",
+    ):
+        del _USERNAME_UID_GID_MAP[username]
+
+    # completely different UID & GID on TW
+    _USERNAME_UID_GID_MAP["pcp"] = (496, 498)
+    _USERNAME_UID_GID_MAP["pcpqa"] = (494, 498)
+    _USERNAME_UID_GID_MAP["wwwrun"] = (None, 498)
+    _USERNAME_UID_GID_MAP["pesign"] = (499, 499)
+    _USERNAME_UID_GID_MAP["systemd-coredump"] = (497, 1000)
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_uids_stable(container: ContainerData) -> None:
+    """Check that every user in :file:`/etc/passwd` has a stable uid & gid as
+    defined in ``_USERNAME_UID_GID_MAP``.
+
+    """
+    passwd: str = container.connection.file("/etc/passwd").content_string
+    assert container.connection.user("root").exists, "root user does not exist"
+
+    for userline in passwd.splitlines():
+        tmp = userline.split(":")
+        name, uid, gid = tmp[0], int(tmp[2]), int(tmp[3])
+
+        expected_uid, expected_gid = _USERNAME_UID_GID_MAP.get(
+            name, (499, 499)
+        )
+        expected_uid = 499 if expected_uid is None else expected_uid
+        expected_gid = 499 if expected_gid is None else expected_gid
+
+        # special cases
+        if (container.container.get_base().baseurl or "").split(":")[
+            0
+        ].endswith("kiosk/xorg") and name == "user":
+            expected_gid = 100
+
+        if (container.container.get_base().baseurl or "").split(":")[
+            0
+        ].endswith("kiosk/pulseaudio") and name == "messagebus":
+            expected_gid = 499
+
+        if (container.container.get_base().baseurl or "").split(":")[
+            0
+        ].endswith("kiosk/pulseaudio") and name == "polkitd":
+            expected_gid = 481
+            expected_uid = 481
+
+        if (container.container.get_base().baseurl or "").endswith(
+            "opensuse/samba-client:latest"
+        ) and name == "messagebus":
+            expected_gid = 499
+            expected_uid = 499
+
+        if (container.container.get_base().baseurl or "").endswith(
+            "opensuse/samba-server:latest"
+        ) and name == "messagebus":
+            expected_gid = 498
+            expected_uid = 498
+
+        if (container.container.get_base().baseurl or "").endswith(
+            "opensuse/samba-toolbox:latest"
+        ) and name == "messagebus":
+            expected_gid = 498
+            expected_uid = 498
+
+        if (
+            (container.container.get_base().baseurl or "")
+            .split(":")[0]
+            .endswith("opensuse/pcp")
+        ):
+            if name == "messagebus":
+                expected_gid = 499
+                expected_uid = 499
+            if name == "pcpqa":
+                expected_gid = 494
+                expected_uid = 494
+            if name == "pcp":
+                expected_gid = 498
+                expected_uid = 496
+
+        assert uid == expected_uid, (
+            f"Expected user {name} to have uid {expected_uid} but got {uid}"
+        )
+        assert gid == expected_gid, (
+            f"Expected user {name} to have gid {expected_gid} but got {gid}"
+        )
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_all_users_provided_by_sysusers(container: ContainerData) -> None:
+    """Check that all users from :file:`/etc/passwd` are provided by a
+    corresponding conf file in :file:`/usr/lib/sysusers.d/`.
+
+    Additionally we verify that
+
+    """
+    passwd: str = container.connection.file("/etc/passwd").content_string
+
+    @dataclass
+    class SysUser:
+        """Class representing a user defined in a sysusers.d config file."""
+
+        username: str
+        uid: Optional[int] = None
+        home: Optional[str] = None
+        shell: Optional[str] = None
+
+    sysusers_d = "/usr/lib/sysusers.d/"
+
+    all_users: Dict[str, SysUser] = {}
+
+    # can't use file(_SYSUSERS_D).listdir() because that uses `ls -1 -q` which
+    # is unsupported by busybox 🙄
+    for fname in (
+        container.connection.check_output(f"ls -1 {sysusers_d}")
+        .strip()
+        .splitlines()
+    ):
+        if not fname.endswith(".conf"):
+            continue
+
+        for line in container.connection.file(
+            f"{sysusers_d}{fname}"
+        ).content_string.splitlines():
+            if not line.startswith("u"):
+                continue
+
+            parsed = shlex.split(line)
+            assert parsed[0] in ("u", "u!")
+
+            uid = parsed[2]
+            user = SysUser(
+                username=parsed[1], uid=int(uid) if uid != "-" else None
+            )
+
+            if len(parsed) > 4 and parsed[4] != "-":
+                user.home = parsed[4]
+
+            if len(parsed) > 5:
+                user.shell = (
+                    parsed[5] if parsed[5] != "-" else "/usr/sbin/nologin"
+                )
+
+            all_users[user.username] = user
+
+    for userline in passwd.splitlines():
+        name, _, uid, _, _, home, shell = userline.split(":")
+
+        users_not_via_sysusers_d = ("app", "tomcat", "stunnel")
+        if OS_VERSION in ("15.6", "15.7"):
+            users_not_via_sysusers_d += ("pesign",)
+        if (container.container.get_base().baseurl or "").endswith(
+            "bci/sle-15-sp6/containerfile/bci/bci-init:15.6"
+        ):
+            users_not_via_sysusers_d += ("systemd-coredump",)
+        nobody_user_containers = (
+            "suse/kiosk/firefox-esr",
+            "suse/kiosk/xorg",
+            "suse/kiosk/xorg-client",
+        )
+        if OS_VERSION in ("15.7") and (
+            container.container.get_base().baseurl or ""
+        ).split(":")[0].endswith(nobody_user_containers):
+            users_not_via_sysusers_d += ("nobody",)
+
+        if name in users_not_via_sysusers_d:
+            pytest.xfail(
+                f"user {name} is known to not be provided via sysusers.d"
+            )
+
+        assert name in all_users
+        sys_user = all_users[name]
+
+        if sys_user.uid is not None:
+            assert int(uid) == sys_user.uid
+
+        if sys_user.home is not None:
+            assert sys_user.home == home
+
+        if sys_user.shell is not None:
+            # bci-busybox does not include /bin/bash, but system-user-root
+            # defines /bin/bash as the shell and the container uses /bin/sh
+            # instead
+            if (
+                (OS_VERSION == "tumbleweed" or OS_VERSION == "16.0")
+                and (container.container.get_base().baseurl or "")
+                .split(":")[0]
+                .endswith("bci/bci-busybox")
+                and name == "root"
+            ):
+                assert shell == "/bin/sh"
+            else:
+                assert sys_user.shell == shell
