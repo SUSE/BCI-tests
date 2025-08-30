@@ -855,7 +855,7 @@ if OS_VERSION in (
     "15.6",
     "15.7",
 ):
-    _GIT_APP_VERSION = "2.43"
+    _GIT_APP_VERSION = "2.51"
 elif OS_VERSION in ("15.5", "15.4"):
     _GIT_APP_VERSION = "2.35"
 else:
