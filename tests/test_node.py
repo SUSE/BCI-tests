@@ -31,7 +31,12 @@ def test_node_version(auto_container):
         for pkg in (
             GitRepositoryBuild(
                 repository_url="https://github.com/caolan/async",
-                build_command="npm ci && npm test",
+                build_command=dedent(
+                    """npm ci &&
+                       npm run lint &&
+                       npm run mocha-node-test -- --timeout 7500
+                """
+                ),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/isaacs/node-glob",
