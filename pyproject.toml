@@ -93,6 +93,7 @@ markers = [
     'gcc_15',
     'git_2.35',
     'git_2.43',
+    'git_2.51',
     'git_latest',
     'helm_3',
     'helm_latest',
