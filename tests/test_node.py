@@ -31,7 +31,12 @@ def test_node_version(auto_container):
         for pkg in (
             GitRepositoryBuild(
                 repository_url="https://github.com/caolan/async",
-                build_command="npm ci && npm test",
+                build_command=dedent(
+                    """npm ci &&
+                       npm run lint &&
+                       npm run mocha-node-test -- --timeout 7500
+                """
+                ),
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/isaacs/node-glob",
@@ -101,6 +106,12 @@ def test_popular_npm_repos(
          - :command:`npm install && npm run unit`
 
     """
-    auto_container_per_test.connection.check_output(
+    out = auto_container_per_test.connection.run(
         container_git_clone.test_command
     )
+
+    # node.js failures are huge and not readable if using check_output
+    # assert the exit code only for a clean assert output
+    # include the stderr in the assertion message for a humam readable output
+    code = out.rc
+    assert code == 0, f"Unexpected exit code {out.rc}.\n\n{out.stderr}"
