@@ -363,6 +363,10 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     """
 
     container_per_test.connection.check_output(
+        "timeout 5m zypper -n addlock libcurl-mini4"
+    )
+
+    container_per_test.connection.check_output(
         f"timeout 5m zypper -n dup --from {BCI_REPO_NAME} -l "
         "--no-allow-vendor-change --no-allow-name-change --no-allow-arch-change "
         "--allow-downgrade"
