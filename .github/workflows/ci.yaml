@@ -38,7 +38,7 @@ jobs:
       - name: checkout source code
         uses: actions/checkout@v5
       - name: get the current PR
-        uses: 8BitJonny/gh-get-current-pr@3.0.0
+        uses: 8BitJonny/gh-get-current-pr@4.0.0
         id: pr
         with:
           github-token: ${{ github.token }}
