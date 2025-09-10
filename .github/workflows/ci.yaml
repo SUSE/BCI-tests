@@ -222,7 +222,7 @@ jobs:
 
     steps:
       - name: Clean up disk space to maximize available space
-        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL && sudo docker image prune --all --force
+        run: sudo rm -rf /usr/local/*/* /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache && sudo docker image prune --all --force
       - name: checkout source code
         uses: actions/checkout@v5
       - name: Set up Python
