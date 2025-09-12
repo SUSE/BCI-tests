@@ -6,6 +6,8 @@ from tenacity import retry
 from tenacity import stop_after_attempt
 from tenacity import wait_exponential
 
+from bci_tester.data import LMCACHE_LMSTACK_ROUTER_CONTAINER
+from bci_tester.data import LMCACHE_VLLM_OPENAI_CONTAINER
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENWEBUI_CONTAINER
@@ -13,6 +15,7 @@ from bci_tester.data import OPENWEBUI_PIPELINES_CONTAINER
 from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
 from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
+from bci_tester.data import VLLM_OPENAI_CONTAINER
 
 CONTAINER_IMAGES = (
     OLLAMA_CONTAINER,
@@ -22,6 +25,9 @@ CONTAINER_IMAGES = (
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
     OPENWEBUI_PIPELINES_CONTAINER,
+    VLLM_OPENAI_CONTAINER,
+    LMCACHE_LMSTACK_ROUTER_CONTAINER,
+    LMCACHE_VLLM_OPENAI_CONTAINER,
 )
 
 
@@ -120,3 +126,49 @@ def test_pipelines_health(container_per_test):
         assert ":true" in resp.text
 
     check_pipelines_response()
+
+
+@pytest.mark.parametrize(
+    "container",
+    [VLLM_OPENAI_CONTAINER],
+    indirect=["container"],
+)
+def test_vllm_health(container):
+    """Test the vLLM container."""
+
+    # check vLLM version
+    container.connection.check_output(
+        "python3.11 -c 'import vllm; print(vllm.__version__)'"
+    )
+
+
+@pytest.mark.parametrize(
+    "container",
+    [LMCACHE_VLLM_OPENAI_CONTAINER],
+    indirect=["container"],
+)
+def test_lmcache_vllm_health(container):
+    """Test the LMCache vLLM container."""
+
+    # check vLLM version
+    container.connection.check_output(
+        "python3.11 -c 'import vllm; print(vllm.__version__)'"
+    )
+    # check LMCache version
+    container.connection.check_output(
+        "python3.11 -c 'import lmcache._version; print(lmcache._version.__version__)'"
+    )
+
+
+@pytest.mark.parametrize(
+    "container",
+    [LMCACHE_LMSTACK_ROUTER_CONTAINER],
+    indirect=["container"],
+)
+def test_lmstack_router_health(container):
+    """Test the LMCache LMStack Router container."""
+
+    # check vLLM Router version
+    container.connection.check_output(
+        "python3.11 -c 'import vllm_router._version; print(vllm_router._version.__version__)'"
+    )

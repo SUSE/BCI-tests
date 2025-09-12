@@ -60,6 +60,8 @@ from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
+from bci_tester.data import LMCACHE_LMSTACK_ROUTER_CONTAINER
+from bci_tester.data import LMCACHE_VLLM_OPENAI_CONTAINER
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
@@ -101,6 +103,7 @@ from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
 from bci_tester.data import TARGET
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
+from bci_tester.data import VLLM_OPENAI_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
@@ -319,6 +322,17 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (
             OPENWEBUI_PIPELINES_CONTAINER,
             "open-webui-pipelines",
+            ImageType.SAC_APPLICATION,
+        ),
+        (VLLM_OPENAI_CONTAINER, "vllm-openai", ImageType.SAC_APPLICATION),
+        (
+            LMCACHE_VLLM_OPENAI_CONTAINER,
+            "lmcache-vllm-openai",
+            ImageType.SAC_APPLICATION,
+        ),
+        (
+            LMCACHE_LMSTACK_ROUTER_CONTAINER,
+            "lmcache-lmstack-router",
             ImageType.SAC_APPLICATION,
         ),
     ]
