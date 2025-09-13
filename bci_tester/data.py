@@ -289,7 +289,7 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if image_type == "dockerfile":
         return "containerfile/"
     if image_type == "kiwi":
-        return "images/"
+        return "containerkiwi/" if OS_VERSION.startswith("16") else "images/"
     raise AssertionError(f"invalid image_type: {image_type}")
 
 
