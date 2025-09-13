@@ -189,7 +189,7 @@ else:
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     if OS_VERSION.startswith("16"):
         ibs_cr_project = (
-            f"registry.suse.de/suse/slfo/products/sles/{DISTNAME}/test"
+            f"registry.suse.de/suse/slfo/products/bci/{DISTNAME}/test"
         )
     elif OS_VERSION == "15.6-ai":
         obs_project = "registry.suse.de/devel/ai"
