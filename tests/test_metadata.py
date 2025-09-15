@@ -632,7 +632,7 @@ def test_disturl(
             )
         else:
             assert (
-                f"obs://build.suse.de/SUSE:SLFO:Products:SLES:16.{OS_SP_VERSION}"
+                f"obs://build.suse.de/SUSE:SLFO:Products:BCI:16.{OS_SP_VERSION}"
                 in disturl
             )
     else:
