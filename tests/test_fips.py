@@ -371,10 +371,6 @@ def test_gpgconf_binary(container_per_test: ContainerData) -> None:
 @pytest.mark.skipif(
     OS_VERSION in ("15.3",), reason="FIPS 140-3 not supported on 15.3"
 )
-@pytest.mark.xfail(
-    OS_VERSION in ("16.0",),
-    reason="https://bugzilla.suse.com/show_bug.cgi?id=1246541",
-)
 @pytest.mark.parametrize(
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
