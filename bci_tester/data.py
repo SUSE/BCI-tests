@@ -1089,6 +1089,27 @@ SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME = create_BCI(
     custom_entry_point="/bin/bash",
 )
 
+VLLM_OPENAI_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/vllm-openai:0",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
+
+LMCACHE_VLLM_OPENAI_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/lmcache-vllm-openai:0",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
+
+LMCACHE_LMSTACK_ROUTER_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/lmcache-lmstack-router:0",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="/bin/bash",
+)
+
 VALKEY_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/valkey:{tag}",
@@ -1294,6 +1315,9 @@ CONTAINERS_WITHOUT_ZYPPER = [
     PYTORCH_CONTAINER,
     OPENWEBUI_CONTAINER,
     OPENWEBUI_PIPELINES_CONTAINER,
+    VLLM_OPENAI_CONTAINER,
+    LMCACHE_VLLM_OPENAI_CONTAINER,
+    LMCACHE_LMSTACK_ROUTER_CONTAINER,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
