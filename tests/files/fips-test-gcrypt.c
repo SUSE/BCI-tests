@@ -32,10 +32,18 @@ int main(int argc, char *argv[]) {
         return ret_code;
     }
     // check if the algorithm is FIPS compliant to the service indicator
+    // SUSE named it GCRYCTL_FIPS_SERVICE_INDICATOR_HASH, but upstream named it GCRYCTL_FIPS_SERVICE_INDICATOR_MD since 1.11.0
+    // upstream added it in 1.11.0 , but we already had it backported for SP6 in 1.10.3.
+    // indicators are new with FIPS 140-3 which we started with 1.9.4
+#if GCRYPT_VERSION_NUMBER >= 0x010904
+# if GCRYPT_VERSION_NUMBER < 0x010a03
+#  define GCRYCTL_FIPS_SERVICE_INDICATOR_MD GCRYCTL_FIPS_SERVICE_INDICATOR_HASH
+# endif
     if (gcry_control(GCRYCTL_FIPS_SERVICE_INDICATOR_MD, algo) != GPG_ERR_NO_ERROR) {
         fprintf(stderr, "Algorithm %s is not FIPS compliant\n", argv[1]);
         return ret_code;
     }
+#endif
 
     if (gcry_md_open(&md_hd, algo, GCRY_MD_FLAG_SECURE) != 0) {
         fprintf(stderr, "Failed to create hash context\n");
