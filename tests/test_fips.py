@@ -283,6 +283,10 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
 @pytest.mark.parametrize(
     "container_per_test", FIPS_GCRYPT_TESTER_IMAGES, indirect=True
 )
+@pytest.mark.skipif(
+    OS_VERSION in ("15.3", "15.4", "15.5"),
+    reason="bsc#1229856 - libgcrypt computes hashes of non-FIPS digests",
+)
 def test_gcrypt_binary(container_per_test: ContainerData) -> None:
     """Check that a binary linked against gcrypt obeys the host's FIPS mode
     setting:
@@ -303,7 +307,7 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
 
     c.check_output(
         "zypper -n in gcc libgcrypt-devel dirmngr && "
-        "gcc -Og -g3 fips-test-gcrypt.c -Wall -Wextra -Wpedantic -lgcrypt -o fips-test-gcrypt && "
+        "gcc -O2 fips-test-gcrypt.c -Wall -Wextra -Werror -lgcrypt -o fips-test-gcrypt && "
         "mv fips-test-gcrypt /bin/fips-test-gcrypt"
     )
 

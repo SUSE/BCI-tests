@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Unknown message digest %s\n", argv[1]);
         return ret_code;
     }
+
     // check if the algorithm is FIPS compliant to the service indicator
     // SUSE named it GCRYCTL_FIPS_SERVICE_INDICATOR_HASH, but upstream named it GCRYCTL_FIPS_SERVICE_INDICATOR_MD since 1.11.0
     // upstream added it in 1.11.0 , but we already had it backported for SP6 in 1.10.3.
