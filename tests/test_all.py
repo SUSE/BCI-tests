@@ -8,6 +8,9 @@ import json
 import pathlib
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 
 import packaging.version
 import pytest
@@ -763,3 +766,103 @@ def test_container_suseconnect_adds_repos(container_per_test: ContainerData):
     container_per_test.connection.check_output("zypper -n ref")
     repos = get_repos_from_connection(container_per_test.connection)
     assert len(repos) > 3
+
+
+_USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
+    "nobody": (65534, 65534),
+    "root": (0, 0),
+    "wwwrun": (None, 485),
+    "pesign": (None, 486),
+    "nginx": (None, 486),
+    "registry": (None, 486),
+    "app": (1654, 1654),
+    "mysql": (60, 60),
+    "dirsrv": (None, 486),
+    "postgres": (None, 486),
+    "pcp": (496, 484),
+    "ldap": (498, 498),
+    "systemd-coredump": (497, 100),
+    "postfix": (51, 51),
+    "keadhcp": (None, 486),
+    "user": (1000, 1000),
+}
+
+
+@pytest.fixture
+def uid_gid_map(container: ContainerData) -> Dict[str, Tuple[int, int]]:
+    """
+    Returns the expected UID and GID mapping based on the container's
+    operating system version.
+    """
+    # Create a deep copy of the base map to modify it without affecting
+    # other tests that might use the same base data.
+    expected_map = {k: list(v) for k, v in _USERNAME_UID_GID_MAP.items()}
+    # Apply special cases for TW & SLE 16
+    if OS_VERSION in ("tumbleweed", "16.0"):
+        # These users don't use the non-default GID on TW
+        for username in (
+            "nginx",
+            "dirsrv",
+            "postgres",
+            "registry",
+            "keadhcp",
+        ):
+            if username in expected_map:
+                del expected_map[username]
+
+        # Completely different UID & GID on TW
+        expected_map["pcp"] = [496, 498]
+        expected_map["wwwrun"] = [498, 498]
+        expected_map["pesign"] = [499, 499]
+        expected_map["systemd-coredump"] = [497, 1000]
+
+    # Handle the 'kiosk/xorg' special case
+    if (
+        (container.container.get_base().baseurl or "")
+        .split(":")[0]
+        .endswith("kiosk/xorg")
+    ):
+        if "user" in expected_map:
+            expected_map["user"] = [expected_map["user"][0], 100]
+
+    for name, (uid, gid) in expected_map.items():
+        uid = uid if uid is not None else 499
+        gid = gid if gid is not None else 499
+        expected_map[name] = (uid, gid)
+
+    return expected_map
+
+
+@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
+def test_uids_stable(
+    container: ContainerData, uid_gid_map: Dict[str, Tuple[int, int]]
+) -> None:
+    """Check that every user in :file:`/etc/passwd` has a stable uid & gid as
+    defined in ``_USERNAME_UID_GID_MAP``.
+
+    """
+    # collect users who owns subdirectories in directories /var, /etc, /opt, /home
+    user_list = (
+        container.connection.check_output(
+            "find /var /etc /opt /home -printf '%u \n' | sort -u"
+        )
+        .strip()
+        .split("\n")
+    )
+    passwd: str = container.connection.file("/etc/passwd").content_string
+    assert container.connection.user("root").exists, "root user does not exist"
+
+    for userline in passwd.splitlines():
+        tmp = userline.split(":")
+        name, uid, gid = tmp[0], int(tmp[2]), int(tmp[3])
+        if name not in user_list:
+            continue
+
+        expected_uid, expected_gid = uid_gid_map.get(name, (499, 499))
+
+        assert uid == expected_uid, (
+            f"Expected user {name} to have uid {expected_uid} but got {uid}"
+        )
+        assert gid == expected_gid, (
+            f"Expected user {name} to have gid {expected_gid} but got {gid}"
+        )
