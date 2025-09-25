@@ -7,6 +7,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import OS_VERSION
+from bci_tester.selinux import selinux_status
 
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]
 
@@ -53,15 +54,14 @@ def test_busybox_image_size(
 
 def test_busybox_links(auto_container):
     """Ensure all binaries in :file:`/bin` are links to :file:`/usr/bin/busybox`."""
-    auto_container.connection.run_expect(
-        [0],
+    auto_container.connection.check_output(
         'for i in /bin/*; do stat -c "%N" "$i" | grep -qE "(busybox|zmore|zless|zgrep|ldd|gencat|getent|locale|iconv|localedef|ld-linux|getconf)"; done',
     )
 
 
 def test_busybox_binary_works(auto_container):
     """Ensure the busybox binary works"""
-    auto_container.connection.run_expect([0], "busybox")
+    auto_container.connection.check_output("busybox")
 
 
 def test_true(auto_container):
@@ -97,9 +97,13 @@ def test_base32_64(auto_container):
 )
 def test_busybox_adduser(container_per_test):
     """Ensure the adduser command works and a new user can be created"""
-    container_per_test.connection.run_expect([0], "adduser -D foo")
+    res = container_per_test.connection.run_expect([0, 1], "adduser -D foo")
+    if res.rc == 1 and selinux_status() == "enforcing":
+        pytest.xfail("https://bugzilla.suse.com/show_bug.cgi?id=1248283")
+    assert res.rc == 0, f"adduser command failed with {res.stderr}"
+
     getent_passwd = container_per_test.connection.run_expect(
         [0], "getent passwd foo"
     )
     assert "foo" in getent_passwd.stdout
-    container_per_test.connection.run_expect([0], "su - foo")
+    container_per_test.connection.check_output("su - foo")
