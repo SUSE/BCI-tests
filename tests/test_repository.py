@@ -64,8 +64,14 @@ def test_installcheck(container_per_test):
     # Check that all packages in SLE_BCI can be installed, using already installed
     # packages (@System) if necessary. It tries to keep rpm installed
     # but rpm-ndb conflicts with that, so exclude rpm-ndb.
+    excludes = ""
+    if OS_VERSION.startswith("15"):
+        excludes = "--exclude 'rpm-ndb'"
+    elif OS_VERSION.startswith("16"):
+        excludes = "--exclude 'kernel-livepatch-6_12_0-160000_5-default'"
+
     container_per_test.connection.check_output(
-        "installcheck $(uname -m) --exclude 'rpm-ndb' /var/cache/zypp/solv/SLE_BCI/solv --nocheck /var/cache/zypp/solv/@System/solv"
+        f"installcheck $(uname -m) {excludes} /var/cache/zypp/solv/SLE_BCI/solv --nocheck /var/cache/zypp/solv/@System/solv"
     )
 
 
@@ -146,8 +152,11 @@ def test_sle_bci_forbidden_packages(container_per_test):
         )
     )
 
+    if OS_VERSION.startswith("16") and forbidden_packages:
+        forbidden_packages.remove("kernel-livepatch-6_12_0-160000_5-default")
+
     assert not forbidden_packages, (
-        f"package_list must not contain any forbidden packages, but found {', '.join(forbidden_packages)}"
+        f"package_list contains forbidden packages: {', '.join(forbidden_packages)}"
     )
 
 
