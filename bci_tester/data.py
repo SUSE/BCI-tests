@@ -597,11 +597,11 @@ OPENJDK_DEVEL_21_CONTAINER = create_BCI(
     available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
     custom_entry_point="/bin/sh",
 )
-OPENJDK_24_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:24", available_versions=["tumbleweed"]
+OPENJDK_25_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:25", available_versions=["tumbleweed"]
 )
-OPENJDK_DEVEL_24_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:24", available_versions=["tumbleweed"]
+OPENJDK_DEVEL_25_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:25", available_versions=["tumbleweed"]
 )
 
 
@@ -609,14 +609,14 @@ OPENJDK_CONTAINERS = [
     OPENJDK_11_CONTAINER,
     OPENJDK_17_CONTAINER,
     OPENJDK_21_CONTAINER,
-    OPENJDK_24_CONTAINER,
+    OPENJDK_25_CONTAINER,
 ]
 
 OPENJDK_DEVEL_CONTAINERS = [
     OPENJDK_DEVEL_11_CONTAINER,
     OPENJDK_DEVEL_17_CONTAINER,
     OPENJDK_DEVEL_21_CONTAINER,
-    OPENJDK_DEVEL_24_CONTAINER,
+    OPENJDK_DEVEL_25_CONTAINER,
 ]
 
 NODEJS_20_CONTAINER = create_BCI(
@@ -949,7 +949,7 @@ APACHE_TOMCAT_10_CONTAINERS = [
         available_versions=("tumbleweed",),
         forwarded_ports=[PortForwarding(container_port=8080)],
     )
-    for openjdk_version in (24, 21, 17)
+    for openjdk_version in (25, 21, 17)
 ]
 
 APACHE_TOMCAT_9_CONTAINERS = [
