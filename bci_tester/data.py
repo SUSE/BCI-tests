@@ -902,10 +902,10 @@ KUBECTL_CONTAINERS = [
     for kubectl_ver, os_versions in (
         ("oldstable", ("15.7",)),
         ("stable", ("15.7",)),
-        ("1.30", ("tumbleweed",)),
         ("1.31", ("tumbleweed",)),
         ("1.32", ("tumbleweed",)),
         ("1.33", ("tumbleweed",)),
+        ("1.34", ("tumbleweed",)),
     )
 ]
 
