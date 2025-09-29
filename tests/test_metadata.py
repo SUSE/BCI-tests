@@ -479,6 +479,7 @@ def test_general_labels(
             assert "BCI" in labels[f"{prefix}.title"]
 
 
+@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container,container_name,container_type",
     IMAGES_AND_NAMES,
