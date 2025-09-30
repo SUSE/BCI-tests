@@ -90,6 +90,7 @@ from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RELEASED_LTSS_VERSIONS
+from bci_tester.data import RMT_CONTAINERS
 from bci_tester.data import RUBY_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SAMBA_CLIENT_CONTAINERS
@@ -365,6 +366,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (samba_ctr, "samba-toolbox", ImageType.APPLICATION)
         for samba_ctr in SAMBA_TOOLBOX_CONTAINERS
     ]
+    + [(rmt, "rmt-server", ImageType.APPLICATION) for rmt in RMT_CONTAINERS]
     + [
         (
             pr_ctr,
