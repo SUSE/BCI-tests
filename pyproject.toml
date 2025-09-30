@@ -163,6 +163,7 @@ markers = [
     'registry_2.8',
     'registry_3.0',
     'registry_latest',
+    'rmt-server_2',
     'ruby_2.5',
     'ruby_3.4',
     'ruby_latest',

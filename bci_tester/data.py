@@ -1241,6 +1241,14 @@ SPR_CONTAINERS = [
     )
 ]
 
+RMT_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/rmt-server:2",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        custom_entry_point="/bin/bash",
+    )
+]
 
 CONTAINERS_WITH_ZYPPER = (
     [
@@ -1264,6 +1272,7 @@ CONTAINERS_WITH_ZYPPER = (
     + OPENJDK_DEVEL_CONTAINERS
     + PCP_CONTAINERS
     + PYTHON_CONTAINERS
+    + RMT_CONTAINERS
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
@@ -1391,6 +1400,7 @@ else:
         + OPENJDK_DEVEL_CONTAINERS
         + PCP_CONTAINERS
         + PYTHON_CONTAINERS
+        + RMT_CONTAINERS
         + RUBY_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
