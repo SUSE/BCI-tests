@@ -40,6 +40,7 @@ from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
+from bci_tester.data import KUBEVIRT_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
@@ -453,6 +454,9 @@ def test_zypper_not_present_in_containers_without_it(
 
 # PCP_CONTAINERS: uses systemd for starting multiple services
 # KIWI_CONTAINERS: pulls lvm2 which pulls systemd
+# KIOSK_PULSEAUDIO_CONTAINERS: udev and systemd are needed for pulseaudio
+# KIOSK_XORG_CONTAINERS: udev and systemd are needed for Xorg
+# KUBEVIRT_CONTAINERS: some of the dependencies pull systemd
 @pytest.mark.parametrize(
     "container",
     [
@@ -465,6 +469,7 @@ def test_zypper_not_present_in_containers_without_it(
             + KIWI_CONTAINERS
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
+            + KUBEVIRT_CONTAINERS
             + ([KERNEL_MODULE_CONTAINER] if OS_VERSION == "16.0" else [])
         )
     ],

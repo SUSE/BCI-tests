@@ -2,6 +2,7 @@
 import enum
 import os
 from datetime import timedelta
+from itertools import product
 from pathlib import Path
 from typing import Iterable
 from typing import Optional
@@ -1217,6 +1218,32 @@ SAMBA_CONTAINERS = (
     + SAMBA_TOOLBOX_CONTAINERS
 )
 
+KUBEVIRT_CONTAINERS = [
+    create_BCI(
+        build_tag=(
+            f"suse/sles/16.0/virt-{service}:1.5"
+            if os_version.startswith("16")
+            else f"{APP_CONTAINER_PREFIX}/virt-{service}:1.6"
+        ),
+        bci_type=ImageType.APPLICATION,
+        available_versions=[os_version],
+        custom_entry_point="/bin/bash",
+    )
+    for os_version, service in product(
+        ("16.0", "tumbleweed"),
+        (
+            "api",
+            "controller",
+            "exportproxy",
+            "exportserver",
+            "handler",
+            "launcher",
+            "operator",
+            "pr-helper",
+        ),
+    )
+]
+
 SPR_CONTAINERS = [
     create_BCI(
         build_tag=f"private-registry/harbor-{img}:latest",
@@ -1340,6 +1367,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
     *SPR_CONTAINERS,
+    *KUBEVIRT_CONTAINERS,
 ]
 
 
@@ -1391,6 +1419,7 @@ else:
         + GOLANG_CONTAINERS
         + KIOSK_CONTAINERS
         + KUBECTL_CONTAINERS
+        + KUBEVIRT_CONTAINERS
         + LTSS_BASE_CONTAINERS
         + LTSS_BASE_FIPS_CONTAINERS
         + MARIADB_CLIENT_CONTAINERS

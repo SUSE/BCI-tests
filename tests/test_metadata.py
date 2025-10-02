@@ -59,6 +59,7 @@ from bci_tester.data import KIOSK_XORG_CLIENT_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
+from bci_tester.data import KUBEVIRT_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import LMCACHE_LMSTACK_ROUTER_CONTAINER
 from bci_tester.data import LMCACHE_VLLM_OPENAI_CONTAINER
@@ -376,6 +377,16 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             ImageType.APPLICATION,
         )
         for pr_ctr in SPR_CONTAINERS
+    ]
+    + [
+        (
+            kubevirt_ctr,
+            container_and_marks_from_pytest_param(kubevirt_ctr)[0]
+            .baseurl.rpartition("/")[2]
+            .rpartition(":")[0],
+            ImageType.APPLICATION,
+        )
+        for kubevirt_ctr in KUBEVIRT_CONTAINERS
     ]
 ]
 
