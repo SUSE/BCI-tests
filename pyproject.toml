@@ -151,6 +151,7 @@ markers = [
     'postgres_15',
     'postgres_16',
     'postgres_17',
+    'postgres_18',
     'prometheus_2',
     'prometheus_3',
     'pulseaudio_17',
