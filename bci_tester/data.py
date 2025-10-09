@@ -1245,6 +1245,31 @@ KUBEVIRT_CONTAINERS = [
     )
 ]
 
+KUBEVIRT_CDI_CONTAINERS = [
+    create_BCI(
+        build_tag=(
+            f"suse/sles/16.0/cdi-{service}:1.60"
+            if os_version.startswith("16")
+            else f"{APP_CONTAINER_PREFIX}/cdi-{service}:latest"
+        ),
+        bci_type=ImageType.APPLICATION,
+        available_versions=[os_version],
+        custom_entry_point="/bin/bash",
+    )
+    for os_version, service in product(
+        ("16.0", "tumbleweed"),
+        (
+            "apiserver",
+            "cloner",
+            "controller",
+            "importer",
+            "uploadproxy",
+            "uploadserver",
+        ),
+    )
+]
+
+
 SPR_CONTAINERS = [
     create_BCI(
         build_tag=f"private-registry/harbor-{img}:latest",
@@ -1369,6 +1394,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
     *SPR_CONTAINERS,
     *KUBEVIRT_CONTAINERS,
+    *KUBEVIRT_CDI_CONTAINERS,
 ]
 
 
@@ -1421,6 +1447,7 @@ else:
         + KIOSK_CONTAINERS
         + KUBECTL_CONTAINERS
         + KUBEVIRT_CONTAINERS
+        + KUBEVIRT_CDI_CONTAINERS
         + LTSS_BASE_CONTAINERS
         + LTSS_BASE_FIPS_CONTAINERS
         + MARIADB_CLIENT_CONTAINERS

@@ -59,6 +59,7 @@ from bci_tester.data import KIOSK_XORG_CLIENT_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
+from bci_tester.data import KUBEVIRT_CDI_CONTAINERS
 from bci_tester.data import KUBEVIRT_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import LMCACHE_LMSTACK_ROUTER_CONTAINER
@@ -370,23 +371,15 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [(rmt, "rmt-server", ImageType.APPLICATION) for rmt in RMT_CONTAINERS]
     + [
         (
-            pr_ctr,
-            container_and_marks_from_pytest_param(pr_ctr)[0]
+            app_ctr,
+            container_and_marks_from_pytest_param(app_ctr)[0]
             .baseurl.rpartition("/")[2]
             .rpartition(":")[0],
             ImageType.APPLICATION,
         )
-        for pr_ctr in SPR_CONTAINERS
-    ]
-    + [
-        (
-            kubevirt_ctr,
-            container_and_marks_from_pytest_param(kubevirt_ctr)[0]
-            .baseurl.rpartition("/")[2]
-            .rpartition(":")[0],
-            ImageType.APPLICATION,
-        )
-        for kubevirt_ctr in KUBEVIRT_CONTAINERS
+        for app_ctr in SPR_CONTAINERS
+        + KUBEVIRT_CONTAINERS
+        + KUBEVIRT_CDI_CONTAINERS
     ]
 ]
 
