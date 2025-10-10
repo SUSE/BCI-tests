@@ -36,7 +36,6 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
-from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
@@ -470,15 +469,13 @@ def test_zypper_not_present_in_containers_without_it(
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
             + KUBEVIRT_CONTAINERS
-            + ([KERNEL_MODULE_CONTAINER] if OS_VERSION == "16.0" else [])
         )
     ],
     indirect=True,
 )
 def test_systemd_not_installed_in_all_containers_except_init(container):
     """Ensure that systemd is not present in all containers besides the init
-    pcp, and postfix containers.
-
+    pcp and udev/systemd based containers.
     """
     assert not container.connection.exists("systemctl")
 
