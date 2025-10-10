@@ -488,6 +488,35 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
 
 @pytest.mark.parametrize(
     "container",
+    [
+        c
+        for c in ALL_CONTAINERS
+        if (
+            c
+            not in PCP_CONTAINERS
+            + [INIT_CONTAINER]
+            + KIWI_CONTAINERS
+            + KIOSK_PULSEAUDIO_CONTAINERS
+            + KIOSK_XORG_CONTAINERS
+            + KUBEVIRT_CONTAINERS
+        )
+    ],
+    indirect=True,
+)
+def test_udev_not_installed_in_all_containers_except_init(container):
+    """Ensure that udev is not present in all containers besides init
+    or udev based containers.
+    """
+    assert not container.connection.exists("udevadm")
+
+    if container.connection.file("/etc/blkid.conf").exists:
+        assert "EVALUATE=udev" not in container.connection.file(
+            "/etc/blkid.conf"
+        ).content.decode("utf-8")
+
+
+@pytest.mark.parametrize(
+    "container",
     ALL_CONTAINERS,
     indirect=True,
 )
