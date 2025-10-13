@@ -797,59 +797,56 @@ _USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
 }
 
 
-@pytest.fixture
-def uid_gid_map(container: ContainerData) -> Dict[str, Tuple[int, int]]:
-    """
-    Returns the expected UID and GID mapping based on the container's
-    operating system version.
-    """
-    # Create a deep copy of the base map to modify it without affecting
-    # other tests that might use the same base data.
-    expected_map = {k: list(v) for k, v in _USERNAME_UID_GID_MAP.items()}
-    # Apply special cases for TW & SLE 16
-    if OS_VERSION in ("tumbleweed", "16.0"):
-        # These users don't use the non-default GID on TW
-        for username in (
-            "nginx",
-            "dirsrv",
-            "postgres",
-            "registry",
-            "keadhcp",
-        ):
-            if username in expected_map:
-                del expected_map[username]
-
-        # Completely different UID & GID on TW
-        expected_map["pcp"] = [496, 498]
-        expected_map["wwwrun"] = [498, 498]
-        expected_map["pesign"] = [499, 499]
-        expected_map["systemd-coredump"] = [497, 1000]
-
-    # Handle the 'kiosk/xorg' special case
-    if (
-        (container.container.get_base().baseurl or "")
-        .split(":")[0]
-        .endswith("kiosk/xorg")
-    ):
-        if "user" in expected_map:
-            expected_map["user"] = [expected_map["user"][0], 100]
-
-    for name, (uid, gid) in expected_map.items():
-        uid = uid if uid is not None else 499
-        gid = gid if gid is not None else 499
-        expected_map[name] = (uid, gid)
-
-    return expected_map
-
-
 @pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
-def test_uids_stable(
-    container: ContainerData, uid_gid_map: Dict[str, Tuple[int, int]]
-) -> None:
+def test_uids_stable(container: ContainerData) -> None:
     """Check that every user in :file:`/etc/passwd` has a stable uid & gid as
     defined in ``_USERNAME_UID_GID_MAP``.
 
     """
+
+    def uid_gid_map(container: ContainerData) -> Dict[str, Tuple[int, int]]:
+        """
+        Returns the expected UID and GID mapping based on the container's
+        operating system version.
+        """
+        # Create a deep copy of the base map to modify it without affecting
+        # other tests that might use the same base data.
+        expected_map = {k: list(v) for k, v in _USERNAME_UID_GID_MAP.items()}
+        # Apply special cases for TW & SLE 16
+        if OS_VERSION in ("tumbleweed", "16.0"):
+            # These users don't use the non-default GID on TW
+            for username in (
+                "nginx",
+                "dirsrv",
+                "postgres",
+                "registry",
+                "keadhcp",
+            ):
+                if username in expected_map:
+                    del expected_map[username]
+
+            # Completely different UID & GID on TW
+            expected_map["pcp"] = [496, 498]
+            expected_map["wwwrun"] = [498, 498]
+            expected_map["pesign"] = [499, 499]
+            expected_map["systemd-coredump"] = [497, 1000]
+
+        # Handle the 'kiosk/xorg' special case
+        if (
+            (container.container.get_base().baseurl or "")
+            .split(":")[0]
+            .endswith("kiosk/xorg")
+        ):
+            if "user" in expected_map:
+                expected_map["user"] = [expected_map["user"][0], 100]
+
+        for name, (uid, gid) in expected_map.items():
+            uid = uid if uid is not None else 499
+            gid = gid if gid is not None else 499
+            expected_map[name] = (uid, gid)
+
+        return expected_map
+
     # collect users who owns subdirectories in directories /var, /etc, /opt, /home
     user_list = (
         container.connection.check_output(
