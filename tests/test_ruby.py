@@ -81,31 +81,38 @@ def test_install_gems(auto_container_per_test, gem):
     OS_VERSION != "tumbleweed", reason="no yarn (needed by rails) in SLE"
 )
 def test_rails_hello_world(auto_container_per_test):
-    auto_container_per_test.connection.run_expect([0], "gem install 'rails'")
+    """Check that we can install Rails and create a new minimal Rails application."""
+    auto_container_per_test.connection.check_output("gem install 'rails'")
 
     # Rails asset pipeline needs Node.js and yarn
-    auto_container_per_test.connection.run_expect(
-        [0], "zypper -n in nodejs-default yarn libyaml-devel"
+    auto_container_per_test.connection.check_output(
+        "zypper -n in nodejs-default yarn libyaml-devel"
     )
-    auto_container_per_test.connection.run_expect(
-        [0], "rails new /hello/ --minimal"
+    auto_container_per_test.connection.check_output(
+        "rails new /hello/ --minimal"
     )
 
 
-@pytest.mark.skipif(OS_VERSION != "tumbleweed", reason="no rails for ruby 2.5")
 def test_rails_template(auto_container_per_test):
+    """Check that we can install Rails and create a new Rails application from a template."""
+
+    if auto_container_per_test.connection.check_output(
+        "echo $RUBY_VERSION"
+    ).startswith("2.5"):
+        pytest.xfail("Rails 8 needs Ruby >= 3.0")
+
     # Rails asset pipeline needs Node.js and yarn
-    auto_container_per_test.connection.run_expect(
-        [0], "zypper -n in nodejs-default yarn libyaml-devel"
+    auto_container_per_test.connection.check_output(
+        "zypper -n in nodejs-default libyaml-devel"
     )
 
-    auto_container_per_test.connection.run_expect(
-        [0], "gem install 'rails:~> 7.0'"
+    auto_container_per_test.connection.check_output(
+        "gem install 'rails:~> 8.0'"
     )
     # auto_container_per_test.connection.run_expect([0], "zypper -n in npm nodejs")
     # auto_container_per_test.connection.run_expect([0], "npm -g install yarn")
-    auto_container_per_test.connection.run_expect(
-        [0], "rails new /hello/ --minimal"
+    auto_container_per_test.connection.check_output(
+        "rails new /hello/ --minimal"
     )
 
     # https://railsbytes.com/public/templates/x7msKX
