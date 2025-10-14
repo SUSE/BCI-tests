@@ -7,7 +7,6 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import OS_VERSION
-from bci_tester.selinux import selinux_status
 
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]
 
@@ -98,8 +97,6 @@ def test_base32_64(auto_container):
 def test_busybox_adduser(container_per_test):
     """Ensure the adduser command works and a new user can be created"""
     res = container_per_test.connection.run_expect([0, 1], "adduser -D foo")
-    if res.rc == 1 and selinux_status() == "enforcing":
-        pytest.xfail("https://bugzilla.suse.com/show_bug.cgi?id=1248283")
     assert res.rc == 0, f"adduser command failed with {res.stderr}"
 
     getent_passwd = container_per_test.connection.run_expect(
