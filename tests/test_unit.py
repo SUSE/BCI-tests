@@ -1,3 +1,5 @@
+"""Unit tests for validating that BCI-tests in principle works."""
+
 from pathlib import Path
 
 from bci_tester.fips import host_fips_enabled

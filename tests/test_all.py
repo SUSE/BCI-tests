@@ -864,7 +864,9 @@ def test_uids_stable(container: ContainerData) -> None:
         if name not in user_list:
             continue
 
-        expected_uid, expected_gid = uid_gid_map.get(name, (499, 499))
+        expected_uid, expected_gid = uid_gid_map(container).get(
+            name, (499, 499)
+        )
 
         assert uid == expected_uid, (
             f"Expected user {name} to have uid {expected_uid} but got {uid}"
