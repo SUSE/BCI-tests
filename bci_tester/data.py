@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+"""Common data and container definitions for the BCI testsuite"""
+
 import enum
 import os
 from datetime import timedelta
@@ -214,9 +215,7 @@ else:
     }[TARGET]
 
 
-BCI_REPO_NAME = "SLE_BCI"
-if OS_VERSION == "tumbleweed":
-    BCI_REPO_NAME = "repo-oss"
+BCI_REPO_NAME = "repo-oss" if OS_VERSION == "tumbleweed" else "SLE_BCI"
 
 
 def create_container_version_mark(
@@ -254,24 +253,24 @@ if BCI_DEVEL_REPO is None:
         BCI_DEVEL_REPO = "http://download.opensuse.org/tumbleweed/repo/oss/"
     else:
         # from SLE 15 SP6 onward we use the unauthenticated CDN
-        cdn_prefix = (
+        CDN_PREFIX = (
             "public-dl"
             if OS_SP_VERSION >= 6 or OS_MAJOR_VERSION > 15
             else "updates"
         )
         if OS_MAJOR_VERSION > 15:
-            BCI_DEVEL_REPO = f"https://{cdn_prefix}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}.{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
+            BCI_DEVEL_REPO = f"https://{CDN_PREFIX}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}.{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
         else:
-            BCI_DEVEL_REPO = f"https://{cdn_prefix}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
-    _BCI_REPLACE_REPO_CONTAINERFILE = ""
+            BCI_DEVEL_REPO = f"https://{CDN_PREFIX}.suse.com/SUSE/Products/SLE-BCI/{OS_MAJOR_VERSION}-SP{OS_SP_VERSION}/{LOCALHOST.system_info.arch}/product/"
+    _bci_replace_repo_containerfile = ""
 else:
-    bci_repo_path = f"/etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
+    BCI_REPO_PATH = f"/etc/zypp/repos.d/{BCI_REPO_NAME}.repo"
     bci_repo_replace = "${line/baseurl*/baseurl = " + BCI_DEVEL_REPO + "}"
-    _BCI_REPLACE_REPO_CONTAINERFILE = f"""RUN if [ -e {bci_repo_path} ]; then \\
+    _bci_replace_repo_containerfile = f"""RUN if [ -e {BCI_REPO_PATH} ]; then \\
         while IFS= read -r line; do \\
-            echo \"{bci_repo_replace}\" >> {bci_repo_path}.tmp; \\
-        done < {bci_repo_path}; \\
-        mv {bci_repo_path}.tmp {bci_repo_path}; \\
+            echo \"{bci_repo_replace}\" >> {BCI_REPO_PATH}.tmp; \\
+        done < {BCI_REPO_PATH}; \\
+        mv {BCI_REPO_PATH}.tmp {BCI_REPO_PATH}; \\
     fi"""
 
 assert BCI_DEVEL_REPO, "BCI_DEVEL_REPO must be set at this point"
@@ -427,9 +426,9 @@ def create_BCI(
         containerfile = ""
     else:
         if container_user:
-            containerfile = f"USER root\n{_BCI_REPLACE_REPO_CONTAINERFILE}\nUSER {container_user}"
+            containerfile = f"USER root\n{_bci_replace_repo_containerfile}\nUSER {container_user}"
         else:
-            containerfile = _BCI_REPLACE_REPO_CONTAINERFILE
+            containerfile = _bci_replace_repo_containerfile
 
     if (
         "SCC_CREDENTIAL_USERNAME" in os.environ
@@ -834,14 +833,14 @@ POSTGRESQL_CONTAINERS = [
     )
 ]
 
-_DISTRIBUTION_VERSION = "latest"
+_distribution_version = "latest"
 if OS_VERSION in ("15.7",):
-    _DISTRIBUTION_VERSION = "2.8"
+    _distribution_version = "2.8"
 elif OS_VERSION in ("16.0",):
-    _DISTRIBUTION_VERSION = "3.0"
+    _distribution_version = "3.0"
 
 DISTRIBUTION_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/registry:{_DISTRIBUTION_VERSION}",
+    build_tag=f"{APP_CONTAINER_PREFIX}/registry:{_distribution_version}",
     bci_type=ImageType.APPLICATION,
     image_type="kiwi",
     forwarded_ports=[PortForwarding(container_port=5000)],
@@ -858,14 +857,14 @@ if OS_VERSION in (
     "15.6",
     "15.7",
 ):
-    _GIT_APP_VERSION = "2.51"
+    _git_app_version = "2.51"
 elif OS_VERSION in ("15.5", "15.4"):
-    _GIT_APP_VERSION = "2.35"
+    _git_app_version = "2.35"
 else:
-    _GIT_APP_VERSION = "latest"
+    _git_app_version = "latest"
 
 GIT_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/git:{_GIT_APP_VERSION}",
+    build_tag=f"{APP_CONTAINER_PREFIX}/git:{_git_app_version}",
     bci_type=ImageType.APPLICATION,
 )
 

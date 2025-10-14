@@ -1,3 +1,5 @@
+"""Tests for validating the KEA DHCP Server image."""
+
 import json
 import os
 import re
