@@ -36,7 +36,6 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
-from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
@@ -470,15 +469,13 @@ def test_zypper_not_present_in_containers_without_it(
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
             + KUBEVIRT_CONTAINERS
-            + ([KERNEL_MODULE_CONTAINER] if OS_VERSION == "16.0" else [])
         )
     ],
     indirect=True,
 )
 def test_systemd_not_installed_in_all_containers_except_init(container):
     """Ensure that systemd is not present in all containers besides the init
-    pcp, and postfix containers.
-
+    pcp and udev/systemd based containers.
     """
     assert not container.connection.exists("systemctl")
 
@@ -487,6 +484,39 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
         assert not container.connection.package("systemd").is_installed, (
             "systemd is installed in this container!"
         )
+
+
+@pytest.mark.skipif(
+    OS_VERSION in ("15.3", "15.4", "15.5", "15.6-ai", "15.6-spr"),
+    reason="doesn't have the fixes for blkid/udev",
+)
+@pytest.mark.parametrize(
+    "container",
+    [
+        c
+        for c in ALL_CONTAINERS
+        if (
+            c
+            not in PCP_CONTAINERS
+            + [INIT_CONTAINER]
+            + KIWI_CONTAINERS
+            + KIOSK_PULSEAUDIO_CONTAINERS
+            + KIOSK_XORG_CONTAINERS
+            + KUBEVIRT_CONTAINERS
+        )
+    ],
+    indirect=True,
+)
+def test_udev_not_installed_in_all_containers_except_init(container):
+    """Ensure that udev is not present in all containers besides init
+    or udev based containers.
+    """
+    assert not container.connection.exists("udevadm")
+
+    if container.connection.file("/etc/blkid.conf").exists:
+        assert "EVALUATE=udev" not in container.connection.file(
+            "/etc/blkid.conf"
+        ).content.decode("utf-8")
 
 
 @pytest.mark.parametrize(
