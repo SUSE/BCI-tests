@@ -116,6 +116,7 @@ markers = [
     'helm_3',
     'helm_latest',
     'nginx_1.21',
+    'nginx_1.27',
     'nginx_latest',
     'golang_oldstable',
     'golang_oldstable-openssl',

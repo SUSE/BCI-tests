@@ -75,7 +75,7 @@ from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import NGINX_CONTAINER
+from bci_tester.data import NGINX_CONTAINERS
 from bci_tester.data import NODEJS_CONTAINERS
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
@@ -189,8 +189,8 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
-        (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
+    + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
         (c, "openjdk.devel", ImageType.LANGUAGE_STACK)

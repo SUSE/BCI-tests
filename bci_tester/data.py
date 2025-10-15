@@ -68,10 +68,10 @@ ALLOWED_BCI_REPO_OS_VERSIONS = (
 )
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.7",)
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.0")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "tumbleweed")
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
 
 # Test base containers by default for these versions
 _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
@@ -638,7 +638,7 @@ PYTHON_WITH_PIPX_CONTAINERS = [
     )
     for ver, versions in (
         ("3.12", ["15.6", "tumbleweed"]),
-        ("3.13", ["15.7", "tumbleweed"]),
+        ("3.13", ["15.7", "16.0", "tumbleweed"]),
     )
 ]
 
@@ -648,17 +648,17 @@ PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.6", _DEFAULT_NONBASE_SLE_VERSIONS),
-        ("3.11", _DEFAULT_NONBASE_OS_VERSIONS),
+        ("3.6", ("15.7",)),
+        ("3.11", ("15.7", "tumbleweed")),
     )
 ]
 
 RUBY_25_CONTAINER = create_BCI(
-    build_tag="bci/ruby:2.5", available_versions=_DEFAULT_NONBASE_SLE_VERSIONS
+    build_tag="bci/ruby:2.5", available_versions=("15.7",)
 )
 
 RUBY_34_CONTAINER = create_BCI(
-    build_tag="bci/ruby:3.4", available_versions=["15.7"]
+    build_tag="bci/ruby:3.4", available_versions=_DEFAULT_NONBASE_SLE_VERSIONS
 )
 
 RUBY_LATEST_CONTAINER = create_BCI(
@@ -674,47 +674,47 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
 
 DOTNET_SDK_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:8.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_9_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:9.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_10_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:10.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:8.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_9_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:9.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:10.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:8.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_9_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:9.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_10_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:10.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
@@ -868,6 +868,8 @@ if OS_VERSION in (
     "15.7",
 ):
     _git_app_version = "2.51"
+elif OS_VERSION in ("16.0",):
+    _git_app_version = "2.51"
 elif OS_VERSION in ("15.5", "15.4"):
     _git_app_version = "2.35"
 else:
@@ -895,13 +897,19 @@ COSIGN_CONTAINERS = [
     )
 ]
 
-_NGINX_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "1.21"
-
-NGINX_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{_NGINX_APP_VERSION}",
-    bci_type=ImageType.APPLICATION,
-    forwarded_ports=[PortForwarding(container_port=80)],
-)
+NGINX_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{nginx_ver}",
+        bci_type=ImageType.APPLICATION,
+        available_versions=os_versions,
+        forwarded_ports=[PortForwarding(container_port=80)],
+    )
+    for nginx_ver, os_versions in (
+        ("latest", ("tumbleweed",)),
+        ("1.21", ("15.7",)),
+        ("1.27", ("16.0",)),
+    )
+]
 
 KUBECTL_CONTAINERS = [
     create_BCI(
@@ -949,7 +957,7 @@ GCC_CONTAINERS = [
     )
     for gcc_version, os_versions in (
         (13, ("tumbleweed",)),
-        (14, _DEFAULT_NONBASE_OS_VERSIONS),
+        (14, ("15.7", "tumbleweed")),
         (15, ("16.0", "tumbleweed")),
     )
 ]
@@ -1020,7 +1028,7 @@ ALERTMANAGER_CONTAINERS = [
         available_versions=versions,
     )
     for tag, versions in (
-        ("0.26", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("0.26", ("15.7",)),
         ("latest", ("tumbleweed",)),
     )
 ]
@@ -1033,7 +1041,7 @@ BLACKBOX_CONTAINERS = [
         available_versions=versions,
     )
     for tag, versions in (
-        ("0.26", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("0.26", ("15.7",)),
         ("latest", ("tumbleweed",)),
     )
 ]
@@ -1045,7 +1053,7 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for tag, versions in (("11", _DEFAULT_NONBASE_OS_VERSIONS),)
+    for tag, versions in (("11", ("15.7",)),)
 ]
 
 STUNNEL_CONTAINER = create_BCI(
@@ -1083,7 +1091,7 @@ KIOSK_FIREFOX_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/firefox-esr:esr",
         bci_type=ImageType.APPLICATION,
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        available_versions=("15.7",),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1092,7 +1100,7 @@ KIOSK_PULSEAUDIO_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/pulseaudio:17",
         bci_type=ImageType.APPLICATION,
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        available_versions=("15.7",),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1101,7 +1109,7 @@ KIOSK_XORG_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/xorg:21",
         bci_type=ImageType.APPLICATION,
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        available_versions=("15.7",),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1110,7 +1118,7 @@ KIOSK_XORG_CLIENT_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/xorg-client:21",
         bci_type=ImageType.APPLICATION,
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        available_versions=("15.7",),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1249,7 +1257,7 @@ RMT_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/rmt-server:2",
         bci_type=ImageType.APPLICATION,
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+        available_versions=("15.7",),
         custom_entry_point="/bin/bash",
     )
 ]
@@ -1349,7 +1357,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MICRO_CONTAINER,
     MICRO_FIPS_CONTAINER,
     MINIMAL_CONTAINER,
-    NGINX_CONTAINER,
+    *NGINX_CONTAINERS,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1396,7 +1404,6 @@ else:
             MICRO_CONTAINER,
             MICRO_FIPS_CONTAINER,
             MINIMAL_CONTAINER,
-            NGINX_CONTAINER,
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
@@ -1418,6 +1425,7 @@ else:
         + LTSS_BASE_FIPS_CONTAINERS
         + MARIADB_CLIENT_CONTAINERS
         + MARIADB_CONTAINERS
+        + NGINX_CONTAINERS
         + NODEJS_CONTAINERS
         + OPENJDK_CONTAINERS
         + OPENJDK_DEVEL_CONTAINERS
