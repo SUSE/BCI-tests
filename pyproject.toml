@@ -109,6 +109,7 @@ markers = [
     'git_latest',
     'helm_3',
     'helm_latest',
+    'mcpo_0',
     'milvus_2.4',
     'nginx_1.21',
     'nginx_latest',

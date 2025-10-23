@@ -8,6 +8,7 @@ from tenacity import wait_exponential
 
 from bci_tester.data import LMCACHE_LMSTACK_ROUTER_CONTAINER
 from bci_tester.data import LMCACHE_VLLM_OPENAI_CONTAINER
+from bci_tester.data import MCPO_CONTAINER
 from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENWEBUI_CONTAINER
@@ -21,6 +22,7 @@ CONTAINER_IMAGES = (
     OLLAMA_CONTAINER,
     OPENWEBUI_CONTAINER,
     MILVUS_CONTAINER,
+    MCPO_CONTAINER,
     PYTORCH_CONTAINER,
     SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
     SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
@@ -172,3 +174,25 @@ def test_lmstack_router_health(container):
     container.connection.check_output(
         "python3.11 -c 'import vllm_router._version; print(vllm_router._version.__version__)'"
     )
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    [MCPO_CONTAINER],
+    indirect=["container_per_test"],
+)
+def test_mcpo_health(container_per_test):
+    """Test that we can reach the port 8000 successfully."""
+    host_port = container_per_test.forwarded_ports[0].host_port
+
+    # Retry 5 times with exponential backoff delay
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(5),
+    )
+    def check_mcpo_response():
+        resp = requests.get(f"http://localhost:{host_port}/docs", timeout=30)
+        resp.raise_for_status()
+        assert "mcp-time" in resp.text
+
+    check_mcpo_response()
