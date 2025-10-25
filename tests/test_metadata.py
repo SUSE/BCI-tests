@@ -473,7 +473,6 @@ def test_general_labels(
             assert "BCI" in labels[f"{prefix}.title"]
 
 
-@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container,container_name,container_type",
     IMAGES_AND_NAMES,
@@ -510,8 +509,12 @@ def test_url(
             ImageType.SAC_LANGUAGE_STACK,
             ImageType.SAC_APPLICATION,
         ):
+            container_mapping: dict[str, str] = {
+                "lmcache-lmstack-router": "vllm",
+                "lmcache-vllm-openai": "vllm",
+            }
             expected_url = (
-                f"https://apps.rancher.io/applications/{container_name}",
+                f"https://apps.rancher.io/applications/{container_mapping.get(container_name, container_name)}",
                 f"https://apps.rancher.io/applications/{container_name.rpartition('-')[0]}",
             )
         elif container_type == ImageType.OS_LTSS:
