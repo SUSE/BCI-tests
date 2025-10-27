@@ -413,7 +413,11 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     # but that is a few bytes larger so we accept it as an exception
     known_orphaned_packages = {
         "kubic-locale-archive",
-        "skelcd-EULA-bci",
+        (
+            "skelcd-EULA-BCI"
+            if OS_VERSION.startswith("16")
+            else "skelcd-EULA-bci"
+        ),
         "sles-ltss-release",
         ("SLES-release" if OS_VERSION.startswith("16") else "sles-release"),
         "ALP-dummy-release",
