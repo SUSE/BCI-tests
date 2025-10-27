@@ -1049,6 +1049,24 @@ OPENWEBUI_CONTAINER = create_BCI(
     forwarded_ports=[PortForwarding(container_port=8080)],
 )
 
+MCPO_CONTAINER = create_BCI(
+    build_tag=f"{SAC_CONTAINER_PREFIX}/mcpo:0",
+    bci_type=ImageType.SAC_APPLICATION,
+    available_versions=["15.6-ai"],
+    custom_entry_point="mcpo",
+    extra_entrypoint_args=[
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--",
+        "uvx",
+        "mcp-server-time",
+        "--local-timezone=America/New_York",
+    ],
+    forwarded_ports=[PortForwarding(container_port=8000)],
+)
+
 MILVUS_CONTAINER = create_BCI(
     build_tag=f"{SAC_CONTAINER_PREFIX}/milvus:2.4",
     bci_type=ImageType.SAC_APPLICATION,
@@ -1369,6 +1387,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *KIOSK_XORG_CONTAINERS,
     *KIOSK_XORG_CLIENT_CONTAINERS,
     *KIOSK_PULSEAUDIO_CONTAINERS,
+    MCPO_CONTAINER,
     MICRO_CONTAINER,
     MICRO_FIPS_CONTAINER,
     MINIMAL_CONTAINER,
