@@ -842,7 +842,6 @@ elif OS_VERSION in ("16.0",):
 DISTRIBUTION_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/registry:{_distribution_version}",
     bci_type=ImageType.APPLICATION,
-    image_type="kiwi",
     forwarded_ports=[PortForwarding(container_port=5000)],
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
     # FIXME: https://github.com/SUSE/BCI-tests/issues/647, Default timeout is 4 minutes
