@@ -101,14 +101,15 @@ def test_rails_template(auto_container_per_test):
     ).startswith("2.5"):
         pytest.xfail("Rails 8 needs Ruby >= 3.0")
 
-    # Rails asset pipeline needs Node.js and yarn
+    # Rails asset pipeline needs Node.js and yarn. apps:template needs libxslt
     auto_container_per_test.connection.check_output(
-        "zypper -n in nodejs-default libyaml-devel"
+        "zypper -n in nodejs-default libyaml-devel libxslt1"
     )
 
     auto_container_per_test.connection.check_output(
         "gem install 'rails:~> 8.0'"
     )
+
     # auto_container_per_test.connection.run_expect([0], "zypper -n in npm nodejs")
     # auto_container_per_test.connection.run_expect([0], "npm -g install yarn")
     auto_container_per_test.connection.check_output(
