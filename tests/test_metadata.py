@@ -68,7 +68,6 @@ from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
-from bci_tester.data import MCPO_CONTAINER
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MILVUS_CONTAINER
@@ -80,6 +79,7 @@ from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
 from bci_tester.data import OPENWEBUI_CONTAINER
 from bci_tester.data import OPENWEBUI_PIPELINES_CONTAINER
+from bci_tester.data import OPEN_WEBUI_MCPO_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
@@ -339,7 +339,11 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             "lmcache-lmstack-router",
             ImageType.SAC_APPLICATION,
         ),
-        (MCPO_CONTAINER, "mcpo", ImageType.SAC_APPLICATION),
+        (
+            OPEN_WEBUI_MCPO_CONTAINER,
+            "open-webui-mcpo",
+            ImageType.SAC_APPLICATION,
+        ),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
     + [
