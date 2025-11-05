@@ -27,10 +27,18 @@ SPR_CONFIG_DIR = Path(__file__).parent.parent / "tests" / "files" / "spr"
 SPR_CONFIG = {
     "db": {
         "name": "postgresql",
-        "volumes": [ContainerVolume("/var/lib/postgresql/data")],
+        "url": "registry.suse.com/suse/postgres:17",
+        "volumes": [
+            ContainerVolume("/var/lib/psql/data"),
+            BindMount(
+                "/docker-entrypoint-initdb.d/initial-registry.sql",
+                host_path=str(SPR_CONFIG_DIR / "db" / "initial-registry.sql"),
+            ),
+        ],
     },
     "valkey": {
         "name": "redis",
+        "url": "registry.suse.com/suse/valkey:8",
         "volumes": [ContainerVolume("/var/lib/valkey")],
     },
     "registry": {
@@ -150,6 +158,7 @@ SPR_CONFIG = {
     },
     "nginx": {
         "name": "proxy",
+        "url": "registry.suse.com/suse/nginx:1.21",
         "volumes": [
             BindMount("/etc/nginx", host_path=str(SPR_CONFIG_DIR / "nginx")),
             BindMount(
@@ -166,6 +175,10 @@ SPR_CONFIG = {
 SPR_CONTAINERS_FOR_POD = []
 
 for img, conf in SPR_CONFIG.items():
+    url = conf.get(
+        "url",
+        f"{BASEURL}/{_get_repository_name('dockerfile')}private-registry/harbor-{img}:latest",
+    )
     launch_args = [f"--name={conf.get('name', img)}"]
 
     env_file = SPR_CONFIG_DIR / img / "env"
@@ -174,7 +187,7 @@ for img, conf in SPR_CONFIG.items():
 
     SPR_CONTAINERS_FOR_POD.append(
         Container(
-            url=f"{BASEURL}/{_get_repository_name('dockerfile')}private-registry/harbor-{img}:latest",
+            url=url,
             volume_mounts=conf["volumes"],
             extra_launch_args=launch_args,
         )
