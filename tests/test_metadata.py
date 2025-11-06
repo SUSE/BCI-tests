@@ -449,6 +449,10 @@ def test_general_labels(
                 assert (
                     "based on the SLE Base Container Image."
                     in labels[f"{prefix}.description"]
+                    or "based on the SUSE Linux Enterprise Base Container Image."
+                    in labels[f"{prefix}.description"]
+                    or "based on the SUSE Linux Base Container Image."
+                    in labels[f"{prefix}.description"]
                 )
 
         if version == "tumbleweed":
@@ -470,6 +474,7 @@ def test_general_labels(
             labels["com.suse.lifecycle-url"]
             in (
                 "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
+                "https://www.suse.com/lifecycle#suse-linux-enterprise-server-16",
                 "https://www.suse.com/lifecycle",  # SLE 15 SP5 base container has incorrect URL
             )
         )
