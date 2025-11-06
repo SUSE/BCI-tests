@@ -456,7 +456,6 @@ def create_BCI(
 KIWI_CONTAINERS = [
     create_BCI(build_tag=f"bci/kiwi:{tag}", available_versions=(ver,))
     for ver, tag in (
-        ("15.7", "9.24"),
         ("16.0", "10.2"),
         ("tumbleweed", "latest"),
     )
