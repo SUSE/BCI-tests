@@ -20,7 +20,7 @@ def test_nginx_welcome_page(auto_container):
         stop=stop_after_attempt(5),
     )
     def check_nginx_response():
-        resp = requests.get(f"http://localhost:{host_port}/", timeout=30)
+        resp = requests.get(f"http://0.0.0.0:{host_port}/", timeout=30)
         resp.raise_for_status()
         assert "Welcome to nginx" in resp.text
 
