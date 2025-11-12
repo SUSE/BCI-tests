@@ -1308,22 +1308,16 @@ SPR_CONTAINERS = [
         build_tag=f"private-registry/harbor-{img}:latest",
         bci_type=ImageType.APPLICATION,
         available_versions=["15.6-spr"],
-        custom_entry_point="/bin/sh" if img != "db" else "",
-        extra_environment_variables=(
-            {"POSTGRES_PASSWORD": POSTGRES_PASSWORD} if img == "db" else {}
-        ),
+        custom_entry_point="/bin/sh",
     )
     for img in (
         "core",
-        "db",
         "exporter",
         "jobservice",
-        "nginx",
         "portal",
         "registry",
         "registryctl",
         "trivy-adapter",
-        "valkey",
     )
 ]
 
