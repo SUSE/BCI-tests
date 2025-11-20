@@ -210,11 +210,29 @@ def test_sle15_lifecycle(container_per_test):
     lifecycle = zypper_lifecycle_xml.find(
         ".//product[@name='SLES']/xmlfwd/codestream/endoflife"
     )
-    assert lifecycle is not None, (
-        "No endoflife information found in product description"
-    )
-    assert lifecycle.text == "2031-07-31", (
-        f"Expected end of life 2031-07-31, but got {lifecycle.text}"
+
+    lifecycle_date = None
+
+    if lifecycle is not None and lifecycle.text:
+        lifecycle_date = lifecycle.text
+    else:
+        # if codestream/endoflife is empty
+        # extract endoflife from the product itself
+        lifecycle = zypper_lifecycle_xml.find(
+            ".//product[@name='SLES']/endoflife"
+        )
+        if lifecycle is not None:
+            lifecycle_date = lifecycle.get("text")[:10]
+
+    assert lifecycle_date is not None, "No endoflife information found"
+
+    lifecycle_end = {
+        "15.6": "2025-12-31",
+        "15.7": "2031-07-31",
+    }
+
+    assert lifecycle_date == lifecycle_end[OS_VERSION], (
+        f"Expected end of life {lifecycle_end[OS_VERSION]}, but got {lifecycle_date}"
     )
 
 
