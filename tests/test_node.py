@@ -40,7 +40,6 @@ def test_node_version(auto_container):
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/isaacs/node-glob",
-                repository_tag="v11.0.3",
                 build_command="npm ci && npm test",
                 marks=[
                     pytest.mark.skipif(
