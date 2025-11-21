@@ -671,8 +671,8 @@ RUBY_LATEST_CONTAINER = create_BCI(
 RUBY_CONTAINERS = [RUBY_25_CONTAINER, RUBY_34_CONTAINER, RUBY_LATEST_CONTAINER]
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
-    LOCALHOST.system_info.arch != "x86_64",
-    reason="The .Net containers are only available on x86_64",
+    LOCALHOST.system_info.arch not in ("aarch64", "x86_64"),
+    reason="The .Net containers are only available on aarch64 and x86_64",
 )
 
 DOTNET_SDK_8_0_CONTAINER = create_BCI(
