@@ -196,6 +196,9 @@ def test_tox(auto_container_per_test):
     )
 
 
+@pytest.mark.skipif(
+    OS_VERSION == "16.0", reason="no packaged tox version available"
+)
 def test_packaged_tox(auto_container_per_test):
     """Ensure we can use the packaged tox version."""
     version = auto_container_per_test.connection.check_output(
