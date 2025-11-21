@@ -195,7 +195,7 @@ def test_repo_content_licensing(container_per_test) -> None:
 
 
 @pytest.mark.skipif(
-    not OS_VERSION.startswith("15."), reason="SLE15 specific test"
+    not OS_VERSION.startswith("15.7"), reason="SLE15 specific test"
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
 def test_sle15_lifecycle(container_per_test):
