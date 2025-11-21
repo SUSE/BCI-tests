@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install necessary software
         run: |
           set -e
@@ -36,7 +36,7 @@ jobs:
       matrix: ${{ steps.setmatrix.outputs.matrix }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: get the current PR
         uses: 8BitJonny/gh-get-current-pr@4.0.0
         id: pr
@@ -82,7 +82,7 @@ jobs:
       image: registry.suse.com/bci/python:${{ matrix.python_version }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install tox
         run: |
           python3 --version
@@ -97,7 +97,7 @@ jobs:
     name: Build documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -109,7 +109,7 @@ jobs:
     name: Lint source code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -226,7 +226,7 @@ jobs:
       - name: Clean up disk space to maximize available space
         run: sudo rm -rf /usr/local/*/* /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache && sudo docker image prune --all --force
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
