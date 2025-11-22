@@ -14,9 +14,12 @@ offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
 
+import base64
 import datetime
+import json
 import urllib.parse
 from pathlib import Path
+from typing import Any
 from typing import List
 from typing import Tuple
 
@@ -910,4 +913,162 @@ def test_oci_base_refs(
 
     LOCALHOST.check_output(
         f"{container_runtime.runner_binary} manifest inspect {base_repository}@{base_digest}",
+    )
+
+
+def _reg(registry: str, repository: str, otype: str, object: str) -> Any:
+    r = requests.get(
+        f"https://{registry}/v2/{repository}/{otype}/{object}",
+        timeout=5,
+        allow_redirects=False,
+        verify=not registry.endswith("suse.de"),
+        headers={"User-Agent": "github.com/SUSE/BCI-tests"},
+    )
+    return r.json()
+
+
+@pytest.mark.skipif(
+    OS_VERSION not in ("15.7",), reason="Does not have buildtime attestations"
+)
+@pytest.mark.parametrize(
+    "container",
+    [
+        MICRO_CONTAINER,
+        MICRO_FIPS_CONTAINER,
+        BASE_CONTAINER,
+        *BASE_FIPS_CONTAINERS,
+    ],
+    indirect=["container"],
+)
+def test_buildtime_attestations(container):
+    baseurl = urllib.parse.urlparse(
+        f"oci://{container.container.get_base().url}"
+    )
+    repository, _, tag = baseurl.path.partition(":")
+
+    container_reference = container.inspect.config.labels[
+        "org.opensuse.reference"
+    ]
+    assert container_reference
+
+    digest = None
+    # Find the match for the local architecture in the fat manifest
+    fat_manifest = _reg(baseurl.netloc, repository, "manifests", tag)
+    assert fat_manifest["schemaVersion"] == 2
+    for manifest in fat_manifest["manifests"]:
+        local_arch = {"aarch64": "arm64", "x86_64": "amd64"}.get(
+            LOCALHOST.system_info.arch, LOCALHOST.system_info.arch
+        )
+        if manifest["platform"]["architecture"] == local_arch:
+            digest = manifest["digest"]
+            break
+
+    assert digest, (
+        f"No manifest found for architecture {LOCALHOST.system_info.arch}"
+    )
+    # Fetch the attestation for the specific architecture
+    attestation = _reg(
+        baseurl.netloc,
+        repository,
+        "manifests",
+        digest.replace("sha256:", "sha256-") + ".att",
+    )
+    got_clamav: bool = False
+    # Trivy is not scanning on s390x architecture
+    got_trivy: bool = manifest["platform"]["architecture"] in ("s390x",)
+    # NeuVector is only scanning on x86_64 and aarch64, so skip on ppc64le and s390x
+    got_neuvector: bool = manifest["platform"]["architecture"] in (
+        "ppc64le",
+        "s390x",
+    )
+    for layer in attestation["layers"]:
+        predicate_type = layer.get("annotations", {}).get(
+            "org.open-build-service.intoto.predicatetype", None
+        )
+        predicate = _reg(baseurl.netloc, repository, "blobs", layer["digest"])
+
+        payload = json.loads(base64.b64decode(predicate["payload"]))
+        assert digest.endswith(payload["subject"][0]["digest"]["sha256"])
+
+        if predicate_type == "https://cosign.sigstore.dev/attestation/v1":
+            assert not got_clamav
+            got_clamav = True
+            clamav_result = payload["predicate"]["data"]
+            assert "Infected files: 0" in clamav_result
+
+            virus_count_found = False
+            files_count_found = False
+            for r in clamav_result.splitlines():
+                if r.startswith("Known viruses: "):
+                    assert int(r.partition(":")[2]) > 100000, (
+                        f"{clamav_result} does not have at least 100000 signatures"
+                    )
+                    virus_count_found = True
+                if r.startswith("Scanned files: "):
+                    assert int(r.partition(":")[2]) >= 200, (
+                        f"{clamav_result} does not have at least 200 files scanned"
+                    )
+                    files_count_found = True
+
+            assert virus_count_found and files_count_found
+            assert 500 < len(predicate["payload"]) < 1000, (
+                "ClamAV scan result has unusual length"
+            )
+            continue
+        if not predicate_type.endswith("/vuln/v1"):
+            assert 10000 < len(predicate["payload"]) < 10000000, (
+                f"Attestation payload length {len(predicate['payload'])} outside range"
+            )
+            continue
+
+        scanner = payload["predicate"]["scanner"]
+        result = scanner["result"]
+        if "aquasecurity/trivy" in scanner["uri"]:
+            assert not got_trivy, (
+                f"Multiple Trivy attestations for {manifest['platform']['architecture']}"
+            )
+            got_trivy = True
+
+            trivy_reference = result["Metadata"]["ImageConfig"]["config"][
+                "Labels"
+            ]["org.opensuse.reference"]
+            assert container_reference == trivy_reference, (
+                f"Unexpected reference {trivy_reference} in trivy report"
+            )
+
+            for finding in result["Results"]:
+                assert "Vulnerabilities" not in finding, (
+                    f"Image has vulnerability {finding['Vulnerabilities'][0]['VulnerabilityID']}"
+                )
+            assert "Class" in result["Results"][0]
+        elif "neuvector/scanner" in scanner["uri"]:
+            assert not got_neuvector, (
+                f"Multiple NeuVector attestations for {manifest['platform']['architecture']}"
+            )
+            got_neuvector = True
+            assert scanner["db"]["uri"]
+            if "error_message" in result:
+                assert len(result["error_message"]) == 0
+            for check in result["report"]["checks"]:
+                assert check["level"] in ("WARN",), (
+                    f"Neuvector file {check['description']}"
+                )
+
+            # for some reason, NeuVector cannot extract labels from kiwi type containers
+            if "labels" in result["report"]:
+                assert (
+                    container_reference
+                    == result["report"]["labels"]["org.opensuse.reference"]
+                )
+        assert 10000 < len(predicate["payload"]) < 1000000, (
+            f"Vulnerability report length {len(predicate['payload'])} outside range"
+        )
+    assert got_clamav, (
+        f"ClamAV missing for {manifest['platform']['architecture']}"
+    )
+    assert got_neuvector, (
+        f"NeuVector missing for {manifest['platform']['architecture']}"
+    )
+    assert got_trivy, (
+        f"Trivy missing for {manifest['platform']['architecture']}"
     )
