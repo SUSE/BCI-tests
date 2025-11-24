@@ -90,6 +90,9 @@ from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
+from bci_tester.data import PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
+from bci_tester.data import PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
+from bci_tester.data import PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
@@ -131,17 +134,25 @@ SKIP_IF_AI_MARK = pytest.mark.skipif(
 SKIP_IF_LTSS_VERSION = pytest.mark.skipif(
     OS_VERSION in RELEASED_LTSS_VERSIONS, reason="LTSS container"
 )
+SKIP_IF_PC_MARK = pytest.mark.skipif(
+    OS_VERSION == "16.0-pc2025",
+    reason="not for Public Cloud Toolchain containers",
+)
 
 
 def _get_container_label_prefix(
     container_name: str, container_type: ImageType
 ) -> str:
+    if OS_VERSION == "16.0-pc2025" and container_type == ImageType.APPLICATION:
+        return f"com.suse.public-cloud-toolchain.{container_name}"
+
     if OS_VERSION == "tumbleweed" and container_name == "base":
         return "org.opensuse.base"
     if OS_VERSION == "tumbleweed":
         return f"org.opensuse.{container_type}.{container_name}"
     if container_type == ImageType.OS_LTSS:
         return f"com.suse.sle.{container_name}"
+
     return f"com.suse.{container_type}.{container_name}"
 
 
@@ -365,6 +376,21 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             "open-webui-mcpo",
             ImageType.SAC_APPLICATION,
         ),
+        (
+            PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            "aws-toolchain-runtime-provider",
+            ImageType.APPLICATION,
+        ),
+        (
+            PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            "az-toolchain-runtime-provider",
+            ImageType.APPLICATION,
+        ),
+        (
+            PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            "google-toolchain-runtime-provider",
+            ImageType.APPLICATION,
+        ),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
     + [
@@ -466,6 +492,11 @@ def test_general_labels(
                     "for SUSE Private Registry"
                     in labels[f"{prefix}.description"]
                 )
+            elif OS_VERSION in ("16.0-pc2025",):
+                assert (
+                    "Use this container when building a transparent"
+                    in labels[f"{prefix}.description"]
+                )
             else:
                 assert (
                     "based on the SLE Base Container Image."
@@ -543,6 +574,8 @@ def test_url(
                 "https://www.opensuse.org",
                 "https://www.opensuse.org/",
             )
+        elif OS_VERSION == "16.0-pc2025":
+            expected_url = ("https://www.suse.com",)
         elif container_type in (
             ImageType.SAC_LANGUAGE_STACK,
             ImageType.SAC_APPLICATION,
@@ -565,6 +598,7 @@ def test_url(
         )
 
 
+@SKIP_IF_PC_MARK
 @SKIP_IF_AI_MARK
 @SKIP_IF_LTSS_VERSION
 @pytest.mark.parametrize(
@@ -680,6 +714,11 @@ def test_disturl(
         assert "obs://build.suse.de/Devel:AI" in disturl
     elif OS_VERSION == "15.6-spr" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:SCC:PrivateRegistry" in disturl
+    elif OS_VERSION == "16.0-pc2025":
+        assert (
+            "obs://build.suse.de/SUSE:SLFO:Products:PublicCloud:Toolchain:2025"
+            in disturl
+        )
     elif OS_VERSION == "16.0":
         if baseurl.netloc == "registry.opensuse.org":
             assert (
@@ -937,6 +976,7 @@ def _reg(registry: str, repository: str, otype: str, object: str) -> Any:
         MICRO_FIPS_CONTAINER,
         BASE_CONTAINER,
         *BASE_FIPS_CONTAINERS,
+        BUSYBOX_CONTAINER,
     ],
     indirect=["container"],
 )
