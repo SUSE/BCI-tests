@@ -937,6 +937,7 @@ def _reg(registry: str, repository: str, otype: str, object: str) -> Any:
         MICRO_FIPS_CONTAINER,
         BASE_CONTAINER,
         *BASE_FIPS_CONTAINERS,
+        BUSYBOX_CONTAINER,
     ],
     indirect=["container"],
 )
