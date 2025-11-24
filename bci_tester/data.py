@@ -52,6 +52,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6-spr",
     "15.7",
     "16.0",
+    "16.0-pc2025",
     "tumbleweed",
 )
 
@@ -190,7 +191,9 @@ else:
     ibs_released: str = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
-    if OS_VERSION.startswith("16"):
+    if OS_VERSION == "16.0-pc2025":
+        ibs_cr_project = "registry.suse.de/suse/slfo/products/publiccloud/toolchain/2025/totest"
+    elif OS_VERSION.startswith("16"):
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/bci/{DISTNAME}/test"
         )
@@ -282,6 +285,8 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
     if TARGET in ("dso", "ibs-released"):
         return ""
     if TARGET == "ibs-cr":
+        if OS_VERSION == "16.0-pc2025":
+            return "containers_registry_16.0/"
         return "containerfile/" if OS_VERSION.startswith("16") else "images/"
     if (TARGET in ("factory-totest", "factory-arm-totest")) or (
         TARGET in ("ibs", "obs") and OS_VERSION == "15.6-ai"
@@ -1336,6 +1341,25 @@ RMT_CONTAINERS = [
     )
 ]
 
+PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/public-cloud-toolchain/aws-toolchain-runtime-provider:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("16.0-pc2025",),
+)
+
+PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/public-cloud-toolchain/az-toolchain-runtime-provider:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("16.0-pc2025",),
+)
+
+PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/public-cloud-toolchain/google-toolchain-runtime-provider:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=("16.0-pc2025",),
+)
+
+
 CONTAINERS_WITH_ZYPPER = (
     [
         BASE_CONTAINER,
@@ -1344,6 +1368,9 @@ CONTAINERS_WITH_ZYPPER = (
         PHP_8_APACHE,
         PHP_8_CLI,
         PHP_8_FPM,
+        PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+        PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+        PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
     ]
     + BASE_FIPS_CONTAINERS
     + CONTAINER_389DS_CONTAINERS
@@ -1472,6 +1499,9 @@ else:
             MILVUS_CONTAINER,
             PYTORCH_CONTAINER,
             OPENWEBUI_PIPELINES_CONTAINER,
+            PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
