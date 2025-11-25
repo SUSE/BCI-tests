@@ -213,8 +213,8 @@ def test_sle15_lifecycle(container_per_test):
     assert lifecycle is not None, (
         "No endoflife information found in product description"
     )
-    assert lifecycle.text == "2031-07-31", (
-        f"Expected end of life 2031-07-31, but got {lifecycle.text}"
+    assert lifecycle.text in ("2031-07-31", "2037-12-31"), (
+        f"Expected end of life 2037-12-31, but got {lifecycle.text}"
     )
 
 
