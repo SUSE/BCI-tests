@@ -117,6 +117,7 @@ markers = [
     'helm_latest',
     'milvus_2.4',
     'nginx_1.21',
+    'nginx_1.27',
     'nginx_latest',
     'golang_oldstable',
     'golang_oldstable-openssl',
