@@ -1388,7 +1388,11 @@ CONTAINERS_WITH_ZYPPER = (
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
-    + (DOTNET_CONTAINERS if LOCALHOST.system_info.arch == "x86_64" else [])
+    + (
+        DOTNET_CONTAINERS
+        if LOCALHOST.system_info.arch in ("aarch64", "x86_64")
+        else []
+    )
     + KEA_CONTAINERS
 )
 
