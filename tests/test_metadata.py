@@ -332,7 +332,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
                 ImageType.LANGUAGE_STACK,
             ),
         ]
-        if LOCALHOST.system_info.arch == "x86_64"
+        if LOCALHOST.system_info.arch in ("aarch64", "x86_64")
         else []
     )
     + [(cont, "base", ImageType.OS_LTSS) for cont in LTSS_BASE_CONTAINERS]
