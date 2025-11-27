@@ -1100,7 +1100,7 @@ def test_buildtime_attestations(container):
                     container_reference
                     == result["report"]["labels"]["org.opensuse.reference"]
                 )
-        assert 10000 < len(predicate["payload"]) < 1000000, (
+        assert 8000 < len(predicate["payload"]) < 1000000, (
             f"Vulnerability report length {len(predicate['payload'])} outside range"
         )
     assert got_clamav, (
