@@ -3,6 +3,7 @@
 import enum
 import os
 from datetime import timedelta
+from itertools import chain
 from itertools import product
 from pathlib import Path
 from typing import Iterable
@@ -51,6 +52,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6-ai",
     "15.6-spr",
     "15.7",
+    "15.7-spr",
     "16.0",
     "16.0-pc2025",
     "tumbleweed",
@@ -62,6 +64,7 @@ ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.6-ai",
     "15.6-spr",
     "15.7",
+    "15.7-spr",
     "16.0",
     "tumbleweed",
 )
@@ -84,6 +87,7 @@ RELEASED_SLE_VERSIONS = (
     "15.6-ai",
     "15.6-spr",
     "15.7",
+    "15.7-spr",
     "16.0",
 )
 
@@ -203,8 +207,8 @@ else:
             "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
         )
         ibs_released = "dp.apps.rancher.io"
-    elif OS_VERSION == "15.6-spr":
-        ibs_cr_project = "registry.suse.de/suse/sle-15-sp6/update/products/privateregistry/totest"
+    elif OS_VERSION in ("15.6-spr", "15.7-spr"):
+        ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
         obs_project = "registry.suse.de/devel/scc/privateregistry"
 
     BASEURL = {
@@ -382,7 +386,6 @@ def create_BCI(
                 reason="This container is not available on Ironbank",
             )
         )
-
     if bci_type not in (ImageType.OS, ImageType.OS_LTSS):
         if available_versions:
             for ver in available_versions:
@@ -1307,28 +1310,37 @@ KUBEVIRT_CDI_CONTAINERS = [
     )
 ]
 
-
 SPR_CONTAINERS = [
     create_BCI(
-        build_tag=f"private-registry/harbor-{img}:latest",
+        build_tag=f"private-registry/harbor-{service}:latest",
         bci_type=ImageType.APPLICATION,
-        available_versions=["15.6-spr"],
-        custom_entry_point="/bin/sh" if img != "db" else "",
+        available_versions=[os_version],
+        custom_entry_point="/bin/sh" if service != "db" else "",
         extra_environment_variables=(
-            {"POSTGRES_PASSWORD": POSTGRES_PASSWORD} if img == "db" else {}
+            {"POSTGRES_PASSWORD": POSTGRES_PASSWORD} if service == "db" else {}
         ),
     )
-    for img in (
-        "core",
-        "db",
-        "exporter",
-        "jobservice",
-        "nginx",
-        "portal",
-        "registry",
-        "registryctl",
-        "trivy-adapter",
-        "valkey",
+    for os_version, service in chain(
+        product(
+            ("15.6-spr", "15.7-spr"),
+            (
+                "core",
+                "exporter",
+                "jobservice",
+                "portal",
+                "registry",
+                "registryctl",
+                "trivy-adapter",
+            ),
+        ),
+        product(
+            ("15.6-spr",),
+            (
+                "db",
+                "nginx",
+                "valkey",
+            ),
+        ),
     )
 ]
 

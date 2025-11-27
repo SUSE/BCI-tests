@@ -27,10 +27,18 @@ SPR_CONFIG_DIR = Path(__file__).parent.parent / "tests" / "files" / "spr"
 SPR_CONFIG = {
     "db": {
         "name": "postgresql",
-        "volumes": [ContainerVolume("/var/lib/postgresql/data")],
+        "url": "registry.suse.com/suse/postgres:17",
+        "volumes": [
+            ContainerVolume("/var/lib/psql/data"),
+            BindMount(
+                "/docker-entrypoint-initdb.d/initial-registry.sql",
+                host_path=str(SPR_CONFIG_DIR / "db" / "initial-registry.sql"),
+            ),
+        ],
     },
     "valkey": {
         "name": "redis",
+        "url": "registry.suse.com/suse/valkey:8",
         "volumes": [ContainerVolume("/var/lib/valkey")],
     },
     "registry": {
@@ -150,6 +158,7 @@ SPR_CONFIG = {
     },
     "nginx": {
         "name": "proxy",
+        "url": "registry.suse.com/suse/nginx:1.21",
         "volumes": [
             BindMount("/etc/nginx", host_path=str(SPR_CONFIG_DIR / "nginx")),
             BindMount(
@@ -162,10 +171,28 @@ SPR_CONFIG = {
     },
 }
 
-
 SPR_CONTAINERS_FOR_POD = []
 
 for img, conf in SPR_CONFIG.items():
+    # 15.7-spr means SPR 1.1.x (onwards) where we use BCI iamges  db, nginx, and valkey.
+    # In that case SPR_CONFIG.url points to a suitable BCI image.
+    #
+    # 15.6-spr means SPR 1.0.x where we built extra images for db, nginx, and valkey.
+    # In that case SPR_CONFIG.url is dropped so that the default url pointing to
+    # the private-registry images is used.
+    # For the SPR's postgres (db) image the volume containing the initial DB scheme is dropped
+    # because the image already includes it.
+
+    if OS_VERSION == "15.6-spr":
+        conf.pop("url", None)
+        if img == "db":
+            conf["volumes"].pop()
+
+    url = conf.get(
+        "url",
+        f"{BASEURL}/{_get_repository_name('dockerfile')}private-registry/harbor-{img}:latest",
+    )
+
     launch_args = [f"--name={conf.get('name', img)}"]
 
     env_file = SPR_CONFIG_DIR / img / "env"
@@ -174,7 +201,7 @@ for img, conf in SPR_CONFIG.items():
 
     SPR_CONTAINERS_FOR_POD.append(
         Container(
-            url=f"{BASEURL}/{_get_repository_name('dockerfile')}private-registry/harbor-{img}:latest",
+            url=url,
             volume_mounts=conf["volumes"],
             extra_launch_args=launch_args,
         )
@@ -190,7 +217,11 @@ HARBOR_POD = Pod(
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ("15.6-spr",),
+    OS_VERSION
+    not in (
+        "15.6-spr",
+        "15.7-spr",
+    ),
     reason="Harbor is only tested for SUSE Private Registry",
 )
 @pytest.mark.parametrize(
