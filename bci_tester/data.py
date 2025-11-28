@@ -606,10 +606,12 @@ OPENJDK_DEVEL_21_CONTAINER = create_BCI(
     custom_entry_point="/bin/sh",
 )
 OPENJDK_25_CONTAINER = create_BCI(
-    build_tag="bci/openjdk:25", available_versions=["tumbleweed"]
+    build_tag="bci/openjdk:25",
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
 OPENJDK_DEVEL_25_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:25", available_versions=["tumbleweed"]
+    build_tag="bci/openjdk-devel:25",
+    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
 
 
