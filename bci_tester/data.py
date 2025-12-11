@@ -49,7 +49,6 @@ ALLOWED_BASE_OS_VERSIONS = (
 # Allowed os versions for Language and Application containers
 ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6",
-    "15.6-ai",
     "15.6-spr",
     "15.7",
     "15.7-spr",
@@ -61,7 +60,6 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 # Allowed os versions for SLE_BCI repo checks
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.6",
-    "15.6-ai",
     "15.6-spr",
     "15.7",
     "15.7-spr",
@@ -84,7 +82,6 @@ RELEASED_SLE_VERSIONS = (
     "15.4",
     "15.5",
     "15.6",
-    "15.6-ai",
     "15.6-spr",
     "15.7",
     "15.7-spr",
@@ -201,12 +198,6 @@ else:
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/bci/{DISTNAME}/test"
         )
-    elif OS_VERSION == "15.6-ai":
-        obs_project = "registry.suse.de/devel/ai"
-        ibs_cr_project = (
-            "registry.suse.de/suse/sle-15-sp6/update/products/ai/totest"
-        )
-        ibs_released = "dp.apps.rancher.io"
     elif OS_VERSION in ("15.6-spr", "15.7-spr"):
         ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
         obs_project = "registry.suse.de/devel/scc/privateregistry"
@@ -292,10 +283,6 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         if OS_VERSION == "16.0-pc2025":
             return "containers_registry_16.0/"
         return "containerfile/" if OS_VERSION.startswith("16") else "images/"
-    if (TARGET in ("factory-totest", "factory-arm-totest")) or (
-        TARGET in ("ibs", "obs") and OS_VERSION == "15.6-ai"
-    ):
-        return "containers/"
     if image_type == "dockerfile":
         return "containerfile/"
     if image_type == "kiwi":
@@ -1061,99 +1048,11 @@ GRAFANA_CONTAINERS = [
     for tag, versions in (("11", _DEFAULT_NONBASE_OS_VERSIONS),)
 ]
 
-OLLAMA_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/ollama:0",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    forwarded_ports=[PortForwarding(container_port=11434)],
-)
-
-OPENWEBUI_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui:0",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    forwarded_ports=[PortForwarding(container_port=8080)],
-)
-
-OPEN_WEBUI_MCPO_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui-mcpo:0",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="mcpo",
-    extra_entrypoint_args=[
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8000",
-        "--",
-        "uvx",
-        "mcp-server-time",
-        "--local-timezone=America/New_York",
-    ],
-    forwarded_ports=[PortForwarding(container_port=8000)],
-)
-
-MILVUS_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/milvus:2.4",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="/bin/bash",
-)
-
-PYTORCH_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/pytorch:2-nvidia",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="/bin/bash",
-)
-
-OPENWEBUI_PIPELINES_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/open-webui-pipelines:0",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    forwarded_ports=[PortForwarding(container_port=9099)],
-)
-
 STUNNEL_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
     available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
-)
-
-SUSE_AI_OBSERVABILITY_EXTENSION_SETUP = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/suse-ai-observability-extension-setup:1",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="/bin/bash",
-)
-
-SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/suse-ai-observability-extension-runtime:1",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="/bin/bash",
-)
-
-VLLM_OPENAI_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/vllm-openai:0",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="/bin/bash",
-)
-
-LMCACHE_VLLM_OPENAI_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/lmcache-vllm-openai:0",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="/bin/bash",
-)
-
-LMCACHE_LMSTACK_ROUTER_CONTAINER = create_BCI(
-    build_tag=f"{SAC_CONTAINER_PREFIX}/lmcache-lmstack-router:0",
-    bci_type=ImageType.SAC_APPLICATION,
-    available_versions=["15.6-ai"],
-    custom_entry_point="/bin/bash",
 )
 
 VALKEY_CONTAINERS = [
@@ -1449,17 +1348,8 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *KIOSK_PULSEAUDIO_CONTAINERS,
     MICRO_CONTAINER,
     MICRO_FIPS_CONTAINER,
-    MILVUS_CONTAINER,
     MINIMAL_CONTAINER,
     NGINX_CONTAINER,
-    OLLAMA_CONTAINER,
-    PYTORCH_CONTAINER,
-    OPENWEBUI_CONTAINER,
-    OPEN_WEBUI_MCPO_CONTAINER,
-    OPENWEBUI_PIPELINES_CONTAINER,
-    VLLM_OPENAI_CONTAINER,
-    LMCACHE_VLLM_OPENAI_CONTAINER,
-    LMCACHE_LMSTACK_ROUTER_CONTAINER,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1469,8 +1359,6 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *SAMBA_CONTAINERS,
     STUNNEL_CONTAINER,
     *VALKEY_CONTAINERS,
-    SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
-    SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
     *SPR_CONTAINERS,
     *KUBEVIRT_CONTAINERS,
     *KUBEVIRT_CDI_CONTAINERS,
@@ -1512,11 +1400,6 @@ else:
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
-            OLLAMA_CONTAINER,
-            OPENWEBUI_CONTAINER,
-            MILVUS_CONTAINER,
-            PYTORCH_CONTAINER,
-            OPENWEBUI_PIPELINES_CONTAINER,
             PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
             PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
             PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
