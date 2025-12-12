@@ -162,12 +162,6 @@ jobs:
           - toxenv: metadata
             testing_target: ibs-released
             os_version: 15.5
-          - toxenv: ai
-            testing_target: ibs-released
-            os_version: 15.6-ai
-          - toxenv: metadata
-            testing_target: ibs-released
-            os_version: 15.6-ai
           - toxenv: spr
             testing_target: ibs-released
             os_version: 15.6-spr

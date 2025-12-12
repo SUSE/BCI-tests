@@ -68,24 +68,17 @@ from bci_tester.data import KUBECTL_CONTAINERS
 from bci_tester.data import KUBEVIRT_CDI_CONTAINERS
 from bci_tester.data import KUBEVIRT_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
-from bci_tester.data import LMCACHE_LMSTACK_ROUTER_CONTAINER
-from bci_tester.data import LMCACHE_VLLM_OPENAI_CONTAINER
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MICRO_FIPS_CONTAINER
-from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINER
 from bci_tester.data import NODEJS_CONTAINERS
-from bci_tester.data import OLLAMA_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
-from bci_tester.data import OPENWEBUI_CONTAINER
-from bci_tester.data import OPENWEBUI_PIPELINES_CONTAINER
-from bci_tester.data import OPEN_WEBUI_MCPO_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
@@ -100,7 +93,6 @@ from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
-from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RMT_CONTAINERS
 from bci_tester.data import RUBY_CONTAINERS
@@ -111,12 +103,9 @@ from bci_tester.data import SAMBA_TOOLBOX_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import SPR_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
-from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
-from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
 from bci_tester.data import TARGET
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
-from bci_tester.data import VLLM_OPENAI_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
@@ -341,41 +330,6 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for cont in LTSS_BASE_FIPS_CONTAINERS
     ]
     + [
-        (OLLAMA_CONTAINER, "ollama", ImageType.SAC_APPLICATION),
-        (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
-        (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
-        (PYTORCH_CONTAINER, "pytorch", ImageType.SAC_APPLICATION),
-        (
-            SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
-            "suse-ai-observability-extension-setup",
-            ImageType.SAC_APPLICATION,
-        ),
-        (
-            SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
-            "suse-ai-observability-extension-runtime",
-            ImageType.SAC_APPLICATION,
-        ),
-        (
-            OPENWEBUI_PIPELINES_CONTAINER,
-            "open-webui-pipelines",
-            ImageType.SAC_APPLICATION,
-        ),
-        (VLLM_OPENAI_CONTAINER, "vllm-openai", ImageType.SAC_APPLICATION),
-        (
-            LMCACHE_VLLM_OPENAI_CONTAINER,
-            "lmcache-vllm-openai",
-            ImageType.SAC_APPLICATION,
-        ),
-        (
-            LMCACHE_LMSTACK_ROUTER_CONTAINER,
-            "lmcache-lmstack-router",
-            ImageType.SAC_APPLICATION,
-        ),
-        (
-            OPEN_WEBUI_MCPO_CONTAINER,
-            "open-webui-mcpo",
-            ImageType.SAC_APPLICATION,
-        ),
         (
             PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
             "aws-toolchain-runtime-provider",
