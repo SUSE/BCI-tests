@@ -203,7 +203,9 @@ def test_rancher_build(
         pytest.skip(f"Rancher requires {go_mod_version}, but got {go_version}")
 
     (rancher_dir / "Dockerfile.dapper").write_text(
-        from_line_regex.sub(f"FROM {container.image_url_or_id}", contents)
+        from_line_regex.sub(
+            f"FROM {container.image_url_or_id}\nENV GOMAXPROCS=2", contents
+        )
     )
 
     host.check_output(f"cd {rancher_dir} && {dapper} build")
