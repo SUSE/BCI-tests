@@ -3,9 +3,6 @@
 These tests are host OS independent and it is thus not necessary to run them on
 a non-x86_64 host.
 
-**CAUTION:** The tests should be run on x86_64, as the .Net images are only
-available on that platform.
-
 The tests in this module are mostly testing the image labels. We follow the
 conventions outlined in
 `<https://confluence.suse.com/display/ENGCTNRSTORY/BCI+image+labels>`_. But have
@@ -703,7 +700,7 @@ def test_disturl_can_be_checked_out(
 ):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
     label that can be checked out using :command:`osc` to get the sources at
-    exactly the version from which the container was build. This test verifies
+    exactly the version from which the container was built. This test verifies
     that the url is accessible.
     """
     disturl_label = container.inspect.config.labels[
