@@ -55,7 +55,7 @@ from bci_tester.util import get_repos_from_connection
 CONTAINER_IMAGES = ALL_CONTAINERS
 
 
-#: go file to perform a GET request to suse.com and that panics if the request
+#: Go file to perform a GET request to suse.com and that panics if the request
 #: fails
 FETCH_SUSE_DOT_COM = """package main
 
@@ -96,7 +96,7 @@ def test_os_release(auto_container):
     ):
         if var_name == "VERSION_ID":
             if OS_VERSION == "tumbleweed":
-                # on openSUSE Tumbleweed that is the an ever changing snapshot date
+                # on openSUSE Tumbleweed that is an ever changing snapshot date
                 # just check whether it is less than 10 days old
                 assert (
                     datetime.datetime.now()
@@ -131,7 +131,7 @@ def test_os_release(auto_container):
 )
 def test_branding(container):
     """
-    check that the :file:`/etc/SUSE-brand` file exists and containers SLE branding
+    check that the :file:`/etc/SUSE-brand` file exists and contains SLE branding
     """
     location = "/etc/SUSE-brand"
     branding = "SLE"

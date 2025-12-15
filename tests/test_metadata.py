@@ -3,9 +3,6 @@
 These tests are host OS independent and it is thus not necessary to run them on
 a non-x86_64 host.
 
-**CAUTION:** The tests should be run on x86_64, as the .Net images are only
-available on that platform.
-
 The tests in this module are mostly testing the image labels. We follow the
 conventions outlined in
 `<https://confluence.suse.com/display/ENGCTNRSTORY/BCI+image+labels>`_. But have
@@ -75,7 +72,7 @@ from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import NGINX_CONTAINER
+from bci_tester.data import NGINX_CONTAINERS
 from bci_tester.data import NODEJS_CONTAINERS
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
@@ -189,8 +186,8 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
-        (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
+    + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
         (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
@@ -703,7 +700,7 @@ def test_disturl_can_be_checked_out(
 ):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
     label that can be checked out using :command:`osc` to get the sources at
-    exactly the version from which the container was build. This test verifies
+    exactly the version from which the container was built. This test verifies
     that the url is accessible.
     """
     disturl_label = container.inspect.config.labels[
