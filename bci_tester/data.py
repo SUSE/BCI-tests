@@ -283,6 +283,8 @@ def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
         if OS_VERSION == "16.0-pc2025":
             return "containers_registry_16.0/"
         return "containerfile/" if OS_VERSION.startswith("16") else "images/"
+    if TARGET in ("factory-totest", "factory-arm-totest"):
+        return "containers/"
     if image_type == "dockerfile":
         return "containerfile/"
     if image_type == "kiwi":
