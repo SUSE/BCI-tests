@@ -215,6 +215,9 @@ jobs:
             os_version: "16.0"
           - toxenv: repository
             os_version: "16.0"
+          - toxenv: base
+            testing_target: factory-totest
+            os_version: "tumbleweed"
 
     steps:
       - name: Clean up disk space to maximize available space
