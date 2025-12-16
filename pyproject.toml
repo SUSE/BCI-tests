@@ -36,6 +36,7 @@ markers = [
     'bci-base_15.5',
     'bci-base_15.5-ltss',
     'bci-base_15.6',
+    'bci-base_15.6-ltss',
     'bci-base_15.7',
     'bci-base_16.0',
     'bci-base_latest',
