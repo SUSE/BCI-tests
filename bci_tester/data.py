@@ -502,7 +502,7 @@ else:
                 extra_marks=[pytest.mark.__getattr__(f"bci-base_{sp}-ltss")],
                 bci_type=ImageType.OS_LTSS,
             )
-            for sp in ("15.3", "15.4", "15.5")
+            for sp in ("15.3", "15.4", "15.5", "15.6")
         )
         LTSS_BASE_FIPS_CONTAINERS.extend(
             create_BCI(
