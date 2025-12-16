@@ -1073,7 +1073,7 @@ VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in (
-        (("15.7",), "8.0"),
+        (("15.7", "16.0"), "8.0"),
         (("tumbleweed",), "latest"),
     )
 ]
