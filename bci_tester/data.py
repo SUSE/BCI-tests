@@ -1055,7 +1055,7 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for tag, versions in (("11", ("15.7",)),)
+    for tag, versions in (("11", ("15.7", "tumbleweed")),)
 ]
 
 STUNNEL_CONTAINER = create_BCI(
