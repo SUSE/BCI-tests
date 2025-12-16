@@ -165,7 +165,7 @@ def test_product(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5", "tumbleweed"),
+    OS_VERSION in ("15.3", "15.4", "15.5", "15.6", "tumbleweed"),
     reason="suse trademark only available in certain SLE versions",
 )
 def test_suse_trademark(auto_container):
@@ -280,7 +280,7 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS or OS_VERSION == "15.6",
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
 @pytest.mark.parametrize(
