@@ -438,7 +438,7 @@ def test_general_labels(
                     or "based on the SLE LTSS Base Container Image"
                     in labels[f"{prefix}.description"]
                 )
-            elif OS_VERSION in ("15.6-spr",):
+            elif OS_VERSION in ("15.7-spr",):
                 assert (
                     "for SUSE Private Registry"
                     in labels[f"{prefix}.description"]
@@ -617,7 +617,7 @@ def test_support_end_in_future(
 
 
 @pytest.mark.skipif(
-    OS_VERSION == "15.6-spr",
+    OS_VERSION == "15.7-spr",
     reason="SPR publishes out of the devel project",
 )
 @pytest.mark.skipif(
@@ -663,8 +663,8 @@ def test_disturl(
         )
     elif OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:AI" in disturl
-    elif OS_VERSION == "15.6-spr" and TARGET in ("ibs", "obs"):
-        assert "obs://build.suse.de/Devel:SCC:PrivateRegistry" in disturl
+    elif OS_VERSION == "15.7-spr" and TARGET in ("ibs", "obs"):
+        assert "obs://build.suse.de/Devel:SCC:PrivateRegistry:1.1" in disturl
     elif OS_VERSION == "16.0-pc2025":
         assert (
             "obs://build.suse.de/SUSE:SLFO:Products:PublicCloud:Toolchain:2025"
@@ -836,7 +836,7 @@ def test_reference(
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
-    elif OS_VERSION in ("15.6-spr",):
+    elif OS_VERSION in ("15.7-spr",):
         assert reference.startswith("registry.suse.com/private-registry/")
     else:
         if container_type in (
