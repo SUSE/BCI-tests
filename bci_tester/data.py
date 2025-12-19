@@ -1030,7 +1030,7 @@ ALERTMANAGER_CONTAINERS = [
         available_versions=versions,
     )
     for tag, versions in (
-        ("0.26", ("15.7",)),
+        ("0.28", ("15.7",)),
         ("latest", ("tumbleweed",)),
     )
 ]
