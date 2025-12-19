@@ -19,7 +19,7 @@ CONTAINER_IMAGES = KIWI_CONTAINERS
 KIWI_CONTAINER_EXTENDED = []
 
 CONTAINERFILE_KIWI_EXTENDED = """
-RUN curl -Lsf -o - https://github.com/OSInside/kiwi/archive/refs/heads/master.tar.gz | tar --no-same-permissions --no-same-owner -xzf - | true
+RUN curl -Lsf -o - https://github.com/OSInside/kiwi/archive/refs/heads/main.tar.gz | tar --no-same-permissions --no-same-owner -xzf - | true
 """
 
 for kiwi_ctr in KIWI_CONTAINERS:
