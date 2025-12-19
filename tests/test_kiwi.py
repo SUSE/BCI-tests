@@ -80,10 +80,14 @@ def test_kiwi_create_image(
 
     kiwi_cmd = "kiwi-ng system build --description kiwi-main/build-tests/x86/leap/test-image-disk --set-repo obs://openSUSE:Leap:15.6/standard --target-dir /tmp/myimage"
     res = container_per_test.connection.run_expect([0, 1], kiwi_cmd)
-    if res.rc == 1 and selinux_status() == "enforcing":
-        pytest.xfail(
-            "kiwi container fails to build an image on hosts in SELinux enforcing mode"
-        )
+
+    if res.rc == 1:
+        if selinux_status() == "enforcing":
+            pytest.xfail(
+                "kiwi container fails to build an image on hosts in SELinux enforcing mode"
+            )
+        else:
+            pytest.fail("Build failed!")
 
     container_per_test.connection.check_output(
         "kiwi-ng result list --target-dir=/tmp/myimage/"
