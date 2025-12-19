@@ -18,8 +18,10 @@ CONTAINER_IMAGES = KIWI_CONTAINERS
 
 KIWI_CONTAINER_EXTENDED = []
 
-CONTAINERFILE_KIWI_EXTENDED = """
-RUN curl -Lsf -o - https://github.com/OSInside/kiwi/archive/refs/tags/v10.2.34.tar.gz | tar --no-same-permissions --no-same-owner -xzf - | true
+_KIWI_VER = "10.2.33"
+
+CONTAINERFILE_KIWI_EXTENDED = f"""
+RUN curl -Lsf -o - https://github.com/OSInside/kiwi/archive/refs/tags/v{_KIWI_VER}.tar.gz | tar --no-same-permissions --no-same-owner -xzf - | true
 """
 
 for kiwi_ctr in KIWI_CONTAINERS:
@@ -77,10 +79,10 @@ def test_kiwi_create_image(
     )
 
     assert container_per_test.connection.file(
-        "kiwi-10.2.34/build-tests"
+        f"kiwi-{_KIWI_VER}/build-tests"
     ).exists
 
-    kiwi_cmd = "kiwi-ng system build --description kiwi-10.2.34/build-tests/x86/leap/test-image-disk --set-repo obs://openSUSE:Leap:15.6/standard --target-dir /tmp/myimage"
+    kiwi_cmd = f"kiwi-ng system build --description kiwi-{_KIWI_VER}/build-tests/x86/leap/test-image-disk --set-repo obs://openSUSE:Leap:15.6/standard --target-dir /tmp/myimage"
     res = container_per_test.connection.run_expect([0, 1], kiwi_cmd)
 
     if res.rc == 1:
