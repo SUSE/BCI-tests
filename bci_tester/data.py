@@ -1134,7 +1134,6 @@ KIOSK_CONTAINERS = (
 
 _SAMBA_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
     ("4.21", ("15.7",)),
-    ("latest", ("tumbleweed",)),
 )
 
 SAMBA_SERVER_CONTAINERS = [
