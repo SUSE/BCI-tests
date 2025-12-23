@@ -88,7 +88,7 @@ def test_iconv_working(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5"),
+    OS_VERSION in ("15.4", "15.5"),
     reason="unfixed in LTSS codestreams",
 )
 def test_group_nobody_working(auto_container):
@@ -129,7 +129,7 @@ def test_base_size(container: ContainerData, container_runtime):
         # SP4+ is a lot larger as it pulls in python3 and
         # the FIPS crypto policy scripts
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 130 if OS_VERSION in ("15.3",) else 169,
+            "x86_64": 169,
         }
         if TARGET in ("dso",):
             # the dso container is larger than the bci-base-fips container
@@ -205,7 +205,7 @@ def test_gost_digest_disable(auto_container):
     """Checks that the gost message digest is not known to openssl."""
     openssl_error_message = (
         "Invalid command 'gost'"
-        if OS_VERSION not in ("15.3", "15.4", "15.5")
+        if OS_VERSION not in ("15.4", "15.5")
         else "gost is not a known digest"
     )
     assert (
@@ -266,13 +266,13 @@ def test_all_openssl_hashes_known(auto_container):
     expected_digest_list = ALL_DIGESTS
 
     # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
-    if OS_VERSION not in ("15.3", "15.4", "15.5"):
+    if OS_VERSION not in ("15.4", "15.5"):
         if host_fips_enabled() or target_fips_enforced() or fips_mode:
             expected_digest_list = FIPS_DIGESTS
 
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
-    if OS_VERSION in ("15.3", "15.4", "15.5"):
+    if OS_VERSION in ("15.4", "15.5"):
         expected_digest_list += ("gost",)
 
     assert set(hashes) == set(expected_digest_list), (

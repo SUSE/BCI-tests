@@ -84,7 +84,7 @@ def test_maven_present(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ("15.3", "15.4", "15.5", "15.6"),
+    OS_VERSION not in ("15.4", "15.5", "15.6"),
     reason="jshell is no longer the CMD as of SP7",
 )
 @pytest.mark.parametrize(

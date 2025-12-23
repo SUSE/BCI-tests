@@ -41,6 +41,7 @@ from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBEVIRT_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
+from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import OS_PRETTY_NAME
@@ -121,7 +122,7 @@ def test_os_release(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5"),
+    OS_VERSION in ("15.4", "15.5"),
     reason="branding packages are known to not be installed",
 )
 @pytest.mark.parametrize(
@@ -165,7 +166,7 @@ def test_product(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5", "15.6", "tumbleweed"),
+    OS_VERSION in ("15.4", "15.5", "15.6", "tumbleweed"),
     reason="suse trademark only available in certain SLE versions",
 )
 def test_suse_trademark(auto_container):
@@ -352,7 +353,10 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     [
         c
         for c in CONTAINERS_WITH_ZYPPER_AS_ROOT
-        if c not in LTSS_BASE_CONTAINERS + KIOSK_PULSEAUDIO_CONTAINERS
+        if c
+        not in LTSS_BASE_CONTAINERS
+        + LTSS_BASE_FIPS_CONTAINERS
+        + KIOSK_PULSEAUDIO_CONTAINERS
     ],
     indirect=True,
 )
@@ -487,7 +491,7 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5", "15.6-spr", "15.7-spr"),
+    OS_VERSION in ("15.4", "15.5", "15.6-spr", "15.7-spr"),
     reason="doesn't have the fixes for blkid/udev",
 )
 @pytest.mark.parametrize(
@@ -535,7 +539,11 @@ def test_no_compat_packages(container):
 
 @pytest.mark.parametrize(
     "container",
-    [c for c in ALL_CONTAINERS if c not in LTSS_BASE_CONTAINERS],
+    [
+        c
+        for c in ALL_CONTAINERS
+        if c not in LTSS_BASE_CONTAINERS + LTSS_BASE_FIPS_CONTAINERS
+    ],
     indirect=True,
 )
 def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
@@ -646,7 +654,7 @@ def test_certificates_are_present(
     [
         c
         for c in CONTAINERS_WITH_ZYPPER_AS_ROOT
-        if c not in LTSS_BASE_CONTAINERS
+        if c not in LTSS_BASE_CONTAINERS + LTSS_BASE_FIPS_CONTAINERS
     ],
     indirect=True,
 )
