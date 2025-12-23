@@ -102,7 +102,7 @@ def test_go_get_binary_in_path(auto_container_per_test):
 
 
 @pytest.mark.parametrize("container", [BASE_CONTAINER], indirect=True)
-def test_base_PATH_present(auto_container, container):
+def test_base_path_present(auto_container, container):
     """Regression test that we did not accidentally omit parts of ``$PATH`` that are
     present in he base container in the golang containers.
 
