@@ -37,7 +37,6 @@ OS_VERSION = os.getenv("OS_VERSION", "15.7")
 
 # Allowed os versions for base (non lang/non-app) containers
 ALLOWED_BASE_OS_VERSIONS = (
-    "15.3",
     "15.4",
     "15.5",
     "15.6",
@@ -78,7 +77,6 @@ _DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
 RELEASED_SLE_VERSIONS = (
-    "15.3",
     "15.4",
     "15.5",
     "15.6",
@@ -89,7 +87,7 @@ RELEASED_SLE_VERSIONS = (
 )
 
 # List the LTSS versions of SLE
-RELEASED_LTSS_VERSIONS = ("15.3", "15.4", "15.5")
+RELEASED_LTSS_VERSIONS = ("15.4", "15.5", "15.6")
 
 
 #: directory of the SCC credentials stored by zypper
@@ -225,8 +223,8 @@ def create_container_version_mark(
     Args:
 
     available_versions: iterable of versions for which this container is
-        available. Each version must be in the form ``15.4`` for SLE 15 SP4,
-        ``15.3`` for SLE 15 SP3 and so on
+        available. Each version must be in the form ``15.4`` for SLE 15 SP4
+        and so on
     """
     for ver in available_versions:
         if ver.startswith("15") and ver[:2] == str(OS_MAJOR_VERSION):
@@ -502,7 +500,7 @@ else:
                 extra_marks=[pytest.mark.__getattr__(f"bci-base_{sp}-ltss")],
                 bci_type=ImageType.OS_LTSS,
             )
-            for sp in ("15.3", "15.4", "15.5", "15.6")
+            for sp in ("15.4", "15.5", "15.6")
         )
         LTSS_BASE_FIPS_CONTAINERS.extend(
             create_BCI(
@@ -510,7 +508,7 @@ else:
                 available_versions=[sp],
                 bci_type=ImageType.OS_LTSS,
             )
-            for sp in ("15.3", "15.4")
+            for sp in ("15.4", "15.6")
         )
 
 MINIMAL_CONTAINER = create_BCI(

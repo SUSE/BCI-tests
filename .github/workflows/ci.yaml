@@ -132,21 +132,12 @@ jobs:
         include:
           - toxenv: fips
             testing_target: ibs-released
-            os_version: 15.3
-          - toxenv: fips
-            testing_target: ibs-released
             os_version: 15.4
           - toxenv: repository
             testing_target: ibs-released
             os_version: 15.5
           - toxenv: all
             testing_target: ibs-released
-            os_version: 15.3
-          - toxenv: base
-            testing_target: ibs-released
-            os_version: 15.3
-          - toxenv: all
-            testing_target: ibs-released
             os_version: 15.4
           - toxenv: base
             testing_target: ibs-released
@@ -163,6 +154,15 @@ jobs:
           - toxenv: metadata
             testing_target: ibs-released
             os_version: 15.5
+          - toxenv: all
+            testing_target: ibs-released
+            os_version: 15.6
+          - toxenv: base
+            testing_target: ibs-released
+            os_version: 15.6
+          - toxenv: metadata
+            testing_target: ibs-released
+            os_version: 15.6
           - toxenv: spr
             testing_target: ibs-released
             os_version: 15.7-spr
@@ -173,35 +173,25 @@ jobs:
             testing_target: ibs-released
             os_version: 15.7-spr
           - toxenv: all
+            os_version: 15.4
+          - toxenv: base
+            os_version: 15.4
+          - toxenv: metadata
+            os_version: 15.4
+          - toxenv: all
+            os_version: 15.5
+          - toxenv: base
+            os_version: 15.5
+          - toxenv: metadata
+            os_version: 15.5
+          - toxenv: all
             os_version: 15.6
           - toxenv: base
             os_version: 15.6
           - toxenv: metadata
-            os_version: 15.6
-          - toxenv: node
-            os_version: 15.6
-          - toxenv: python
-            os_version: 15.6
-          - toxenv: kernel_module
-            os_version: 15.6
-          - toxenv: repository
             os_version: 15.6
           - toxenv: fips
             os_version: 15.6
-          - toxenv: mariadb
-            os_version: 15.6
-          - toxenv: all
-            os_version: 15.3
-          - toxenv: base
-            os_version: 15.3
-          - toxenv: metadata
-            os_version: 15.3
-          - toxenv: all
-            os_version: 15.4
-          - toxenv: base
-            os_version: 15.4
-          - toxenv: metadata
-            os_version: 15.4
           - toxenv: all
             os_version: "16.0"
           - toxenv: base
