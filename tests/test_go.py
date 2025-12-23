@@ -12,6 +12,7 @@ from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
+from bci_tester.data import OS_VERSION
 from bci_tester.runtime_choice import DOCKER_SELECTED
 
 #: Maximum go container size in Bytes
@@ -151,6 +152,10 @@ def test_build_generics_cache(
 )
 @pytest.mark.skipif(
     not DOCKER_SELECTED, reason="Dapper only works with docker"
+)
+@pytest.mark.skipif(
+    not OS_VERSION.startswith("15"),
+    reason="rancher builds only works on SLE15",
 )
 @pytest.mark.skipif(
     LOCALHOST.system_info.arch not in ("x86_64", "aarch64"),
