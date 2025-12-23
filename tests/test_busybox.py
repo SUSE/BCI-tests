@@ -22,10 +22,10 @@ def test_busybox_provides_sh(auto_container):
 
 #: size limits of the micro image per architecture in MiB
 BUSYBOX_IMAGE_MAX_SIZE: Dict[str, int] = {
-    "x86_64": 16 if OS_VERSION == "tumbleweed" else 13,
-    "aarch64": 16 if OS_VERSION == "tumbleweed" else 13,
-    "s390x": 16 if OS_VERSION == "tumbleweed" else 13,
-    "ppc64le": 16 if OS_VERSION == "tumbleweed" else 13,
+    "x86_64": 13 if OS_VERSION.startswith("15") else 16,
+    "aarch64": 13 if OS_VERSION.startswith("15") else 16,
+    "s390x": 13 if OS_VERSION.startswith("15") else 16,
+    "ppc64le": 13 if OS_VERSION.startswith("15") else 16,
 }
 
 
