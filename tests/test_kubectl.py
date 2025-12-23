@@ -102,3 +102,15 @@ def test_kubectl_binary(container_per_test) -> None:
     ).strip()
     json_out = json.loads(output)
     assert json_out == expected_json
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    KUBECTL_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_diff_available(container_per_test) -> None:
+    output = container_per_test.connection.check_output(
+        "diff --version"
+    ).strip()
+    assert "GNU diffutils" in output
