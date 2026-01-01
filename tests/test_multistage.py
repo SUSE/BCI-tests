@@ -112,13 +112,13 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 OPENJDK_DEVEL_CONTAINER = (
     OPENJDK_DEVEL_11_CONTAINER
-    if OS_VERSION in ("15.3", "15.4", "15.5")
+    if OS_VERSION in ("15.4", "15.5")
     else OPENJDK_DEVEL_21_CONTAINER
 )
 
 OPENJDK_CONTAINER = (
     OPENJDK_11_CONTAINER
-    if OS_VERSION in ("15.3", "15.4", "15.5")
+    if OS_VERSION in ("15.4", "15.5")
     else OPENJDK_21_CONTAINER
 )
 

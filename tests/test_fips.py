@@ -99,7 +99,7 @@ def digest_xoflen(digest: str) -> str:
     for variable-length hash functions."""
     param: str = ""
 
-    if OS_VERSION in ("15.3", "15.4", "15.5"):
+    if OS_VERSION in ("15.4", "15.5"):
         return param
 
     if digest in ("shake128",):
@@ -213,9 +213,6 @@ def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
         run_digest_tests("openssl-1_1")
 
 
-@pytest.mark.skipif(
-    OS_VERSION in ("15.3",), reason="FIPS 140-3 not supported on 15.3"
-)
 def fips_mode_setup_check(container_per_test: ContainerData) -> None:
     """If the host is running in FIPS mode, then `fips-mode-setup --check` should
     exit with `0`.
@@ -311,12 +308,7 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
         r"fips-mode:y::Libgcrypt version [\d\.\-]+:",
         c.check_output("gpgconf --show-versions"),
     )
-    if not fips_ver_match:
-        if OS_VERSION == "15.3":
-            pytest.xfail(
-                reason="https://bugzilla.suse.com/show_bug.cgi?id=1234366"
-            )
-        assert fips_ver_match, "FIPS mode not detected by gpgconf"
+    assert fips_ver_match, "FIPS mode not detected by gpgconf"
 
     expected_fips_gcrypt_digests = {
         "sha1": "c87d25a09584c040f3bfc53b570199591deb10ba648a6a6ffffdaa0badb23b8baf90b6168dd16b3a",
@@ -352,7 +344,7 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
         if non_fips_call.rc == 0 or any(
             msg in non_fips_call.stderr for msg in expected_msg
         ):
-            if OS_VERSION in ("15.3", "15.4", "15.5"):
+            if OS_VERSION in ("15.4", "15.5"):
                 pytest.xfail(
                     reason="bsc#1229856 - libgcrypt computes hashes of non-FIPS digests",
                 )
@@ -374,9 +366,6 @@ def test_gpgconf_binary(container_per_test: ContainerData) -> None:
 
 @pytest.mark.skipif(
     LOCALHOST.system_info.arch != "s390x", reason="libica is s390x specific"
-)
-@pytest.mark.skipif(
-    OS_VERSION in ("15.3",), reason="FIPS 140-3 not supported on 15.3"
 )
 @pytest.mark.parametrize(
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
