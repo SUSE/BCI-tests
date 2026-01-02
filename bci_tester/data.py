@@ -636,10 +636,7 @@ PYTHON_WITH_PIPX_CONTAINERS = [
         build_tag=f"{BCI_CONTAINER_PREFIX}/python:{ver}",
         available_versions=versions,
     )
-    for ver, versions in (
-        ("3.12", ["15.6", "tumbleweed"]),
-        ("3.13", ["15.7", "16.0", "tumbleweed"]),
-    )
+    for ver, versions in (("3.13", ["15.7", "16.0", "tumbleweed"]),)
 ]
 
 PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
