@@ -73,7 +73,7 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.0")
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
 
 # Test base containers by default for these versions
-_DEFAULT_BASE_OS_VERSIONS = ("15.6", "15.7", "16.0", "tumbleweed")
+_DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
 
 # List the released versions of SLE, used for supportabilty and EULA tests
 RELEASED_SLE_VERSIONS = (
@@ -616,18 +616,12 @@ OPENJDK_DEVEL_CONTAINERS = [
     OPENJDK_DEVEL_25_CONTAINER,
 ]
 
-NODEJS_20_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:20",
-    available_versions=("15.6",),
-)
-
 NODEJS_22_CONTAINER = create_BCI(
     build_tag="bci/nodejs:22",
     available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
 
 NODEJS_CONTAINERS = [
-    NODEJS_20_CONTAINER,
     NODEJS_22_CONTAINER,
 ]
 
@@ -777,7 +771,6 @@ PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
 MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
 _MARIADB_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
-    ("10.11", ("15.6",)),
     ("11.8", ("15.7",)),
     ("latest", ("tumbleweed",)),
 )
@@ -943,7 +936,7 @@ if OS_VERSION in ("16.0",):
 else:
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle15-kernel-module-devel:{OS_CONTAINER_TAG}",
-        available_versions=("15.6", "15.7"),
+        available_versions=("15.7",),
         bci_type=ImageType.OS,
     )
 
