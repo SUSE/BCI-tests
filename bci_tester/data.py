@@ -527,7 +527,6 @@ MICRO_FIPS_CONTAINER = create_BCI(
 
 BUSYBOX_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-busybox:{OS_CONTAINER_TAG}",
-    image_type="kiwi",
     custom_entry_point="/bin/sh",
     bci_type=ImageType.OS,
 )
