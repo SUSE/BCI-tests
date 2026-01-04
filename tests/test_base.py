@@ -78,7 +78,7 @@ def test_passwd_present(auto_container):
     reason="requires gconv modules",
 )
 def test_iconv_working(auto_container):
-    """Generic test iconv works for UTF8 and ISO-8859-15 locale"""
+    """Generic test that iconv works for UTF8 and ISO-8859-15 locale"""
     assert (
         auto_container.connection.check_output(
             "echo -n 'SüSE' | iconv -f UTF8 -t ISO_8859-15 | wc -c"
@@ -110,7 +110,7 @@ def test_base_size(container: ContainerData, container_runtime):
     :py:const:`base_container_max_size`
 
     """
-    # the FIPS container is bigger too than the 15 SP3 base image
+    # the FIPS container is bigger too than the 15 SP7 base image
     is_fips_ctr = (
         container.container.baseurl
         and container.container.baseurl.rpartition("/")[2].startswith(
@@ -227,7 +227,7 @@ def test_gost_digest_disable(auto_container):
     indirect=True,
 )
 def test_openssl_hashes(container):
-    """If the host is not running in fips mode, then we check that all hash
+    """If the host is not running in FIPS mode, then we check that all hash
     algorithms work via :command:`openssl $digest /dev/null`.
 
     """

@@ -96,7 +96,7 @@ def host_git_clone(
 ) -> Iterator[Tuple[Path, GitRepositoryBuild]]:
     """This fixture clones the `GitRepositoryBuild` into a temporary directory
     on the host system, `cd`'s into it and returns the path and the
-    `GitRepositoryBuild` as a tuple to the test function requesting this it.
+    `GitRepositoryBuild` as a tuple to the test function requesting this.
     """
 
     if isinstance(request.param, GitRepositoryBuild):
@@ -160,7 +160,7 @@ def dapper(host):
     yields the path to the dapper binary.
 
     If dapper is already installed on the host, then its location is
-    returned. Otherwise, dapper is either build from source inside a temporary
+    returned. Otherwise, dapper is either built from source inside a temporary
     directory or downloaded from rancher.com (if no go toolchain can be found).
 
     """

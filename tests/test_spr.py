@@ -174,7 +174,7 @@ SPR_CONFIG = {
 SPR_CONTAINERS_FOR_POD = []
 
 for img, conf in SPR_CONFIG.items():
-    # 15.7-spr means SPR 1.1.x (onwards) where we use BCI iamges  db, nginx, and valkey.
+    # 15.7-spr means SPR 1.1.x (onwards) where we use BCI images for db, nginx and valkey.
     # In that case SPR_CONFIG.url points to a suitable BCI image.
     #
     # 15.6-spr means SPR 1.0.x where we built extra images for db, nginx, and valkey.
