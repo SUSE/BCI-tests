@@ -75,7 +75,7 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
 # Test base containers by default for these versions
 _DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
 
-# List the released versions of SLE, used for supportabilty and EULA tests
+# List the released versions of SLE, used for supportability and EULA tests
 RELEASED_SLE_VERSIONS = (
     "15.4",
     "15.5",
@@ -100,7 +100,7 @@ assert sorted(ALLOWED_BASE_OS_VERSIONS) == list(ALLOWED_BASE_OS_VERSIONS), (
 assert sorted(ALLOWED_NONBASE_OS_VERSIONS) == list(
     ALLOWED_NONBASE_OS_VERSIONS
 ), (
-    f"list ALLOWED_NONOS_VERSIONS must be sorted, but got {ALLOWED_NONBASE_OS_VERSIONS}"
+    f"list ALLOWED_NONBASE_OS_VERSIONS must be sorted, but got {ALLOWED_NONBASE_OS_VERSIONS}"
 )
 
 if not (

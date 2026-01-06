@@ -5,7 +5,7 @@ a non-x86_64 host.
 
 The tests in this module are mostly testing the image labels. We follow the
 conventions outlined in
-`<https://confluence.suse.com/display/ENGCTNRSTORY/BCI+image+labels>`_. But have
+`<https://confluence.suse.com/display/ENGCTNRSTORY/BCI+image+labels>`_. However, we have
 to skip some of the tests for the SLE 15 SP3 base container, as it does not
 offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
@@ -558,7 +558,7 @@ def test_url(
     indirect=True,
 )
 def test_artifacthub_urls(container: ContainerData) -> None:
-    """Smoke test checking that the artifacthub.io labelling is passing sanity checks"""
+    """Smoke test checking that the artifacthub.io labeling is passing sanity checks"""
     labels = container.inspect.config.labels
 
     assert "io.artifacthub.package.readme-url" in labels, (

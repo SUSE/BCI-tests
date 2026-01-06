@@ -155,7 +155,7 @@ def test_samba_server_tdbsam_in_pod(pod_per_test: PodData) -> None:
         "smbuser -u dave -p password -d /shares/users/dave"
     )
 
-    # check that we can connect to the samba server annonymously
+    # check that we can connect to the samba server anonymously
     assert "public          Disk      Public files" in client_con.check_output(
         "smbclient -q -L //localhost -N"
     )
@@ -166,7 +166,7 @@ def test_samba_server_tdbsam_in_pod(pod_per_test: PodData) -> None:
         not in client_con.check_output("smbclient -q -L //localhost -N")
     )
 
-    # check that we can't access a private share annonymously
+    # check that we can't access a private share anonymously
     assert (
         "NT_STATUS_ACCESS_DENIED"
         in client_con.run_expect(

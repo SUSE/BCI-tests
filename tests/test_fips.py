@@ -164,9 +164,9 @@ def test_openssl_binary(container_per_test: ContainerData) -> None:
 
 
 def openssl_fips_hashes_test_fnct(container_per_test: ContainerData) -> None:
-    """If the host is running in FIPS mode, then we check that all fips certified
+    """If the host is running in FIPS mode, then we check that all FIPS certified
     hash algorithms can be invoked via :command:`openssl $digest /dev/null` and
-    all non-fips hash algorithms fail.
+    all non-FIPS hash algorithms fail.
 
     """
     con = container_per_test.connection
@@ -357,7 +357,7 @@ def test_gcrypt_binary(container_per_test: ContainerData) -> None:
     "container_per_test", FIPS_GCRYPT_TESTER_IMAGES, indirect=True
 )
 def test_gpgconf_binary(container_per_test: ContainerData) -> None:
-    """validate that gpgconf lists fips-mode"""
+    """validate that gpgconf lists ``fips-mode``"""
 
     assert container_per_test.connection.check_output(
         "gpgconf --show-versions | sed -n '/fips-mode:[yn]:/p' "
@@ -404,7 +404,7 @@ def test_nss_firefox_cert(container_per_test: ContainerData) -> None:
         c.check_output("modutil -chkfips true -dbdir nssdb")
         == "FIPS mode enabled."
     ), "FIPS mode not enabled properly"
-    # Following will fail in FIPS mode because to short rsa keylength (1024)
+    # Following will fail in FIPS mode because of too short RSA key length (1024)
     c.run_expect(
         [255],
         'certutil -R -k rsa -g 1024 -s "CN=Daniel Duesentrieb3,O=Example Corp,L=Mountain View,ST=California,C=DE" -d "${PWD}/nssdb" -o cert9.cer -f password.txt -z seedfile.dat',
