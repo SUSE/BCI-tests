@@ -13,11 +13,13 @@ from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
+from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
+from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import TARGET
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.fips import ALL_DIGESTS
@@ -301,6 +303,11 @@ DIND_CONTAINER = pytest.param(
 
 @pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
 @pytest.mark.skipif(
+    OS_VERSION not in RELEASED_LTSS_VERSIONS
+    or OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="No repo available to install docker",
+)
+@pytest.mark.skipif(
     not DOCKER_SELECTED,
     reason="Docker in docker can only be tested when using the docker runtime",
 )
@@ -312,11 +319,8 @@ def test_dind(container_per_test):
     :py:const:`DIND_CONTAINER`).
 
     """
-    container_per_test.connection.run_expect([0], "zypper -n in docker")
-    container_per_test.connection.run_expect([0], "docker ps")
-    res = container_per_test.connection.run_expect(
-        [0],
-        "docker run --rm registry.opensuse.org/opensuse/tumbleweed:latest "
-        "/usr/bin/ls",
+    container_per_test.connection.check_output("zypper -n in docker")
+    container_per_test.connection.check_output("docker ps")
+    assert "etc" in container_per_test.connection.check_output(
+        "docker run --rm registry.suse.com/bci/bci-busybox:latest /usr/bin/ls",
     )
-    assert "etc" in res.stdout

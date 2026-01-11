@@ -166,7 +166,8 @@ def test_product(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.4", "15.5", "15.6", "tumbleweed"),
+    OS_VERSION in ("15.4", "15.5", "15.6", "tumbleweed")
+    or OS_VERSION not in RELEASED_SLE_VERSIONS,
     reason="suse trademark only available in certain SLE versions",
 )
 def test_suse_trademark(auto_container):
@@ -429,6 +430,10 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="no included BCI repository - can't test zypper verify",
+)
 @pytest.mark.parametrize(
     "container", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
 )
