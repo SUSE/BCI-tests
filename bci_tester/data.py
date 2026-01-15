@@ -42,6 +42,7 @@ ALLOWED_BASE_OS_VERSIONS = (
     "15.6",
     "15.7",
     "16.0",
+    "16.1",
     "tumbleweed",
 )
 
@@ -73,7 +74,7 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.0")
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
 
 # Test base containers by default for these versions
-_DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
+_DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "16.1", "tumbleweed")
 
 # List the released versions of SLE, used for supportability and EULA tests
 RELEASED_SLE_VERSIONS = (
@@ -181,7 +182,7 @@ if TARGET not in (
     if BASEURL.endswith("/"):
         BASEURL = BASEURL[:-1]
 else:
-    if OS_VERSION in ("tumbleweed", "16.0"):
+    if OS_VERSION in ("tumbleweed", "16.0", "16.1"):
         DISTNAME = OS_VERSION
     else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"

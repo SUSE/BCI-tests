@@ -670,7 +670,7 @@ def test_disturl(
             "obs://build.suse.de/SUSE:SLFO:Products:PublicCloud:Toolchain:2025"
             in disturl
         )
-    elif OS_VERSION == "16.0":
+    elif OS_VERSION.startswith("16."):
         if baseurl.netloc == "registry.opensuse.org":
             assert (
                 f"obs://build.opensuse.org/devel:BCI:16.{OS_SP_VERSION}"

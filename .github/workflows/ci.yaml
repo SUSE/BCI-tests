@@ -206,6 +206,14 @@ jobs:
             os_version: "16.0"
           - toxenv: repository
             os_version: "16.0"
+          - toxenv: all
+            os_version: "16.1"
+          - toxenv: base
+            os_version: "16.1"
+          - toxenv: minimal
+            os_version: "16.1"
+          - toxenv: metadata
+            os_version: "16.1"
           - toxenv: base
             testing_target: factory-totest
             os_version: "tumbleweed"
