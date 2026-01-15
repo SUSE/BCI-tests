@@ -114,9 +114,6 @@ SKIP_IF_TW_MARK = pytest.mark.skipif(
     reason="no supportlevel labels on openSUSE containers",
 )
 
-SKIP_IF_AI_MARK = pytest.mark.skipif(
-    OS_VERSION == "15.6-ai", reason="no supportlevel labels on AI containers"
-)
 SKIP_IF_LTSS_VERSION = pytest.mark.skipif(
     OS_VERSION in RELEASED_LTSS_VERSIONS, reason="LTSS container"
 )
@@ -550,7 +547,6 @@ def test_url(
 
 
 @SKIP_IF_PC_MARK
-@SKIP_IF_AI_MARK
 @SKIP_IF_LTSS_VERSION
 @pytest.mark.parametrize(
     "container",
@@ -739,7 +735,6 @@ def test_disturl_can_be_checked_out(
 
 
 @SKIP_IF_TW_MARK
-@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container",
     [
@@ -761,7 +756,6 @@ def test_techpreview_label(container: ContainerData):
 
 
 @SKIP_IF_TW_MARK
-@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container",
     list(ACC_CONTAINERS),
@@ -778,7 +772,6 @@ def test_acc_label(container: ContainerData):
 
 
 @SKIP_IF_TW_MARK
-@SKIP_IF_AI_MARK
 @pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label
