@@ -14,7 +14,7 @@ addopts = "--strict-markers"
 markers = [
     '389-ds_2.2',
     '389-ds_2.5',
-    '389-ds_3.1',
+    '389-ds_3.2',
     'alertmanager_0.28',
     'alertmanager_latest',
     'apache-tomcat_9-openjdk8',
