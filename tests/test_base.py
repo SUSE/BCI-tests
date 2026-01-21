@@ -143,12 +143,12 @@ def test_base_size(container: ContainerData, container_runtime):
             "ppc64le": 128,
             "s390x": 93,
         }
-    elif OS_VERSION in ("16.0",):
+    elif OS_VERSION in ("16.0", "16.1"):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 95,
             "aarch64": 100,
-            "ppc64le": 114,
-            "s390x": 92,
+            "ppc64le": 115,
+            "s390x": 93,
         }
     elif OS_VERSION in ("15.7",):
         base_container_max_size: Dict[str, int] = {
