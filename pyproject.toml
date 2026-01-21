@@ -12,9 +12,8 @@ build-backend = 'setuptools.build_meta'
 xfail_strict = true
 addopts = "--strict-markers"
 markers = [
-    '389-ds_2.2',
     '389-ds_2.5',
-    '389-ds_3.2',
+    '389-ds_latest',
     'alertmanager_0.28',
     'alertmanager_latest',
     'apache-tomcat_9-openjdk8',
