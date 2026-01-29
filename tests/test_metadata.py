@@ -575,8 +575,21 @@ def test_artifacthub_urls(container: ContainerData) -> None:
     # for devel projects we pass it as a query
     assert readme_url.path.endswith(".md")
     assert "/README" in readme_url.path
-    assert "//" not in readme_url.path and "//" not in readme_url.path
-    # TODO(dmllr): add testing for logo-url
+    assert "//" not in readme_url.path
+
+    if "io.artifacthub.package.logo-url" in labels:
+        logo_url = urllib.parse.urlparse(
+            labels["io.artifacthub.package.logo-url"]
+        )
+        assert logo_url.scheme == "https"
+        assert logo_url.port is None
+        assert logo_url.netloc in (
+            "raw.githubusercontent.com",
+            "opensource.suse.com",
+            "gcc.gnu.org",
+            "spack.io",
+        )
+        assert "//" not in logo_url.path
 
 
 @pytest.mark.parametrize(
