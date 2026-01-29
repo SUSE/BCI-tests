@@ -92,6 +92,18 @@ def test_base32_64(auto_container):
     )
 
 
+@pytest.mark.skipif(
+    OS_VERSION in ("15.6", "15.7"),
+    reason="supporting rootless ping is considered a feature and ECO still pending.",
+)
+def test_ping(auto_container):
+    """Ensure ping command works in a busybox container"""
+    assert (
+        "--- www.suse.com ping statistics"
+        in auto_container.connection.check_output("ping -4 -c 2 www.suse.com")
+    )
+
+
 @pytest.mark.parametrize(
     "container_per_test", [BUSYBOX_CONTAINER], indirect=True
 )
