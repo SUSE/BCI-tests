@@ -1159,9 +1159,9 @@ SAMBA_CONTAINERS = (
 KUBEVIRT_CONTAINERS = [
     create_BCI(
         build_tag=(
-            f"suse/sles/16.0/virt-{service}:1.5"
-            if os_version.startswith("16")
-            else f"{APP_CONTAINER_PREFIX}/virt-{service}:1.6"
+            f"{APP_CONTAINER_PREFIX}/virt-{service}:latest"
+            if os_version == "tumbleweed"
+            else f"suse/sles/16.0/virt-{service}:1.5"
         ),
         bci_type=ImageType.APPLICATION,
         available_versions=[os_version],
