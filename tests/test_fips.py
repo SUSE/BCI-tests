@@ -129,6 +129,19 @@ def test_fips_env(container_per_test: ContainerData) -> None:
 
 
 @pytest.mark.parametrize(
+    "container_per_test",
+    FIPS_TESTER_IMAGES + [MICRO_FIPS_CONTAINER],
+    indirect=True,
+)
+def test_fips_crypto_policy(container_per_test: ContainerData) -> None:
+    """Check that the crypto policy is set to FIPS"""
+    state = container_per_test.connection.file(
+        "/etc/crypto-policies/state/current"
+    ).content_string
+    assert state.strip() == "FIPS", "Crypto policy is not set to FIPS"
+
+
+@pytest.mark.parametrize(
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
 def test_openssl_binary(container_per_test: ContainerData) -> None:
