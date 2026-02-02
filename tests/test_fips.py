@@ -18,6 +18,7 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import OS_VERSION
+from bci_tester.data import RELEASED_SLE_VERSIONS
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.fips import FIPS_DIGESTS
 from bci_tester.fips import FIPS_GCRYPT_DIGESTS
@@ -141,6 +142,10 @@ def test_fips_crypto_policy(container_per_test: ContainerData) -> None:
     assert state.strip() == "FIPS", "Crypto policy is not set to FIPS"
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in RELEASED_SLE_VERSIONS,
+    reason="no BCI repository in not released products",
+)
 @pytest.mark.parametrize(
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
@@ -241,6 +246,10 @@ def test_openssl_fips_hashes(container_per_test: ContainerData):
     openssl_fips_hashes_test_fnct(container_per_test)
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in RELEASED_SLE_VERSIONS,
+    reason="no BCI repository in not released products",
+)
 @pytest.mark.parametrize(
     "container_per_test", FIPS_GNUTLS_TESTER_IMAGES, indirect=True
 )
@@ -290,6 +299,10 @@ def test_gnutls_binary(container_per_test: ContainerData) -> None:
         )
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in RELEASED_SLE_VERSIONS,
+    reason="no BCI repository in not released products",
+)
 @pytest.mark.parametrize(
     "container_per_test", FIPS_GCRYPT_TESTER_IMAGES, indirect=True
 )
@@ -397,6 +410,10 @@ def test_icainfo_binary(container_per_test: ContainerData) -> None:
     container_per_test.connection.check_output("icastats -S")
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in RELEASED_SLE_VERSIONS,
+    reason="no BCI repository in not released products",
+)
 @pytest.mark.parametrize(
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
