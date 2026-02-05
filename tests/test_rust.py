@@ -40,7 +40,7 @@ def test_cargo_version(auto_container):
         for pkg in (
             GitRepositoryBuild(
                 repository_url="https://github.com/sfackler/rust-openssl",
-                build_command="zypper -n in libopenssl-devel && cargo build && cargo test",
+                build_command="zypper -n in libopenssl-devel gcc && cargo build && cargo test",
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/rust-random/rand",
