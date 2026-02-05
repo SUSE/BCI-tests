@@ -142,9 +142,9 @@ def test_sle_bci_forbidden_packages(container_per_test):
         filter(
             package_name_filter_func(ALLOWED_PACKAGES),
             filter(
-                lambda p: not package_name_filter_func(
-                    FORBIDDEN_PACKAGE_NAMES
-                )(p),
+                lambda p: (
+                    not package_name_filter_func(FORBIDDEN_PACKAGE_NAMES)(p)
+                ),
                 package_list,
             ),
         )
