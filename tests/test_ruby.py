@@ -38,20 +38,14 @@ def test_lang_set(auto_container):
         ),
         (
             # bsc#1203692
-            "sqlite3 -v 1.4.0"
-            if OS_VERSION in ("15.5", "15.6", "15.7")
-            else "sqlite3"
+            "sqlite3 -v 1.4.0" if OS_VERSION in ("15.7",) else "sqlite3"
         ),
         "rspec-expectations",
-        "diff-lcs",
+        ("diff-lcs -v 1.6.2" if OS_VERSION in ("15.7",) else "diff-lcs"),
         "rspec-mocks",
         "rspec-support",
         "rspec",
-        (
-            "multi_json -v 1.15.0"
-            if OS_VERSION in ("15.5", "15.6", "15.7")
-            else "multi_json"
-        ),
+        ("multi_json -v 1.15.0" if OS_VERSION in ("15.7",) else "multi_json"),
         "rack",
         "rake",
         "i18n",
