@@ -215,7 +215,7 @@ jobs:
           - toxenv: metadata
             os_version: "16.1"
           - toxenv: base
-            testing_target: factory-totest
+            testing_target: obs
             os_version: "tumbleweed"
 
     steps:
