@@ -1301,7 +1301,6 @@ CONTAINERS_WITH_ZYPPER = (
         if LOCALHOST.system_info.arch in ("aarch64", "x86_64")
         else []
     )
-    + KEA_CONTAINERS
 )
 
 #: all containers with zypper and with the flag to launch them as root
