@@ -123,5 +123,5 @@ def test_rails_template(auto_container_per_test):
         pytest.xfail("timezone data are not in the container")
 
     assert "Ruby on Rails" in auto_container_per_test.connection.check_output(
-        "cd /hello/ && (rails server > /dev/null &) && curl -sf --retry 5 --retry-connrefused  http://localhost:3000",
+        "cd /hello/ && (timeout 30 rails server > /dev/null &) && curl -sf --retry 5 --retry-connrefused http://localhost:3000",
     )
