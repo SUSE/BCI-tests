@@ -233,10 +233,10 @@ def test_tmpfiles_d_created(container: ContainerData) -> None:
         tp, path, mode, owner, group, age, arg = line.split()
 
         # sanity check, we don't handle these below at all
-        assert age == "-" and arg == "-"
+        assert age == "-"
 
         # another sanity check because we don't test other tmpfiles.d constructs
-        assert tp in ("d", "C")
+        assert tp in ("d", "C", "L")
 
         # directories
         if tp == "d":
@@ -253,3 +253,12 @@ def test_tmpfiles_d_created(container: ContainerData) -> None:
             assert file.exists
             assert file.is_file
             assert owner == "-" and group == "-" and mode == "-"
+
+        # linked files
+        elif tp == "L":
+            file = container.connection.file(path)
+            assert file.exists
+            assert file.is_symlink
+            assert (Path(path).parent / arg).resolve() == Path(
+                file.linked_to
+            ).resolve()

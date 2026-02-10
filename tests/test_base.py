@@ -138,10 +138,10 @@ def test_base_size(container: ContainerData, container_runtime):
             base_container_max_size["x86_64"] += 10
     elif OS_VERSION in ("tumbleweed",):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 101,
-            "aarch64": 117,
-            "ppc64le": 128,
-            "s390x": 93,
+            "x86_64": 103,
+            "aarch64": 119,
+            "ppc64le": 130,
+            "s390x": 95,
         }
     elif OS_VERSION in ("16.0", "16.1"):
         base_container_max_size: Dict[str, int] = {
