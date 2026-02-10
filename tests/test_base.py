@@ -76,6 +76,39 @@ def test_passwd_present(auto_container):
 
 
 @pytest.mark.skipif(
+    OS_VERSION in ("tumbleweed",)
+    or OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="No repo available or no sensible gpgkey settings (openSUSE)",
+)
+def test_gpgkey_present_and_correct(auto_container):
+    """Check that the gpgkey setting in repos makes sense."""
+    found_gpgkey = False
+    for repo in (
+        auto_container.connection.check_output(
+            "grep -hE 'gpgkey.*=' /etc/zypp/repos.d/*.repo | sort -u"
+        )
+        .strip()
+        .splitlines()
+    ):
+        k, _, v = repo.partition("=")
+        assert k.strip() == "gpgkey", (
+            f"Expected gpgkey setting but got {k.strip()}"
+        )
+        assert v.strip().startswith("file:/usr/lib/rpm/")
+        assert auto_container.connection.file(v.strip()[5:]).exists, (
+            f"GPG key file {v.strip()[5:]} does not exist in the container"
+        )
+        auto_container.connection.check_output(
+            f"rpmkeys --import {v.strip()[5:]}"
+        )
+        found_gpgkey = True
+
+    assert found_gpgkey, (
+        "No repo files with gpgkey setting found in /etc/zypp/repos.d/SLE_BCI*.repo"
+    )
+
+
+@pytest.mark.skipif(
     OS_VERSION not in ("tumbleweed", "16.0"),
     reason="requires gconv modules",
 )
