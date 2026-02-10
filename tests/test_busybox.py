@@ -82,6 +82,14 @@ def test_ps(auto_container):
     assert "root" in auto_container.connection.check_output("ps")
 
 
+def test_no_gplv3(auto_container):
+    """Check if we can find GPLv3 licensed binaries in the image"""
+    for candidate in auto_container.connection.check_output(
+        r"find /usr /var /etc /boot -type f -exec grep -E -q 'GPL-3.0-|Version 3, 29 June 2007' {} \; -print"
+    ):
+        pytest.fail(f"GPLv3 license found: {candidate}")
+
+
 def test_base32_64(auto_container):
     """Ensure the base32 and base64 commands are returning the correct result for a given "test" string"""
     assert "ORSXG5AK" in auto_container.connection.check_output(
