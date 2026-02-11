@@ -3,13 +3,24 @@
 from typing import Dict
 
 import pytest
+from pytest_container import MultiStageBuild
+from pytest_container import get_extra_run_args
+from pytest_container.helpers import get_extra_build_args
 from pytest_container.runtime import LOCALHOST
 
+from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.selinux import selinux_status
 
 CONTAINER_IMAGES = [BUSYBOX_CONTAINER]
+
+RPM_BUSYBOX_DOCKERFILE = """
+FROM $runner as target
+FROM $builder
+COPY --from=target / /target
+RUN rpm --root /target -qa --qf '%{NAME} %{LICENSE}\\n' > /tmp/licenses.txt
+"""
 
 
 def test_busybox_provides_sh(auto_container):
@@ -82,12 +93,36 @@ def test_ps(auto_container):
     assert "root" in auto_container.connection.check_output("ps")
 
 
-def test_no_gplv3(auto_container):
+def test_no_gplv3_license(auto_container):
     """Check if we can find GPLv3 licensed binaries in the image"""
     for candidate in auto_container.connection.check_output(
-        r"find /usr /var /etc /boot -type f -exec grep -E -q 'GPL-3.0-|Version 3, 29 June 2007' {} \; -print"
+        r"find /usr /var /etc /boot -type f -exec grep -E -q 'GPL[ -]3|Version 3, 29 June 2007' {} \; -print"
     ):
         pytest.fail(f"GPLv3 license found: {candidate}")
+
+
+def test_no_gplv3_package(
+    auto_container, host, container_runtime, tmp_path, pytestconfig
+):
+    """test that there is no GPL-3 labelled package in the image."""
+
+    runner_id = MultiStageBuild(
+        containers={
+            "builder": BASE_CONTAINER,
+            "runner": auto_container.container,
+        },
+        containerfile_template=RPM_BUSYBOX_DOCKERFILE,
+    ).build(
+        tmp_path,
+        pytestconfig,
+        container_runtime,
+        extra_build_args=get_extra_run_args(pytestconfig),
+    )
+    assert "GPL-3" not in host.check_output(
+        f"{container_runtime.runner_binary} run --rm "
+        f"{' '.join(get_extra_build_args(pytestconfig))} "
+        f"{runner_id} cat /tmp/licenses.txt",
+    )
 
 
 def test_base32_64(auto_container):
