@@ -54,6 +54,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "15.7-spr",
     "16.0",
     "16.0-pc2025",
+    "16.1",
     "tumbleweed",
 )
 
@@ -1004,7 +1005,7 @@ PROMETHEUS_CONTAINERS = [
     )
     for tag, versions in (
         ("2", ("15.7",)),
-        ("3", ("16.0", "tumbleweed")),
+        ("3", ("16.0", "16.1", "tumbleweed")),
     )
 ]
 
