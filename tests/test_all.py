@@ -337,9 +337,21 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
                 ].partition("-")
                 version, _, release = version.partition("-")
                 if installed_version == version and release:
-                    assert packaging.version.parse(
+                    ver_installed_release = packaging.version.Version(
                         installed_release
-                    ) <= packaging.version.parse(release), (
+                    )
+                    ver_release = packaging.version.Version(release)
+                    if len(ver_installed_release.release) > len(
+                        ver_release.release
+                    ):
+                        ver_installed_release = (
+                            ver_installed_release.__replace__(
+                                release=ver_installed_release.release[
+                                    : len(ver_release.release)
+                                ]
+                            )
+                        )
+                    assert ver_installed_release <= ver_release, (
                         f"Installed {name} = {installed_release} is newer than "
                         f"what {solvable['solvable:name']} requires (= {release})"
                     )
