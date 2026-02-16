@@ -72,6 +72,10 @@ _DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.0")
 # Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
 
+# SLFO 16.0+ Test Language and Application containers by default for these versions
+_DEFAULT_NONBASE_SLFOPLUS_VERSIONS = ("16.0", "16.1", "tumbleweed")
+
+
 # Test base containers by default for these versions
 _DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "16.1", "tumbleweed")
 
@@ -615,14 +619,17 @@ OPENJDK_DEVEL_CONTAINERS = [
     OPENJDK_DEVEL_25_CONTAINER,
 ]
 
-NODEJS_22_CONTAINER = create_BCI(
-    build_tag="bci/nodejs:22",
-    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
-)
-
 NODEJS_CONTAINERS = [
-    NODEJS_22_CONTAINER,
+    create_BCI(
+        build_tag=f"bci/nodejs:{node_version}",
+        available_versions=available_versions,
+    )
+    for node_version, available_versions in (
+        (22, ("15.7", "16.0")),
+        (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
+    )
 ]
+
 
 PYTHON_WITH_PIPX_CONTAINERS = [
     create_BCI(
