@@ -486,7 +486,9 @@ def test_general_labels(
         ):
             assert labels["com.suse.eula"] == "sle-eula"
         else:
-            assert labels["com.suse.eula"] == "sle-bci"
+            assert labels["com.suse.eula"] == (
+                "sle-beta" if OS_VERSION in ("16.1",) else "sle-bci"
+            )
             assert "BCI" in labels[f"{prefix}.title"]
 
 
