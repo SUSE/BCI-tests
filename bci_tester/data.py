@@ -63,6 +63,7 @@ ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.7",
     "15.7-spr",
     "16.0",
+    "16.1",
     "tumbleweed",
 )
 

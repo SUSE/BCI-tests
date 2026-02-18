@@ -424,13 +424,15 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
 
     # kubic-locale-archive should be replaced by glibc-locale-base in the containers
     # but that is a few bytes larger so we accept it as an exception
+    eula_package = "skelcd-EULA-bci"
+    if OS_VERSION.startswith("16.1"):
+        eula_package = "skelcd-EULA-SLES"
+    elif OS_VERSION.startswith("16"):
+        eula_package = "skelcd-EULA-BCI"
+
     known_orphaned_packages = {
+        eula_package,
         "kubic-locale-archive",
-        (
-            "skelcd-EULA-BCI"
-            if OS_VERSION.startswith("16")
-            else "skelcd-EULA-bci"
-        ),
         "sles-ltss-release",
         ("SLES-release" if OS_VERSION.startswith("16") else "sles-release"),
         "ALP-dummy-release",
