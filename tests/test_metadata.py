@@ -74,6 +74,7 @@ from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NGINX_CONTAINERS
 from bci_tester.data import NODEJS_CONTAINERS
+from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
 from bci_tester.data import OS_SP_VERSION
@@ -184,6 +185,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
     ]
+    + [(c, "nvidia", ImageType.OS) for c in NVIDIA_CONTAINERS]
     + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
@@ -663,6 +665,11 @@ def test_disturl(
         assert "obs://build.suse.de/Devel:AI" in disturl
     elif OS_VERSION == "15.7-spr" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:SCC:PrivateRegistry:1.1" in disturl
+    elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs"):
+        assert (
+            "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:SLE-15-SP7"
+            in disturl
+        )
     elif OS_VERSION == "16.0-pc2025":
         assert (
             "obs://build.suse.de/SUSE:SLFO:Products:PublicCloud:Toolchain:2025"

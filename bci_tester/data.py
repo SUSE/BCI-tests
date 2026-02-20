@@ -52,6 +52,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-third-party",
     "16.0",
     "16.0-pc2025",
     "16.1",
@@ -88,6 +89,7 @@ RELEASED_SLE_VERSIONS = (
     "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-third-party",
     "16.0",
 )
 
@@ -191,6 +193,7 @@ else:
     else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
 
+    ibs_project: str = f"registry.suse.de/suse/{DISTNAME}/update/bci"
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     ibs_released: str = "registry.suse.com"
     ibs_cr_project: str = f"registry.suse.de/suse/{DISTNAME}/update/cr/totest"
@@ -204,12 +207,17 @@ else:
     elif OS_VERSION in ("15.6-spr", "15.7-spr"):
         ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
         obs_project = "registry.suse.de/devel/scc/privateregistry"
+    elif OS_VERSION in ("15.7-third-party"):
+        ibs_project = (
+            f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}"
+        )
+        ibs_cr_project = f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/totest"
 
     BASEURL = {
         "obs": obs_project,
         "factory-totest": "registry.opensuse.org/opensuse/factory/totest",
         "factory-arm-totest": "registry.opensuse.org/opensuse/factory/arm/totest",
-        "ibs": f"registry.suse.de/suse/{DISTNAME}/update/bci",
+        "ibs": ibs_project,
         "dso": "registry1.dso.mil/ironbank/suse",
         "ibs-cr": ibs_cr_project,
         "ibs-released": ibs_released,
@@ -628,6 +636,20 @@ NODEJS_CONTAINERS = [
     for node_version, available_versions in (
         (22, ("15.7", "16.0")),
         (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
+    )
+]
+
+NVIDIA_CONTAINERS = [
+    create_BCI(
+        build_tag=f"third-party/nvidia/driver:{driver_ver}-sles{os_ver}",
+        available_versions=[f"{os_ver}-third-party"],
+    )
+    for driver_ver, os_ver in (
+        ("580.126.16", "15.7"),
+        ("580.126.09", "15.7"),
+        ("580.105.08", "15.7"),
+        ("580.95.05", "15.7"),
+        ("580.82.07", "15.7"),
     )
 ]
 
@@ -1372,6 +1394,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *SPR_CONTAINERS,
     *KUBEVIRT_CONTAINERS,
     *KUBEVIRT_CDI_CONTAINERS,
+    *NVIDIA_CONTAINERS,
 ]
 
 
