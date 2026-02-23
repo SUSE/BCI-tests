@@ -20,7 +20,7 @@ pytestmark = pytest.mark.skipif(
     reason="no kernel-module containers for Tumbleweed",
 )
 
-_DRBD_VERSION = "9.2.11"
+_DRBD_VERSION = "9.2.16"
 
 
 def create_kernel_test(containerfile: str) -> ParameterSet:
@@ -38,8 +38,6 @@ def create_kernel_test(containerfile: str) -> ParameterSet:
 
 DRBD_CONTAINER = create_kernel_test(
     rf"""WORKDIR /src/
-RUN zypper -n in coccinelle tar
-
 RUN set -euxo pipefail; \
     curl -Lsf -o - https://pkg.linbit.com/downloads/drbd/9/drbd-{_DRBD_VERSION}.tar.gz | tar xzf - ; \
     cd drbd-{_DRBD_VERSION}; \
@@ -48,10 +46,6 @@ RUN set -euxo pipefail; \
 )
 
 
-@pytest.mark.skipif(
-    OS_VERSION in ("16.0",),
-    reason="can't install additional packages yet on 16",
-)
 @pytest.mark.parametrize("container", [DRBD_CONTAINER], indirect=True)
 def test_drbd_builds(container: ContainerData) -> None:
     """Test that the DRBD kernel module builds."""
