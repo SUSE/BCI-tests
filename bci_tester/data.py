@@ -933,7 +933,13 @@ KEA_CONTAINERS = [
     for kea_ver, os_versions in (("2.6", ("15.7",)), ("3.0", ("tumbleweed",)))
 ]
 
-if OS_VERSION in ("16.0",):
+if OS_VERSION in ("16.1",):
+    KERNEL_MODULE_CONTAINER = create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle16-kernel-module-devel:{OS_CONTAINER_TAG}",
+        available_versions=["16.1"],
+        bci_type=ImageType.OS,
+    )
+elif OS_VERSION in ("16.0",):
     KERNEL_MODULE_CONTAINER = create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/bci-sle16-kernel-module-devel:{OS_CONTAINER_TAG}",
         available_versions=["16.0"],
