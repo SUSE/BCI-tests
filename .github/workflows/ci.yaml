@@ -24,8 +24,8 @@ jobs:
       - name: Install necessary software
         run: |
           set -e
-          sudo apt update
-          sudo apt -y install tox
+          sudo apt-get update
+          sudo apt-get -y install tox
       - name: Test formatting with ruff & check the markers
         run: ./pre-commit-full.sh
 
@@ -48,7 +48,7 @@ jobs:
 
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
-        run: sudo apt update && sudo apt install jo tox fish
+        run: sudo apt-get update && sudo apt install jo tox fish
 
       - id: setmatrix
         run: |
@@ -102,7 +102,7 @@ jobs:
         with:
           python-version: "3.x"
       - name: Install tox
-        run: sudo apt update && sudo apt install tox
+        run: sudo apt-get update && sudo apt-get install tox
       - run: tox -e doc
 
   lint:
@@ -114,7 +114,7 @@ jobs:
         with:
           python-version: "3.x"
       - name: Install tox
-        run: sudo apt update && sudo apt install tox
+        run: sudo apt-get update && sudo apt-get install tox
       - run: tox -e lint
 
   test-containers:
@@ -221,6 +221,8 @@ jobs:
     steps:
       - name: Clean up disk space to maximize available space
         run: sudo rm -rf /usr/local/*/* /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache && sudo docker image prune --all --force
+      - name: Uninstall conflicting packages
+        run: sudo apt-get -y remove python3-chardet
       - name: checkout source code
         uses: actions/checkout@v6
       - name: Set up Python
