@@ -207,7 +207,7 @@ else:
     elif OS_VERSION in ("15.6-spr", "15.7-spr"):
         ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
         obs_project = "registry.suse.de/devel/scc/privateregistry"
-    elif OS_VERSION in ("15.7-third-party"):
+    elif OS_VERSION in ("15.7-third-party",):
         ibs_project = (
             f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}"
         )
