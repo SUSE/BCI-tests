@@ -185,7 +185,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
     ]
-    + [(c, "nvidia", ImageType.OS) for c in NVIDIA_CONTAINERS]
+    + [(c, "nvidia-driver", ImageType.THIRD_PARTY) for c in NVIDIA_CONTAINERS]
     + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
@@ -487,6 +487,8 @@ def test_general_labels(
             ImageType.SAC_APPLICATION,
         ):
             assert labels["com.suse.eula"] == "sle-eula"
+        elif container_name in ("nvidia-driver",):
+            assert labels["com.suse.eula"] == "sle-beta"
         else:
             assert labels["com.suse.eula"] == (
                 "sle-beta" if OS_VERSION in ("16.1",) else "sle-bci"
@@ -665,7 +667,7 @@ def test_disturl(
         assert "obs://build.suse.de/Devel:AI" in disturl
     elif OS_VERSION == "15.7-spr" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:SCC:PrivateRegistry:1.1" in disturl
-    elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs"):
+    elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs", "ibs-cr"):
         assert (
             "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:SLE-15-SP7"
             in disturl
@@ -821,13 +823,15 @@ def test_reference(
         == reference
     )
     if container_type != ImageType.OS_LTSS:
-        reference_name = container_name.replace(".", "-")
+        reference_name = container_name.replace("-", "/").replace(".", "-")
         # the BCI-base container is actually identifying itself as the os container
         # Fixed by creating bci-base from dockerfile-generator on 15.6+
         if OS_VERSION in ("15.5", "tumbleweed") and container_name in (
             "base",
         ):
             reference_name = "sle15" if OS_VERSION == "15.5" else "tumbleweed"
+        if "nvidia" in container_name:
+            reference = "nvidia/driver"
         assert reference_name in reference
 
     if OS_VERSION == "tumbleweed":
