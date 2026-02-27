@@ -44,6 +44,7 @@ from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
@@ -492,6 +493,7 @@ def test_zypper_not_present_in_containers_without_it(
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
             + KUBEVIRT_CONTAINERS
+            + NVIDIA_CONTAINERS
         )
     ],
     indirect=True,

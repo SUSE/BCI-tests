@@ -317,6 +317,7 @@ class ImageType(enum.Enum):
     SAC_APPLICATION = enum.auto()
     OS = enum.auto()
     OS_LTSS = enum.auto()
+    THIRD_PARTY = enum.auto()
 
     def __str__(self) -> str:
         if self.value == ImageType.OS_LTSS:
@@ -325,6 +326,9 @@ class ImageType(enum.Enum):
             return "application"
         if self.value == ImageType.SAC_APPLICATION.value:
             return "application"
+        if self.value == ImageType.THIRD_PARTY.value:
+            return "third-party"
+
         return "bci"
 
 
@@ -643,6 +647,7 @@ NVIDIA_CONTAINERS = [
     create_BCI(
         build_tag=f"third-party/nvidia/driver:{driver_ver}-sles{os_ver}",
         available_versions=[f"{os_ver}-third-party"],
+        custom_entry_point="/bin/sh",
     )
     for driver_ver, os_ver in (
         ("580.126.16", "15.7"),
