@@ -185,7 +185,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
     ]
-    + [(c, "nvidia", ImageType.OS) for c in NVIDIA_CONTAINERS]
+    + [(c, "nvidia-driver", ImageType.THIRD_PARTY) for c in NVIDIA_CONTAINERS]
     + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
@@ -487,6 +487,8 @@ def test_general_labels(
             ImageType.SAC_APPLICATION,
         ):
             assert labels["com.suse.eula"] == "sle-eula"
+        elif container_name in ("nvidia-driver",):
+            assert labels["com.suse.eula"] == "sle-beta"
         else:
             assert labels["com.suse.eula"] == (
                 "sle-beta" if OS_VERSION in ("16.1",) else "sle-bci"
@@ -665,7 +667,7 @@ def test_disturl(
         assert "obs://build.suse.de/Devel:AI" in disturl
     elif OS_VERSION == "15.7-spr" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:SCC:PrivateRegistry:1.1" in disturl
-    elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs"):
+    elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs", "ibs-cr"):
         assert (
             "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:SLE-15-SP7"
             in disturl
@@ -828,6 +830,8 @@ def test_reference(
             "base",
         ):
             reference_name = "sle15" if OS_VERSION == "15.5" else "tumbleweed"
+        if OS_VERSION in ("15.7-third-party",):
+            reference_name = reference_name.replace("-", "/")
         assert reference_name in reference
 
     if OS_VERSION == "tumbleweed":
@@ -852,6 +856,8 @@ def test_reference(
             assert reference.startswith("registry.suse.com/suse/")
         elif container_type == ImageType.OS_LTSS:
             assert reference.startswith("registry.suse.com/suse/ltss/sle15")
+        elif container_type == ImageType.THIRD_PARTY:
+            assert reference.startswith("registry.suse.com/third-party/")
         else:
             assert reference.startswith("registry.suse.com/bci/")
 
