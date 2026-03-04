@@ -37,6 +37,7 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v6
+
       - name: get the current PR
         uses: 8BitJonny/gh-get-current-pr@4.0.0
         id: pr
@@ -48,7 +49,7 @@ jobs:
 
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
-        run: sudo apt-get update && sudo apt install jo tox fish
+        run: sudo apt-get update && sudo apt install jo tox fish iproute2
 
       - id: setmatrix
         run: |
@@ -244,6 +245,9 @@ jobs:
           sudo apt-get install ldap-utils
           command -v ldapwhoami
         if: ${{ matrix.toxenv == '389ds' }}
+
+      - name: log ip address
+        run: ip r
 
       - uses: actions/cache@v5
         with:
