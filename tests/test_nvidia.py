@@ -4,7 +4,6 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
-from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import NVIDIA_CONTAINERS
 
@@ -44,33 +43,19 @@ def test_image_content(container_per_test: ContainerData):
         "/usr/local/bin/nvidia-driver-selector.sh",
     ]
 
-    if LOCALHOST.system_info.arch in ("aarch64",):
-        ### TODO why are those uncompressed?
-        files += [
-            "/opt/open/nvidia-drm.ko",
-            "/opt/open/nvidia-modeset.ko",
-            "/opt/open/nvidia-peermem.ko",
-            "/opt/open/nvidia-uvm.ko",
-            "/opt/open/nvidia.ko",
-            "/opt/proprietary/nvidia-drm.ko",
-            "/opt/proprietary/nvidia-modeset.ko",
-            "/opt/proprietary/nvidia-peermem.ko",
-            "/opt/proprietary/nvidia-uvm.ko",
-            "/opt/proprietary/nvidia.ko",
-        ]
-    elif LOCALHOST.system_info.arch in ("x86_64",):
-        files += [
-            "/opt/open/nvidia-drm.ko.zst",
-            "/opt/open/nvidia-modeset.ko.zst",
-            "/opt/open/nvidia-peermem.ko.zst",
-            "/opt/open/nvidia-uvm.ko.zst",
-            "/opt/open/nvidia.ko.zst",
-            "/opt/proprietary/nvidia-drm.ko.zst",
-            "/opt/proprietary/nvidia-modeset.ko.zst",
-            "/opt/proprietary/nvidia-peermem.ko.zst",
-            "/opt/proprietary/nvidia-uvm.ko.zst",
-            "/opt/proprietary/nvidia.ko.zst",
-        ]
+    ### TODO test kernel modules via modinfo/modprobe
+    files += [
+        "/opt/open/nvidia-drm.ko.zst",
+        "/opt/open/nvidia-modeset.ko.zst",
+        "/opt/open/nvidia-peermem.ko.zst",
+        "/opt/open/nvidia-uvm.ko.zst",
+        "/opt/open/nvidia.ko.zst",
+        "/opt/proprietary/nvidia-drm.ko.zst",
+        "/opt/proprietary/nvidia-modeset.ko.zst",
+        "/opt/proprietary/nvidia-peermem.ko.zst",
+        "/opt/proprietary/nvidia-uvm.ko.zst",
+        "/opt/proprietary/nvidia.ko.zst",
+    ]
 
     for filename in files:
         assert container_per_test.connection.file(filename).exists
