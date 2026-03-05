@@ -912,7 +912,7 @@ HELM_CONTAINER = create_BCI(
     custom_entry_point="/bin/sh",
 )
 
-_COSIGN_VERSION: str = "latest" if OS_VERSION == "tumbleweed" else "2.5"
+_COSIGN_VERSION: str = "latest" if OS_VERSION == "tumbleweed" else "3"
 COSIGN_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/cosign:{_COSIGN_VERSION}",
