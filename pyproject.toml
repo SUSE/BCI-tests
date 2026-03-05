@@ -92,7 +92,7 @@ markers = [
     'cdi-uploadproxy_latest',
     'cdi-uploadserver_1.64',
     'cdi-uploadserver_latest',
-    'cosign_2.5',
+    'cosign_3',
     'cosign_latest',
     'dotnet-aspnet_8.0',
     'dotnet-aspnet_9.0',
