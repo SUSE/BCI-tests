@@ -37,6 +37,7 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v6
+
       - name: get the current PR
         uses: 8BitJonny/gh-get-current-pr@4.0.0
         id: pr
@@ -48,7 +49,7 @@ jobs:
 
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
-        run: sudo apt-get update && sudo apt install jo tox fish
+        run: sudo apt-get update && sudo apt install jo tox fish iproute2
 
       - id: setmatrix
         run: |
@@ -244,6 +245,9 @@ jobs:
           sudo apt-get install ldap-utils
           command -v ldapwhoami
         if: ${{ matrix.toxenv == '389ds' }}
+
+      - name: log ip address
+        run: ip r
 
       - uses: actions/cache@v5
         with:
@@ -443,7 +447,7 @@ jobs:
           done
 
       - name: Run the tests for docker
-        run: python3 -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
+        run: python3 -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: docker
           OS_VERSION: ${{ matrix.os_version }}
@@ -452,7 +456,7 @@ jobs:
 
       - name: Run tests as root for podman
         run: |
-          sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H $(type -p python3) -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
+          sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H $(type -p python3) -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: podman
           OS_VERSION: ${{ matrix.os_version }}

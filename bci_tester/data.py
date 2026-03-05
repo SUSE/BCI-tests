@@ -1203,7 +1203,7 @@ KUBEVIRT_CONTAINERS = [
         build_tag=(
             f"{APP_CONTAINER_PREFIX}/virt-{service}:latest"
             if os_version == "tumbleweed"
-            else f"suse/sles/16.0/virt-{service}:1.5"
+            else f"suse/sles/16.0/virt-{service}:1.7"
         ),
         bci_type=ImageType.APPLICATION,
         available_versions=[os_version],
@@ -1227,7 +1227,7 @@ KUBEVIRT_CONTAINERS = [
 KUBEVIRT_CDI_CONTAINERS = [
     create_BCI(
         build_tag=(
-            f"suse/sles/16.0/cdi-{service}:1.60"
+            f"suse/sles/16.0/cdi-{service}:1.64"
             if os_version.startswith("16")
             else f"{APP_CONTAINER_PREFIX}/cdi-{service}:latest"
         ),
