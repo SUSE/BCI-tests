@@ -304,7 +304,7 @@ _DB_ENV = {
 
 @pytest.mark.parametrize("ctr_image", MARIADB_CONTAINERS)
 @pytest.mark.skipif(
-    OS_VERSION not in ("15.6",),
+    OS_VERSION not in ("15.7", "16.0"),
     reason="MariaDB upgrade scenario not supported",
 )
 def test_mariadb_upgrade(
@@ -317,9 +317,9 @@ def test_mariadb_upgrade(
     mounts: List[Union[BindMount, ContainerVolume]] = [
         BindMount(host_path=tmp_path, container_path="/var/lib/mysql")
     ]
+
     mariadb_old = DerivedContainer(
-        base="registry.suse.com/suse/mariadb:10.6",
-        containerfile='RUN set -euo pipefail; head -n -1 /usr/local/bin/gosu > /tmp/gosu;  echo \'exec setpriv --pdeathsig=keep --reuid="$u" --regid="$u" --clear-groups -- "$@"\' >> /tmp/gosu;  mv /tmp/gosu /usr/local/bin/gosu; chmod +x /usr/local/bin/gosu',
+        base="registry.suse.com/suse/mariadb:11.4",
         volume_mounts=mounts,
         extra_environment_variables=_DB_ENV,
     )
