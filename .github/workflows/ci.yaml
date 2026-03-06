@@ -247,7 +247,8 @@ jobs:
         if: ${{ matrix.toxenv == '389ds' }}
 
       - name: log ip address
-        run: ip r
+        run: |
+            echo -n "IPv4 public: "; curl -4 ifconfig.me; echo ""
 
       - uses: actions/cache@v5
         with:
