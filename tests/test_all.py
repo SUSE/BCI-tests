@@ -51,6 +51,7 @@ from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RELEASED_SLE_VERSIONS
+from bci_tester.data import TARGET
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.util import get_repos_from_connection
 
@@ -283,7 +284,11 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS or OS_VERSION == "15.6",
+    OS_VERSION.startswith("16.1") and TARGET in ("dso", "obs"),
+    reason="16.1 is not having regular bci-repo publishes",
+)
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
 @pytest.mark.parametrize(
