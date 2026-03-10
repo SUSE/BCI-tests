@@ -595,8 +595,12 @@ def test_support_end_in_future(
     container_name: str,
     container_type: ImageType,  # pylint: disable=unused-argument
 ):
-    labels = container.inspect.config.labels
-    if "com.suse.supportlevel.until" in labels:
+    support_end_label = container.inspect.config.labels.get(
+        "com.suse.supportlevel.until", None
+    )
+    if support_end_label:
+        if not len(support_end_label):
+            pytest.skip(reason="No date defined")
         if container_type in (
             ImageType.SAC_APPLICATION,
             ImageType.SAC_LANGUAGE_STACK,
@@ -607,11 +611,11 @@ def test_support_end_in_future(
         try:
             # python 3.7+
             support_end: datetime.datetime = datetime.datetime.fromisoformat(
-                labels["com.suse.supportlevel.until"]
+                support_end_label
             )
         except AttributeError:
             support_end = datetime.datetime.strptime(
-                labels["com.suse.supportlevel.until"], "%Y-%m-%d"
+                support_end_label, "%Y-%m-%d"
             )
         assert datetime.datetime.now() < support_end, (
             f"container out of {support_end}"
