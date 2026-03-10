@@ -20,6 +20,7 @@ from pytest_container.container import ContainerData
 from pytest_container.container import EntrypointSelection
 
 from bci_tester.data import BIND_CONTAINERS
+from bci_tester.data import OS_VERSION
 
 CONTAINER_IMAGES = BIND_CONTAINERS
 
@@ -216,6 +217,10 @@ for param in BIND_CONTAINERS:
     )
 
 
+@pytest.mark.xfail(
+    OS_VERSION in ("15.7", "16.0"),
+    reason="https://bugzilla.suse.com/show_bug.cgi?id=1258782",
+)
 @pytest.mark.parametrize("container", _BIND_WITH_BASH, indirect=True)
 def test_tmpfiles_d_created(container: ContainerData) -> None:
     """Check that our container image has all directories and files that
