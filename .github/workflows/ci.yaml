@@ -195,6 +195,8 @@ jobs:
             os_version: 15.6
           - toxenv: nvidia
             os_version: 15.7-third-party
+          - toxenv: nvidia
+            os_version: 16.0-third-party
           - toxenv: all
             os_version: "16.0"
           - toxenv: base

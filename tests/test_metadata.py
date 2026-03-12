@@ -834,7 +834,7 @@ def test_reference(
             "base",
         ):
             reference_name = "sle15" if OS_VERSION == "15.5" else "tumbleweed"
-        if OS_VERSION in ("15.7-third-party",):
+        if OS_VERSION in ("15.7-third-party", "16.0-third-party"):
             reference_name = reference_name.replace("-", "/")
         assert reference_name in reference
 

@@ -55,6 +55,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "15.7-third-party",
     "16.0",
     "16.0-pc2025",
+    "16.0-third-party",
     "16.1",
     "tumbleweed",
 )
@@ -91,6 +92,7 @@ RELEASED_SLE_VERSIONS = (
     "15.7-spr",
     "15.7-third-party",
     "16.0",
+    "16.0-third-party",
 )
 
 # List the LTSS versions of SLE
@@ -207,7 +209,7 @@ else:
     elif OS_VERSION in ("15.6-spr", "15.7-spr"):
         ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
         obs_project = "registry.suse.de/devel/scc/privateregistry"
-    elif OS_VERSION in ("15.7-third-party",):
+    elif OS_VERSION in ("15.7-third-party", "16.0-third-party"):
         ibs_project = (
             f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}"
         )
@@ -654,6 +656,8 @@ NVIDIA_CONTAINERS = [
         custom_entry_point="/bin/sh",
     )
     for driver_ver, os_ver in (
+        ("595.45.04", "16.0"),
+        ("595.45.04", "15.7"),
         ("590.48.01", "15.7"),
         ("580.126.16", "15.7"),
         ("580.126.09", "15.7"),
