@@ -365,7 +365,6 @@ def create_BCI(
         **kwargs: additional keyword arguments are forwarded to the constructor
             of the :py:class:`~pytest_container.DerivedContainer`
     """
-    build_tag_base = build_tag.rpartition("/")[2]
     marks = []
     if extra_marks:
         for m in extra_marks:
@@ -418,6 +417,11 @@ def create_BCI(
     if OS_VERSION in (
         available_versions or list(_DEFAULT_NONBASE_OS_VERSIONS)
     ):
+        if build_tag.startswith("third-party/"):
+            build_tag_base = build_tag.partition("/")[2].replace("/", "-")
+        else:
+            build_tag_base = build_tag.rpartition("/")[2]
+
         marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
 
     if TARGET == "manual":
