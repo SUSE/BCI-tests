@@ -32,6 +32,7 @@ for param in NVIDIA_CONTAINERS:
 def test_image_content(container_per_test: ContainerData):
     """Test that ensures that required files exist in the image."""
     version = container_per_test.inspect.config.env.get("DRIVER_VERSION")
+    branch = int(container_per_test.inspect.config.env.get("DRIVER_BRANCH"))
 
     files = [
         "/drivers/README.md",
@@ -43,19 +44,35 @@ def test_image_content(container_per_test: ContainerData):
         "/usr/local/bin/nvidia-driver-selector.sh",
     ]
 
-    ### TODO test kernel modules via modinfo/modprobe
-    files += [
-        "/opt/open/nvidia-drm.ko.zst",
-        "/opt/open/nvidia-modeset.ko.zst",
-        "/opt/open/nvidia-peermem.ko.zst",
-        "/opt/open/nvidia-uvm.ko.zst",
-        "/opt/open/nvidia.ko.zst",
-        "/opt/proprietary/nvidia-drm.ko.zst",
-        "/opt/proprietary/nvidia-modeset.ko.zst",
-        "/opt/proprietary/nvidia-peermem.ko.zst",
-        "/opt/proprietary/nvidia-uvm.ko.zst",
-        "/opt/proprietary/nvidia.ko.zst",
-    ]
+    # since 575 drivers use DKMS and are compressed
+    # prior 575 driveers use KMP and are not compressed
+    # TODO: test kernel modules via modinfo/modprobe
+    if branch >= 575:
+        files += [
+            "/opt/open/nvidia-drm.ko.zst",
+            "/opt/open/nvidia-modeset.ko.zst",
+            "/opt/open/nvidia-peermem.ko.zst",
+            "/opt/open/nvidia-uvm.ko.zst",
+            "/opt/open/nvidia.ko.zst",
+            "/opt/proprietary/nvidia-drm.ko.zst",
+            "/opt/proprietary/nvidia-modeset.ko.zst",
+            "/opt/proprietary/nvidia-peermem.ko.zst",
+            "/opt/proprietary/nvidia-uvm.ko.zst",
+            "/opt/proprietary/nvidia.ko.zst",
+        ]
+    else:
+        files += [
+            "/opt/open/nvidia-drm.ko",
+            "/opt/open/nvidia-modeset.ko",
+            "/opt/open/nvidia-peermem.ko",
+            "/opt/open/nvidia-uvm.ko",
+            "/opt/open/nvidia.ko",
+            "/opt/proprietary/nvidia-drm.ko",
+            "/opt/proprietary/nvidia-modeset.ko",
+            "/opt/proprietary/nvidia-peermem.ko",
+            "/opt/proprietary/nvidia-uvm.ko",
+            "/opt/proprietary/nvidia.ko",
+        ]
 
     for filename in files:
         assert container_per_test.connection.file(filename).exists

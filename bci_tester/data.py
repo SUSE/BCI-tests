@@ -365,7 +365,6 @@ def create_BCI(
         **kwargs: additional keyword arguments are forwarded to the constructor
             of the :py:class:`~pytest_container.DerivedContainer`
     """
-    build_tag_base = build_tag.rpartition("/")[2]
     marks = []
     if extra_marks:
         for m in extra_marks:
@@ -418,6 +417,11 @@ def create_BCI(
     if OS_VERSION in (
         available_versions or list(_DEFAULT_NONBASE_OS_VERSIONS)
     ):
+        if build_tag.startswith("third-party/"):
+            build_tag_base = build_tag.partition("/")[2].replace("/", "-")
+        else:
+            build_tag_base = build_tag.rpartition("/")[2]
+
         marks.append(pytest.mark.__getattr__(build_tag_base.replace(":", "_")))
 
     if TARGET == "manual":
@@ -650,11 +654,16 @@ NVIDIA_CONTAINERS = [
         custom_entry_point="/bin/sh",
     )
     for driver_ver, os_ver in (
+        ("590.48.01", "15.7"),
         ("580.126.16", "15.7"),
         ("580.126.09", "15.7"),
         ("580.105.08", "15.7"),
         ("580.95.05", "15.7"),
         ("580.82.07", "15.7"),
+        ("575.57.08", "15.7"),
+        ("570.211.01", "15.7"),
+        ("570.195.03", "15.7"),
+        ("550.163.01", "15.7"),
     )
 ]
 
