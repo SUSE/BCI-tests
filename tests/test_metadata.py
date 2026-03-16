@@ -681,6 +681,11 @@ def test_disturl(
             "obs://build.suse.de/SUSE:SLFO:Products:PublicCloud:Toolchain:2025"
             in disturl
         )
+    elif OS_VERSION == "16.0-third-party" and TARGET in ("ibs", "ibs-cr"):
+        assert (
+            "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:16.0"
+            in disturl
+        )
     elif OS_VERSION.startswith("16."):
         if baseurl.netloc == "registry.opensuse.org":
             assert (

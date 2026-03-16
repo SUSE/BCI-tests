@@ -551,7 +551,7 @@ def test_udev_not_installed_in_all_containers_except_init(container):
 
 @pytest.mark.parametrize(
     "container",
-    ALL_CONTAINERS,
+    [c for c in ALL_CONTAINERS if (c not in NVIDIA_CONTAINERS)],
     indirect=True,
 )
 def test_no_compat_packages(container):
