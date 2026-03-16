@@ -190,8 +190,8 @@ if TARGET not in (
     if BASEURL.endswith("/"):
         BASEURL = BASEURL[:-1]
 else:
-    if OS_VERSION in ("tumbleweed", "16.0", "16.1"):
-        DISTNAME = OS_VERSION
+    if OS_VERSION in ("tumbleweed",) or OS_VERSION.startswith("16."):
+        DISTNAME = OS_VERSION.partition("-")[0]
     else:
         DISTNAME = f"sle-{OS_MAJOR_VERSION}-sp{OS_SP_VERSION}"
 
@@ -202,6 +202,15 @@ else:
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     if OS_VERSION == "16.0-pc2025":
         ibs_cr_project = "registry.suse.de/suse/slfo/products/publiccloud/toolchain/2025/totest"
+    elif OS_VERSION in ("15.7-third-party", "16.0-third-party"):
+        ibs_project = (
+            f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}"
+        )
+        ibs_cr_project = (
+            f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/test"
+            if OS_VERSION == "16.0-third-party"
+            else f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/totest"
+        )
     elif OS_VERSION.startswith("16"):
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/bci/{DISTNAME}/test"
@@ -209,11 +218,6 @@ else:
     elif OS_VERSION in ("15.6-spr", "15.7-spr"):
         ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
         obs_project = "registry.suse.de/devel/scc/privateregistry"
-    elif OS_VERSION in ("15.7-third-party", "16.0-third-party"):
-        ibs_project = (
-            f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}"
-        )
-        ibs_cr_project = f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/totest"
 
     BASEURL = {
         "obs": obs_project,
