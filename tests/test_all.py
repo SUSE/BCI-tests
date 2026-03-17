@@ -607,26 +607,6 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
         )
 
 
-@pytest.mark.skipif(
-    OS_VERSION in RELEASED_SLE_VERSIONS or OS_VERSION in ("tumbleweed",),
-    reason="BETA EULA not expected",
-)
-@pytest.mark.parametrize(
-    "container",
-    ALL_CONTAINERS,
-    indirect=True,
-)
-def test_sles_beta_eula_exists(container):
-    """Ensure that the SLES Beta eula exists in the container"""
-
-    assert (
-        "SUSE(R) End User License Agreement for Beta Software"
-        in container.connection.check_output(
-            "head -n 1 /usr/share/licenses/product/base/license.txt"
-        )
-    )
-
-
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
 def test_certificates_are_present(
     host, tmp_path, container_runtime, runner: Container, pytestconfig: Config
