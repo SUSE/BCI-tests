@@ -864,7 +864,7 @@ POSTGRES_PASSWORD = "n0ts3cr3t"
 
 POSTGRESQL_CONTAINERS = [
     create_BCI(
-        build_tag=f"{APP_CONTAINER_PREFIX}/postgres:{pg_ver}",
+        build_tag=f"{APP_CONTAINER_PREFIX}/postgres:{pg_ver}{variant}",
         bci_type=ImageType.APPLICATION,
         available_versions=pg_versions,
         forwarded_ports=[PortForwarding(container_port=5432)],
@@ -883,7 +883,9 @@ POSTGRESQL_CONTAINERS = [
         (17, _DEFAULT_NONBASE_OS_VERSIONS),
         (18, _DEFAULT_NONBASE_OS_VERSIONS),
     )
+    for variant in ("", "-contrib")
 ]
+
 
 _distribution_version = "latest"
 if OS_VERSION in ("15.7",):
