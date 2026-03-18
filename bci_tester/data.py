@@ -857,7 +857,7 @@ POSTFIX_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=25)],
         extra_environment_variables={"SERVER_HOSTNAME": "localhost"},
     )
-    for postfix_ver, os_versions in (("3.10", ["tumbleweed"]),)
+    for postfix_ver, os_versions in (("latest", ["tumbleweed"]),)
 ]
 
 POSTGRES_PASSWORD = "n0ts3cr3t"
