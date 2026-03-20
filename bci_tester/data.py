@@ -810,7 +810,7 @@ CONTAINER_389DS_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3389)],
     )
     for ver, os_ver in (
-        ("2.5", ("15.7",)),
+        ("2.7", ("15.7",)),
         ("latest", ("tumbleweed",)),
     )
 ]
@@ -1342,7 +1342,6 @@ CONTAINERS_WITH_ZYPPER = (
         PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
     ]
     + BASE_FIPS_CONTAINERS
-    + CONTAINER_389DS_CONTAINERS
     + GCC_CONTAINERS
     + GOLANG_CONTAINERS
     + KIWI_CONTAINERS
@@ -1391,6 +1390,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *BIND_CONTAINERS,
     *BLACKBOX_CONTAINERS,
     BUSYBOX_CONTAINER,
+    *CONTAINER_389DS_CONTAINERS,
     DISTRIBUTION_CONTAINER,
     GIT_CONTAINER,
     *GRAFANA_CONTAINERS,
