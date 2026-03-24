@@ -977,7 +977,11 @@ KEA_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
         available_versions=os_versions,
     )
-    for kea_ver, os_versions in (("2.6", ("15.7",)), ("3.0", ("tumbleweed",)))
+    for kea_ver, os_versions in (
+        ("2.6", ("15.7",)),
+        ("3.0", ("16.0", "16.1")),
+        ("3.0", ("tumbleweed",)),
+    )
 ]
 
 if OS_VERSION in ("16.1",):
