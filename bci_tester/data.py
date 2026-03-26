@@ -955,6 +955,12 @@ HELM_CONTAINER = create_BCI(
     custom_entry_point="/bin/sh",
 )
 
+GEMINI_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/gemini-cli:latest",
+    bci_type=ImageType.APPLICATION,
+    available_versions=["tumbleweed"],
+)
+
 _COSIGN_VERSION: str = "latest" if OS_VERSION == "tumbleweed" else "3"
 COSIGN_CONTAINERS = [
     create_BCI(
@@ -1420,6 +1426,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     BUSYBOX_CONTAINER,
     *CONTAINER_389DS_CONTAINERS,
     DISTRIBUTION_CONTAINER,
+    GEMINI_CONTAINER,
     GIT_CONTAINER,
     *GRAFANA_CONTAINERS,
     HELM_CONTAINER,
