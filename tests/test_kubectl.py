@@ -1,3 +1,5 @@
+"""Test the kubernetes client (kubectl) BCI application container images."""
+
 import json
 
 import pytest
@@ -87,6 +89,7 @@ _KUBECTL_134_JSON = """{
     indirect=["container_per_test"],
 )
 def test_kubectl_binary(container_per_test) -> None:
+    """Test that the kubectl binary behaves like expected (mocked)"""
     version = json.loads(
         container_per_test.connection.check_output(
             "kubectl version --client=true -o json"
@@ -102,3 +105,16 @@ def test_kubectl_binary(container_per_test) -> None:
     ).strip()
     json_out = json.loads(output)
     assert json_out == expected_json
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    KUBECTL_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_diff_available(container_per_test) -> None:
+    """Test for diff being embedded in the container - necessary for kubectl diff"""
+    output = container_per_test.connection.check_output(
+        "diff --version"
+    ).strip()
+    assert "GNU diffutils" in output

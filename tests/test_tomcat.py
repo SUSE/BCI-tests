@@ -86,7 +86,8 @@ def test_tomcat_launches_sample_app(
     """
 
     sample_req = requests.get(
-        "https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war"
+        "https://tomcat.apache.org/tomcat-10.1-doc/appdev/sample/sample.war",
+        timeout=30,
     )
     sample_req.raise_for_status()
 

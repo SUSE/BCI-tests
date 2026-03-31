@@ -38,20 +38,14 @@ def test_lang_set(auto_container):
         ),
         (
             # bsc#1203692
-            "sqlite3 -v 1.4.0"
-            if OS_VERSION in ("15.5", "15.6", "15.7")
-            else "sqlite3"
+            "sqlite3 -v 1.4.0" if OS_VERSION in ("15.7",) else "sqlite3"
         ),
         "rspec-expectations",
-        "diff-lcs",
+        ("diff-lcs -v 1.6.2" if OS_VERSION in ("15.7",) else "diff-lcs"),
         "rspec-mocks",
         "rspec-support",
         "rspec",
-        (
-            "multi_json -v 1.15.0"
-            if OS_VERSION in ("15.5", "15.6", "15.7")
-            else "multi_json"
-        ),
+        ("multi_json -v 1.15.0" if OS_VERSION in ("15.7",) else "multi_json"),
         "rack",
         "rake",
         "i18n",
@@ -81,31 +75,39 @@ def test_install_gems(auto_container_per_test, gem):
     OS_VERSION != "tumbleweed", reason="no yarn (needed by rails) in SLE"
 )
 def test_rails_hello_world(auto_container_per_test):
-    auto_container_per_test.connection.run_expect([0], "gem install 'rails'")
+    """Check that we can install Rails and create a new minimal Rails application."""
+    auto_container_per_test.connection.check_output("gem install 'rails'")
 
     # Rails asset pipeline needs Node.js and yarn
-    auto_container_per_test.connection.run_expect(
-        [0], "zypper -n in nodejs-default yarn libyaml-devel"
+    auto_container_per_test.connection.check_output(
+        "zypper -n in nodejs-default yarn libyaml-devel"
     )
-    auto_container_per_test.connection.run_expect(
-        [0], "rails new /hello/ --minimal"
+    auto_container_per_test.connection.check_output(
+        "rails new /hello/ --minimal"
     )
 
 
-@pytest.mark.skipif(OS_VERSION != "tumbleweed", reason="no rails for ruby 2.5")
 def test_rails_template(auto_container_per_test):
-    # Rails asset pipeline needs Node.js and yarn
-    auto_container_per_test.connection.run_expect(
-        [0], "zypper -n in nodejs-default yarn libyaml-devel"
+    """Check that we can install Rails and create a new Rails application from a template."""
+
+    if auto_container_per_test.connection.check_output(
+        "echo $RUBY_VERSION"
+    ).startswith("2.5"):
+        pytest.xfail("Rails 8 needs Ruby >= 3.0")
+
+    # Rails asset pipeline needs Node.js and yarn. apps:template needs libxslt
+    auto_container_per_test.connection.check_output(
+        "zypper -n in nodejs-default libyaml-devel libxslt1"
     )
 
-    auto_container_per_test.connection.run_expect(
-        [0], "gem install 'rails:~> 7.0'"
+    auto_container_per_test.connection.check_output(
+        "gem install 'rails:~> 8.0'"
     )
+
     # auto_container_per_test.connection.run_expect([0], "zypper -n in npm nodejs")
     # auto_container_per_test.connection.run_expect([0], "npm -g install yarn")
-    auto_container_per_test.connection.run_expect(
-        [0], "rails new /hello/ --minimal"
+    auto_container_per_test.connection.check_output(
+        "rails new /hello/ --minimal"
     )
 
     # https://railsbytes.com/public/templates/x7msKX
@@ -121,5 +123,5 @@ def test_rails_template(auto_container_per_test):
         pytest.xfail("timezone data are not in the container")
 
     assert "Ruby on Rails" in auto_container_per_test.connection.check_output(
-        "cd /hello/ && (rails server > /dev/null &) && curl -sf --retry 5 --retry-connrefused  http://localhost:3000",
+        "cd /hello/ && (timeout 60 rails server > /dev/null 2>&1 &) && curl -sf --retry 5 --retry-connrefused http://localhost:3000 && kill -TERM $(<tmp/pids/server.pid)",
     )

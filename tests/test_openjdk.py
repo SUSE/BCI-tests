@@ -19,7 +19,7 @@ from bci_tester.data import OPENJDK_21_CONTAINER
 from bci_tester.data import OPENJDK_25_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
 
-CONTAINER_TEST_DIR = "/tmp/"
+CONTAINER_TEST_DIR = "/src/"
 HOST_TEST_DIR = "tests/trainers/java/"
 
 DOCKERF_EXTENDED = f"""
@@ -27,14 +27,14 @@ WORKDIR {CONTAINER_TEST_DIR}
 COPY {HOST_TEST_DIR} {CONTAINER_TEST_DIR}
 """
 
-DOCKERF_CASSANDRA = """
-RUN zypper -n in tar gzip git-core util-linux
+DOCKERF_CASSANDRA = f"""
+WORKDIR {CONTAINER_TEST_DIR}
 """
 
-DOCKERFILE_OPENJDK_FIPS = """WORKDIR /src/
+DOCKERFILE_OPENJDK_FIPS = f"""
+WORKDIR {CONTAINER_TEST_DIR}
 COPY tests/files/Tcheck.java tests/files/JCEProviderInfo.java /src/
 ENV NSS_FIPS=1
-RUN zypper -n in mozilla-nss* java-$JAVA_VERSION-openjdk-devel
 """
 
 FIPS_OPENJDK_IMAGES = []

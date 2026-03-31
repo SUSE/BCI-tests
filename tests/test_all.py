@@ -36,27 +36,29 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
-from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBEVIRT_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
+from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RELEASED_SLE_VERSIONS
+from bci_tester.data import TARGET
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.util import get_repos_from_connection
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
 
-#: go file to perform a GET request to suse.com and that panics if the request
+#: Go file to perform a GET request to suse.com and that panics if the request
 #: fails
 FETCH_SUSE_DOT_COM = """package main
 
@@ -97,7 +99,7 @@ def test_os_release(auto_container):
     ):
         if var_name == "VERSION_ID":
             if OS_VERSION == "tumbleweed":
-                # on openSUSE Tumbleweed that is the an ever changing snapshot date
+                # on openSUSE Tumbleweed that is an ever changing snapshot date
                 # just check whether it is less than 10 days old
                 assert (
                     datetime.datetime.now()
@@ -122,7 +124,7 @@ def test_os_release(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5"),
+    OS_VERSION in ("15.4", "15.5"),
     reason="branding packages are known to not be installed",
 )
 @pytest.mark.parametrize(
@@ -132,7 +134,7 @@ def test_os_release(auto_container):
 )
 def test_branding(container):
     """
-    check that the :file:`/etc/SUSE-brand` file exists and containers SLE branding
+    check that the :file:`/etc/SUSE-brand` file exists and contains SLE branding
     """
     location = "/etc/SUSE-brand"
     branding = "SLE"
@@ -166,7 +168,8 @@ def test_product(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5", "tumbleweed"),
+    OS_VERSION in ("15.4", "15.5", "15.6", "tumbleweed")
+    or OS_VERSION not in RELEASED_SLE_VERSIONS,
     reason="suse trademark only available in certain SLE versions",
 )
 def test_suse_trademark(auto_container):
@@ -281,6 +284,10 @@ for param in CONTAINERS_WITH_ZYPPER_AS_ROOT:
 
 
 @pytest.mark.skipif(
+    OS_VERSION.startswith("16.1") and TARGET in ("dso", "obs"),
+    reason="16.1 is not having regular bci-repo publishes",
+)
+@pytest.mark.skipif(
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
@@ -336,9 +343,21 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
                 ].partition("-")
                 version, _, release = version.partition("-")
                 if installed_version == version and release:
-                    assert packaging.version.parse(
+                    ver_installed_release = packaging.version.Version(
                         installed_release
-                    ) <= packaging.version.parse(release), (
+                    )
+                    ver_release = packaging.version.Version(release)
+                    if len(ver_installed_release.release) > len(
+                        ver_release.release
+                    ):
+                        ver_installed_release = (
+                            ver_installed_release.__replace__(
+                                release=ver_installed_release.release[
+                                    : len(ver_release.release)
+                                ]
+                            )
+                        )
+                    assert ver_installed_release <= ver_release, (
                         f"Installed {name} = {installed_release} is newer than "
                         f"what {solvable['solvable:name']} requires (= {release})"
                     )
@@ -348,16 +367,15 @@ def test_no_downgrade_on_install(container: ContainerData) -> None:
     OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
     reason="LTSS containers are known to be non-functional with BCI_repo ",
 )
-@pytest.mark.skipif(
-    OS_VERSION == "15.6-ai",
-    reason="AI containers include unpublished packages",
-)
 @pytest.mark.parametrize(
     "container_per_test",
     [
         c
         for c in CONTAINERS_WITH_ZYPPER_AS_ROOT
-        if c not in LTSS_BASE_CONTAINERS + KIOSK_PULSEAUDIO_CONTAINERS
+        if c
+        not in LTSS_BASE_CONTAINERS
+        + LTSS_BASE_FIPS_CONTAINERS
+        + KIOSK_PULSEAUDIO_CONTAINERS
     ],
     indirect=True,
 )
@@ -412,9 +430,15 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
 
     # kubic-locale-archive should be replaced by glibc-locale-base in the containers
     # but that is a few bytes larger so we accept it as an exception
+    eula_package = "skelcd-EULA-bci"
+    if OS_VERSION.startswith("16.1"):
+        eula_package = "skelcd-EULA-SLES"
+    elif OS_VERSION.startswith("16"):
+        eula_package = "skelcd-EULA-BCI"
+
     known_orphaned_packages = {
+        eula_package,
         "kubic-locale-archive",
-        "skelcd-EULA-bci",
         "sles-ltss-release",
         ("SLES-release" if OS_VERSION.startswith("16") else "sles-release"),
         "ALP-dummy-release",
@@ -426,6 +450,10 @@ def test_no_orphaned_packages(container_per_test: ContainerData) -> None:
     assert not orphaned_packages.difference(known_orphaned_packages)
 
 
+@pytest.mark.skipif(
+    OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="no included BCI repository - can't test zypper verify",
+)
 @pytest.mark.parametrize(
     "container", CONTAINERS_WITH_ZYPPER_AS_ROOT, indirect=True
 )
@@ -470,15 +498,14 @@ def test_zypper_not_present_in_containers_without_it(
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
             + KUBEVIRT_CONTAINERS
-            + ([KERNEL_MODULE_CONTAINER] if OS_VERSION == "16.0" else [])
+            + NVIDIA_CONTAINERS
         )
     ],
     indirect=True,
 )
 def test_systemd_not_installed_in_all_containers_except_init(container):
     """Ensure that systemd is not present in all containers besides the init
-    pcp, and postfix containers.
-
+    pcp and udev/systemd based containers.
     """
     assert not container.connection.exists("systemctl")
 
@@ -489,9 +516,42 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
         )
 
 
+@pytest.mark.skipif(
+    OS_VERSION in ("15.4", "15.5", "15.6-spr", "15.7-spr"),
+    reason="doesn't have the fixes for blkid/udev",
+)
 @pytest.mark.parametrize(
     "container",
-    ALL_CONTAINERS,
+    [
+        c
+        for c in ALL_CONTAINERS
+        if (
+            c
+            not in PCP_CONTAINERS
+            + [INIT_CONTAINER]
+            + KIWI_CONTAINERS
+            + KIOSK_PULSEAUDIO_CONTAINERS
+            + KIOSK_XORG_CONTAINERS
+            + KUBEVIRT_CONTAINERS
+        )
+    ],
+    indirect=True,
+)
+def test_udev_not_installed_in_all_containers_except_init(container):
+    """Ensure that udev is not present in all containers besides init
+    or udev based containers.
+    """
+    assert not container.connection.exists("udevadm")
+
+    if container.connection.file("/etc/blkid.conf").exists:
+        assert "EVALUATE=udev" not in container.connection.file(
+            "/etc/blkid.conf"
+        ).content.decode("utf-8")
+
+
+@pytest.mark.parametrize(
+    "container",
+    [c for c in ALL_CONTAINERS if (c not in NVIDIA_CONTAINERS)],
     indirect=True,
 )
 def test_no_compat_packages(container):
@@ -505,7 +565,11 @@ def test_no_compat_packages(container):
 
 @pytest.mark.parametrize(
     "container",
-    [c for c in ALL_CONTAINERS if c not in LTSS_BASE_CONTAINERS],
+    [
+        c
+        for c in ALL_CONTAINERS
+        if c not in LTSS_BASE_CONTAINERS + LTSS_BASE_FIPS_CONTAINERS
+    ],
     indirect=True,
 )
 def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
@@ -541,26 +605,6 @@ def test_bci_eula_is_correctly_available(container: ContainerData) -> None:
         assert not container.connection.file(bci_license).exists, (
             "BCI EULA shall not be in LTSS container"
         )
-
-
-@pytest.mark.skipif(
-    OS_VERSION in RELEASED_SLE_VERSIONS or OS_VERSION in ("tumbleweed",),
-    reason="BETA EULA not expected",
-)
-@pytest.mark.parametrize(
-    "container",
-    ALL_CONTAINERS,
-    indirect=True,
-)
-def test_sles_beta_eula_exists(container):
-    """Ensure that the SLES Beta eula exists in the container"""
-
-    assert (
-        "SUSE(R) End User License Agreement for Beta Software"
-        in container.connection.check_output(
-            "head -n 1 /usr/share/licenses/product/base/license.txt"
-        )
-    )
 
 
 @pytest.mark.parametrize("runner", ALL_CONTAINERS)
@@ -616,7 +660,7 @@ def test_certificates_are_present(
     [
         c
         for c in CONTAINERS_WITH_ZYPPER_AS_ROOT
-        if c not in LTSS_BASE_CONTAINERS
+        if c not in LTSS_BASE_CONTAINERS + LTSS_BASE_FIPS_CONTAINERS
     ],
     indirect=True,
 )
@@ -797,59 +841,56 @@ _USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
 }
 
 
-@pytest.fixture
-def uid_gid_map(container: ContainerData) -> Dict[str, Tuple[int, int]]:
-    """
-    Returns the expected UID and GID mapping based on the container's
-    operating system version.
-    """
-    # Create a deep copy of the base map to modify it without affecting
-    # other tests that might use the same base data.
-    expected_map = {k: list(v) for k, v in _USERNAME_UID_GID_MAP.items()}
-    # Apply special cases for TW & SLE 16
-    if OS_VERSION in ("tumbleweed", "16.0"):
-        # These users don't use the non-default GID on TW
-        for username in (
-            "nginx",
-            "dirsrv",
-            "postgres",
-            "registry",
-            "keadhcp",
-        ):
-            if username in expected_map:
-                del expected_map[username]
-
-        # Completely different UID & GID on TW
-        expected_map["pcp"] = [496, 498]
-        expected_map["wwwrun"] = [498, 498]
-        expected_map["pesign"] = [499, 499]
-        expected_map["systemd-coredump"] = [497, 1000]
-
-    # Handle the 'kiosk/xorg' special case
-    if (
-        (container.container.get_base().baseurl or "")
-        .split(":")[0]
-        .endswith("kiosk/xorg")
-    ):
-        if "user" in expected_map:
-            expected_map["user"] = [expected_map["user"][0], 100]
-
-    for name, (uid, gid) in expected_map.items():
-        uid = uid if uid is not None else 499
-        gid = gid if gid is not None else 499
-        expected_map[name] = (uid, gid)
-
-    return expected_map
-
-
 @pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
-def test_uids_stable(
-    container: ContainerData, uid_gid_map: Dict[str, Tuple[int, int]]
-) -> None:
+def test_uids_stable(container: ContainerData) -> None:
     """Check that every user in :file:`/etc/passwd` has a stable uid & gid as
     defined in ``_USERNAME_UID_GID_MAP``.
 
     """
+
+    def uid_gid_map(container: ContainerData) -> Dict[str, Tuple[int, int]]:
+        """
+        Returns the expected UID and GID mapping based on the container's
+        operating system version.
+        """
+        # Create a deep copy of the base map to modify it without affecting
+        # other tests that might use the same base data.
+        expected_map = {k: list(v) for k, v in _USERNAME_UID_GID_MAP.items()}
+        # Apply special cases for TW & SLE 16
+        if OS_VERSION in ("tumbleweed", "16.0"):
+            # These users don't use the non-default GID on TW
+            for username in (
+                "nginx",
+                "dirsrv",
+                "postgres",
+                "registry",
+                "keadhcp",
+            ):
+                if username in expected_map:
+                    del expected_map[username]
+
+            # Completely different UID & GID on TW
+            expected_map["pcp"] = [496, 498]
+            expected_map["wwwrun"] = [498, 498]
+            expected_map["pesign"] = [499, 499]
+            expected_map["systemd-coredump"] = [497, 1000]
+
+        # Handle the 'kiosk/xorg' special case
+        if (
+            (container.container.get_base().baseurl or "")
+            .split(":")[0]
+            .endswith("kiosk/xorg")
+        ):
+            if "user" in expected_map:
+                expected_map["user"] = [expected_map["user"][0], 100]
+
+        for name, (uid, gid) in expected_map.items():
+            uid = uid if uid is not None else 499
+            gid = gid if gid is not None else 499
+            expected_map[name] = (uid, gid)
+
+        return expected_map
+
     # collect users who owns subdirectories in directories /var, /etc, /opt, /home
     user_list = (
         container.connection.check_output(
@@ -867,7 +908,9 @@ def test_uids_stable(
         if name not in user_list:
             continue
 
-        expected_uid, expected_gid = uid_gid_map.get(name, (499, 499))
+        expected_uid, expected_gid = uid_gid_map(container).get(
+            name, (499, 499)
+        )
 
         assert uid == expected_uid, (
             f"Expected user {name} to have uid {expected_uid} but got {uid}"

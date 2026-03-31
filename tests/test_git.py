@@ -54,9 +54,11 @@ X11Forwarding no\n\
 Subsystem       sftp    /usr/lib/ssh/sftp-server\n\
 ' > /etc/ssh/sshd_config
 
+RUN chown -R git /etc/ssh
+
 EXPOSE {_SSH_PORT}
 
-CMD ["/usr/sbin/sshd", "-De"]
+CMD ["/usr/bin/su", "git", "-s", "/bin/bash", "-c", "/usr/sbin/sshd -De -h /etc/ssh/ssh_host_ed25519_key"]
 
 HEALTHCHECK --interval=5s --timeout=5s --retries=5"""
     + (" --start-period=1m" if LOCALHOST.system_info.arch == "ppc64le" else "")

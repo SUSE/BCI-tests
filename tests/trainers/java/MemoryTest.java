@@ -2,7 +2,7 @@
 Test memory limits
 This test allocates memory in iterations of 1Mb
 until when there are not enough memory failing
-with an OutOfMemoryError execption
+with an OutOfMemoryError exception
 */
 import java.util.Vector;
 

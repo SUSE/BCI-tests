@@ -9,6 +9,7 @@ from pytest_container import Version
 
 
 def get_host_go_version(host) -> Version:
+    """Return the Version of the host installed go compiler."""
     # output of go version:
     # go version go1.19.1 linux/amd64
     return Version.parse(

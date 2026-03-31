@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
       EVP_MD_get_type(md) == NID_shake256) {
     xoflen = EVP_MD_get_type(md) == NID_shake128 ? 32 : 64;
     if (1 != EVP_MD_CTX_set_params(mdctx, digst_params)) {
-      FAIL("EVP_MD_CTX_set_params was not successfull");
+      FAIL("EVP_MD_CTX_set_params was not successful");
     }
   }
 #endif

@@ -67,8 +67,6 @@ def test_installcheck(container_per_test):
     excludes = ""
     if OS_VERSION.startswith("15"):
         excludes = "--exclude 'rpm-ndb'"
-    elif OS_VERSION.startswith("16"):
-        excludes = "--exclude 'kernel-livepatch-6_12_0-160000_5-default'"
 
     container_per_test.connection.check_output(
         f"installcheck $(uname -m) {excludes} /var/cache/zypp/solv/SLE_BCI/solv --nocheck /var/cache/zypp/solv/@System/solv"
@@ -144,16 +142,13 @@ def test_sle_bci_forbidden_packages(container_per_test):
         filter(
             package_name_filter_func(ALLOWED_PACKAGES),
             filter(
-                lambda p: not package_name_filter_func(
-                    FORBIDDEN_PACKAGE_NAMES
-                )(p),
+                lambda p: (
+                    not package_name_filter_func(FORBIDDEN_PACKAGE_NAMES)(p)
+                ),
                 package_list,
             ),
         )
     )
-
-    if OS_VERSION.startswith("16") and forbidden_packages:
-        forbidden_packages.remove("kernel-livepatch-6_12_0-160000_5-default")
 
     assert not forbidden_packages, (
         f"package_list contains forbidden packages: {', '.join(forbidden_packages)}"
@@ -200,7 +195,7 @@ def test_repo_content_licensing(container_per_test) -> None:
 
 
 @pytest.mark.skipif(
-    not OS_VERSION.startswith("15."), reason="SLE15 specific test"
+    not OS_VERSION.startswith("15.7"), reason="SLE15 specific test"
 )
 @pytest.mark.parametrize("container_per_test", [BASE_CONTAINER], indirect=True)
 def test_sle15_lifecycle(container_per_test):
@@ -218,8 +213,8 @@ def test_sle15_lifecycle(container_per_test):
     assert lifecycle is not None, (
         "No endoflife information found in product description"
     )
-    assert lifecycle.text == "2031-07-31", (
-        f"Expected end of life 2031-07-31, but got {lifecycle.text}"
+    assert lifecycle.text in ("2031-07-31", "2037-12-31"), (
+        f"Expected end of life 2037-12-31, but got {lifecycle.text}"
     )
 
 

@@ -38,7 +38,7 @@ How can I run the tests?
 
 1. Ensure that you have the dependencies installed
 2. Optionally set the ``BCI_DEVEL_REPO`` environment variable (see next section).
-3. Run ``tox -e build`` (this is not strictly necessary to run beforehands, but it
+3. Run ``tox -e build`` (this is not strictly necessary to run beforehand, but it
    will reduce the danger of race conditions when building containers)
 4. Run ``tox -e $language_stack -- -n auto``
 
@@ -50,9 +50,9 @@ The base container
 
 We are basing most of our tests on _the_ base container (available via the
 ``BASE_CONTAINER`` variable in :file:`bci_tester/data.py`). This container is pulled
-directly from ``registry.suse.de`` and is being build from the
-`SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image
-<https://build.suse.de/package/show/SUSE:SLE-15-SP3:Update:CR:ToTest/sles15-image>`_
+directly from ``registry.suse.de`` and is being built from the
+`SUSE:SLE-15-SP7:Update:CR:ToTest/sles15-image
+<https://build.suse.de/package/show/SUSE:SLE-15-SP7:Update:CR:ToTest/sles15-image>`_
 package.
 
 That container is automatically configured at build time to contain the
@@ -61,11 +61,11 @@ tested it). We also want to be able to test the current development state of the
 ``SLE_BCI`` repository. This can be achieved by setting the environment variable
 ``BCI_DEVEL_REPO`` to the url of the development/snapshot state. It is published
 on ``dist.nue.suse.com`` in one of the subfolders of
-http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP3:/Update:/BCI/images/repo/. Unfortunately,
+http://dist.nue.suse.com/ibs/SUSE:/SLE-15-SP7:/Update:/BCI/images/repo/. Unfortunately,
 you have to hand pick the correct folder (use the one ending with ``-Media1`` and
 for the correct arch) because the build number is put into the folder name.
 
-The ``BASE_CONTAINER`` will then be rebuild with the ``SLE_BCI`` repository
+The ``BASE_CONTAINER`` will then be rebuilt with the ``SLE_BCI`` repository
 replaced with the one from the ``BCI_DEVEL_REPO`` and all tests will thus use
 the new repository.
 
@@ -172,7 +172,7 @@ that it runs each time before a commit is created. The script exits with a
 non-zero status when the desired formatting is not applied.
 
 The :file:`pre-commit-full.sh` script in addition also checks if any container
-marker in :file:`pyproject.toml` is missing. This checks takes some time.
+marker in :file:`pyproject.toml` is missing. This check takes some time.
 
 To install the hook, execute the following commands from the top level project
 directory:

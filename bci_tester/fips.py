@@ -16,7 +16,7 @@ NONFIPS_DIGESTS: Tuple[str, ...] = (
 )
 
 # OpenSSL 3.x in Tumbleweed dropped those as they're beyond deprecated
-if OS_VERSION in ("15.3", "15.4", "15.5"):
+if OS_VERSION in ("15.4", "15.5"):
     NONFIPS_DIGESTS += ("md4", "mdc2")
 
 #: FIPS compliant openssl digests
@@ -98,6 +98,7 @@ NONFIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
     "stribog256",
     "stribog512",
     "md5",
+    "sm3",
 )
 
 #: FIPS compliant gcrypt digests
@@ -110,15 +111,9 @@ FIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
     "sha3-256",
     "sha3-384",
     "sha3-512",
+    "sha512_224",
+    "sha512_256",
 )
-
-if OS_VERSION != "15.3":
-    FIPS_GCRYPT_DIGESTS += (
-        "sha512_224",
-        "sha512_256",
-    )
-    NONFIPS_GCRYPT_DIGESTS += ("sm3",)
-
 
 # sha1 is non-FIPS in 15.6
 if OS_VERSION == "15.6":

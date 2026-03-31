@@ -1,5 +1,5 @@
 /**
-Test to check the Java Timming. This covers operations
+Test to check the Java Timing. This covers operations
 that are related with the interaction of java with the
 system where is running.
 - Date

@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install necessary software
         run: |
           set -e
-          sudo apt update
-          sudo apt -y install tox
+          sudo apt-get update
+          sudo apt-get -y install tox
       - name: Test formatting with ruff & check the markers
         run: ./pre-commit-full.sh
 
@@ -36,7 +36,8 @@ jobs:
       matrix: ${{ steps.setmatrix.outputs.matrix }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
+
       - name: get the current PR
         uses: 8BitJonny/gh-get-current-pr@4.0.0
         id: pr
@@ -48,7 +49,7 @@ jobs:
 
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
-        run: sudo apt update && sudo apt install jo tox fish
+        run: sudo apt-get update && sudo apt install jo tox fish iproute2
 
       - id: setmatrix
         run: |
@@ -82,7 +83,7 @@ jobs:
       image: registry.suse.com/bci/python:${{ matrix.python_version }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install tox
         run: |
           python3 --version
@@ -97,24 +98,24 @@ jobs:
     name: Build documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
       - name: Install tox
-        run: sudo apt update && sudo apt install tox
+        run: sudo apt-get update && sudo apt-get install tox
       - run: tox -e doc
 
   lint:
     name: Lint source code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
       - name: Install tox
-        run: sudo apt update && sudo apt install tox
+        run: sudo apt-get update && sudo apt-get install tox
       - run: tox -e lint
 
   test-containers:
@@ -127,25 +128,17 @@ jobs:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
         os_version:
           - 15.7
+          - "16.0"
           - "tumbleweed"
         include:
           - toxenv: fips
             testing_target: ibs-released
-            os_version: 15.3
-          - toxenv: fips
-            testing_target: ibs-released
             os_version: 15.4
           - toxenv: repository
             testing_target: ibs-released
             os_version: 15.5
           - toxenv: all
             testing_target: ibs-released
-            os_version: 15.3
-          - toxenv: base
-            testing_target: ibs-released
-            os_version: 15.3
-          - toxenv: all
-            testing_target: ibs-released
             os_version: 15.4
           - toxenv: base
             testing_target: ibs-released
@@ -162,51 +155,48 @@ jobs:
           - toxenv: metadata
             testing_target: ibs-released
             os_version: 15.5
-          - toxenv: ai
+          - toxenv: all
             testing_target: ibs-released
-            os_version: 15.6-ai
+            os_version: 15.6
+          - toxenv: base
+            testing_target: ibs-released
+            os_version: 15.6
           - toxenv: metadata
             testing_target: ibs-released
-            os_version: 15.6-ai
+            os_version: 15.6
           - toxenv: spr
             testing_target: ibs-released
-            os_version: 15.6-spr
+            os_version: 15.7-spr
           - toxenv: all
             testing_target: ibs-released
-            os_version: 15.6-spr
+            os_version: 15.7-spr
           - toxenv: metadata
             testing_target: ibs-released
-            os_version: 15.6-spr
+            os_version: 15.7-spr
+          - toxenv: all
+            os_version: 15.4
+          - toxenv: base
+            os_version: 15.4
+          - toxenv: metadata
+            os_version: 15.4
+          - toxenv: all
+            os_version: 15.5
+          - toxenv: base
+            os_version: 15.5
+          - toxenv: metadata
+            os_version: 15.5
           - toxenv: all
             os_version: 15.6
           - toxenv: base
             os_version: 15.6
           - toxenv: metadata
-            os_version: 15.6
-          - toxenv: node
-            os_version: 15.6
-          - toxenv: python
-            os_version: 15.6
-          - toxenv: kernel_module
-            os_version: 15.6
-          - toxenv: repository
             os_version: 15.6
           - toxenv: fips
             os_version: 15.6
-          - toxenv: mariadb
-            os_version: 15.6
-          - toxenv: all
-            os_version: 15.3
-          - toxenv: base
-            os_version: 15.3
-          - toxenv: metadata
-            os_version: 15.3
-          - toxenv: all
-            os_version: 15.4
-          - toxenv: base
-            os_version: 15.4
-          - toxenv: metadata
-            os_version: 15.4
+          - toxenv: nvidia
+            os_version: 15.7-third-party
+          - toxenv: nvidia
+            os_version: 16.0-third-party
           - toxenv: all
             os_version: "16.0"
           - toxenv: base
@@ -221,12 +211,25 @@ jobs:
             os_version: "16.0"
           - toxenv: repository
             os_version: "16.0"
+          - toxenv: all
+            os_version: "16.1"
+          - toxenv: base
+            os_version: "16.1"
+          - toxenv: minimal
+            os_version: "16.1"
+          - toxenv: metadata
+            os_version: "16.1"
+          - toxenv: base
+            testing_target: factory-totest
+            os_version: "tumbleweed"
 
     steps:
       - name: Clean up disk space to maximize available space
         run: sudo rm -rf /usr/local/*/* /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache && sudo docker image prune --all --force
+      - name: Uninstall conflicting packages
+        run: sudo apt-get -y remove python3-chardet
       - name: checkout source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -245,7 +248,11 @@ jobs:
           command -v ldapwhoami
         if: ${{ matrix.toxenv == '389ds' }}
 
-      - uses: actions/cache@v4
+      - name: log ip address
+        run: |
+            echo -n "IPv4 public: "; curl -4 ifconfig.me; echo ""
+
+      - uses: actions/cache@v5
         with:
             path: .tox
             key: tox--${{ hashFiles('tox.ini') }}
@@ -443,7 +450,7 @@ jobs:
           done
 
       - name: Run the tests for docker
-        run: python3 -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
+        run: python3 -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: docker
           OS_VERSION: ${{ matrix.os_version }}
@@ -452,7 +459,7 @@ jobs:
 
       - name: Run tests as root for podman
         run: |
-          sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H $(type -p python3) -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 3 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
+          sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H $(type -p python3) -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
           CONTAINER_RUNTIME: podman
           OS_VERSION: ${{ matrix.os_version }}

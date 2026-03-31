@@ -13,11 +13,13 @@ from pytest_container.container import ContainerData
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
+from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import OS_VERSION
+from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import TARGET
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.fips import ALL_DIGESTS
@@ -74,11 +76,44 @@ def test_passwd_present(auto_container):
 
 
 @pytest.mark.skipif(
+    OS_VERSION in ("tumbleweed",)
+    or OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="No repo available or no sensible gpgkey settings (openSUSE)",
+)
+def test_gpgkey_present_and_correct(auto_container):
+    """Check that the gpgkey setting in repos makes sense."""
+    found_gpgkey = False
+    for repo in (
+        auto_container.connection.check_output(
+            "grep -hE 'gpgkey.*=' /etc/zypp/repos.d/*.repo | sort -u"
+        )
+        .strip()
+        .splitlines()
+    ):
+        k, _, v = repo.partition("=")
+        assert k.strip() == "gpgkey", (
+            f"Expected gpgkey setting but got {k.strip()}"
+        )
+        assert v.strip().startswith("file:/usr/lib/rpm/")
+        assert auto_container.connection.file(v.strip()[5:]).exists, (
+            f"GPG key file {v.strip()[5:]} does not exist in the container"
+        )
+        auto_container.connection.check_output(
+            f"rpmkeys --import {v.strip()[5:]}"
+        )
+        found_gpgkey = True
+
+    assert found_gpgkey, (
+        "No repo files with gpgkey setting found in /etc/zypp/repos.d/SLE_BCI*.repo"
+    )
+
+
+@pytest.mark.skipif(
     OS_VERSION not in ("tumbleweed", "16.0"),
     reason="requires gconv modules",
 )
 def test_iconv_working(auto_container):
-    """Generic test iconv works for UTF8 and ISO-8859-15 locale"""
+    """Generic test that iconv works for UTF8 and ISO-8859-15 locale"""
     assert (
         auto_container.connection.check_output(
             "echo -n 'SüSE' | iconv -f UTF8 -t ISO_8859-15 | wc -c"
@@ -88,7 +123,7 @@ def test_iconv_working(auto_container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.3", "15.4", "15.5"),
+    OS_VERSION in ("15.4", "15.5"),
     reason="unfixed in LTSS codestreams",
 )
 def test_group_nobody_working(auto_container):
@@ -110,7 +145,7 @@ def test_base_size(container: ContainerData, container_runtime):
     :py:const:`base_container_max_size`
 
     """
-    # the FIPS container is bigger too than the 15 SP3 base image
+    # the FIPS container is bigger too than the 15 SP7 base image
     is_fips_ctr = (
         container.container.baseurl
         and container.container.baseurl.rpartition("/")[2].startswith(
@@ -129,24 +164,24 @@ def test_base_size(container: ContainerData, container_runtime):
         # SP4+ is a lot larger as it pulls in python3 and
         # the FIPS crypto policy scripts
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 130 if OS_VERSION in ("15.3",) else 169,
+            "x86_64": 169,
         }
         if TARGET in ("dso",):
             # the dso container is larger than the bci-base-fips container
             base_container_max_size["x86_64"] += 10
     elif OS_VERSION in ("tumbleweed",):
         base_container_max_size: Dict[str, int] = {
-            "x86_64": 99,
-            "aarch64": 115,
-            "ppc64le": 126,
-            "s390x": 91,
+            "x86_64": 103,
+            "aarch64": 119,
+            "ppc64le": 130,
+            "s390x": 95,
         }
-    elif OS_VERSION in ("16.0",):
+    elif OS_VERSION in ("16.0", "16.1"):
         base_container_max_size: Dict[str, int] = {
             "x86_64": 95,
             "aarch64": 100,
-            "ppc64le": 114,
-            "s390x": 92,
+            "ppc64le": 117,
+            "s390x": 93,
         }
     elif OS_VERSION in ("15.7",):
         base_container_max_size: Dict[str, int] = {
@@ -205,7 +240,7 @@ def test_gost_digest_disable(auto_container):
     """Checks that the gost message digest is not known to openssl."""
     openssl_error_message = (
         "Invalid command 'gost'"
-        if OS_VERSION not in ("15.3", "15.4", "15.5")
+        if OS_VERSION not in ("15.4", "15.5")
         else "gost is not a known digest"
     )
     assert (
@@ -227,7 +262,7 @@ def test_gost_digest_disable(auto_container):
     indirect=True,
 )
 def test_openssl_hashes(container):
-    """If the host is not running in fips mode, then we check that all hash
+    """If the host is not running in FIPS mode, then we check that all hash
     algorithms work via :command:`openssl $digest /dev/null`.
 
     """
@@ -266,13 +301,13 @@ def test_all_openssl_hashes_known(auto_container):
     expected_digest_list = ALL_DIGESTS
 
     # openssl-3 reduces the listed digests in FIPS mode, openssl 1.x does not
-    if OS_VERSION not in ("15.3", "15.4", "15.5"):
+    if OS_VERSION not in ("15.4", "15.5"):
         if host_fips_enabled() or target_fips_enforced() or fips_mode:
             expected_digest_list = FIPS_DIGESTS
 
     # gost is not supported to generate digests, but it appears in:
     # openssl list --digest-commands
-    if OS_VERSION in ("15.3", "15.4", "15.5"):
+    if OS_VERSION in ("15.4", "15.5"):
         expected_digest_list += ("gost",)
 
     assert set(hashes) == set(expected_digest_list), (
@@ -301,6 +336,11 @@ DIND_CONTAINER = pytest.param(
 
 @pytest.mark.parametrize("container_per_test", [DIND_CONTAINER], indirect=True)
 @pytest.mark.skipif(
+    OS_VERSION not in RELEASED_LTSS_VERSIONS
+    or OS_VERSION not in ALLOWED_BCI_REPO_OS_VERSIONS,
+    reason="No repo available to install docker",
+)
+@pytest.mark.skipif(
     not DOCKER_SELECTED,
     reason="Docker in docker can only be tested when using the docker runtime",
 )
@@ -312,11 +352,8 @@ def test_dind(container_per_test):
     :py:const:`DIND_CONTAINER`).
 
     """
-    container_per_test.connection.run_expect([0], "zypper -n in docker")
-    container_per_test.connection.run_expect([0], "docker ps")
-    res = container_per_test.connection.run_expect(
-        [0],
-        "docker run --rm registry.opensuse.org/opensuse/tumbleweed:latest "
-        "/usr/bin/ls",
+    container_per_test.connection.check_output("zypper -n in docker")
+    container_per_test.connection.check_output("docker ps")
+    assert "etc" in container_per_test.connection.check_output(
+        "docker run --rm registry.suse.com/bci/bci-busybox:latest /usr/bin/ls",
     )
-    assert "etc" in res.stdout

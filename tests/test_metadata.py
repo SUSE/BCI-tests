@@ -3,20 +3,20 @@
 These tests are host OS independent and it is thus not necessary to run them on
 a non-x86_64 host.
 
-**CAUTION:** The tests should be run on x86_64, as the .Net images are only
-available on that platform.
-
 The tests in this module are mostly testing the image labels. We follow the
 conventions outlined in
-`<https://confluence.suse.com/display/ENGCTNRSTORY/BCI+image+labels>`_. But have
+`<https://confluence.suse.com/display/ENGCTNRSTORY/BCI+image+labels>`_. However, we have
 to skip some of the tests for the SLE 15 SP3 base container, as it does not
 offer the labels under the ``com.suse.bci`` prefix but ``com.suse.sle``.
 
 """
 
+import base64
 import datetime
+import json
 import urllib.parse
 from pathlib import Path
+from typing import Any
 from typing import List
 from typing import Tuple
 
@@ -41,10 +41,13 @@ from bci_tester.data import COSIGN_CONTAINERS
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_9_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_10_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_9_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_10_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_9_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_10_0_CONTAINER
 from bci_tester.data import GCC_CONTAINERS
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
@@ -59,29 +62,28 @@ from bci_tester.data import KIOSK_XORG_CLIENT_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
+from bci_tester.data import KUBEVIRT_CDI_CONTAINERS
 from bci_tester.data import KUBEVIRT_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
-from bci_tester.data import LMCACHE_LMSTACK_ROUTER_CONTAINER
-from bci_tester.data import LMCACHE_VLLM_OPENAI_CONTAINER
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MARIADB_CLIENT_CONTAINERS
 from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MICRO_FIPS_CONTAINER
-from bci_tester.data import MILVUS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import NGINX_CONTAINER
+from bci_tester.data import NGINX_CONTAINERS
 from bci_tester.data import NODEJS_CONTAINERS
-from bci_tester.data import OLLAMA_CONTAINER
+from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
-from bci_tester.data import OPENWEBUI_CONTAINER
-from bci_tester.data import OPENWEBUI_PIPELINES_CONTAINER
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
 from bci_tester.data import PCP_CONTAINERS
+from bci_tester.data import PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
+from bci_tester.data import PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
+from bci_tester.data import PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
 from bci_tester.data import PHP_8_APACHE
 from bci_tester.data import PHP_8_CLI
 from bci_tester.data import PHP_8_FPM
@@ -89,7 +91,6 @@ from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
-from bci_tester.data import PYTORCH_CONTAINER
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RMT_CONTAINERS
 from bci_tester.data import RUBY_CONTAINERS
@@ -100,12 +101,9 @@ from bci_tester.data import SAMBA_TOOLBOX_CONTAINERS
 from bci_tester.data import SPACK_CONTAINERS
 from bci_tester.data import SPR_CONTAINERS
 from bci_tester.data import STUNNEL_CONTAINER
-from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME
-from bci_tester.data import SUSE_AI_OBSERVABILITY_EXTENSION_SETUP
 from bci_tester.data import TARGET
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
-from bci_tester.data import VLLM_OPENAI_CONTAINER
 from bci_tester.data import ImageType
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
@@ -117,23 +115,28 @@ SKIP_IF_TW_MARK = pytest.mark.skipif(
     reason="no supportlevel labels on openSUSE containers",
 )
 
-SKIP_IF_AI_MARK = pytest.mark.skipif(
-    OS_VERSION == "15.6-ai", reason="no supportlevel labels on AI containers"
-)
 SKIP_IF_LTSS_VERSION = pytest.mark.skipif(
     OS_VERSION in RELEASED_LTSS_VERSIONS, reason="LTSS container"
+)
+SKIP_IF_PC_MARK = pytest.mark.skipif(
+    OS_VERSION == "16.0-pc2025",
+    reason="not for Public Cloud Toolchain containers",
 )
 
 
 def _get_container_label_prefix(
     container_name: str, container_type: ImageType
 ) -> str:
+    if OS_VERSION == "16.0-pc2025" and container_type == ImageType.APPLICATION:
+        return f"com.suse.public-cloud-toolchain.{container_name}"
+
     if OS_VERSION == "tumbleweed" and container_name == "base":
         return "org.opensuse.base"
     if OS_VERSION == "tumbleweed":
         return f"org.opensuse.{container_type}.{container_name}"
     if container_type == ImageType.OS_LTSS:
         return f"com.suse.sle.{container_name}"
+
     return f"com.suse.{container_type}.{container_name}"
 
 
@@ -181,8 +184,9 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
-        (NGINX_CONTAINER, "nginx", ImageType.APPLICATION),
     ]
+    + [(c, "nvidia-driver", ImageType.THIRD_PARTY) for c in NVIDIA_CONTAINERS]
+    + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
         (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
@@ -278,12 +282,22 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             (DOTNET_SDK_8_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (DOTNET_SDK_9_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (
+                DOTNET_SDK_10_0_CONTAINER,
+                "dotnet.sdk",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
                 DOTNET_ASPNET_8_0_CONTAINER,
                 "dotnet.aspnet",
                 ImageType.LANGUAGE_STACK,
             ),
             (
                 DOTNET_ASPNET_9_0_CONTAINER,
+                "dotnet.aspnet",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_ASPNET_10_0_CONTAINER,
                 "dotnet.aspnet",
                 ImageType.LANGUAGE_STACK,
             ),
@@ -297,8 +311,13 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
                 "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
             ),
+            (
+                DOTNET_RUNTIME_10_0_CONTAINER,
+                "dotnet.runtime",
+                ImageType.LANGUAGE_STACK,
+            ),
         ]
-        if LOCALHOST.system_info.arch == "x86_64"
+        if LOCALHOST.system_info.arch in ("aarch64", "x86_64")
         else []
     )
     + [(cont, "base", ImageType.OS_LTSS) for cont in LTSS_BASE_CONTAINERS]
@@ -307,35 +326,20 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for cont in LTSS_BASE_FIPS_CONTAINERS
     ]
     + [
-        (OLLAMA_CONTAINER, "ollama", ImageType.SAC_APPLICATION),
-        (OPENWEBUI_CONTAINER, "open-webui", ImageType.SAC_APPLICATION),
-        (MILVUS_CONTAINER, "milvus", ImageType.SAC_APPLICATION),
-        (PYTORCH_CONTAINER, "pytorch", ImageType.SAC_APPLICATION),
         (
-            SUSE_AI_OBSERVABILITY_EXTENSION_SETUP,
-            "suse-ai-observability-extension-setup",
-            ImageType.SAC_APPLICATION,
+            PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            "aws-toolchain-runtime-provider",
+            ImageType.APPLICATION,
         ),
         (
-            SUSE_AI_OBSERVABILITY_EXTENSION_RUNTIME,
-            "suse-ai-observability-extension-runtime",
-            ImageType.SAC_APPLICATION,
+            PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            "az-toolchain-runtime-provider",
+            ImageType.APPLICATION,
         ),
         (
-            OPENWEBUI_PIPELINES_CONTAINER,
-            "open-webui-pipelines",
-            ImageType.SAC_APPLICATION,
-        ),
-        (VLLM_OPENAI_CONTAINER, "vllm-openai", ImageType.SAC_APPLICATION),
-        (
-            LMCACHE_VLLM_OPENAI_CONTAINER,
-            "lmcache-vllm-openai",
-            ImageType.SAC_APPLICATION,
-        ),
-        (
-            LMCACHE_LMSTACK_ROUTER_CONTAINER,
-            "lmcache-lmstack-router",
-            ImageType.SAC_APPLICATION,
+            PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
+            "google-toolchain-runtime-provider",
+            ImageType.APPLICATION,
         ),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
@@ -370,23 +374,15 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [(rmt, "rmt-server", ImageType.APPLICATION) for rmt in RMT_CONTAINERS]
     + [
         (
-            pr_ctr,
-            container_and_marks_from_pytest_param(pr_ctr)[0]
+            app_ctr,
+            container_and_marks_from_pytest_param(app_ctr)[0]
             .baseurl.rpartition("/")[2]
             .rpartition(":")[0],
             ImageType.APPLICATION,
         )
-        for pr_ctr in SPR_CONTAINERS
-    ]
-    + [
-        (
-            kubevirt_ctr,
-            container_and_marks_from_pytest_param(kubevirt_ctr)[0]
-            .baseurl.rpartition("/")[2]
-            .rpartition(":")[0],
-            ImageType.APPLICATION,
-        )
-        for kubevirt_ctr in KUBEVIRT_CONTAINERS
+        for app_ctr in SPR_CONTAINERS
+        + KUBEVIRT_CONTAINERS
+        + KUBEVIRT_CDI_CONTAINERS
     ]
 ]
 
@@ -441,14 +437,23 @@ def test_general_labels(
                     or "based on the SLE LTSS Base Container Image"
                     in labels[f"{prefix}.description"]
                 )
-            elif OS_VERSION in ("15.6-spr",):
+            elif OS_VERSION in ("15.7-spr",):
                 assert (
                     "for SUSE Private Registry"
+                    in labels[f"{prefix}.description"]
+                )
+            elif OS_VERSION in ("16.0-pc2025",):
+                assert (
+                    "Use this container when building a transparent"
                     in labels[f"{prefix}.description"]
                 )
             else:
                 assert (
                     "based on the SLE Base Container Image."
+                    in labels[f"{prefix}.description"]
+                    or "based on the SUSE Linux Enterprise Base Container Image."
+                    in labels[f"{prefix}.description"]
+                    or "based on the SUSE Linux Base Container Image."
                     in labels[f"{prefix}.description"]
                 )
 
@@ -471,6 +476,7 @@ def test_general_labels(
             labels["com.suse.lifecycle-url"]
             in (
                 "https://www.suse.com/lifecycle#suse-linux-enterprise-server-15",
+                "https://www.suse.com/lifecycle#suse-linux-enterprise-server-16",
                 "https://www.suse.com/lifecycle",  # SLE 15 SP5 base container has incorrect URL
             )
         )
@@ -481,8 +487,12 @@ def test_general_labels(
             ImageType.SAC_APPLICATION,
         ):
             assert labels["com.suse.eula"] == "sle-eula"
+        elif container_name in ("nvidia-driver",):
+            assert labels["com.suse.eula"] == "sle-beta"
         else:
-            assert labels["com.suse.eula"] == "sle-bci"
+            assert labels["com.suse.eula"] == (
+                "sle-beta" if OS_VERSION in ("16.1",) else "sle-bci"
+            )
             assert "BCI" in labels[f"{prefix}.title"]
 
 
@@ -518,12 +528,18 @@ def test_url(
                 "https://www.opensuse.org",
                 "https://www.opensuse.org/",
             )
+        elif OS_VERSION == "16.0-pc2025":
+            expected_url = ("https://www.suse.com",)
         elif container_type in (
             ImageType.SAC_LANGUAGE_STACK,
             ImageType.SAC_APPLICATION,
         ):
+            container_mapping: dict[str, str] = {
+                "lmcache-lmstack-router": "vllm",
+                "lmcache-vllm-openai": "vllm",
+            }
             expected_url = (
-                f"https://apps.rancher.io/applications/{container_name}",
+                f"https://apps.rancher.io/applications/{container_mapping.get(container_name, container_name)}",
                 f"https://apps.rancher.io/applications/{container_name.rpartition('-')[0]}",
             )
         elif container_type == ImageType.OS_LTSS:
@@ -536,7 +552,7 @@ def test_url(
         )
 
 
-@SKIP_IF_AI_MARK
+@SKIP_IF_PC_MARK
 @SKIP_IF_LTSS_VERSION
 @pytest.mark.parametrize(
     "container",
@@ -544,7 +560,7 @@ def test_url(
     indirect=True,
 )
 def test_artifacthub_urls(container: ContainerData) -> None:
-    """Smoke test checking that the artifacthub.io labelling is passing sanity checks"""
+    """Smoke test checking that the artifacthub.io labeling is passing sanity checks"""
     labels = container.inspect.config.labels
 
     assert "io.artifacthub.package.readme-url" in labels, (
@@ -579,8 +595,12 @@ def test_support_end_in_future(
     container_name: str,
     container_type: ImageType,  # pylint: disable=unused-argument
 ):
-    labels = container.inspect.config.labels
-    if "com.suse.supportlevel.until" in labels:
+    support_end_label = container.inspect.config.labels.get(
+        "com.suse.supportlevel.until", None
+    )
+    if support_end_label:
+        if not len(support_end_label):
+            pytest.skip(reason="No date defined")
         if container_type in (
             ImageType.SAC_APPLICATION,
             ImageType.SAC_LANGUAGE_STACK,
@@ -591,11 +611,11 @@ def test_support_end_in_future(
         try:
             # python 3.7+
             support_end: datetime.datetime = datetime.datetime.fromisoformat(
-                labels["com.suse.supportlevel.until"]
+                support_end_label
             )
         except AttributeError:
             support_end = datetime.datetime.strptime(
-                labels["com.suse.supportlevel.until"], "%Y-%m-%d"
+                support_end_label, "%Y-%m-%d"
             )
         assert datetime.datetime.now() < support_end, (
             f"container out of {support_end}"
@@ -603,7 +623,7 @@ def test_support_end_in_future(
 
 
 @pytest.mark.skipif(
-    OS_VERSION == "15.6-spr",
+    OS_VERSION == "15.7-spr",
     reason="SPR publishes out of the devel project",
 )
 @pytest.mark.skipif(
@@ -649,9 +669,24 @@ def test_disturl(
         )
     elif OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:AI" in disturl
-    elif OS_VERSION == "15.6-spr" and TARGET in ("ibs", "obs"):
-        assert "obs://build.suse.de/Devel:SCC:PrivateRegistry" in disturl
-    elif OS_VERSION == "16.0":
+    elif OS_VERSION == "15.7-spr" and TARGET in ("ibs", "obs"):
+        assert "obs://build.suse.de/Devel:SCC:PrivateRegistry:1.1" in disturl
+    elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs", "ibs-cr"):
+        assert (
+            "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:SLE-15-SP7"
+            in disturl
+        )
+    elif OS_VERSION == "16.0-pc2025":
+        assert (
+            "obs://build.suse.de/SUSE:SLFO:Products:PublicCloud:Toolchain:2025"
+            in disturl
+        )
+    elif OS_VERSION == "16.0-third-party" and TARGET in ("ibs", "ibs-cr"):
+        assert (
+            "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:16.0"
+            in disturl
+        )
+    elif OS_VERSION.startswith("16."):
         if baseurl.netloc == "registry.opensuse.org":
             assert (
                 f"obs://build.opensuse.org/devel:BCI:16.{OS_SP_VERSION}"
@@ -681,7 +716,7 @@ def test_disturl_can_be_checked_out(
 ):
     """The Open Build Service automatically adds a ``org.openbuildservice.disturl``
     label that can be checked out using :command:`osc` to get the sources at
-    exactly the version from which the container was build. This test verifies
+    exactly the version from which the container was built. This test verifies
     that the url is accessible.
     """
     disturl_label = container.inspect.config.labels[
@@ -720,7 +755,6 @@ def test_disturl_can_be_checked_out(
 
 
 @SKIP_IF_TW_MARK
-@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container",
     [
@@ -742,7 +776,6 @@ def test_techpreview_label(container: ContainerData):
 
 
 @SKIP_IF_TW_MARK
-@SKIP_IF_AI_MARK
 @pytest.mark.parametrize(
     "container",
     list(ACC_CONTAINERS),
@@ -759,7 +792,6 @@ def test_acc_label(container: ContainerData):
 
 
 @SKIP_IF_TW_MARK
-@SKIP_IF_AI_MARK
 @pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label
@@ -807,6 +839,8 @@ def test_reference(
             "base",
         ):
             reference_name = "sle15" if OS_VERSION == "15.5" else "tumbleweed"
+        if OS_VERSION in ("15.7-third-party", "16.0-third-party"):
+            reference_name = reference_name.replace("-", "/")
         assert reference_name in reference
 
     if OS_VERSION == "tumbleweed":
@@ -817,7 +851,7 @@ def test_reference(
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
-    elif OS_VERSION in ("15.6-spr",):
+    elif OS_VERSION in ("15.7-spr",):
         assert reference.startswith("registry.suse.com/private-registry/")
     else:
         if container_type in (
@@ -831,6 +865,8 @@ def test_reference(
             assert reference.startswith("registry.suse.com/suse/")
         elif container_type == ImageType.OS_LTSS:
             assert reference.startswith("registry.suse.com/suse/ltss/sle15")
+        elif container_type == ImageType.THIRD_PARTY:
+            assert reference.startswith("registry.suse.com/third-party/")
         else:
             assert reference.startswith("registry.suse.com/bci/")
 
@@ -884,4 +920,163 @@ def test_oci_base_refs(
 
     LOCALHOST.check_output(
         f"{container_runtime.runner_binary} manifest inspect {base_repository}@{base_digest}",
+    )
+
+
+def _reg(registry: str, repository: str, otype: str, object: str) -> Any:
+    r = requests.get(
+        f"https://{registry}/v2/{repository}/{otype}/{object}",
+        timeout=5,
+        allow_redirects=False,
+        verify=not registry.endswith("suse.de"),
+        headers={"User-Agent": "github.com/SUSE/BCI-tests"},
+    )
+    return r.json()
+
+
+@pytest.mark.skipif(
+    OS_VERSION not in ("15.7",), reason="Does not have buildtime attestations"
+)
+@pytest.mark.parametrize(
+    "container",
+    [
+        MICRO_CONTAINER,
+        MICRO_FIPS_CONTAINER,
+        BASE_CONTAINER,
+        *BASE_FIPS_CONTAINERS,
+        BUSYBOX_CONTAINER,
+    ],
+    indirect=["container"],
+)
+def test_buildtime_attestations(container):
+    baseurl = urllib.parse.urlparse(
+        f"oci://{container.container.get_base().url}"
+    )
+    repository, _, tag = baseurl.path.partition(":")
+
+    container_reference = container.inspect.config.labels[
+        "org.opensuse.reference"
+    ]
+    assert container_reference
+
+    digest = None
+    # Find the match for the local architecture in the fat manifest
+    fat_manifest = _reg(baseurl.netloc, repository, "manifests", tag)
+    assert fat_manifest["schemaVersion"] == 2
+    for manifest in fat_manifest["manifests"]:
+        local_arch = {"aarch64": "arm64", "x86_64": "amd64"}.get(
+            LOCALHOST.system_info.arch, LOCALHOST.system_info.arch
+        )
+        if manifest["platform"]["architecture"] == local_arch:
+            digest = manifest["digest"]
+            break
+
+    assert digest, (
+        f"No manifest found for architecture {LOCALHOST.system_info.arch}"
+    )
+    # Fetch the attestation for the specific architecture
+    attestation = _reg(
+        baseurl.netloc,
+        repository,
+        "manifests",
+        digest.replace("sha256:", "sha256-") + ".att",
+    )
+    got_clamav: bool = False
+    # Trivy is not scanning on s390x architecture
+    got_trivy: bool = manifest["platform"]["architecture"] in ("s390x",)
+    # NeuVector is only scanning on x86_64 and aarch64, so skip on ppc64le and s390x
+    got_neuvector: bool = manifest["platform"]["architecture"] in (
+        "ppc64le",
+        "s390x",
+    )
+    for layer in attestation["layers"]:
+        predicate_type = layer.get("annotations", {}).get(
+            "org.open-build-service.intoto.predicatetype", None
+        )
+        predicate = _reg(baseurl.netloc, repository, "blobs", layer["digest"])
+
+        payload = json.loads(base64.b64decode(predicate["payload"]))
+        assert digest.endswith(payload["subject"][0]["digest"]["sha256"])
+
+        if predicate_type == "https://cosign.sigstore.dev/attestation/v1":
+            assert not got_clamav
+            got_clamav = True
+            clamav_result = payload["predicate"]["data"]
+            assert "Infected files: 0" in clamav_result
+
+            virus_count_found = False
+            files_count_found = False
+            for r in clamav_result.splitlines():
+                if r.startswith("Known viruses: "):
+                    assert int(r.partition(":")[2]) > 100000, (
+                        f"{clamav_result} does not have at least 100000 signatures"
+                    )
+                    virus_count_found = True
+                if r.startswith("Scanned files: "):
+                    assert int(r.partition(":")[2]) >= 200, (
+                        f"{clamav_result} does not have at least 200 files scanned"
+                    )
+                    files_count_found = True
+
+            assert virus_count_found and files_count_found
+            assert 500 < len(predicate["payload"]) < 1000, (
+                "ClamAV scan result has unusual length"
+            )
+            continue
+        if not predicate_type.endswith("/vuln/v1"):
+            assert 10000 < len(predicate["payload"]) < 10000000, (
+                f"Attestation payload length {len(predicate['payload'])} outside range"
+            )
+            continue
+
+        scanner = payload["predicate"]["scanner"]
+        result = scanner["result"]
+        if "aquasecurity/trivy" in scanner["uri"]:
+            assert not got_trivy, (
+                f"Multiple Trivy attestations for {manifest['platform']['architecture']}"
+            )
+            got_trivy = True
+
+            trivy_reference = result["Metadata"]["ImageConfig"]["config"][
+                "Labels"
+            ]["org.opensuse.reference"]
+            assert container_reference == trivy_reference, (
+                f"Unexpected reference {trivy_reference} in trivy report"
+            )
+
+            for finding in result["Results"]:
+                assert "Vulnerabilities" not in finding, (
+                    f"Image has vulnerability {finding['Vulnerabilities'][0]['VulnerabilityID']}"
+                )
+            assert "Class" in result["Results"][0]
+        elif "neuvector/scanner" in scanner["uri"]:
+            assert not got_neuvector, (
+                f"Multiple NeuVector attestations for {manifest['platform']['architecture']}"
+            )
+            got_neuvector = True
+            assert scanner["db"]["uri"]
+            if "error_message" in result:
+                assert len(result["error_message"]) == 0
+            for check in result["report"]["checks"]:
+                assert check["level"] in ("WARN",), (
+                    f"Neuvector file {check['description']}"
+                )
+
+            # for some reason, NeuVector cannot extract labels from kiwi type containers
+            if "labels" in result["report"]:
+                assert (
+                    container_reference
+                    == result["report"]["labels"]["org.opensuse.reference"]
+                )
+        assert 8000 < len(predicate["payload"]) < 1000000, (
+            f"Vulnerability report length {len(predicate['payload'])} outside range"
+        )
+    assert got_clamav, (
+        f"ClamAV missing for {manifest['platform']['architecture']}"
+    )
+    assert got_neuvector, (
+        f"NeuVector missing for {manifest['platform']['architecture']}"
+    )
+    assert got_trivy, (
+        f"Trivy missing for {manifest['platform']['architecture']}"
     )
