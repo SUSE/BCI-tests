@@ -199,6 +199,8 @@ markers = [
     'python_3.11',
     'python_3.12',
     'python_3.13',
+    'python_3.13-base',
+    'python_3.13-micro',
     'python_3.6',
     'registry_2.8',
     'registry_3.0',

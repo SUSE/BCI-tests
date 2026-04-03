@@ -699,13 +699,28 @@ NVIDIA_CONTAINERS = [
     )
 ]
 
+PYTHON_BASE_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/python:{ver}-base",
+        available_versions=versions,
+    )
+    for ver, versions in (("3.13", ["16.0"]),)
+]
 
-PYTHON_WITH_PIPX_CONTAINERS = [
+PYTHON_WITH_PIPX_CONTAINERS = PYTHON_BASE_CONTAINERS + [
     create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/python:{ver}",
         available_versions=versions,
     )
-    for ver, versions in (("3.13", ["15.7", "16.0", "tumbleweed"]),)
+    for ver, versions in (("3.13", ["15.7", "tumbleweed"]),)
+]
+
+PYTHON_MICRO_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/python:{ver}-micro",
+        available_versions=versions,
+    )
+    for ver, versions in (("3.13", ["16.0"]),)
 ]
 
 PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
@@ -1093,7 +1108,7 @@ PROMETHEUS_CONTAINERS = [
         available_versions=versions,
     )
     for tag, versions in (
-        ("2", ("15.7",)),
+        ("3", ("15.7",)),
         ("3", ("16.0", "16.1", "tumbleweed")),
     )
 ]
