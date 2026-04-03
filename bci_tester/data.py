@@ -1108,7 +1108,7 @@ PROMETHEUS_CONTAINERS = [
         available_versions=versions,
     )
     for tag, versions in (
-        ("2", ("15.7",)),
+        ("3", ("15.7",)),
         ("3", ("16.0", "16.1", "tumbleweed")),
     )
 ]
