@@ -740,19 +740,14 @@ PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
     )
 ]
 
-RUBY_25_CONTAINER = create_BCI(
-    build_tag="bci/ruby:2.5", available_versions=("15.7",)
-)
-
-RUBY_34_CONTAINER = create_BCI(
-    build_tag="bci/ruby:3.4", available_versions=_DEFAULT_NONBASE_SLE_VERSIONS
-)
-
-RUBY_LATEST_CONTAINER = create_BCI(
-    build_tag="bci/ruby:latest", available_versions=["tumbleweed"]
-)
-
-RUBY_CONTAINERS = [RUBY_25_CONTAINER, RUBY_34_CONTAINER, RUBY_LATEST_CONTAINER]
+RUBY_CONTAINERS = [
+    create_BCI(build_tag="bci/ruby:2.5", available_versions=("15.7",)),
+    create_BCI(
+        build_tag="bci/ruby:3.4",
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    ),
+    create_BCI(build_tag="bci/ruby:latest", available_versions=["tumbleweed"]),
+]
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     LOCALHOST.system_info.arch not in ("aarch64", "x86_64"),
