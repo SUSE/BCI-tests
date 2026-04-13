@@ -2,6 +2,7 @@
 
 import enum
 import os
+import re
 from datetime import timedelta
 from itertools import chain
 from itertools import product
@@ -52,6 +53,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-spr1.2",
     "15.7-third-party",
     "16.0",
     "16.0-pc2025",
@@ -64,6 +66,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.7",
     "15.7-spr",
+    "15.7-spr1.2",
     "16.0",
     "16.1",
     "tumbleweed",
@@ -90,6 +93,7 @@ RELEASED_SLE_VERSIONS = (
     "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-spr1.2",
     "15.7-third-party",
     "16.0",
     "16.0-third-party",
@@ -166,6 +170,34 @@ else:
     )
 
 
+def _get_spr_version(os_version: str = OS_VERSION) -> Optional[str]:
+    match = re.search(
+        r"(\d+\.\d+)-spr(\d+\.\d+){0,1}", os_version
+    )  # 15.6-spr, 15.7-spr, 15.7-spr1.2, etc.
+    if match is None:
+        return None
+
+    if match[2]:
+        return match[2]
+
+    if match[1] == "15.6":
+        return "1.0"
+
+    if match[1] == "15.7":
+        return "1.1"
+
+    return None
+
+
+def _get_spr_namespace(os_version: str = OS_VERSION) -> str:
+    spr_ver = _get_spr_version(os_version)
+    return "" if spr_ver in (None, "1.0", "1.1") else f"/{spr_ver}"
+
+
+def _is_spr(os_version: str = OS_VERSION) -> bool:
+    return _get_spr_version(os_version) is not None
+
+
 #: value of the environment variable ``TARGET`` which defines whether we are
 #: taking the images from OBS, IBS or the ``CR:ToTest`` project on IBS
 TARGET = os.getenv("TARGET", "obs")
@@ -215,9 +247,12 @@ else:
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/bci/{DISTNAME}/test"
         )
-    elif OS_VERSION in ("15.6-spr", "15.7-spr"):
-        ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
-        obs_project = "registry.suse.de/devel/scc/privateregistry"
+    elif _is_spr():
+        ibs_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry{_get_spr_namespace()}"
+        ibs_cr_project = f"{ibs_project}/totest"
+        obs_project = (
+            f"registry.suse.de/devel/scc/privateregistry/{_get_spr_version()}"
+        )
 
     BASEURL = {
         "obs": obs_project,
@@ -1312,9 +1347,10 @@ KUBEVIRT_CDI_CONTAINERS = [
     )
 ]
 
+
 SPR_CONTAINERS = [
     create_BCI(
-        build_tag=f"private-registry/harbor-{service}:latest",
+        build_tag=f"private-registry{_get_spr_namespace(os_version)}/harbor-{service}:latest",
         bci_type=ImageType.APPLICATION,
         available_versions=[os_version],
         custom_entry_point="/bin/sh" if service != "db" else "",
@@ -1324,7 +1360,11 @@ SPR_CONTAINERS = [
     )
     for os_version, service in chain(
         product(
-            ("15.6-spr", "15.7-spr"),
+            (
+                "15.6-spr",
+                "15.7-spr",
+                "15.7-spr1.2",
+            ),
             (
                 "core",
                 "exporter",

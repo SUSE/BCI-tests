@@ -21,6 +21,8 @@ from pytest_container.pod import PodData
 from bci_tester.data import BASEURL
 from bci_tester.data import OS_VERSION
 from bci_tester.data import _get_repository_name
+from bci_tester.data import _get_spr_namespace
+from bci_tester.data import _is_spr
 
 SPR_CONFIG_DIR = Path(__file__).parent.parent / "tests" / "files" / "spr"
 
@@ -190,7 +192,7 @@ for img, conf in SPR_CONFIG.items():
 
     url = conf.get(
         "url",
-        f"{BASEURL}/{_get_repository_name('dockerfile')}private-registry/harbor-{img}:latest",
+        f"{BASEURL}/{_get_repository_name('dockerfile')}private-registry{_get_spr_namespace()}/harbor-{img}:latest",
     )
 
     launch_args = [f"--name={conf.get('name', img)}"]
@@ -217,11 +219,7 @@ HARBOR_POD = Pod(
 
 
 @pytest.mark.skipif(
-    OS_VERSION
-    not in (
-        "15.6-spr",
-        "15.7-spr",
-    ),
+    not _is_spr(),
     reason="Harbor is only tested for SUSE Private Registry",
 )
 @pytest.mark.parametrize(
