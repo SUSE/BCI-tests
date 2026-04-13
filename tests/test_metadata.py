@@ -49,6 +49,7 @@ from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_9_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_10_0_CONTAINER
 from bci_tester.data import GCC_CONTAINERS
+from bci_tester.data import GEMINI_CONTAINER
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import GRAFANA_CONTAINERS
@@ -165,6 +166,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     pytest.param(cont, name, img_type, marks=cont.marks)
     for cont, name, img_type in [
         (BASE_CONTAINER, "base", ImageType.OS),
+        (GEMINI_CONTAINER, "gemini-cli", ImageType.APPLICATION),
         (GIT_CONTAINER, "git", ImageType.APPLICATION),
         (HELM_CONTAINER, "helm", ImageType.APPLICATION),
         (MINIMAL_CONTAINER, "minimal", ImageType.OS),
