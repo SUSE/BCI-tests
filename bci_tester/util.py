@@ -8,6 +8,11 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+
 from pytest_container import Version
 
 
@@ -107,7 +112,7 @@ def is_spr(os_version: Optional[str] = None) -> bool:
     return get_spr_version(os_version) is not None
 
 
-def get_repository_name(image_type: str) -> str:
+def get_repository_name(image_type: Literal["dockerfile", "kiwi"]) -> str:
     """Return the registry path segment for the given image type and current TARGET/OS_VERSION."""
     target = os.getenv("TARGET", "obs")
     os_version = os.getenv("OS_VERSION", "15.7")
