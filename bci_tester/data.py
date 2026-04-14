@@ -2,7 +2,6 @@
 
 import enum
 import os
-import re
 from datetime import timedelta
 from itertools import chain
 from itertools import product
@@ -31,6 +30,10 @@ from _pytest.mark.structures import MarkDecorator
 from _pytest.mark.structures import ParameterSet
 
 from bci_tester.runtime_choice import DOCKER_SELECTED
+from bci_tester.util import get_repository_name
+from bci_tester.util import get_spr_namespace
+from bci_tester.util import get_spr_version
+from bci_tester.util import is_spr
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
@@ -170,34 +173,6 @@ else:
     )
 
 
-def _get_spr_version(os_version: str = OS_VERSION) -> Optional[str]:
-    match = re.search(
-        r"(\d+\.\d+)-spr(\d+\.\d+){0,1}", os_version
-    )  # 15.6-spr, 15.7-spr, 15.7-spr1.2, etc.
-    if match is None:
-        return None
-
-    if match[2]:
-        return match[2]
-
-    if match[1] == "15.6":
-        return "1.0"
-
-    if match[1] == "15.7":
-        return "1.1"
-
-    return None
-
-
-def _get_spr_namespace(os_version: str = OS_VERSION) -> str:
-    spr_ver = _get_spr_version(os_version)
-    return "" if spr_ver in (None, "1.0", "1.1") else f"/{spr_ver}"
-
-
-def _is_spr(os_version: str = OS_VERSION) -> bool:
-    return _get_spr_version(os_version) is not None
-
-
 #: value of the environment variable ``TARGET`` which defines whether we are
 #: taking the images from OBS, IBS or the ``CR:ToTest`` project on IBS
 TARGET = os.getenv("TARGET", "obs")
@@ -247,11 +222,11 @@ else:
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/bci/{DISTNAME}/test"
         )
-    elif _is_spr():
-        ibs_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry{_get_spr_namespace()}"
+    elif is_spr():
+        ibs_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry{get_spr_namespace()}"
         ibs_cr_project = f"{ibs_project}/totest"
         obs_project = (
-            f"registry.suse.de/devel/scc/privateregistry/{_get_spr_version()}"
+            f"registry.suse.de/devel/scc/privateregistry/{get_spr_version()}"
         )
 
     BASEURL = {
@@ -326,22 +301,6 @@ else:
 assert BCI_DEVEL_REPO, "BCI_DEVEL_REPO must be set at this point"
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
-
-
-def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
-    if TARGET in ("dso", "ibs-released"):
-        return ""
-    if TARGET == "ibs-cr":
-        if OS_VERSION == "16.0-pc2025":
-            return "containers_registry_16.0/"
-        return "containerfile/" if OS_VERSION.startswith("16") else "images/"
-    if TARGET in ("factory-totest", "factory-arm-totest"):
-        return "containers/"
-    if image_type == "dockerfile":
-        return "containerfile/"
-    if image_type == "kiwi":
-        return "containerkiwi/" if OS_VERSION.startswith("16") else "images/"
-    raise AssertionError(f"invalid image_type: {image_type}")
 
 
 @enum.unique
@@ -471,13 +430,11 @@ def create_BCI(
             raise ValueError("Missing CONTAINER_URL for TARGET manual")
     elif OS_VERSION == "tumbleweed":
         if bci_type in (ImageType.APPLICATION, ImageType.SAC_APPLICATION):
-            baseurl = (
-                f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
-            )
+            baseurl = f"{BASEURL}/{get_repository_name(image_type)}{build_tag}"
         else:
-            baseurl = f"{BASEURL}/{_get_repository_name(image_type)}opensuse/{build_tag}"
+            baseurl = f"{BASEURL}/{get_repository_name(image_type)}opensuse/{build_tag}"
     else:
-        baseurl = f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
+        baseurl = f"{BASEURL}/{get_repository_name(image_type)}{build_tag}"
 
     if bci_type == ImageType.OS_LTSS:
         containerfile = ""
@@ -1350,7 +1307,7 @@ KUBEVIRT_CDI_CONTAINERS = [
 
 SPR_CONTAINERS = [
     create_BCI(
-        build_tag=f"private-registry{_get_spr_namespace(os_version)}/harbor-{service}:latest",
+        build_tag=f"private-registry{get_spr_namespace(os_version)}/harbor-{service}:latest",
         bci_type=ImageType.APPLICATION,
         available_versions=[os_version],
         custom_entry_point="/bin/sh" if service != "db" else "",

@@ -105,10 +105,10 @@ from bci_tester.data import TARGET
 from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
 from bci_tester.data import ImageType
-from bci_tester.data import _get_spr_namespace
-from bci_tester.data import _get_spr_version
-from bci_tester.data import _is_spr
 from bci_tester.runtime_choice import PODMAN_SELECTED
+from bci_tester.util import get_spr_namespace
+from bci_tester.util import get_spr_version
+from bci_tester.util import is_spr
 
 #: The official vendor name
 VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"
@@ -440,7 +440,7 @@ def test_general_labels(
                     or "based on the SLE LTSS Base Container Image"
                     in labels[f"{prefix}.description"]
                 )
-            elif _is_spr():
+            elif is_spr():
                 assert (
                     "for SUSE Private Registry"
                     in labels[f"{prefix}.description"]
@@ -668,9 +668,9 @@ def test_disturl(
         )
     elif OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:AI" in disturl
-    elif _is_spr() and TARGET in ("obs",):
+    elif is_spr() and TARGET in ("obs",):
         assert (
-            f"obs://build.suse.de/Devel:SCC:PrivateRegistry:{_get_spr_version()}"
+            f"obs://build.suse.de/Devel:SCC:PrivateRegistry:{get_spr_version()}"
             in disturl
         )
     elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs", "ibs-cr"):
@@ -853,9 +853,9 @@ def test_reference(
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
-    elif _is_spr():
+    elif is_spr():
         assert reference.startswith(
-            f"registry.suse.com/private-registry{_get_spr_namespace()}/"
+            f"registry.suse.com/private-registry{get_spr_namespace()}/"
         )
     else:
         if container_type in (
