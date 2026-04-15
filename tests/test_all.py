@@ -54,6 +54,7 @@ from bci_tester.data import RELEASED_SLE_VERSIONS
 from bci_tester.data import TARGET
 from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.util import get_repos_from_connection
+from bci_tester.util import is_spr
 
 CONTAINER_IMAGES = ALL_CONTAINERS
 
@@ -517,7 +518,7 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
 
 
 @pytest.mark.skipif(
-    OS_VERSION in ("15.4", "15.5", "15.6-spr", "15.7-spr"),
+    OS_VERSION in ("15.4", "15.5") or is_spr(),
     reason="doesn't have the fixes for blkid/udev",
 )
 @pytest.mark.parametrize(

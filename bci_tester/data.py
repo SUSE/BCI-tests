@@ -30,6 +30,10 @@ from _pytest.mark.structures import MarkDecorator
 from _pytest.mark.structures import ParameterSet
 
 from bci_tester.runtime_choice import DOCKER_SELECTED
+from bci_tester.util import get_repository_name
+from bci_tester.util import get_spr_namespace
+from bci_tester.util import get_spr_version
+from bci_tester.util import is_spr
 
 #: The operating system version as present in /etc/os-release & various other
 #: places
@@ -52,6 +56,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-spr1.2",
     "15.7-third-party",
     "16.0",
     "16.0-pc2025",
@@ -64,6 +69,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.7",
     "15.7-spr",
+    "15.7-spr1.2",
     "16.0",
     "16.1",
     "tumbleweed",
@@ -90,6 +96,7 @@ RELEASED_SLE_VERSIONS = (
     "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-spr1.2",
     "15.7-third-party",
     "16.0",
     "16.0-third-party",
@@ -215,9 +222,12 @@ else:
         ibs_cr_project = (
             f"registry.suse.de/suse/slfo/products/bci/{DISTNAME}/test"
         )
-    elif OS_VERSION in ("15.6-spr", "15.7-spr"):
-        ibs_cr_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry/totest"
-        obs_project = "registry.suse.de/devel/scc/privateregistry"
+    elif is_spr():
+        ibs_project = f"registry.suse.de/suse/{DISTNAME}/update/products/privateregistry{get_spr_namespace()}"
+        ibs_cr_project = f"{ibs_project}/totest"
+        obs_project = (
+            f"registry.suse.de/devel/scc/privateregistry/{get_spr_version()}"
+        )
 
     BASEURL = {
         "obs": obs_project,
@@ -291,22 +301,6 @@ else:
 assert BCI_DEVEL_REPO, "BCI_DEVEL_REPO must be set at this point"
 
 _IMAGE_TYPE_T = Literal["dockerfile", "kiwi"]
-
-
-def _get_repository_name(image_type: _IMAGE_TYPE_T) -> str:
-    if TARGET in ("dso", "ibs-released"):
-        return ""
-    if TARGET == "ibs-cr":
-        if OS_VERSION == "16.0-pc2025":
-            return "containers_registry_16.0/"
-        return "containerfile/" if OS_VERSION.startswith("16") else "images/"
-    if TARGET in ("factory-totest", "factory-arm-totest"):
-        return "containers/"
-    if image_type == "dockerfile":
-        return "containerfile/"
-    if image_type == "kiwi":
-        return "containerkiwi/" if OS_VERSION.startswith("16") else "images/"
-    raise AssertionError(f"invalid image_type: {image_type}")
 
 
 @enum.unique
@@ -436,13 +430,11 @@ def create_BCI(
             raise ValueError("Missing CONTAINER_URL for TARGET manual")
     elif OS_VERSION == "tumbleweed":
         if bci_type in (ImageType.APPLICATION, ImageType.SAC_APPLICATION):
-            baseurl = (
-                f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
-            )
+            baseurl = f"{BASEURL}/{get_repository_name(image_type)}{build_tag}"
         else:
-            baseurl = f"{BASEURL}/{_get_repository_name(image_type)}opensuse/{build_tag}"
+            baseurl = f"{BASEURL}/{get_repository_name(image_type)}opensuse/{build_tag}"
     else:
-        baseurl = f"{BASEURL}/{_get_repository_name(image_type)}{build_tag}"
+        baseurl = f"{BASEURL}/{get_repository_name(image_type)}{build_tag}"
 
     if bci_type == ImageType.OS_LTSS:
         containerfile = ""
@@ -1312,9 +1304,10 @@ KUBEVIRT_CDI_CONTAINERS = [
     )
 ]
 
+
 SPR_CONTAINERS = [
     create_BCI(
-        build_tag=f"private-registry/harbor-{service}:latest",
+        build_tag=f"private-registry{get_spr_namespace(os_version)}/harbor-{service}:latest",
         bci_type=ImageType.APPLICATION,
         available_versions=[os_version],
         custom_entry_point="/bin/sh" if service != "db" else "",
@@ -1324,7 +1317,11 @@ SPR_CONTAINERS = [
     )
     for os_version, service in chain(
         product(
-            ("15.6-spr", "15.7-spr"),
+            (
+                "15.6-spr",
+                "15.7-spr",
+                "15.7-spr1.2",
+            ),
             (
                 "core",
                 "exporter",

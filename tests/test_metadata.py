@@ -106,6 +106,9 @@ from bci_tester.data import TOMCAT_CONTAINERS
 from bci_tester.data import VALKEY_CONTAINERS
 from bci_tester.data import ImageType
 from bci_tester.runtime_choice import PODMAN_SELECTED
+from bci_tester.util import get_spr_namespace
+from bci_tester.util import get_spr_version
+from bci_tester.util import is_spr
 
 #: The official vendor name
 VENDOR = "openSUSE Project" if OS_VERSION == "tumbleweed" else "SUSE LLC"
@@ -437,7 +440,7 @@ def test_general_labels(
                     or "based on the SLE LTSS Base Container Image"
                     in labels[f"{prefix}.description"]
                 )
-            elif OS_VERSION in ("15.7-spr",):
+            elif is_spr():
                 assert (
                     "for SUSE Private Registry"
                     in labels[f"{prefix}.description"]
@@ -623,10 +626,6 @@ def test_support_end_in_future(
 
 
 @pytest.mark.skipif(
-    OS_VERSION == "15.7-spr",
-    reason="SPR publishes out of the devel project",
-)
-@pytest.mark.skipif(
     TARGET == "custom",
     reason="disturl can be anything if TARGET=custom",
 )
@@ -669,8 +668,11 @@ def test_disturl(
         )
     elif OS_VERSION == "15.6-ai" and TARGET in ("ibs", "obs"):
         assert "obs://build.suse.de/Devel:AI" in disturl
-    elif OS_VERSION == "15.7-spr" and TARGET in ("ibs", "obs"):
-        assert "obs://build.suse.de/Devel:SCC:PrivateRegistry:1.1" in disturl
+    elif is_spr() and TARGET in ("obs",):
+        assert (
+            f"obs://build.suse.de/Devel:SCC:PrivateRegistry:{get_spr_version()}"
+            in disturl
+        )
     elif OS_VERSION == "15.7-third-party" and TARGET in ("ibs", "ibs-cr"):
         assert (
             "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:SLE-15-SP7"
@@ -851,8 +853,10 @@ def test_reference(
             assert reference.startswith("registry.opensuse.org/opensuse/")
         else:
             assert reference.startswith("registry.opensuse.org/opensuse/bci/")
-    elif OS_VERSION in ("15.7-spr",):
-        assert reference.startswith("registry.suse.com/private-registry/")
+    elif is_spr():
+        assert reference.startswith(
+            f"registry.suse.com/private-registry{get_spr_namespace()}/"
+        )
     else:
         if container_type in (
             ImageType.SAC_LANGUAGE_STACK,
