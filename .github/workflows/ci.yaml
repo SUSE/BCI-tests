@@ -193,6 +193,8 @@ jobs:
             os_version: 15.6
           - toxenv: fips
             os_version: 15.6
+          - toxenv: amd
+            os_version: 15.7-third-party
           - toxenv: nvidia
             os_version: 15.7-third-party
           - toxenv: nvidia

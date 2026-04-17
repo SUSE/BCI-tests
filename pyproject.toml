@@ -17,6 +17,7 @@ markers = [
     '389-ds_latest',
     'alertmanager_0.28',
     'alertmanager_latest',
+    'amdgpu-driver_sles-15.7-7.0.3',
     'apache-tomcat_9-openjdk8',
     'apache-tomcat_9-openjdk11',
     'apache-tomcat_9-openjdk17',
