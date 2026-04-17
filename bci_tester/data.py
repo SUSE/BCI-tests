@@ -417,7 +417,7 @@ def create_BCI(
     if OS_VERSION in (
         available_versions or list(_DEFAULT_NONBASE_OS_VERSIONS)
     ):
-        if build_tag.startswith("third-party/"):
+        if build_tag.startswith("third-party/nvidia/"):
             build_tag_base = build_tag.partition("/")[2].replace("/", "-")
         else:
             build_tag_base = build_tag.rpartition("/")[2]
