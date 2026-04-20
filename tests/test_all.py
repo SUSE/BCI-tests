@@ -835,7 +835,7 @@ _USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
     "postgres": (None, 486),
     "pcp": (496, 484),
     "ldap": (498, 498),
-    "systemd-coredump": (497, 100),
+    "systemd-coredump": (497, 1000),
     "postfix": (51, 51),
     "keadhcp": (None, 486),
     "user": (1000, 1000),
@@ -883,7 +883,7 @@ def test_uids_stable(container: ContainerData) -> None:
             .endswith("kiosk/xorg")
         ):
             if "user" in expected_map:
-                expected_map["user"] = [expected_map["user"][0], 100]
+                expected_map["user"] = [expected_map["user"][0], 1000]
 
         for name, (uid, gid) in expected_map.items():
             uid = uid if uid is not None else 499
