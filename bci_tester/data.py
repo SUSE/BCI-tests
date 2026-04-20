@@ -417,7 +417,7 @@ def create_BCI(
     if OS_VERSION in (
         available_versions or list(_DEFAULT_NONBASE_OS_VERSIONS)
     ):
-        if build_tag.startswith("third-party/"):
+        if build_tag.startswith("third-party/nvidia/"):
             build_tag_base = build_tag.partition("/")[2].replace("/", "-")
         else:
             build_tag_base = build_tag.rpartition("/")[2]
@@ -643,6 +643,17 @@ NODEJS_CONTAINERS = [
         (22, ("15.7", "16.0")),
         (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
     )
+]
+
+AMD_CONTAINERS = [
+    create_BCI(
+        build_tag=(
+            f"third-party/amd/amdgpu-driver:sles-{os_ver}-{driver_ver}"
+        ),
+        available_versions=[f"{os_ver}-third-party"],
+        custom_entry_point="/bin/sh",
+    )
+    for driver_ver, os_ver in (("7.0.3", "15.7"),)
 ]
 
 NVIDIA_CONTAINERS = [

@@ -1,4 +1,4 @@
-"""This module contains the tests for the valkey container."""
+"""This module contains the tests for the NVIDIA GPU container."""
 
 import pytest
 from pytest_container import DerivedContainer
@@ -76,3 +76,4 @@ def test_image_content(container_per_test: ContainerData):
 
     for filename in files:
         assert container_per_test.connection.file(filename).exists
+        assert container_per_test.connection.file(filename).is_file
