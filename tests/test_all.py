@@ -27,6 +27,7 @@ from pytest_container.container import VolumeFlag
 
 from bci_tester.data import ALLOWED_BCI_REPO_OS_VERSIONS
 from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import AMD_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import BCI_REPO_NAME
@@ -499,6 +500,7 @@ def test_zypper_not_present_in_containers_without_it(
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
             + KUBEVIRT_CONTAINERS
+            + AMD_CONTAINERS
             + NVIDIA_CONTAINERS
         )
     ],
