@@ -31,6 +31,7 @@ from pytest_container.runtime import LOCALHOST
 from bci_tester.data import ACC_CONTAINERS
 from bci_tester.data import ALERTMANAGER_CONTAINERS
 from bci_tester.data import ALL_CONTAINERS
+from bci_tester.data import AMD_CONTAINERS
 from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import BIND_CONTAINERS
@@ -188,6 +189,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
     ]
+    + [(c, "amd-driver", ImageType.THIRD_PARTY) for c in AMD_CONTAINERS]
     + [(c, "nvidia-driver", ImageType.THIRD_PARTY) for c in NVIDIA_CONTAINERS]
     + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
     + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
@@ -490,7 +492,10 @@ def test_general_labels(
             ImageType.SAC_APPLICATION,
         ):
             assert labels["com.suse.eula"] == "sle-eula"
-        elif container_name in ("nvidia-driver",):
+        elif container_name in (
+            "amd-driver",
+            "nvidia-driver",
+        ):
             assert labels["com.suse.eula"] == "sle-beta"
         else:
             assert labels["com.suse.eula"] == (
@@ -841,8 +846,10 @@ def test_reference(
             "base",
         ):
             reference_name = "sle15" if OS_VERSION == "15.5" else "tumbleweed"
-        if OS_VERSION in ("15.7-third-party", "16.0-third-party"):
-            reference_name = reference_name.replace("-", "/")
+        if container_name in ("nvidia-driver",):
+            reference_name = "nvidia/driver"
+        if container_name in ("amd-driver",):
+            reference_name = "amd/amdgpu-driver"
         assert reference_name in reference
 
     if OS_VERSION == "tumbleweed":
