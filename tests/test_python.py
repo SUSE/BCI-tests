@@ -16,6 +16,7 @@ from pytest_container.runtime import get_selected_runtime
 
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PYTHON_CONTAINERS
+from bci_tester.data import PYTHON_MICRO_CONTAINERS
 from bci_tester.data import PYTHON_WITH_PIPX_CONTAINERS
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
@@ -28,7 +29,7 @@ PORT1 = 8123
 
 
 #: Base containers under test, input of auto_container fixture
-CONTAINER_IMAGES = PYTHON_CONTAINERS
+CONTAINER_IMAGES = PYTHON_CONTAINERS + PYTHON_MICRO_CONTAINERS
 
 
 #: Derived containers with the python http.server as CMD and a HEALTHCHECK
@@ -47,7 +48,7 @@ HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localho
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
     )
-    for CONTAINER_T in CONTAINER_IMAGES
+    for CONTAINER_T in PYTHON_CONTAINERS
 ]
 
 REQUESTS_CONTAINER_IMAGES = [
@@ -197,11 +198,16 @@ def test_tox(auto_container_per_test):
 
 
 @pytest.mark.skipif(
-    OS_VERSION == "16.0", reason="no packaged tox version available"
+    OS_VERSION in ["16.0", "16.1"], reason="no packaged tox version available"
 )
-def test_packaged_tox(auto_container_per_test):
+@pytest.mark.parametrize(
+    "container_per_test",
+    PYTHON_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_packaged_tox(container_per_test):
     """Ensure we can use the packaged tox version."""
-    version = auto_container_per_test.connection.check_output(
+    version = container_per_test.connection.check_output(
         "echo $PYTHON_VERSION"
     )
     if (
@@ -211,14 +217,19 @@ def test_packaged_tox(auto_container_per_test):
     ):
         pytest.skip("packaged tox not available")
 
-    auto_container_per_test.connection.check_output(
+    container_per_test.connection.check_output(
         f"zypper --non-interactive in {'python311' if version.startswith('3.11') else 'python3'}-tox && tox --version"
     )
 
 
-def test_pep517_wheels(auto_container_per_test):
+@pytest.mark.parametrize(
+    "container_per_test",
+    PYTHON_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_pep517_wheels(container_per_test):
     """Ensure we can use :command:`pip` to build PEP517 binary wheels"""
-    version = auto_container_per_test.connection.check_output(
+    version = container_per_test.connection.check_output(
         "echo $PYTHON_VERSION"
     )
     if "3.12" in version and OS_VERSION not in ("tumbleweed",):
@@ -232,7 +243,7 @@ def test_pep517_wheels(auto_container_per_test):
     if OS_VERSION in ("tumbleweed",):
         pip_install += " --break-system-packages --user"
     ujson_version = "5.10.0"
-    auto_container_per_test.connection.check_output(
+    container_per_test.connection.check_output(
         "zypper -n install gcc-c++ && "
         f"pip download --no-deps --no-binary :all: ujson=={ujson_version} && "
         f"tar --no-same-permissions --no-same-owner -xf ujson-{ujson_version}.tar.gz && "
@@ -248,10 +259,15 @@ def test_pep517_wheels(auto_container_per_test):
     OS_VERSION == "tumbleweed",
     reason="pip --user not working due to PEP 668",
 )
-def test_pip_install_source_cryptography(auto_container_per_test):
+@pytest.mark.parametrize(
+    "container_per_test",
+    PYTHON_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_pip_install_source_cryptography(container_per_test):
     """Check that cryptography python module can be installed from source so that
     it is built against the SLE BCI FIPS enabled libopenssl."""
-    version = auto_container_per_test.connection.check_output(
+    version = container_per_test.connection.check_output(
         "echo $PYTHON_VERSION"
     )
 
@@ -259,20 +275,20 @@ def test_pip_install_source_cryptography(auto_container_per_test):
         pytest.skip("cryptography tests only supported on >= 3.10")
 
     # install dependencies
-    auto_container_per_test.connection.run_expect(
+    container_per_test.connection.run_expect(
         [0],
         "zypper --non-interactive in cargo libffi-devel openssl-devel gcc tar gzip",
     )
 
     # pin cryptography to a version that works with SLE BCI
     cryptography_version = "37.0.4"
-    auto_container_per_test.connection.run_expect(
+    container_per_test.connection.run_expect(
         [0],
         f"pip install --no-binary :all: cryptography=={cryptography_version}",
     )
 
     # test cryptography
-    auto_container_per_test.connection.run_expect(
+    container_per_test.connection.run_expect(
         [0],
         f"""pip install cryptography-vectors=={cryptography_version} pytest &&
             pip download --no-binary :all: cryptography=={cryptography_version} &&

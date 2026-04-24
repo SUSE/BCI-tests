@@ -91,6 +91,7 @@ from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
+from bci_tester.data import PYTHON_MICRO_CONTAINERS
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RMT_CONTAINERS
 from bci_tester.data import RUBY_CONTAINERS
@@ -209,7 +210,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         for c in KIOSK_XORG_CLIENT_CONTAINERS
     ]
     + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
-    + [(c, "python", ImageType.LANGUAGE_STACK) for c in PYTHON_CONTAINERS]
+    + [
+        (c, "python", ImageType.LANGUAGE_STACK)
+        for c in PYTHON_CONTAINERS + PYTHON_MICRO_CONTAINERS
+    ]
     + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
     + [(c, "base-fips", ImageType.OS) for c in BASE_FIPS_CONTAINERS]
     + [
