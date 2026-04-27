@@ -85,7 +85,6 @@ RUN set -eux; \
                 calendar \
                 intl \
                 mbstring \
-                opcache \
                 iconv \
                 ctype \
                 fileinfo \
@@ -193,12 +192,13 @@ def test_install_multiple_extensions_via_script(
         "calendar",
         "intl",
         "mbstring",
-        "opcache",
         "iconv",
         "ctype",
         "fileinfo",
         "dom",
     ]
+    if OS_VERSION not in ("tumbleweed",):
+        extensions.append("opcache")
 
     auto_container_per_test.connection.run_expect(
         [0], f"docker-php-ext-install {' '.join(extensions)}"
