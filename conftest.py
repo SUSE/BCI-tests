@@ -1,9 +1,7 @@
 import logging
 import os
 import shlex
-import tempfile
 import time
-import urllib.request
 from pathlib import Path
 from subprocess import check_output
 from typing import Iterator
@@ -13,14 +11,11 @@ import pytest
 from _pytest.fixtures import SubRequest
 from pytest_container import GitRepositoryBuild
 from pytest_container import OciRuntimeBase
-from pytest_container import Version
 from pytest_container import auto_container_parametrize
 from pytest_container.container import ContainerData
 from pytest_container.helpers import add_extra_run_and_build_args_options
 from pytest_container.helpers import add_logging_level_options
 from pytest_container.helpers import set_logging_level_from_cli_args
-
-from bci_tester.util import get_host_go_version
 
 
 @pytest.fixture(scope="function")
@@ -152,59 +147,3 @@ def pytest_configure(config):
         )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-
-
-@pytest.fixture(scope="module")
-def dapper(host):
-    """Fixture that ensures that dapper is installed on the host system and
-    yields the path to the dapper binary.
-
-    If dapper is already installed on the host, then its location is
-    returned. Otherwise, dapper is either built from source inside a temporary
-    directory or downloaded from rancher.com (if no go toolchain can be found).
-
-    """
-    # dapper has been installed => use that one
-    if host.exists("dapper"):
-        yield host.find_command("dapper")
-        return
-
-    def download_dapper(temporary_directory) -> str:
-        with urllib.request.urlopen(
-            "https://releases.rancher.com/dapper/latest/dapper-Linux-"
-            + host.system_info.arch
-        ) as f:
-            dapper_path = os.path.join(temporary_directory, "dapper")
-            with open(dapper_path, "wb") as dapper_file:
-                dapper_file.write(f.read())
-            os.chmod(dapper_path, 0o755)
-            return dapper_path
-
-    # go is not available on the host => fetch
-    if not host.exists("go"):
-        with tempfile.TemporaryDirectory() as tempdir:
-            yield download_dapper(tempdir)
-            return
-
-    # build dapper from source if we have go
-    with tempfile.TemporaryDirectory() as tmpdir:
-        gopath = os.path.join(tmpdir, "gopath")
-
-        # dapper needs go 1.17+ to build => fallback to downloading
-        if get_host_go_version(host) < Version(1, 17):
-            with tempfile.TemporaryDirectory() as tempdir:
-                yield download_dapper(tempdir)
-                return
-
-        host.run_expect(
-            [0],
-            f"GOPATH={gopath} go install github.com/rancher/dapper@latest",
-        )
-        yield os.path.join(gopath, "bin", "dapper")
-
-        # fix file permissions so that we can unlink them all
-        for root, dirs, files in os.walk(gopath):
-            for filename in files + dirs:
-                full_path = os.path.join(root, filename)
-                if not os.access(full_path, os.W_OK):
-                    os.chmod(full_path, 0o755)

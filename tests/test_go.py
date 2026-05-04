@@ -151,26 +151,25 @@ def test_build_generics_cache(
     indirect=["host_git_clone"],
 )
 @pytest.mark.skipif(
-    not DOCKER_SELECTED, reason="Dapper only works with docker"
+    not DOCKER_SELECTED, reason="Rancher only works with docker"
 )
 @pytest.mark.skipif(
     not OS_VERSION.startswith("15"),
-    reason="rancher builds only works on SLE15",
+    reason="Rancher builds only works on SLE15",
 )
 @pytest.mark.skipif(
     LOCALHOST.system_info.arch not in ("x86_64", "aarch64"),
-    reason=f"{LOCALHOST.system_info.arch} is not supported to build rancher",
+    reason=f"{LOCALHOST.system_info.arch} is not supported to build Rancher",
 )
 def test_rancher_build(
     host,
     host_git_clone: Tuple[Path, GitRepositoryBuild],
-    dapper,
     container: ContainerData,
 ):
     """Regression test that we can build Rancher in the go container:
 
     - clone the `rancher/rancher <https://github.com/rancher/rancher>`_ repository
-    - monkey patch their :file:`Dockerfile.dapper` replacing their container
+    - monkey patch their :file:`Dockerfile.runtime` replacing their container
       image with the url or id of the go container
     - check that the go version from go.mod is smaller than the current go
       compiler version, and if it isn't, skip this test
@@ -181,18 +180,18 @@ def test_rancher_build(
     dest, git_repo = host_git_clone
     rancher_dir = dest / git_repo.repo_name
     with open(
-        rancher_dir / "Dockerfile.dapper", encoding="utf-8"
-    ) as dapperfile:
-        contents = dapperfile.read(-1)
+        rancher_dir / "Dockerfile.runtime", encoding="utf-8"
+    ) as runtimefile:
+        contents = runtimefile.read()
 
     from_line_regex = re.compile(
-        r"^from registry\.suse\.com/bci/golang:(?P<go_ver>.*)$",
+        r"^\s+from\s+registry\.suse\.com/bci/golang:(?P<go_ver>.*)$",
         re.IGNORECASE | re.MULTILINE,
     )
-    from_line = from_line_regex.match(contents)
+    from_line = from_line_regex.search(contents)
 
     assert from_line and from_line.group("go_ver"), (
-        f"No valid FROM line found in Dockerfile.dapper: {contents}"
+        f"No valid FROM line found in Dockerfile.runtime: {contents}"
     )
 
     go_version = container.inspect.config.env["GOLANG_VERSION"]
@@ -207,8 +206,8 @@ def test_rancher_build(
     if go_mod_version > version.parse(go_version):
         pytest.skip(f"Rancher requires {go_mod_version}, but got {go_version}")
 
-    (rancher_dir / "Dockerfile.dapper").write_text(
+    (rancher_dir / "Dockerfile.runtime").write_text(
         from_line_regex.sub(f"FROM {container.image_url_or_id}", contents)
     )
 
-    host.check_output(f"cd {rancher_dir} && {dapper} build")
+    host.check_output(f"cd {rancher_dir} && ./scripts/container-run build")
