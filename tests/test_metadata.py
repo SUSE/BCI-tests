@@ -73,6 +73,7 @@ from bci_tester.data import MARIADB_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.data import NANO_CONTAINER
 from bci_tester.data import NGINX_CONTAINERS
 from bci_tester.data import NODEJS_CONTAINERS
 from bci_tester.data import NVIDIA_CONTAINERS
@@ -186,6 +187,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
             ImageType.OS,
         ),
         (INIT_CONTAINER, "init", ImageType.OS),
+        (NANO_CONTAINER, "nano", ImageType.OS),
         (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
         (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
         (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
