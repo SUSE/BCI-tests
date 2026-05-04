@@ -218,9 +218,9 @@ def test_lifecycle(auto_container):
 
         entry_name, entry_version, entry_date = entry.split(",")
         if entry_name in installed_binaries:
-            if entry_name.startswith("cpp13"):
+            if entry_name.startswith("cpp14"):
                 pytest.xfail(
-                    "https://bugzilla.suse.com/show_bug.cgi?id=1242170"
+                    "Mismatch between lifecycle data and support statement for cpp14, see 2026-05-04 BCI sync meeting notes for details"
                 )
             if fnmatch.fnmatch(installed_binaries[entry_name], entry_version):
                 support_end = datetime.datetime.strptime(
