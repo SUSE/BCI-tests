@@ -89,7 +89,7 @@ COPY {ORIG + APPDIR}/{APPL1} {APPDIR}
         marks=CONTAINER_T.marks,
         id=CONTAINER_T.id,
     )
-    for CONTAINER_T in CONTAINER_IMAGES
+    for CONTAINER_T in PYTHON_CONTAINERS
 ]
 
 
