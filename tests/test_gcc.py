@@ -9,11 +9,11 @@ from bci_tester.data import GCC_CONTAINERS
 
 CONTAINER_IMAGES = GCC_CONTAINERS
 
-_HELLO_VERSION = "2.12.2"
+_HELLO_VERSION = "2.12.3"
 
 CONTAINERFILE_HELLO = f"""
 WORKDIR /src
-RUN curl -sLO https://api.opensuse.org/public/source/openSUSE:Factory/hello/hello-{_HELLO_VERSION}.tar.gz?rev=91eb2953d334a8b971c512dccb0c6df3 && \\
+RUN curl -sLO https://api.opensuse.org/public/source/openSUSE:Factory/hello/hello-{_HELLO_VERSION}.tar.gz?rev=f5df0c4b38fd3b5506882e7142abdf37 && \\
     tar --no-same-permissions --no-same-owner -xf hello-{_HELLO_VERSION}.tar.gz && \\
     cd hello-{_HELLO_VERSION} && \\
     ./configure && \\
