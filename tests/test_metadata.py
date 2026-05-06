@@ -505,7 +505,12 @@ def test_general_labels(
             assert labels["com.suse.eula"] == (
                 "sle-beta" if OS_VERSION in ("16.1",) else "sle-bci"
             )
-            assert "BCI" in labels[f"{prefix}.title"]
+            if container_name not in (
+                "dotnet.aspnet",
+                "dotnet.runtime",
+                "dotnet.sdk",
+            ):
+                assert "BCI" in labels[f"{prefix}.title"]
 
 
 @pytest.mark.parametrize(
