@@ -151,6 +151,10 @@ def test_build_generics_cache(
     indirect=["host_git_clone"],
 )
 @pytest.mark.skipif(
+    "--build-arg" not in LOCALHOST.check_output("docker buildx build --help"),
+    reason="docker too old for Rancher build",
+)
+@pytest.mark.skipif(
     not DOCKER_SELECTED, reason="Rancher only works with docker"
 )
 @pytest.mark.skipif(
