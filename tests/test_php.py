@@ -350,3 +350,39 @@ def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
         "GET /index.php"
         in pod_per_test.container_data[0].read_container_logs()
     )
+
+
+@pytest.mark.skipif(
+    OS_VERSION not in ("tumbleweed"),
+    reason="available only on Tumbleweed",
+)
+@pytest.mark.parametrize("container", [PHP_8_APACHE], indirect=True)
+def test_tmpfiles_d_created(container: ContainerData) -> None:
+    """Check that our container image has all directories and files that
+    would've been created by systemd-tmpfiles.
+
+    """
+    tmpfiles_d = container.connection.file(
+        "/usr/lib/tmpfiles.d/apache2.conf"
+    ).content_string
+
+    for line in tmpfiles_d.strip().splitlines():
+        if line.startswith("#"):
+            continue
+
+        # apache2.conf is missing field Argument
+        tp, path, mode, owner, group, age = line.split()
+
+        # sanity check, we don't handle these below at all
+        assert age == "-"
+
+        # apache2 defines only directories in tmpfiles.d
+        assert tp == "d"
+
+        tmpfile_dir = container.connection.file(path)
+        assert tmpfile_dir.exists
+        assert tmpfile_dir.is_directory
+        assert tmpfile_dir.user == owner
+        assert tmpfile_dir.group == group
+        # apache2.conf appends a 0 before the mode
+        assert oct(tmpfile_dir.mode) == f"0o{mode[1:]}"
