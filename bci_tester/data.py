@@ -659,9 +659,9 @@ AMD_CONTAINERS = [
 NVIDIA_CONTAINERS = [
     create_BCI(
         build_tag=(
-            f"third-party/nvidia/driver:{driver_ver}-sles{os_ver}"
+            f"third-party/nvidia/driver:{driver_branch}-sles{os_ver}"
             if kernel_flavor == "default"
-            else f"third-party/nvidia/driver:{driver_ver}-{kernel_flavor}-sles{os_ver}"
+            else f"third-party/nvidia/driver:{driver_branch}-{kernel_flavor}-sles{os_ver}"
         ),
         available_versions=[f"{os_ver}-third-party"],
         custom_entry_point="/bin/sh",
@@ -674,37 +674,21 @@ NVIDIA_CONTAINERS = [
         if kernel_flavor == "64kb"
         else [],
     )
-    for driver_ver, kernel_flavor, os_ver in (
-        ("595.58.03", "default", "16.0"),
-        ("595.58.03", "64kb", "16.0"),
-        ("595.58.03", "default", "15.7"),
-        ("595.58.03", "64kb", "15.7"),
-        ("595.45.04", "default", "16.0"),
-        ("595.45.04", "64kb", "16.0"),
-        ("595.45.04", "default", "15.7"),
-        ("595.45.04", "64kb", "15.7"),
-        ("590.48.01", "default", "15.7"),
-        ("590.48.01", "64kb", "15.7"),
-        ("580.126.20", "default", "15.7"),
-        ("580.126.20", "64kb", "15.7"),
-        ("580.126.16", "default", "15.7"),
-        ("580.126.16", "64kb", "15.7"),
-        ("580.126.09", "default", "15.7"),
-        ("580.126.09", "64kb", "15.7"),
-        ("580.105.08", "default", "15.7"),
-        ("580.105.08", "64kb", "15.7"),
-        ("580.95.05", "default", "15.7"),
-        ("580.95.05", "64kb", "15.7"),
-        ("580.82.07", "default", "15.7"),
-        ("580.82.07", "64kb", "15.7"),
-        ("575.57.08", "default", "15.7"),
-        ("575.57.08", "64kb", "15.7"),
-        ("570.211.01", "default", "15.7"),
-        ("570.211.01", "64kb", "15.7"),
-        ("570.195.03", "default", "15.7"),
-        ("570.195.03", "64kb", "15.7"),
-        ("550.163.01", "default", "15.7"),
-        ("550.163.01", "64kb", "15.7"),
+    for driver_branch, kernel_flavor, os_ver in (
+        ("595", "default", "16.0"),
+        ("595", "64kb", "16.0"),
+        ("595", "default", "15.7"),
+        ("595", "64kb", "15.7"),
+        ("590", "default", "15.7"),
+        ("590", "64kb", "15.7"),
+        ("580", "default", "15.7"),
+        ("580", "64kb", "15.7"),
+        ("575", "default", "15.7"),
+        ("575", "64kb", "15.7"),
+        ("570", "default", "15.7"),
+        ("570", "64kb", "15.7"),
+        ("550", "default", "15.7"),
+        ("550", "64kb", "15.7"),
     )
 ]
 
