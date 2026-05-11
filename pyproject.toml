@@ -197,7 +197,7 @@ markers = [
     'python_3.14-micro',
     'python_3.6',
     'registry_2.8',
-    'registry_3.0',
+    'registry_3.1',
     'registry_latest',
     'rmt-server_2',
     'ruby_2.5',
