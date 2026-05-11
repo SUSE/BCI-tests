@@ -920,7 +920,7 @@ _distribution_version = "latest"
 if OS_VERSION in ("15.7",):
     _distribution_version = "2.8"
 elif OS_VERSION in ("16.0",):
-    _distribution_version = "3.0"
+    _distribution_version = "3.1"
 
 DISTRIBUTION_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/registry:{_distribution_version}",
