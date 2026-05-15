@@ -45,6 +45,7 @@ from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
+from bci_tester.data import NANO_CONTAINER
 from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
@@ -56,7 +57,7 @@ from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.util import get_repos_from_connection
 from bci_tester.util import is_spr
 
-CONTAINER_IMAGES = ALL_CONTAINERS
+CONTAINER_IMAGES = [x for x in ALL_CONTAINERS if x != NANO_CONTAINER]
 
 
 #: Go file to perform a GET request to suse.com and that panics if the request
@@ -247,7 +248,7 @@ def test_opensuse_product_flavor(container):
     [
         c
         for c in ALL_CONTAINERS
-        if c not in (BUSYBOX_CONTAINER, DISTRIBUTION_CONTAINER)
+        if c not in (BUSYBOX_CONTAINER, DISTRIBUTION_CONTAINER, NANO_CONTAINER)
     ],
     indirect=True,
 )
@@ -495,6 +496,7 @@ def test_zypper_not_present_in_containers_without_it(
             c
             not in PCP_CONTAINERS
             + [INIT_CONTAINER]
+            + [NANO_CONTAINER]
             + KIWI_CONTAINERS
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
@@ -531,6 +533,7 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
             c
             not in PCP_CONTAINERS
             + [INIT_CONTAINER]
+            + [NANO_CONTAINER]
             + KIWI_CONTAINERS
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
@@ -553,7 +556,11 @@ def test_udev_not_installed_in_all_containers_except_init(container):
 
 @pytest.mark.parametrize(
     "container",
-    [c for c in ALL_CONTAINERS if (c not in NVIDIA_CONTAINERS)],
+    [
+        c
+        for c in ALL_CONTAINERS
+        if c not in (*NVIDIA_CONTAINERS, NANO_CONTAINER)
+    ],
     indirect=True,
 )
 def test_no_compat_packages(container):
@@ -570,7 +577,10 @@ def test_no_compat_packages(container):
     [
         c
         for c in ALL_CONTAINERS
-        if c not in LTSS_BASE_CONTAINERS + LTSS_BASE_FIPS_CONTAINERS
+        if c
+        not in (
+            LTSS_BASE_CONTAINERS + LTSS_BASE_FIPS_CONTAINERS + [NANO_CONTAINER]
+        )
     ],
     indirect=True,
 )
@@ -843,8 +853,7 @@ _USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
 }
 
 
-@pytest.mark.parametrize("container", ALL_CONTAINERS, indirect=True)
-def test_uids_stable(container: ContainerData) -> None:
+def test_uids_stable(auto_container) -> None:
     """Check that every user in :file:`/etc/passwd` has a stable uid & gid as
     defined in ``_USERNAME_UID_GID_MAP``.
 
@@ -894,14 +903,16 @@ def test_uids_stable(container: ContainerData) -> None:
 
     # collect users who owns subdirectories in directories /var, /etc, /opt, /home
     user_list = (
-        container.connection.check_output(
+        auto_container.connection.check_output(
             "find /var /etc /opt /home -printf '%u \n' | sort -u"
         )
         .strip()
         .split("\n")
     )
-    passwd: str = container.connection.file("/etc/passwd").content_string
-    assert container.connection.user("root").exists, "root user does not exist"
+    passwd: str = auto_container.connection.file("/etc/passwd").content_string
+    assert auto_container.connection.user("root").exists, (
+        "root user does not exist"
+    )
 
     for userline in passwd.splitlines():
         tmp = userline.split(":")
@@ -909,7 +920,7 @@ def test_uids_stable(container: ContainerData) -> None:
         if name not in user_list:
             continue
 
-        expected_uid, expected_gid = uid_gid_map(container).get(
+        expected_uid, expected_gid = uid_gid_map(auto_container).get(
             name, (499, 499)
         )
 

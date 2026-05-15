@@ -544,6 +544,11 @@ MICRO_FIPS_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
+NANO_CONTAINER = create_BCI(
+    build_tag=f"{BCI_CONTAINER_PREFIX}/bci-nano:{OS_CONTAINER_TAG}",
+    bci_type=ImageType.OS,
+    custom_entry_point="/usr/bin/pause",
+)
 BUSYBOX_CONTAINER = create_BCI(
     build_tag=f"{BCI_CONTAINER_PREFIX}/bci-busybox:{OS_CONTAINER_TAG}",
     custom_entry_point="/bin/sh",
@@ -1443,6 +1448,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MICRO_CONTAINER,
     MICRO_FIPS_CONTAINER,
     MINIMAL_CONTAINER,
+    NANO_CONTAINER,
     *NGINX_CONTAINERS,
     *PYTHON_MICRO_CONTAINERS,
     *POSTFIX_CONTAINERS,
@@ -1493,6 +1499,7 @@ else:
             MICRO_CONTAINER,
             MICRO_FIPS_CONTAINER,
             MINIMAL_CONTAINER,
+            NANO_CONTAINER,
             PHP_8_APACHE,
             PHP_8_CLI,
             PHP_8_FPM,
