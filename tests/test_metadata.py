@@ -962,11 +962,12 @@ def _reg(registry: str, repository: str, otype: str, object: str) -> Any:
 @pytest.mark.parametrize(
     "container",
     [
+        *BASE_FIPS_CONTAINERS,
+        BASE_CONTAINER,
+        BUSYBOX_CONTAINER,
         MICRO_CONTAINER,
         MICRO_FIPS_CONTAINER,
-        BASE_CONTAINER,
-        *BASE_FIPS_CONTAINERS,
-        BUSYBOX_CONTAINER,
+        NANO_CONTAINER,
     ],
     indirect=["container"],
 )
