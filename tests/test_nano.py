@@ -1,5 +1,6 @@
 """This module contains the tests for the nano container, the image with only CA and timezone pre-installed."""
 
+import pytest
 from _pytest.config import Config
 from pytest_container import MultiStageBuild
 from pytest_container import get_extra_build_args
@@ -25,8 +26,13 @@ CMD ["/fetcher/main"]
 """
 
 
+@pytest.mark.parametrize(
+    "container",
+    CONTAINER_IMAGES,
+    indirect=True,
+)
 def test_nano_certificates(
-    host, tmp_path, container_runtime, pytestconfig: Config
+    container, host, tmp_path, container_runtime, pytestconfig: Config
 ):
     """This is a multistage container build, verifying that the certificates are
     correctly set up in the containers.
