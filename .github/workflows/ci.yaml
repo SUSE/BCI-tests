@@ -452,8 +452,9 @@ jobs:
           done
 
       - name: Run the tests for docker
-        run: python3 -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
+        run: python3 -m tox -e "$MATRIX_TOXENV" -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
+          MATRIX_TOXENV: ${{ matrix.toxenv }}
           CONTAINER_RUNTIME: docker
           OS_VERSION: ${{ matrix.os_version }}
           TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
@@ -461,8 +462,9 @@ jobs:
 
       - name: Run tests as root for podman
         run: |
-          sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS -H $(type -p python3) -m tox -e ${{ matrix.toxenv }} -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
+          sudo --preserve-env=CONTAINER_RUNTIME,OS_VERSION,TARGET,PULL_ALWAYS,MATRIX_TOXENV -H $(type -p python3) -m tox -e "$MATRIX_TOXENV" -- -n 3 --reruns 1 --durations=25 --durations-min=600.0 --pytest-container-log-level=debug
         env:
+          MATRIX_TOXENV: ${{ matrix.toxenv }}
           CONTAINER_RUNTIME: podman
           OS_VERSION: ${{ matrix.os_version }}
           TARGET: ${{ matrix.testing_target != '' && matrix.testing_target || 'obs' }}
