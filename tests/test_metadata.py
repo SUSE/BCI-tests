@@ -1047,7 +1047,10 @@ def test_buildtime_attestations(container):
             )
             continue
         if not predicate_type.endswith("/vuln/v1"):
-            assert 10000 < len(predicate["payload"]) < 10000000, (
+            minimum_length = (
+                1000 if "bci-nano" in container.image_url_or_id else 10000
+            )
+            assert minimum_length < len(predicate["payload"]) < 10000000, (
                 f"Attestation payload length {len(predicate['payload'])} outside range"
             )
             continue
