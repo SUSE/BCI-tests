@@ -163,6 +163,7 @@ markers = [
     'mariadb-client_latest',
     'nodejs_22',
     'nodejs_24',
+    'nodejs_24-micro',
     'openjdk_11',
     'openjdk_17',
     'openjdk_21',

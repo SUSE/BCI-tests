@@ -75,7 +75,8 @@ from bci_tester.data import MICRO_FIPS_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
 from bci_tester.data import NANO_CONTAINER
 from bci_tester.data import NGINX_CONTAINERS
-from bci_tester.data import NODEJS_CONTAINERS
+from bci_tester.data import NODEJS_BASE_CONTAINERS
+from bci_tester.data import NODEJS_MICRO_CONTAINERS
 from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
@@ -213,7 +214,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (c, "xorg-client", ImageType.APPLICATION)
         for c in KIOSK_XORG_CLIENT_CONTAINERS
     ]
-    + [(c, "nodejs", ImageType.LANGUAGE_STACK) for c in NODEJS_CONTAINERS]
+    + [
+        (c, "nodejs", ImageType.LANGUAGE_STACK)
+        for c in NODEJS_BASE_CONTAINERS + NODEJS_MICRO_CONTAINERS
+    ]
     + [
         (c, "python", ImageType.LANGUAGE_STACK)
         for c in PYTHON_CONTAINERS + PYTHON_MICRO_CONTAINERS

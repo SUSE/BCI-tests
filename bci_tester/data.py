@@ -639,13 +639,23 @@ OPENJDK_DEVEL_CONTAINERS = [
     OPENJDK_DEVEL_25_CONTAINER,
 ]
 
-NODEJS_CONTAINERS = [
+NODEJS_BASE_CONTAINERS = [
     create_BCI(
         build_tag=f"bci/nodejs:{node_version}",
         available_versions=available_versions,
     )
     for node_version, available_versions in (
         (22, ("15.7", "16.0")),
+        (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
+    )
+]
+
+NODEJS_MICRO_CONTAINERS = [
+    create_BCI(
+        build_tag=f"bci/nodejs:{node_version}-micro",
+        available_versions=available_versions,
+    )
+    for node_version, available_versions in (
         (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
     )
 ]
@@ -1390,7 +1400,7 @@ CONTAINERS_WITH_ZYPPER = (
     + KIWI_CONTAINERS
     + LTSS_BASE_CONTAINERS
     + LTSS_BASE_FIPS_CONTAINERS
-    + NODEJS_CONTAINERS
+    + NODEJS_BASE_CONTAINERS
     + OPENJDK_CONTAINERS
     + OPENJDK_DEVEL_CONTAINERS
     + PCP_CONTAINERS
@@ -1450,6 +1460,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,
     NANO_CONTAINER,
     *NGINX_CONTAINERS,
+    *NODEJS_MICRO_CONTAINERS,
     *PYTHON_MICRO_CONTAINERS,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
@@ -1524,7 +1535,8 @@ else:
         + MARIADB_CLIENT_CONTAINERS
         + MARIADB_CONTAINERS
         + NGINX_CONTAINERS
-        + NODEJS_CONTAINERS
+        + NODEJS_BASE_CONTAINERS
+        + NODEJS_MICRO_CONTAINERS
         + OPENJDK_CONTAINERS
         + OPENJDK_DEVEL_CONTAINERS
         + PCP_CONTAINERS
