@@ -7,9 +7,10 @@ from pytest_container import GitRepositoryBuild
 from pytest_container.container import ContainerData
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import NODEJS_CONTAINERS
+from bci_tester.data import NODEJS_BASE_CONTAINERS
+from bci_tester.data import NODEJS_MICRO_CONTAINERS
 
-CONTAINER_IMAGES = NODEJS_CONTAINERS
+CONTAINER_IMAGES = NODEJS_BASE_CONTAINERS + NODEJS_MICRO_CONTAINERS
 
 
 def test_node_version(auto_container):
@@ -24,6 +25,11 @@ def test_node_version(auto_container):
     )
 
 
+@pytest.mark.parametrize(
+    "container_per_test",
+    NODEJS_BASE_CONTAINERS,
+    indirect=["container_per_test"],
+)
 @pytest.mark.parametrize(
     "container_git_clone",
     [
@@ -82,7 +88,7 @@ def test_node_version(auto_container):
     indirect=["container_git_clone"],
 )
 def test_popular_npm_repos(
-    auto_container_per_test: ContainerData,
+    container_per_test: ContainerData,
     container_git_clone: GitRepositoryBuild,
 ):
     """Try to build and run the tests of a few popular npm packages:
@@ -106,9 +112,7 @@ def test_popular_npm_repos(
          - :command:`npm install && npm run unit`
 
     """
-    out = auto_container_per_test.connection.run(
-        container_git_clone.test_command
-    )
+    out = container_per_test.connection.run(container_git_clone.test_command)
 
     # node.js failures are huge and not readable if using check_output
     # assert the exit code only for a clean assert output
