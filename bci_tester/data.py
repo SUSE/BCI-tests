@@ -562,7 +562,7 @@ GOLANG_CONTAINERS = (
         create_BCI(
             build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
             extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
-            available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+            available_versions=[*_DEFAULT_NONBASE_SLE_VERSIONS, "16.1"],
         )
         for golang_version, stability in (
             ("oldstable-openssl", "oldstable"),
@@ -866,7 +866,7 @@ PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
 MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
 _MARIADB_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
-    ("11.8", ("15.7",)),
+    ("11.8", ("15.7", "16.0", "16.1")),
     ("latest", ("tumbleweed",)),
 )
 
@@ -934,7 +934,7 @@ POSTGRESQL_CONTAINERS = [
 _distribution_version = "latest"
 if OS_VERSION in ("15.7",):
     _distribution_version = "2.8"
-elif OS_VERSION in ("16.0",):
+elif OS_VERSION in ("16.0", "16.1"):
     _distribution_version = "3.1"
 
 DISTRIBUTION_CONTAINER = create_BCI(
@@ -942,12 +942,6 @@ DISTRIBUTION_CONTAINER = create_BCI(
     bci_type=ImageType.APPLICATION,
     forwarded_ports=[PortForwarding(container_port=5000)],
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
-    # FIXME: https://github.com/SUSE/BCI-tests/issues/647, Default timeout is 4 minutes
-    healthcheck_timeout=(
-        timedelta(minutes=8)
-        if LOCALHOST.system_info.arch == "ppc64le"
-        else None
-    ),
 )
 
 if OS_VERSION in (
@@ -955,10 +949,10 @@ if OS_VERSION in (
     "15.7",
 ):
     _git_app_version = "2.51"
+elif OS_VERSION in ("16.1",):
+    _git_app_version = "2.53"
 elif OS_VERSION in ("16.0",):
     _git_app_version = "2.51"
-elif OS_VERSION in ("15.5", "15.4"):
-    _git_app_version = "2.35"
 else:
     _git_app_version = "latest"
 
@@ -967,10 +961,15 @@ GIT_CONTAINER = create_BCI(
     bci_type=ImageType.APPLICATION,
 )
 
-_HELM_APP_VERSION = "latest" if OS_VERSION == "tumbleweed" else "3"
+if OS_VERSION in ("15.7", "16.0"):
+    _helm_app_version = "3"
+elif OS_VERSION in ("16.1",):
+    _helm_app_version = "4"
+else:
+    _helm_app_version = "latest"
 
 HELM_CONTAINER = create_BCI(
-    build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_HELM_APP_VERSION}",
+    build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_helm_app_version}",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
 )
@@ -994,7 +993,7 @@ NGINX_CONTAINERS = [
     for nginx_ver, os_versions in (
         ("latest", ("tumbleweed",)),
         ("1.21", ("15.7",)),
-        ("1.27", ("16.0",)),
+        ("1.27", ("16.0", "16.1")),
     )
 ]
 
