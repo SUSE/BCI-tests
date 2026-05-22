@@ -668,7 +668,16 @@ AMD_CONTAINERS = [
         available_versions=[f"{os_ver}-third-party"],
         custom_entry_point="/bin/sh",
     )
-    for driver_ver, os_ver in (("7.0.3", "15.7"),)
+    for driver_ver, os_ver in (
+        ("31.30", "16.0"),
+        ("31.20", "16.0"),
+        ("31.10", "16.0"),
+        ("31.30", "15.7"),
+        ("31.20", "15.7"),
+        ("31.10", "15.7"),
+        ("30.30.3", "15.7"),
+        ("30.20.1", "15.7"),
+    )
 ]
 
 NVIDIA_CONTAINERS = [
