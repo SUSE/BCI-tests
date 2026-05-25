@@ -641,7 +641,7 @@ def test_support_end_in_future(
                 support_end_label, "%Y-%m-%d"
             )
         assert datetime.datetime.now() < support_end, (
-            f"container out of {support_end}"
+            f"container '{container.image_url_or_id}' out of support: {support_end}"
         )
 
 
