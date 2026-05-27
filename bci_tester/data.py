@@ -53,9 +53,9 @@ ALLOWED_BASE_OS_VERSIONS = (
 # Allowed os versions for Language and Application containers
 ALLOWED_NONBASE_OS_VERSIONS = (
     "15.6",
-    "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-spr1.0",
     "15.7-spr1.2",
     "15.7-third-party",
     "16.0",
@@ -69,6 +69,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
 ALLOWED_BCI_REPO_OS_VERSIONS = (
     "15.7",
     "15.7-spr",
+    "15.7-spr1.0",
     "15.7-spr1.2",
     "16.0",
     "16.1",
@@ -93,9 +94,9 @@ RELEASED_SLE_VERSIONS = (
     "15.4",
     "15.5",
     "15.6",
-    "15.6-spr",
     "15.7",
     "15.7-spr",
+    "15.7-spr1.0",
     "15.7-spr1.2",
     "15.7-third-party",
     "16.0",
@@ -1338,8 +1339,8 @@ SPR_CONTAINERS = [
     for os_version, service in chain(
         product(
             (
-                "15.6-spr",
                 "15.7-spr",
+                "15.7-spr1.0",
                 "15.7-spr1.2",
             ),
             (
@@ -1350,14 +1351,6 @@ SPR_CONTAINERS = [
                 "registry",
                 "registryctl",
                 "trivy-adapter",
-            ),
-        ),
-        product(
-            ("15.6-spr",),
-            (
-                "db",
-                "nginx",
-                "valkey",
             ),
         ),
     )
