@@ -397,6 +397,10 @@ def test_icainfo_binary(container_per_test: ContainerData) -> None:
     container_per_test.connection.check_output("icastats -S")
 
 
+@pytest.mark.xfail(
+    OS_VERSION == "tumbleweed",
+    reason="mozilla-nss is broken (boo#1266391)",
+)
 @pytest.mark.parametrize(
     "container_per_test", FIPS_TESTER_IMAGES, indirect=True
 )
