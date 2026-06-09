@@ -502,16 +502,15 @@ def test_general_labels(
             ImageType.SAC_APPLICATION,
         ):
             assert labels["com.suse.eula"] == "sle-eula"
-        elif container_name in (
-            "amd-driver",
-            "nvidia-driver",
-        ):
+        elif container_name in ("amd-driver",):
             assert labels["com.suse.eula"] == "sle-beta"
         else:
             assert labels["com.suse.eula"] == (
                 "sle-beta" if OS_VERSION in ("16.1",) else "sle-bci"
             )
-            if container_name not in (
+            if container_name in ("nvidia-driver",):
+                assert "NVIDIA Driver" in labels[f"{prefix}.title"]
+            elif container_name not in (
                 "dotnet.aspnet",
                 "dotnet.runtime",
                 "dotnet.sdk",
