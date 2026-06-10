@@ -957,3 +957,22 @@ def test_uids_stable(auto_container) -> None:
         assert gid == expected_gid, (
             f"Expected user {name} to have gid {expected_gid} but got {gid}"
         )
+
+
+@pytest.mark.skipif(
+    OS_VERSION in ("15.7", "16.0"), reason="we focus only on 16.1+"
+)
+def test_no_transient_logfiles(auto_container):
+    """
+    Ensure that no transient state files are leftover in the container from
+    the build process.
+    """
+
+    for f in (
+        "/var/log/suseconnect.log",
+        "/var/log/zypper.log",
+        "/var/log/zypp/history",
+    ):
+        assert not auto_container.connection.file(f).exists, (
+            f"Transient log file {f} should be absent but it exists"
+        )
