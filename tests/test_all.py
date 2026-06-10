@@ -926,3 +926,15 @@ def test_uids_stable(auto_container) -> None:
         assert gid == expected_gid, (
             f"Expected user {name} to have gid {expected_gid} but got {gid}"
         )
+
+
+def test_no_transient_logfiles(auto_container):
+    """
+    Ensure that no transient state files are leftover in the container from
+    the build process.
+    """
+    assert not auto_container.connection.file(
+        "/var/log/suseconnect.log"
+    ).exists
+    assert not auto_container.connection.file("/var/log/zypper.log").exists
+    assert not auto_container.connection.file("/var/log/zypp/history").exists
