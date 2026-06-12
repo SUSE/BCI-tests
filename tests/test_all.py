@@ -60,17 +60,49 @@ from bci_tester.util import is_spr
 CONTAINER_IMAGES = [x for x in ALL_CONTAINERS if x != NANO_CONTAINER]
 
 
-#: Go file to perform a GET request to suse.com and that panics if the request
-#: fails
-FETCH_SUSE_DOT_COM = """package main
+# Go file to perform GET requests and check if 3 out of 5 requests succeed.
+# The goal is to check TLS/SSL connections and not if the services are online.
+GO_TLS_TEST_FILE = """package main
 
-import "net/http"
+import (
+    "fmt"
+    "net/http"
+    "os"
+    "time"
+)
 
 func main() {
-        _, err := http.Get("https://suse.com/")
-        if err != nil {
-                panic(err)
+        urls := []string{
+            "https://suse.com",
+            "https://google.com",
+            "https://cloudflare.com",
+            "https://github.com",
+            "https://letsencrypt.org",
         }
+
+        client := &http.Client{
+            Timeout: 15 * time.Second,
+        }
+
+        successes := 0
+
+        for _, url := range urls {
+            resp, err := client.Get(url)
+            if err == nil {
+                resp.Body.Close()
+                successes++
+            } else {
+                fmt.Printf("Failed to fetch '%s' due to '%s'\\n", url, err.Error())
+            }
+        }
+
+        if successes >= 3 {
+            fmt.Printf("PASS: %d/%d sites\\n", successes, len(urls))
+            os.Exit(0)
+        }
+
+        fmt.Printf("FAIL: only %d/%d sites\\n", successes, len(urls))
+        os.Exit(1)
 }
 """
 
@@ -623,7 +655,7 @@ def test_certificates_are_present(
     correctly set up in the containers.
 
     In the first step, we build a go binary from
-    :py:const:`FETCH_SUSE_DOT_COM` in the golang container. We copy the
+    :py:const:`GO_TLS_TEST_FILE` in the golang container. We copy the
     resulting binary into the container under test and execute it in that
     container.
 
@@ -641,7 +673,7 @@ def test_certificates_are_present(
     )
 
     with open(tmp_path / "main.go", "w", encoding="utf-8") as main_go:
-        main_go.write(FETCH_SUSE_DOT_COM)
+        main_go.write(GO_TLS_TEST_FILE)
 
     # FIXME: ugly duplication of pytest_container internals :-/
     # see: https://github.com/dcermak/pytest_container/issues/149
