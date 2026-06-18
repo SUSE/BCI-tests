@@ -130,6 +130,7 @@ jobs:
         os_version:
           - 15.7
           - "16.0"
+          - "16.1"
           - "tumbleweed"
         include:
           - toxenv: fips
