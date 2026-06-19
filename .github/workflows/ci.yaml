@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install necessary software
         run: |
           set -e
@@ -36,7 +36,7 @@ jobs:
       matrix: ${{ steps.setmatrix.outputs.matrix }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: get the current PR
         uses: 8BitJonny/gh-get-current-pr@4.0.0
@@ -84,7 +84,7 @@ jobs:
       image: registry.suse.com/bci/python:${{ matrix.python_version }}
     steps:
       - name: checkout source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install tox
         run: |
           python3 --version
@@ -99,7 +99,7 @@ jobs:
     name: Build documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -111,7 +111,7 @@ jobs:
     name: Lint source code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -232,7 +232,7 @@ jobs:
       - name: Uninstall conflicting packages
         run: sudo apt-get -y remove python3-chardet
       - name: checkout source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
