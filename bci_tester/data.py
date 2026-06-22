@@ -77,10 +77,10 @@ ALLOWED_BCI_REPO_OS_VERSIONS = (
 )
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.0")
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.0", "16.1")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "tumbleweed")
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "16.1", "tumbleweed")
 
 # SLFO 16.0+ Test Language and Application containers by default for these versions
 _DEFAULT_NONBASE_SLFOPLUS_VERSIONS = ("16.0", "16.1", "tumbleweed")
