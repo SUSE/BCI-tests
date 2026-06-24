@@ -175,9 +175,9 @@ SPR_CONFIG = {
 SPR_CONTAINERS_FOR_POD = []
 
 for img, conf in SPR_CONFIG.items():
-    # SPR 1.1.x (onwards) uses BCI images for db, nginx and valkey.
-    # In that case SPR_CONFIG.url points to a suitable BCI image.
-    #
+    # Some SPR services (db/nginx/valkey) use public BCI images; for those entries
+    # SPR_CONFIG provides an explicit `url`. All other services fall back to the
+    # private-registry images built as part of SPR.
 
     url = conf.get(
         "url",
