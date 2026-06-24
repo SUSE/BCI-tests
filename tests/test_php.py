@@ -197,7 +197,7 @@ def test_install_multiple_extensions_via_script(
         "fileinfo",
         "dom",
     ]
-    if OS_VERSION not in ("tumbleweed",):
+    if OS_VERSION not in ("tumbleweed", "16.1"):
         extensions.append("opcache")
 
     auto_container_per_test.connection.run_expect(
