@@ -19,7 +19,6 @@ from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 
 from bci_tester.data import BASEURL
-from bci_tester.data import OS_VERSION
 from bci_tester.util import get_repository_name
 from bci_tester.util import get_spr_namespace
 from bci_tester.util import is_spr
@@ -176,19 +175,9 @@ SPR_CONFIG = {
 SPR_CONTAINERS_FOR_POD = []
 
 for img, conf in SPR_CONFIG.items():
-    # 15.7-spr means SPR 1.1.x (onwards) where we use BCI images for db, nginx and valkey.
-    # In that case SPR_CONFIG.url points to a suitable BCI image.
-    #
-    # 15.6-spr means SPR 1.0.x where we built extra images for db, nginx, and valkey.
-    # In that case SPR_CONFIG.url is dropped so that the default url pointing to
-    # the private-registry images is used.
-    # For the SPR's postgres (db) image the volume containing the initial DB scheme is dropped
-    # because the image already includes it.
-
-    if OS_VERSION == "15.6-spr":
-        conf.pop("url", None)
-        if img == "db":
-            conf["volumes"].pop()
+    # Some SPR services (db/nginx/valkey) use public BCI images; for those entries
+    # SPR_CONFIG provides an explicit `url`. All other services fall back to the
+    # private-registry images built as part of SPR.
 
     url = conf.get(
         "url",
