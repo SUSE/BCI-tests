@@ -51,7 +51,6 @@ def test_image_content(container_per_test: ContainerData):
         files += [
             "/opt/open/nvidia-drm.ko.zst",
             "/opt/open/nvidia-modeset.ko.zst",
-            "/opt/open/nvidia-peermem.ko.zst",
             "/opt/open/nvidia-uvm.ko.zst",
             "/opt/open/nvidia.ko.zst",
             "/opt/proprietary/nvidia-drm.ko.zst",
