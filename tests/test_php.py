@@ -30,7 +30,7 @@ CONTAINER_IMAGES_WITH_FLAVORS = [
     for t in ((PHP_8_APACHE, "apache"), (PHP_8_FPM, "fpm"), (PHP_8_CLI, "cli"))
 ]
 _PHP_MAJOR_VERSION = 8
-_MEDIAWIKI_VERSION = "1.43.1"
+_MEDIAWIKI_VERSION = "1.43.8"
 _MEDIAWIKI_MAJOR_VERSION = ".".join(_MEDIAWIKI_VERSION.split(".")[:2])
 
 MEDIAWIKI_APACHE_CONTAINER = DerivedContainer(
@@ -197,7 +197,7 @@ def test_install_multiple_extensions_via_script(
         "fileinfo",
         "dom",
     ]
-    if OS_VERSION not in ("tumbleweed",):
+    if OS_VERSION not in ("tumbleweed", "16.1"):
         extensions.append("opcache")
 
     auto_container_per_test.connection.run_expect(
