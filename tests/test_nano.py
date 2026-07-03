@@ -1,13 +1,17 @@
 """This module contains the tests for the nano container, the image with only CA and timezone pre-installed."""
 
+from typing import Dict
+
 import pytest
 from _pytest.config import Config
 from pytest_container import MultiStageBuild
 from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container.container import ImageFormat
+from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import NANO_CONTAINER
+from bci_tester.data import OS_VERSION
 from bci_tester.runtime_choice import PODMAN_SELECTED
 
 CONTAINER_IMAGES = (NANO_CONTAINER,)
@@ -84,3 +88,45 @@ func main() {
         ).strip()
         == ""
     )
+
+
+@pytest.mark.skipif(
+    not PODMAN_SELECTED,
+    reason="docker size reporting is dependent on underlying filesystem",
+)
+@pytest.mark.parametrize("container", [NANO_CONTAINER], indirect=True)
+def test_nano_image_size(container, container_runtime):
+    """Check that the size of the nano container is below the specified limits"""
+
+    if OS_VERSION in ("tumbleweed",):
+        size: Dict[str, int] = {
+            "x86_64": 8,
+            "aarch64": 9,
+            "ppc64le": 9,
+            "s390x": 7,
+        }
+    elif OS_VERSION in ("16.1",):
+        size: Dict[str, int] = {
+            "x86_64": 7,
+            "aarch64": 7,
+            "ppc64le": 7,
+            "s390x": 7,
+        }
+    elif OS_VERSION in ("16.0",):
+        size: Dict[str, int] = {
+            "x86_64": 7,
+            "aarch64": 7,
+            "ppc64le": 7,
+            "s390x": 7,
+        }
+    else:
+        size: Dict[str, int] = {
+            "x86_64": 9,
+            "aarch64": 9,
+            "ppc64le": 9,
+            "s390x": 7,
+        }
+    container_size = container_runtime.get_image_size(
+        container.image_url_or_id
+    ) // (1024 * 1024)
+    assert container_size <= size[LOCALHOST.system_info.arch]
