@@ -201,34 +201,6 @@ jobs:
             os_version: 15.7-third-party
           - toxenv: nvidia
             os_version: 16.0-third-party
-          - toxenv: all
-            os_version: "16.0"
-          - toxenv: base
-            os_version: "16.0"
-          - toxenv: minimal
-            os_version: "16.0"
-          - toxenv: metadata
-            os_version: "16.0"
-          - toxenv: kernel_module
-            os_version: "16.0"
-          - toxenv: kiwi
-            os_version: "16.0"
-          - toxenv: repository
-            os_version: "16.0"
-          - toxenv: all
-            os_version: "16.1"
-          - toxenv: base
-            os_version: "16.1"
-          - toxenv: minimal
-            os_version: "16.1"
-          - toxenv: metadata
-            os_version: "16.1"
-          - toxenv: kernel_module
-            os_version: "16.1"
-          - toxenv: kiwi
-            os_version: "16.1"
-          - toxenv: repository
-            os_version: "16.1"
           - toxenv: base
             testing_target: factory-totest
             os_version: "tumbleweed"
