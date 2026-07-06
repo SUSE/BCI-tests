@@ -71,17 +71,24 @@ def test_micro_image_size(container, container_runtime):
 
     if OS_VERSION in ("tumbleweed",):
         size: Dict[str, int] = {
-            "x86_64": 30,
-            "aarch64": 39,
-            "ppc64le": 38,
+            "x86_64": 22,
+            "aarch64": 30,
+            "ppc64le": 34,
             "s390x": 24,
         }
-    elif OS_VERSION in ("16.0",):
+    elif OS_VERSION in ("16.1",):
         size: Dict[str, int] = {
-            "x86_64": 24,
+            "x86_64": 25,
             "aarch64": 27,
             "ppc64le": 30,
             "s390x": 23,
+        }
+    elif OS_VERSION in ("16.0",):
+        size: Dict[str, int] = {
+            "x86_64": 21,
+            "aarch64": 21,
+            "ppc64le": 24,
+            "s390x": 19,
         }
     elif OS_VERSION in ("15.7",):
         size: Dict[str, int] = {
