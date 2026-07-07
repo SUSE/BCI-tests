@@ -32,6 +32,7 @@ from bci_tester.data import BASE_CONTAINER
 from bci_tester.data import BCI_DEVEL_REPO
 from bci_tester.data import BCI_REPO_NAME
 from bci_tester.data import BUSYBOX_CONTAINER
+from bci_tester.data import CONTAINERS_WITHOUT_SHELL
 from bci_tester.data import CONTAINERS_WITHOUT_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
 from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
@@ -57,7 +58,9 @@ from bci_tester.data import ZYPP_CREDENTIALS_DIR
 from bci_tester.util import get_repos_from_connection
 from bci_tester.util import is_spr
 
-CONTAINER_IMAGES = [x for x in ALL_CONTAINERS if x != NANO_CONTAINER]
+CONTAINER_IMAGES = [
+    x for x in ALL_CONTAINERS if x not in CONTAINERS_WITHOUT_SHELL
+]
 
 
 #: Go file to perform a GET request to suse.com and that panics if the request
