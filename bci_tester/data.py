@@ -990,7 +990,7 @@ COSIGN_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/cosign:{_COSIGN_VERSION}",
         bci_type=ImageType.APPLICATION,
-        custom_entry_point="/bin/sh",
+        custom_entry_point="/usr/bin/pause",
     )
 ]
 
@@ -1450,7 +1450,6 @@ CONTAINERS_WITHOUT_ZYPPER = [
     GIT_CONTAINER,
     *GRAFANA_CONTAINERS,
     HELM_CONTAINER,
-    *COSIGN_CONTAINERS,
     *KEA_CONTAINERS,
     *KIOSK_FIREFOX_CONTAINERS,
     *KIOSK_XORG_CONTAINERS,
@@ -1460,7 +1459,6 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MICRO_CONTAINER,
     MICRO_FIPS_CONTAINER,
     MINIMAL_CONTAINER,
-    NANO_CONTAINER,
     *NGINX_CONTAINERS,
     *NODEJS_MICRO_CONTAINERS,
     *PYTHON_MICRO_CONTAINERS,
@@ -1480,17 +1478,34 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *NVIDIA_CONTAINERS,
 ]
 
+CONTAINERS_WITHOUT_SHELL = [NANO_CONTAINER, *COSIGN_CONTAINERS]
+
 
 # can't use sets here, because the list contents are mutable :-(
 for ctr_with_zypp in CONTAINERS_WITH_ZYPPER:
+    assert ctr_with_zypp not in CONTAINERS_WITHOUT_SHELL, (
+        f"Container '{ctr_with_zypp.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_SHELL"
+    )
     assert ctr_with_zypp not in CONTAINERS_WITHOUT_ZYPPER, (
         f"Container '{ctr_with_zypp.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_ZYPPER"
     )
 
 for ctr_without_zypp in CONTAINERS_WITHOUT_ZYPPER:
+    assert ctr_without_zypp not in CONTAINERS_WITHOUT_SHELL, (
+        f"Container '{ctr_without_zypp.id}' is both in CONTAINERS_WITHOUT_ZYPPER and CONTAINERS_WITHOUT_SHELL"
+    )
     assert ctr_without_zypp not in CONTAINERS_WITH_ZYPPER, (
         f"Container '{ctr_without_zypp.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_ZYPPER"
     )
+
+for ctr_without_shell in CONTAINERS_WITHOUT_SHELL:
+    assert ctr_without_shell not in CONTAINERS_WITH_ZYPPER, (
+        f"Container '{ctr_without_shell.id}' is both in CONTAINERS_WITH_ZYPPER and CONTAINERS_WITHOUT_SHELL"
+    )
+    assert ctr_without_shell not in CONTAINERS_WITHOUT_ZYPPER, (
+        f"Container '{ctr_without_shell.id}' is both in CONTAINERS_WITHOUT_ZYPPER and CONTAINERS_WITHOUT_SHELL"
+    )
+
 
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
@@ -1555,7 +1570,11 @@ else:
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS
 
 #: Containers pulled from registry.suse.de
-ALL_CONTAINERS = CONTAINERS_WITH_ZYPPER + CONTAINERS_WITHOUT_ZYPPER
+ALL_CONTAINERS = (
+    CONTAINERS_WITH_ZYPPER
+    + CONTAINERS_WITHOUT_ZYPPER
+    + CONTAINERS_WITHOUT_SHELL
+)
 
 
 if __name__ == "__main__":
