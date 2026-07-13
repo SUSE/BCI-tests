@@ -1034,7 +1034,7 @@ KEA_CONTAINERS = [
     for kea_ver, os_versions in (
         ("2.6", ("15.7",)),
         ("3.0", ("16.0", "16.1")),
-        ("3.0", ("tumbleweed",)),
+        ("latest", ("tumbleweed",)),
     )
 ]
 
@@ -1160,7 +1160,10 @@ GRAFANA_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3000)],
         available_versions=versions,
     )
-    for tag, versions in (("11", ("15.7", "tumbleweed")),)
+    for tag, versions in (
+        ("11", ("15.7",)),
+        ("latest", ("tumbleweed",)),
+    )
 ]
 
 STUNNEL_CONTAINER = create_BCI(
