@@ -19,7 +19,7 @@ markers = [
     'alertmanager_0.28',
     'alertmanager_latest',
     'amdgpu-driver_sles-15.7-30.20.1',
-    'amdgpu-driver_sles-15.7-30.30.3',
+    'amdgpu-driver_sles-15.7-30.30.4',
     'amdgpu-driver_sles-15.7-31.10',
     'amdgpu-driver_sles-15.7-31.20',
     'amdgpu-driver_sles-15.7-31.30',
