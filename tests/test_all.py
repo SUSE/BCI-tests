@@ -251,7 +251,12 @@ def test_opensuse_product_flavor(container):
     [
         c
         for c in ALL_CONTAINERS
-        if c not in (BUSYBOX_CONTAINER, DISTRIBUTION_CONTAINER, NANO_CONTAINER)
+        if c
+        not in (
+            BUSYBOX_CONTAINER,
+            DISTRIBUTION_CONTAINER,
+            CONTAINERS_WITHOUT_SHELL,
+        )
     ],
     indirect=True,
 )
