@@ -25,10 +25,10 @@ RUN rpm --root /target -qa --qf '%{NAME} %{LICENSE}\\n' > /tmp/licenses.txt
 
 def test_busybox_provides_sh(auto_container):
     """Check that /bin/sh is coming from busybox and not from bash."""
-    assert (
-        "BusyBox"
-        in auto_container.connection.run_expect([0], "sh --help").stderr
-    )
+    ret = auto_container.connection.run_expect([0], "sh --help")
+    # until 1.37 usage it went to stderr, since 1.38 it goes to stdout
+    # https://github.com/vda-linux/busybox_mirror/commit/dbd14c4a42454b61a5474f6243865a6ec113e60b
+    assert "BusyBox" in ret.stdout or "BusyBox" in ret.stderr
 
 
 #: size limits of the micro image per architecture in MiB
