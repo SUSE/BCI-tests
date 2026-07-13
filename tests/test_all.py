@@ -46,7 +46,6 @@ from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
 from bci_tester.data import MICRO_CONTAINER
 from bci_tester.data import MINIMAL_CONTAINER
-from bci_tester.data import NANO_CONTAINER
 from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OS_PRETTY_NAME
 from bci_tester.data import OS_VERSION
@@ -251,7 +250,12 @@ def test_opensuse_product_flavor(container):
     [
         c
         for c in ALL_CONTAINERS
-        if c not in (BUSYBOX_CONTAINER, DISTRIBUTION_CONTAINER, NANO_CONTAINER)
+        if c
+        not in (
+            BUSYBOX_CONTAINER,
+            DISTRIBUTION_CONTAINER,
+            *CONTAINERS_WITHOUT_SHELL,
+        )
     ],
     indirect=True,
 )
@@ -499,7 +503,7 @@ def test_zypper_not_present_in_containers_without_it(
             c
             not in PCP_CONTAINERS
             + [INIT_CONTAINER]
-            + [NANO_CONTAINER]
+            + CONTAINERS_WITHOUT_SHELL
             + KIWI_CONTAINERS
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
@@ -536,7 +540,7 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
             c
             not in PCP_CONTAINERS
             + [INIT_CONTAINER]
-            + [NANO_CONTAINER]
+            + CONTAINERS_WITHOUT_SHELL
             + KIWI_CONTAINERS
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
@@ -559,7 +563,7 @@ def test_udev_not_installed_in_all_containers_except_init(container):
 
 @pytest.mark.parametrize(
     "container",
-    [c for c in ALL_CONTAINERS if c not in (NANO_CONTAINER,)],
+    [c for c in ALL_CONTAINERS if c not in CONTAINERS_WITHOUT_SHELL],
     indirect=True,
 )
 def test_no_compat_packages(container):
@@ -578,7 +582,9 @@ def test_no_compat_packages(container):
         for c in ALL_CONTAINERS
         if c
         not in (
-            LTSS_BASE_CONTAINERS + LTSS_BASE_FIPS_CONTAINERS + [NANO_CONTAINER]
+            LTSS_BASE_CONTAINERS
+            + LTSS_BASE_FIPS_CONTAINERS
+            + CONTAINERS_WITHOUT_SHELL
         )
     ],
     indirect=True,
