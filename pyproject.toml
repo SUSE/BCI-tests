@@ -156,6 +156,7 @@ markers = [
     'grafana_latest',
     'kea_2.6',
     'kea_3.0',
+    'kea_latest',
     'kiwi_9.24',
     'kiwi_10.2',
     'kiwi_latest',

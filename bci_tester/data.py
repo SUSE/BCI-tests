@@ -1034,7 +1034,7 @@ KEA_CONTAINERS = [
     for kea_ver, os_versions in (
         ("2.6", ("15.7",)),
         ("3.0", ("16.0", "16.1")),
-        ("3.0", ("tumbleweed",)),
+        ("latest", ("tumbleweed",)),
     )
 ]
 
