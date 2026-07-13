@@ -153,6 +153,7 @@ markers = [
     'golang_stable-openssl',
     'golang_unstable',
     'grafana_11',
+    'grafana_latest',
     'kea_2.6',
     'kea_3.0',
     'kiwi_9.24',
