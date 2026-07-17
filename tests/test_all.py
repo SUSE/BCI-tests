@@ -855,6 +855,7 @@ _USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
     "postfix": (51, 51),
     "keadhcp": (None, 486),
     "user": (1000, 1000),
+    "tss": (98, 98),
 }
 
 

@@ -955,6 +955,7 @@ DISTRIBUTION_CONTAINER = create_BCI(
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
 )
 
+_git_app_version = "latest"
 if OS_VERSION in (
     "15.6",
     "15.7",
@@ -964,20 +965,19 @@ elif OS_VERSION in ("16.1",):
     _git_app_version = "2.53"
 elif OS_VERSION in ("16.0",):
     _git_app_version = "2.51"
-else:
-    _git_app_version = "latest"
+
 
 GIT_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/git:{_git_app_version}",
     bci_type=ImageType.APPLICATION,
 )
 
+_helm_app_version = "latest"
 if OS_VERSION in ("15.7", "16.0"):
     _helm_app_version = "3"
 elif OS_VERSION in ("16.1",):
     _helm_app_version = "4"
-else:
-    _helm_app_version = "latest"
+
 
 HELM_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_helm_app_version}",
@@ -1278,19 +1278,25 @@ SAMBA_CONTAINERS = (
     + SAMBA_TOOLBOX_CONTAINERS
 )
 
+_kubevirt_version = "latest"
+if OS_VERSION in ("16.0",):
+    _kubevirt_version = "1.7"
+elif OS_VERSION in ("16.1",):
+    _kubevirt_version = "1.8"
+
 KUBEVIRT_CONTAINERS = [
     create_BCI(
         build_tag=(
-            f"{APP_CONTAINER_PREFIX}/virt-{service}:latest"
-            if os_version == "tumbleweed"
-            else f"suse/sles/16.0/virt-{service}:1.7"
+            f"suse/sles/{os_version}/virt-{service}:{_kubevirt_version}"
+            if os_version.startswith("16")
+            else f"{APP_CONTAINER_PREFIX}/virt-{service}:{_kubevirt_version}"
         ),
         bci_type=ImageType.APPLICATION,
         available_versions=[os_version],
-        custom_entry_point="/bin/bash",
+        custom_entry_point="/bin/sh",
     )
     for os_version, service in product(
-        ("16.0", "tumbleweed"),
+        ("16.0", "16.1", "tumbleweed"),
         (
             "api",
             "controller",
@@ -1304,10 +1310,16 @@ KUBEVIRT_CONTAINERS = [
     )
 ]
 
+_cdi_version = "latest"
+if OS_VERSION in ("16.0",):
+    _cdi_version = "1.64"
+elif OS_VERSION in ("16.1",):
+    _cdi_version = "1.65"
+
 KUBEVIRT_CDI_CONTAINERS = [
     create_BCI(
         build_tag=(
-            f"suse/sles/16.0/cdi-{service}:1.64"
+            f"suse/sles/{os_version}/cdi-{service}:{_cdi_version}"
             if os_version.startswith("16")
             else f"{APP_CONTAINER_PREFIX}/cdi-{service}:latest"
         ),
