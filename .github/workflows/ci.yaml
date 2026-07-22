@@ -38,15 +38,6 @@ jobs:
       - name: checkout source code
         uses: actions/checkout@v7
 
-      - name: get the current PR
-        uses: 8BitJonny/gh-get-current-pr@4.0.0
-        id: pr
-        with:
-          github-token: ${{ github.token }}
-          # Verbose setting SHA when using Pull_Request event trigger to fix #16
-          sha: ${{ github.event.pull_request.head.sha }}
-          filterOutClosed: true
-
       # jo is used only to generate matrix using json easily
       - name: Install necessary software
         run: sudo apt-get update && sudo apt install jo tox fish iproute2
@@ -65,7 +56,7 @@ jobs:
           echo "matrix=$stringified_matrix" >> $GITHUB_OUTPUT
         shell: fish {0}
         env:
-          PR_BODY: ${{ steps.pr.outputs.pr_body || '' }}
+          PR_BODY: ${{ github.event.pull_request.body || '' }}
 
   unit-tests:
     name: Unit tests
