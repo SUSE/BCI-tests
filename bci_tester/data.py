@@ -1279,9 +1279,10 @@ SAMBA_CONTAINERS = (
 )
 
 _kubevirt_version = "latest"
-if OS_VERSION in ("16.0",):
-    _kubevirt_version = "1.7"
-elif OS_VERSION in ("16.1",):
+if OS_VERSION in (
+    "16.0",
+    "16.1",
+):
     _kubevirt_version = "1.8"
 
 KUBEVIRT_CONTAINERS = [
@@ -1306,14 +1307,16 @@ KUBEVIRT_CONTAINERS = [
             "launcher",
             "operator",
             "pr-helper",
+            "synchronization-controller",
         ),
     )
 ]
 
 _cdi_version = "latest"
-if OS_VERSION in ("16.0",):
-    _cdi_version = "1.64"
-elif OS_VERSION in ("16.1",):
+if OS_VERSION in (
+    "16.0",
+    "16.1",
+):
     _cdi_version = "1.65"
 
 KUBEVIRT_CDI_CONTAINERS = [
@@ -1328,12 +1331,13 @@ KUBEVIRT_CDI_CONTAINERS = [
         custom_entry_point="/bin/bash",
     )
     for os_version, service in product(
-        ("16.0", "tumbleweed"),
+        ("16.0", "16.1", "tumbleweed"),
         (
             "apiserver",
             "cloner",
             "controller",
             "importer",
+            "operator",
             "uploadproxy",
             "uploadserver",
         ),
