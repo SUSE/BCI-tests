@@ -862,7 +862,6 @@ CONTAINER_389DS_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3389)],
     )
     for ver, os_ver in (
-        ("2.7", ("15.7",)),
         ("3.0", ("16.0",)),
         ("3.1", ("16.1",)),
         ("latest", ("tumbleweed",)),
@@ -943,9 +942,7 @@ POSTGRESQL_CONTAINERS = [
 
 
 _distribution_version = "latest"
-if OS_VERSION in ("15.7",):
-    _distribution_version = "2.8"
-elif OS_VERSION in ("16.0", "16.1"):
+if OS_VERSION in ("16.0", "16.1"):
     _distribution_version = "3.1"
 
 DISTRIBUTION_CONTAINER = create_BCI(
@@ -956,16 +953,10 @@ DISTRIBUTION_CONTAINER = create_BCI(
 )
 
 _git_app_version = "latest"
-if OS_VERSION in (
-    "15.6",
-    "15.7",
-):
-    _git_app_version = "2.51"
-elif OS_VERSION in ("16.1",):
+if OS_VERSION in ("16.1",):
     _git_app_version = "2.53"
 elif OS_VERSION in ("16.0",):
     _git_app_version = "2.51"
-
 
 GIT_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/git:{_git_app_version}",
@@ -973,11 +964,10 @@ GIT_CONTAINER = create_BCI(
 )
 
 _helm_app_version = "latest"
-if OS_VERSION in ("15.7", "16.0"):
+if OS_VERSION in ("16.0"):
     _helm_app_version = "3"
 elif OS_VERSION in ("16.1",):
     _helm_app_version = "4"
-
 
 HELM_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_helm_app_version}",
@@ -1003,7 +993,6 @@ NGINX_CONTAINERS = [
     )
     for nginx_ver, os_versions in (
         ("latest", ("tumbleweed",)),
-        ("1.21", ("15.7",)),
         ("1.27", ("16.0", "16.1")),
     )
 ]
@@ -1181,7 +1170,7 @@ VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in (
-        (("15.7", "16.0", "16.1"), "8.0"),
+        (("16.0", "16.1"), "8.0"),
         (("tumbleweed",), "latest"),
     )
 ]

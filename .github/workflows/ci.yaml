@@ -119,7 +119,6 @@ jobs:
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
         os_version:
-          - 15.7
           - "16.0"
           - "16.1"
           - "tumbleweed"
@@ -186,6 +185,64 @@ jobs:
             os_version: 15.6
           - toxenv: fips
             os_version: 15.6
+          - toxenv: all
+            os_version: 15.7
+          - toxenv: amd
+            os_version: 15.7
+          - toxenv: base
+            os_version: 15.7
+          - toxenv: busybox
+            os_version: 15.7
+          - toxenv: dotnet
+            os_version: 15.7
+          - toxenv: fips
+            os_version: 15.7
+          - toxenv: gcc
+            os_version: 15.7
+          - toxenv: go
+            os_version: 15.7
+          - toxenv: grafana
+            os_version: 15.7
+          - toxenv: init
+            os_version: 15.7
+          - toxenv: kernel_module
+            os_version: 15.7
+          - toxenv: kubectl
+            os_version: 15.7
+          - toxenv: mariadb
+            os_version: 15.7
+          - toxenv: metadata
+            os_version: 15.7
+          - toxenv: minimal
+            os_version: 15.7
+          - toxenv: multistage
+            os_version: 15.7
+          - toxenv: node
+            os_version: 15.7
+          - toxenv: nvidia
+            os_version: 15.7
+          - toxenv: openjdk
+            os_version: 15.7
+          - toxenv: openjdk_devel
+            os_version: 15.7
+          - toxenv: php
+            os_version: 15.7
+          - toxenv: postgres
+            os_version: 15.7
+          - toxenv: prometheus
+            os_version: 15.7
+          - toxenv: python
+            os_version: 15.7
+          - toxenv: repository
+            os_version: 15.7
+          - toxenv: ruby
+            os_version: 15.7
+          - toxenv: rust
+            os_version: 15.7
+          - toxenv: samba
+            os_version: 15.7
+          - toxenv: spack
+            os_version: 15.7
           - toxenv: amd
             os_version: 15.7-third-party
           - toxenv: nvidia
