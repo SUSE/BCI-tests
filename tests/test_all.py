@@ -851,7 +851,7 @@ _USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
     "postgres": (None, 486),
     "pcp": (496, 484),
     "ldap": (498, 498),
-    "systemd-coredump": (497, 1000),
+    "systemd-coredump": (497, 100),
     "postfix": (51, 51),
     "keadhcp": (None, 486),
     "user": (1000, 1000),
@@ -890,6 +890,7 @@ def test_uids_stable(auto_container) -> None:
             expected_map["pcp"] = [496, 498]
             expected_map["wwwrun"] = [498, 498]
             expected_map["pesign"] = [499, 499]
+            expected_map["systemd-coredump"] = [497, 1000]
 
         # Handle the 'kiosk/xorg' special case
         if (
