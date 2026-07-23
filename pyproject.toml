@@ -246,6 +246,7 @@ markers = [
     'samba-toolbox_4.21',
     'spack_0.23',
     'stunnel_5',
+    'tigervnc-x11vnc_1',
     'valkey_8.0',
     'valkey_latest',
     'virt-api_1.7',

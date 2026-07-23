@@ -59,6 +59,7 @@ from bci_tester.data import KEA_CONTAINERS
 from bci_tester.data import KERNEL_MODULE_CONTAINER
 from bci_tester.data import KIOSK_FIREFOX_CONTAINERS
 from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
+from bci_tester.data import KIOSK_X11VNC_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CLIENT_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
@@ -213,6 +214,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [
         (c, "xorg-client", ImageType.APPLICATION)
         for c in KIOSK_XORG_CLIENT_CONTAINERS
+    ]
+    + [
+        (c, "tigervnc-x11vnc", ImageType.APPLICATION)
+        for c in KIOSK_X11VNC_CONTAINERS
     ]
     + [
         (c, "nodejs", ImageType.LANGUAGE_STACK)
