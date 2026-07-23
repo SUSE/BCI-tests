@@ -950,6 +950,7 @@ DISTRIBUTION_CONTAINER = create_BCI(
     bci_type=ImageType.APPLICATION,
     forwarded_ports=[PortForwarding(container_port=5000)],
     volume_mounts=[ContainerVolume(container_path="/var/lib/docker-registry")],
+    available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
 )
 
 _git_app_version = "latest"
@@ -961,6 +962,7 @@ elif OS_VERSION in ("16.0",):
 GIT_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/git:{_git_app_version}",
     bci_type=ImageType.APPLICATION,
+    available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
 )
 
 _helm_app_version = "latest"
@@ -973,6 +975,7 @@ HELM_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/helm:{_helm_app_version}",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
+    available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
 )
 
 _COSIGN_VERSION: str = "latest" if OS_VERSION == "tumbleweed" else "3"
