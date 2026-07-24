@@ -39,6 +39,7 @@ from bci_tester.data import CONTAINERS_WITH_ZYPPER_AS_ROOT
 from bci_tester.data import DISTRIBUTION_CONTAINER
 from bci_tester.data import INIT_CONTAINER
 from bci_tester.data import KIOSK_PULSEAUDIO_CONTAINERS
+from bci_tester.data import KIOSK_X11VNC_CONTAINERS
 from bci_tester.data import KIOSK_XORG_CONTAINERS
 from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBEVIRT_CONTAINERS
@@ -507,6 +508,7 @@ def test_zypper_not_present_in_containers_without_it(
             + KIWI_CONTAINERS
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
+            + KIOSK_X11VNC_CONTAINERS
             + KUBEVIRT_CONTAINERS
             + AMD_CONTAINERS
             + NVIDIA_CONTAINERS
@@ -544,6 +546,7 @@ def test_systemd_not_installed_in_all_containers_except_init(container):
             + KIWI_CONTAINERS
             + KIOSK_PULSEAUDIO_CONTAINERS
             + KIOSK_XORG_CONTAINERS
+            + KIOSK_X11VNC_CONTAINERS
             + KUBEVIRT_CONTAINERS
         )
     ],
