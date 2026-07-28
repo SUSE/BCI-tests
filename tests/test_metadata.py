@@ -965,7 +965,8 @@ def _reg(registry: str, repository: str, otype: str, object: str) -> Any:
 
 
 @pytest.mark.skipif(
-    OS_VERSION not in ("15.7",), reason="Does not have buildtime attestations"
+    OS_VERSION not in ("15.7", "16.0"),
+    reason="Does not have buildtime attestations",
 )
 @pytest.mark.parametrize(
     "container",
