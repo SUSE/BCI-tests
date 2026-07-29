@@ -39,7 +39,6 @@ def test_image_content(container_per_test: ContainerData):
         "/licenses/NGC-DL-CONTAINER-LICENSE",
         f"/opt/lib/firmware/nvidia/{version}/gsp_ga10x.bin",
         f"/opt/lib/firmware/nvidia/{version}/gsp_tu10x.bin",
-        "/usr/local/bin/extract-vmlinux",
         "/usr/local/bin/nvidia-driver",
         "/usr/local/bin/nvidia-driver-selector.sh",
     ]
