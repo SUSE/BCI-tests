@@ -983,6 +983,7 @@ COSIGN_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/cosign:{_COSIGN_VERSION}",
         bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
         custom_entry_point="/usr/bin/pause",
     )
 ]
