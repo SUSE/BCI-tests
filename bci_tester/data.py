@@ -1383,7 +1383,13 @@ RMT_CONTAINERS = [
         bci_type=ImageType.APPLICATION,
         available_versions=("15.7",),
         custom_entry_point="/bin/bash",
-    )
+    ),
+    create_BCI(
+        build_tag=f"{APP_CONTAINER_PREFIX}/rmt-server:3",
+        bci_type=ImageType.APPLICATION,
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+        custom_entry_point="/bin/bash",
+    ),
 ]
 
 PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER = create_BCI(
@@ -1428,7 +1434,6 @@ CONTAINERS_WITH_ZYPPER = (
     + OPENJDK_DEVEL_CONTAINERS
     + PCP_CONTAINERS
     + PYTHON_CONTAINERS
-    + RMT_CONTAINERS
     + RUBY_CONTAINERS
     + RUST_CONTAINERS
     + SPACK_CONTAINERS
@@ -1498,6 +1503,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *KUBEVIRT_CDI_CONTAINERS,
     *AMD_CONTAINERS,
     *NVIDIA_CONTAINERS,
+    *RMT_CONTAINERS,
 ]
 
 CONTAINERS_WITHOUT_SHELL = [NANO_CONTAINER, *COSIGN_CONTAINERS]
