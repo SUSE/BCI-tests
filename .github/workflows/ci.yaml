@@ -255,7 +255,13 @@ jobs:
 
     steps:
       - name: Clean up disk space to maximize available space
-        run: sudo rm -rf /usr/local/*/* /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache && sudo docker image prune --all --force
+        run: |
+          sudo rm -rf /usr/local/bin/{minikube,stack,helm,cmake,cpack,ctest,kustomize,pulumi*}
+          sudo rm -rf /usr/local/julia* /usr/local/aws*
+          sudo rm -rf /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache
+          sudo docker image prune --all --force
+      - name: workaround broken podman installation (https://github.com/actions/runner-images/issues/14473)
+        run: ( echo '[engine.runtimes]' ; echo 'crun = [ "/usr/local/bin/crun" ]' ) | sudo tee /etc/containers/containers.conf
       - name: Uninstall conflicting packages
         run: sudo apt-get -y remove python3-chardet
       - name: checkout source code
@@ -427,8 +433,8 @@ jobs:
       - name: Login to registry.suse.com as CI user
         run: |
           if [ -n "${REGISTRY_LOGIN_PASSWORD}" ]; then
-            echo $REGISTRY_LOGIN_PASSWORD | sudo docker login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
-            echo $REGISTRY_LOGIN_PASSWORD | sudo podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+            echo $REGISTRY_LOGIN_PASSWORD | docker login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+            echo $REGISTRY_LOGIN_PASSWORD | podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
           fi
         env:
           REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
@@ -437,8 +443,8 @@ jobs:
       - name: Login to dp.apps.rancher.io as CI user
         run: |
           if [ -n "${APPCO_USERNAME}" ]; then
-            echo $APPCO_PASSWORD | sudo docker login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
-            echo $APPCO_PASSWORD | sudo podman login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
+            echo $APPCO_PASSWORD | docker login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
+            echo $APPCO_PASSWORD | podman login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
           fi
         if: ${{ matrix.testing_target == 'ibs-released' && matrix.os_version == '15.6-ai' }}
         env:
