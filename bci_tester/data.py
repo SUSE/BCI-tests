@@ -1163,7 +1163,7 @@ STUNNEL_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/stunnel:5",
     bci_type=ImageType.APPLICATION,
     custom_entry_point="/bin/sh",
-    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
+    available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
 )
 
 VALKEY_CONTAINERS = [
@@ -1183,7 +1183,7 @@ BIND_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/bind:9",
         bci_type=ImageType.APPLICATION,
-        available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
         forwarded_ports=[
             PortForwarding(container_port=53, protocol=NetworkProtocol.UDP)
         ],
