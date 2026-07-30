@@ -287,21 +287,6 @@ jobs:
             path: .tox
             key: tox--${{ hashFiles('tox.ini') }}
 
-      - name: Install new podman from OBS
-        if: false
-        run: |
-          sudo mkdir -p /etc/apt/keyrings
-          curl -fsSL https://download-repositories.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_$(lsb_release -rs)/Release.key \
-            | gpg --dearmor \
-            | sudo tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
-              https://download-repositories.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_$(lsb_release -rs)/ /" \
-            | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null
-          sudo apt-get update -qq
-          sudo apt-get -qq -y install podman buildah
-          sudo mkdir -p /etc/containers/registries.d/
-
       - name: configure podman to use sigstore attachments
         run: |
           sudo install -d -m 755 /etc/containers/registries.d/
@@ -442,8 +427,8 @@ jobs:
       - name: Login to registry.suse.com as CI user
         run: |
           if [ -n "${REGISTRY_LOGIN_PASSWORD}" ]; then
-            echo $REGISTRY_LOGIN_PASSWORD | docker login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
-            echo $REGISTRY_LOGIN_PASSWORD | podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+            echo $REGISTRY_LOGIN_PASSWORD | sudo docker login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
+            echo $REGISTRY_LOGIN_PASSWORD | sudo podman login -u $REGISTRY_LOGIN_USERNAME --password-stdin registry.suse.com
           fi
         env:
           REGISTRY_LOGIN_USERNAME: ${{ secrets.REGISTRY_LOGIN_USERNAME }}
@@ -452,8 +437,8 @@ jobs:
       - name: Login to dp.apps.rancher.io as CI user
         run: |
           if [ -n "${APPCO_USERNAME}" ]; then
-            echo $APPCO_PASSWORD | docker login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
-            echo $APPCO_PASSWORD | podman login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
+            echo $APPCO_PASSWORD | sudo docker login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
+            echo $APPCO_PASSWORD | sudo podman login -u $APPCO_USERNAME --password-stdin dp.apps.rancher.io
           fi
         if: ${{ matrix.testing_target == 'ibs-released' && matrix.os_version == '15.6-ai' }}
         env:
