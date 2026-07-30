@@ -1313,6 +1313,24 @@ KUBEVIRT_CONTAINERS = [
             "synchronization-controller",
         ),
     )
+] + [
+    create_BCI(
+        build_tag=(
+            f"suse/sles/{os_version}/{service}:{_kubevirt_version}"
+            if os_version.startswith("16")
+            else f"{APP_CONTAINER_PREFIX}/{service}:{_kubevirt_version}"
+        ),
+        bci_type=ImageType.APPLICATION,
+        available_versions=[os_version],
+        custom_entry_point="/bin/sh",
+    )
+    for os_version, service in product(
+        ("16.0", "16.1", "tumbleweed"),
+        (
+            "libguestfs-tools",
+            "sidecar-shim",
+        ),
+    )
 ]
 
 _cdi_version = "latest"
