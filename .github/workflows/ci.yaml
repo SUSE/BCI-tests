@@ -255,7 +255,13 @@ jobs:
 
     steps:
       - name: Clean up disk space to maximize available space
-        run: sudo rm -rf /usr/local/*/* /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache && sudo docker image prune --all --force
+        run: |
+          sudo rm -rf /usr/local/bin/{minikube,stack,helm,cmake,cpack,ctest,kustomize,pulumi*}
+          sudo rm -rf /usr/local/julia* /usr/local/aws*
+          sudo rm -rf /usr/local/.ghcup /home/runner/.rustup /home/linuxbrew /usr/share/swift /usr/share/dotnet /opt/google/chrome /opt/microsoft/msedge /opt/ghc /opt/hostedtoolcache
+          sudo docker image prune --all --force
+      - name: workaround broken podman installation (https://github.com/actions/runner-images/issues/14473)
+        run: ( echo '[engine.runtimes]' ; echo 'crun = [ "/usr/local/bin/crun" ]' ) | sudo tee /etc/containers/containers.conf
       - name: Uninstall conflicting packages
         run: sudo apt-get -y remove python3-chardet
       - name: checkout source code
