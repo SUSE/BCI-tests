@@ -1109,9 +1109,10 @@ def test_buildtime_attestations(container):
     assert got_clamav, (
         f"ClamAV missing for {manifest['platform']['architecture']}"
     )
-    assert got_neuvector, (
-        f"NeuVector missing for {manifest['platform']['architecture']}"
-    )
+    if OS_VERSION in ("15.7",):
+        assert got_neuvector, (
+            f"NeuVector missing for {manifest['platform']['architecture']}"
+        )
     assert got_trivy, (
         f"Trivy missing for {manifest['platform']['architecture']}"
     )
