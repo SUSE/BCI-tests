@@ -245,6 +245,8 @@ jobs:
             os_version: 15.7
           - toxenv: amd
             os_version: 15.7-third-party
+          - toxenv: amd
+            os_version: 16.0-third-party
           - toxenv: nvidia
             os_version: 15.7-third-party
           - toxenv: nvidia
