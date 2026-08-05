@@ -1061,6 +1061,7 @@ GCC_CONTAINERS = [
         (13, ("tumbleweed",)),
         (14, ("15.7", "tumbleweed")),
         (15, ("16.0", "16.1", "tumbleweed")),
+        (16, ("16.1", "tumbleweed")),
     )
 ]
 
