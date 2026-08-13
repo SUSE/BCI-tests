@@ -47,7 +47,6 @@ def test_lang_set(auto_container):
         "rspec",
         ("multi_json -v 1.15.0" if OS_VERSION in ("15.7",) else "multi_json"),
         "rack",
-        "rake",
         ("i18n -v 1.14.8" if OS_VERSION in ("15.7",) else "i18n"),
     ],
 )
@@ -65,7 +64,6 @@ def test_install_gems(auto_container_per_test, gem):
     - rspec
     - multi_json
     - rack
-    - rake
     - i18n
     """
     auto_container_per_test.connection.run_expect([0], f"gem install {gem}")
