@@ -4,12 +4,18 @@ FIPS mode.
 """
 
 import re
+import shutil
 from pathlib import Path
 
 import pytest
+from _pytest.config import Config
 from pytest_container import DerivedContainer
+from pytest_container import MultiStageBuild
+from pytest_container import get_extra_build_args
+from pytest_container import get_extra_run_args
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
+from pytest_container.container import ImageFormat
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
 
@@ -27,6 +33,7 @@ from bci_tester.fips import NONFIPS_GCRYPT_DIGESTS
 from bci_tester.fips import NONFIPS_GNUTLS_DIGESTS
 from bci_tester.fips import NULL_DIGESTS
 from bci_tester.fips import host_fips_enabled
+from bci_tester.runtime_choice import PODMAN_SELECTED
 
 #: multistage :file:`Dockerfile` that builds the program from
 #: :py:const:`FIPS_TEST_DOT_C` using gcc and copies it, ``libcrypto``, ``libssl``
@@ -429,3 +436,91 @@ def test_nss_firefox_cert(container_per_test: ContainerData) -> None:
     c.check_output(
         'certutil -R -k rsa -g 2048 -s "CN=Daniel Duesentrieb3,O=Example Corp,L=Mountain View,ST=California,C=DE" -d "${PWD}/nssdb" -o cert9.cer -f password.txt -z seedfile.dat',
     )
+
+
+MULTISTAGE_FIPS_DOCKERFILE = """FROM $builder as builder
+WORKDIR /src
+
+COPY fips-test.c /src/
+
+RUN zypper --gpg-auto-import-keys -n ref
+RUN zypper -n install gcc libopenssl-devel
+
+RUN gcc -O2 fips-test.c -Wall -Wextra -Wpedantic -lcrypto -lssl -o fips-test
+
+FROM $runner
+
+COPY --from=builder /src/fips-test /bin/fips-test
+"""
+
+
+@pytest.mark.parametrize(
+    "container",
+    (MICRO_FIPS_CONTAINER,),
+    indirect=True,
+)
+def test_fips_properly_setup_on_micro(
+    container, host, tmp_path, container_runtime, pytestconfig: Config
+):
+    """This is a multistage container build, verifying that the FIPS is
+    correctly set up in the given container.
+
+    This test case is an adaptation of ``test_openssl_binary`` for containers
+    that do not ship Zypper or RPM.
+
+    In the builder stage, we build the fips-test binary and we copy the
+    resulting binary into target stage and execute it in that
+    container.
+
+    If FIPS is incorrectly set up, non FIPS digest (e.g md5) will likely
+    succeed and fail the test case.
+
+    This test can run on both FIPS enforcing host and regular hosts, because
+    the container is configured for FIPS mode regardless of the host setup.
+
+    This is a reproducer for bsc#1274584.
+    """
+    print(container)
+    multi_stage_build = MultiStageBuild(
+        containers={
+            "builder": "registry.suse.com/bci/gcc:latest",
+            "runner": container.image_url_or_id,
+        },
+        containerfile_template=MULTISTAGE_FIPS_DOCKERFILE,
+    )
+    multi_stage_build.prepare_build(
+        tmp_path, container_runtime, pytestconfig.rootpath
+    )
+
+    shutil.copyfile("tests/files/fips-test.c", tmp_path / "fips-test.c")
+
+    build_args = get_extra_run_args(pytestconfig)
+
+    if PODMAN_SELECTED:
+        build_args += ["--format", str(ImageFormat.DOCKER)]
+
+    runner_id = multi_stage_build.build(
+        tmp_path, pytestconfig, container_runtime, extra_build_args=build_args
+    )
+
+    extra_args = " ".join(get_extra_build_args(pytestconfig))
+
+    cmd = (
+        f"{container_runtime.runner_binary} run --rm {extra_args} {runner_id}"
+    )
+
+    for digest in FIPS_DIGESTS:
+        cr = host.run_expect([0], f"{cmd} /bin/fips-test {digest}")
+        assert "Digest is" in cr.stdout
+        assert cr.stderr == ""
+
+    for digest in NONFIPS_DIGESTS:
+        cr = host.run_expect([1], f"{cmd} /bin/fips-test {digest}")
+
+        assert cr.stdout == ""
+        err_msg = cr.stderr
+
+        assert (
+            f"Unknown message digest {digest}" in err_msg
+            or "EVP_DigestInit_ex was not successful" in err_msg
+        ), f"non-fips digest {digest} unexpected output {err_msg}"
