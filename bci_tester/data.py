@@ -995,7 +995,10 @@ NGINX_CONTAINERS = [
         build_tag=f"{APP_CONTAINER_PREFIX}/nginx:{nginx_ver}",
         bci_type=ImageType.APPLICATION,
         available_versions=os_versions,
-        forwarded_ports=[PortForwarding(container_port=80)],
+        forwarded_ports=[
+            PortForwarding(container_port=80),
+            PortForwarding(container_port=8080),
+        ],
     )
     for nginx_ver, os_versions in (
         ("latest", ("tumbleweed",)),
