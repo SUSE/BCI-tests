@@ -472,6 +472,7 @@ KIWI_CONTAINERS = [
     create_BCI(build_tag=f"bci/kiwi:{tag}", available_versions=(ver,))
     for ver, tag in (
         ("16.0", "10.2"),
+        ("16.1", "10.2"),
         ("tumbleweed", "latest"),
     )
 ]
