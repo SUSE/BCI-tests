@@ -859,6 +859,14 @@ _USERNAME_UID_GID_MAP: Dict[str, Tuple[Optional[int], Optional[int]]] = {
     "keadhcp": (None, 486),
     "user": (1000, 1000),
     "tss": (98, 98),
+    "virt-api": (1001, 1001),
+    "virt-controller": (1001, 1001),
+    "virt-exportproxy": (1001, 1001),
+    "virt-exportserver": (107, 107),
+    "virt-libguestfs-tools": (1001, 1001),
+    "virt-operator": (1001, 1001),
+    "virt-sidecar-shim": (1001, 1001),
+    "virt-synchronization-controller": (1001, 1001),
 }
 
 
