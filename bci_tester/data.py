@@ -590,6 +590,12 @@ GOLANG_CONTAINERS = (
         )
         for stability in ("oldstable", "stable")
     ]
+    + [
+        create_BCI(
+            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:oldoldstable",
+            available_versions=["15.7"],
+        )
+    ]
 )
 
 OPENJDK_11_CONTAINER = create_BCI(
