@@ -159,6 +159,7 @@ markers = [
     'nginx_1.21',
     'nginx_1.27',
     'nginx_latest',
+    'golang_oldoldstable',
     'golang_oldstable',
     'golang_oldstable-openssl',
     'golang_stable',
