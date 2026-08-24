@@ -513,7 +513,7 @@ def test_general_labels(
             )
             if container_name in ("nvidia-driver",):
                 assert "NVIDIA Driver" in labels[f"{prefix}.title"]
-            if container_name in ("amd-driver",):
+            elif container_name in ("amd-driver",):
                 assert "AMD GPU Driver" in labels[f"{prefix}.title"]
             elif container_name not in (
                 "dotnet.aspnet",
