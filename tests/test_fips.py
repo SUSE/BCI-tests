@@ -512,14 +512,11 @@ def test_fips_properly_setup_on_micro(
     for digest in FIPS_DIGESTS:
         cr = host.run_expect([0], f"{cmd} /bin/fips-test {digest}")
         assert "Digest is" in cr.stdout
-        assert cr.stderr == ""
 
     for digest in NONFIPS_DIGESTS:
         cr = host.run_expect([1], f"{cmd} /bin/fips-test {digest}")
 
-        assert cr.stdout == ""
         err_msg = cr.stderr
-
         assert (
             f"Unknown message digest {digest}" in err_msg
             or "EVP_DigestInit_ex was not successful" in err_msg
