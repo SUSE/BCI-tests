@@ -197,6 +197,9 @@ def test_tox(auto_container_per_test):
     )
 
 
+@pytest.mark.skipif(
+    OS_VERSION in ["16.1"], reason="no packaged tox version available"
+)
 @pytest.mark.parametrize(
     "container_per_test",
     PYTHON_CONTAINERS,
@@ -207,6 +210,9 @@ def test_packaged_tox(container_per_test):
     version = container_per_test.connection.check_output(
         "echo $PYTHON_VERSION"
     )
+    if OS_VERSION == "tumbleweed" and version.startswith("3.11"):
+        pytest.skip("packaged tox no longer available")
+
     if (
         OS_VERSION.startswith("15")
         and not version.startswith("3.6")
