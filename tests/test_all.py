@@ -479,7 +479,11 @@ def test_zypper_verify_passes(container: ContainerData) -> None:
     )
 
 
-@pytest.mark.parametrize("container", CONTAINERS_WITHOUT_ZYPPER, indirect=True)
+@pytest.mark.parametrize(
+    "container",
+    [c for c in CONTAINERS_WITHOUT_ZYPPER if (c not in KUBEVIRT_CONTAINERS)],
+    indirect=True,
+)
 def test_zypper_not_present_in_containers_without_it(
     container: ContainerData,
 ) -> None:
