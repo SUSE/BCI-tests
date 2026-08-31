@@ -732,7 +732,7 @@ PYTHON_BASE_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.13", ["16.0", "16.1"]),
+        ("3.13", ["tumbleweed", "16.0", "16.1"]),
         ("3.14", ["tumbleweed", "16.1"]),
     )
 ]
@@ -742,7 +742,14 @@ PYTHON_WITH_PIPX_CONTAINERS = PYTHON_BASE_CONTAINERS + [
         build_tag=f"{BCI_CONTAINER_PREFIX}/python:{ver}",
         available_versions=versions,
     )
-    for ver, versions in (("3.13", ["15.7", "tumbleweed"]),)
+    for ver, versions in (
+        (
+            "3.13",
+            [
+                "15.7",
+            ],
+        ),
+    )
 ]
 
 PYTHON_MICRO_CONTAINERS = [
@@ -751,7 +758,7 @@ PYTHON_MICRO_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.13", ["16.0", "16.1"]),
+        ("3.13", ["tumbleweed", "16.0", "16.1"]),
         ("3.14", ["tumbleweed", "16.1"]),
     )
 ]
