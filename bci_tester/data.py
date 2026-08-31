@@ -1414,15 +1414,9 @@ SPR_CONTAINERS = [
 
 RMT_CONTAINERS = [
     create_BCI(
-        build_tag=f"{APP_CONTAINER_PREFIX}/rmt-server:2",
-        bci_type=ImageType.APPLICATION,
-        available_versions=("15.7",),
-        custom_entry_point="/bin/bash",
-    ),
-    create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/rmt-server:3",
         bci_type=ImageType.APPLICATION,
-        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
         custom_entry_point="/bin/bash",
     ),
 ]
