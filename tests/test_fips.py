@@ -15,9 +15,11 @@ from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container.container import BindMount
 from pytest_container.container import ContainerData
+from pytest_container.container import ContainerLauncher
 from pytest_container.container import ImageFormat
 from pytest_container.container import container_and_marks_from_pytest_param
 from pytest_container.runtime import LOCALHOST
+from pytest_container.runtime import OciRuntimeBase
 
 from bci_tester.data import BASE_FIPS_CONTAINERS
 from bci_tester.data import CONTAINERS_WITH_ZYPPER
@@ -522,3 +524,41 @@ def test_fips_properly_setup_on_micro(
             f"Unknown message digest {digest}" in err_msg
             or "EVP_DigestInit_ex was not successful" in err_msg
         ), f"non-fips digest {digest} unexpected output {err_msg}"
+
+
+@pytest.mark.parametrize(
+    "micro_ctr_image",
+    [
+        MICRO_FIPS_CONTAINER,
+    ],
+)
+@pytest.mark.parametrize("base_ctr_image", BASE_FIPS_CONTAINERS)
+def test_fips_in_sync_between_micro_and_base(
+    micro_ctr_image: DerivedContainer,
+    base_ctr_image: DerivedContainer,
+    container_runtime: OciRuntimeBase,
+    pytestconfig: pytest.Config,
+):
+    with ContainerLauncher.from_pytestconfig(
+        micro_ctr_image, container_runtime, pytestconfig
+    ) as micro_launcher, ContainerLauncher.from_pytestconfig(
+        base_ctr_image, container_runtime, pytestconfig
+    ) as base_launcher:
+        micro_launcher.launch_container()
+        base_launcher.launch_container()
+
+        micro_con = micro_launcher.container_data.connection
+        base_con = base_launcher.container_data.connection
+
+        micro_ver = micro_con.check_output(
+            'file=$(ls /usr/lib64/libssl.so.3.*); echo "${file##*libssl.so.}"'
+        ).strip()
+        base_ver = base_con.check_output(
+            'file=$(ls /usr/lib64/libssl.so.3.*); echo "${file##*libssl.so.}"'
+        ).strip()
+
+        assert len(micro_ver) > 0
+        assert len(base_ver) > 0
+        assert micro_ver == base_ver, (
+            "libopenssl3 version mismatch between bci-micro-fips and bci-base-fips"
+        )
