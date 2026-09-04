@@ -43,6 +43,12 @@ def test_image_content(container_per_test: ContainerData):
         "/usr/local/bin/nvidia-driver-selector.sh",
     ]
 
+    if branch >= 610:
+        files += [
+            f"/opt/lib/firmware/nvidia/{version}/ucodes_ga10x.bin",
+            f"/opt/lib/firmware/nvidia/{version}/ucodes_tu10x.bin",
+        ]
+
     # since 575 drivers use DKMS and are compressed
     # prior 575 driveers use KMP and are not compressed
     # TODO: test kernel modules via modinfo/modprobe
