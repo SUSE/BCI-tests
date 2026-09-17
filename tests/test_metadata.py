@@ -99,6 +99,7 @@ from bci_tester.data import PYTHON_MICRO_CONTAINERS
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RMT_CONTAINERS
 from bci_tester.data import RUBY_CONTAINERS
+from bci_tester.data import RUBY_MICRO_CONTAINERS
 from bci_tester.data import RUST_CONTAINERS
 from bci_tester.data import SAMBA_CLIENT_CONTAINERS
 from bci_tester.data import SAMBA_SERVER_CONTAINERS
@@ -227,7 +228,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         (c, "python", ImageType.LANGUAGE_STACK)
         for c in PYTHON_CONTAINERS + PYTHON_MICRO_CONTAINERS
     ]
-    + [(c, "ruby", ImageType.LANGUAGE_STACK) for c in RUBY_CONTAINERS]
+    + [
+        (c, "ruby", ImageType.LANGUAGE_STACK)
+        for c in RUBY_CONTAINERS + RUBY_MICRO_CONTAINERS
+    ]
     + [(c, "base-fips", ImageType.OS) for c in BASE_FIPS_CONTAINERS]
     + [
         (container_pcp, "pcp", ImageType.APPLICATION)
