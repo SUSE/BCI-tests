@@ -12,13 +12,13 @@ ELECTRON_APP_BUILD = """
 FROM $runner as target
 FROM $builder as builder
 WORKDIR /src
-RUN npm install --omit=dev electron@44.2.0
+RUN npm install --omit=dev electron@43.2.0
 RUN node_modules/.bin/install-electron
 
 FROM target
 COPY --from=builder /src/node_modules/electron/dist /usr/local/electron
 USER user
-RUN test "$$(/usr/local/electron/electron -v 2>/dev/null)" = "v44.2.0"
+RUN test "$$(/usr/local/electron/electron -v 2>/dev/null)" = "v43.2.0"
 """
 
 
