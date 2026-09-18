@@ -778,13 +778,31 @@ PYTHON_CONTAINERS = PYTHON_WITH_PIPX_CONTAINERS + [
     )
 ]
 
-RUBY_CONTAINERS = [
-    create_BCI(build_tag="bci/ruby:2.5", available_versions=("15.7",)),
+RUBY_BASE_CONTAINERS = [
     create_BCI(
-        build_tag="bci/ruby:3.4",
-        available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
-    ),
-    create_BCI(build_tag="bci/ruby:latest", available_versions=["tumbleweed"]),
+        build_tag=f"{BCI_CONTAINER_PREFIX}/ruby:{ver}-base",
+        available_versions=versions,
+    )
+    for ver, versions in (
+        ("3.4", ("16.0", "16.1")),
+        ("4.0", ("tumbleweed",)),
+    )
+]
+
+RUBY_MICRO_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/ruby:{ver}-micro",
+        available_versions=versions,
+    )
+    for ver, versions in (
+        ("3.4", ("16.0", "16.1")),
+        ("4.0", ("tumbleweed",)),
+    )
+]
+
+RUBY_CONTAINERS = RUBY_BASE_CONTAINERS + [
+    create_BCI(build_tag="bci/ruby:2.5", available_versions=("15.7",)),
+    create_BCI(build_tag="bci/ruby:3.4", available_versions=("15.7",)),
 ]
 
 _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
@@ -1529,6 +1547,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *NGINX_CONTAINERS,
     *NODEJS_MICRO_CONTAINERS,
     *PYTHON_MICRO_CONTAINERS,
+    *RUBY_MICRO_CONTAINERS,
     *POSTFIX_CONTAINERS,
     *TOMCAT_CONTAINERS,
     *POSTGRESQL_CONTAINERS,
@@ -1629,6 +1648,7 @@ else:
         + PYTHON_MICRO_CONTAINERS
         + RMT_CONTAINERS
         + RUBY_CONTAINERS
+        + RUBY_MICRO_CONTAINERS
         + RUST_CONTAINERS
         + SPACK_CONTAINERS
         + VALKEY_CONTAINERS

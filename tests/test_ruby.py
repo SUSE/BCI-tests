@@ -4,30 +4,44 @@ import pytest
 
 from bci_tester.data import OS_VERSION
 from bci_tester.data import RUBY_CONTAINERS
+from bci_tester.data import RUBY_MICRO_CONTAINERS
 
 CONTAINER_IMAGES = RUBY_CONTAINERS
 
 
-def test_ruby_version(auto_container):
+@pytest.mark.parametrize(
+    "container_per_test",
+    RUBY_CONTAINERS + RUBY_MICRO_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_ruby_version(container_per_test):
     """Verify that the environment variable ``RUBY_VERSION`` and ``RUBY_MAJOR``
     match the version of Ruby in the container.
 
     """
-    rb_ver = auto_container.connection.check_output(
+    rb_ver = container_per_test.connection.check_output(
         "ruby -e 'puts RUBY_VERSION'"
     )
     assert (
-        auto_container.connection.check_output("echo $RUBY_VERSION") == rb_ver
+        container_per_test.connection.check_output("echo $RUBY_VERSION")
+        == rb_ver
     )
 
-    assert auto_container.connection.check_output(
+    assert container_per_test.connection.check_output(
         "echo $RUBY_MAJOR"
     ) == ".".join(rb_ver.split(".")[:-1])
 
 
-def test_lang_set(auto_container):
+@pytest.mark.parametrize(
+    "container_per_test",
+    RUBY_CONTAINERS + RUBY_MICRO_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_lang_set(container_per_test):
     """Assert that the environment variable ``LANG`` is set to ``C.UTF-8``."""
-    assert auto_container.connection.check_output("echo $LANG") == "C.UTF-8"
+    assert (
+        container_per_test.connection.check_output("echo $LANG") == "C.UTF-8"
+    )
 
 
 @pytest.mark.parametrize(
