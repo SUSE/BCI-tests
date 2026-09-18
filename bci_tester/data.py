@@ -557,44 +557,50 @@ BUSYBOX_CONTAINER = create_BCI(
     bci_type=ImageType.OS,
 )
 
-# The very last container in this list needs to be available for all
-# tested OSes
+GOLANG_OLDOLDSTABLE_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/golang:oldoldstable",
+        available_versions=["15.7"],
+    )
+]
+
+GOLANG_UNSTABLE_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
+        extra_marks=[
+            pytest.mark.__getattr__(f"golang_{golang_version}"),
+            pytest.mark.skip(
+                reason="There is no unstable golang at the moment"
+            ),
+        ],
+        available_versions=["tumbleweed"],
+    )
+    for golang_version in ("unstable",)
+]
+
+GOLANG_OPENSSL_CONTAINERS = [
+    create_BCI(
+        build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
+        extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
+        available_versions=[*_DEFAULT_NONBASE_SLE_VERSIONS, "16.1"],
+    )
+    for golang_version, stability in (
+        ("oldstable-openssl", "oldstable"),
+        ("stable-openssl", "stable"),
+    )
+]
+
 GOLANG_CONTAINERS = (
-    [
-        create_BCI(
-            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
-            extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
-            available_versions=[*_DEFAULT_NONBASE_SLE_VERSIONS, "16.1"],
-        )
-        for golang_version, stability in (
-            ("oldstable-openssl", "oldstable"),
-            ("stable-openssl", "stable"),
-        )
-    ]
-    + [
-        create_BCI(
-            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
-            extra_marks=[
-                pytest.mark.__getattr__(f"golang_{golang_version}"),
-                pytest.mark.skip(
-                    reason="There is no unstable golang at the moment"
-                ),
-            ],
-            available_versions=["tumbleweed"],
-        )
-        for golang_version in ("unstable",)
-    ]
+    GOLANG_OLDOLDSTABLE_CONTAINERS
+    + GOLANG_UNSTABLE_CONTAINERS
+    + GOLANG_OPENSSL_CONTAINERS
+    # this needs to be the last item in the list and it must be available for
+    # all tested OSes, see test_multistage.py::test_dockerfile_build.
     + [
         create_BCI(
             build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{stability}",
         )
         for stability in ("oldstable", "stable")
-    ]
-    + [
-        create_BCI(
-            build_tag=f"{BCI_CONTAINER_PREFIX}/golang:oldoldstable",
-            available_versions=["15.7"],
-        )
     ]
 )
 
