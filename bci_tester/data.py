@@ -1332,90 +1332,93 @@ SAMBA_CONTAINERS = (
     + SAMBA_TOOLBOX_CONTAINERS
 )
 
-_kubevirt_version = "latest"
-if OS_VERSION in (
-    "16.0",
-    "16.1",
-):
-    _kubevirt_version = "1.8"
+_kubevirt_services = [
+    f"virt-{service}"
+    for service in (
+        "api",
+        "controller",
+        "exportproxy",
+        "exportserver",
+        "handler",
+        "launcher",
+        "operator",
+        "synchronization-controller",
+    )
+] + ["libguestfs-tools", "pr-helper", "sidecar-shim"]
 
-KUBEVIRT_CONTAINERS = [
-    create_BCI(
-        build_tag=(
-            f"suse/sles/{os_version}/virt-{service}:{_kubevirt_version}"
-            if os_version.startswith("16")
-            else f"{APP_CONTAINER_PREFIX}/virt-{service}:{_kubevirt_version}"
-        ),
-        bci_type=ImageType.APPLICATION,
-        available_versions=[os_version],
-        custom_entry_point="/bin/sh",
-    )
-    for os_version, service in product(
-        ("16.0", "16.1", "tumbleweed"),
-        (
-            "api",
-            "controller",
-            "exportproxy",
-            "exportserver",
-            "handler",
-            "launcher",
-            "operator",
-            "pr-helper",
-            "synchronization-controller",
-        ),
-    )
-] + [
-    create_BCI(
-        build_tag=(
-            f"suse/sles/{os_version}/{service}:{_kubevirt_version}"
-            if os_version.startswith("16")
-            else f"{APP_CONTAINER_PREFIX}/{service}:{_kubevirt_version}"
-        ),
-        bci_type=ImageType.APPLICATION,
-        available_versions=[os_version],
-        custom_entry_point="/bin/sh",
-    )
-    for os_version, service in product(
-        ("16.0", "16.1", "tumbleweed"),
-        (
-            "libguestfs-tools",
-            "sidecar-shim",
-        ),
-    )
-]
+KUBEVIRT_CONTAINERS = (
+    [
+        create_BCI(
+            build_tag=(f"suse/sles/16.0/{service}:{kubevirt_version}"),
+            bci_type=ImageType.APPLICATION,
+            available_versions=("16.0",),
+            custom_entry_point="/bin/sh",
+        )
+        for kubevirt_version, service in product(
+            ("1.8", "1.9"),
+            _kubevirt_services,
+        )
+    ]
+    + [
+        create_BCI(
+            build_tag=(f"{APP_CONTAINER_PREFIX}/{service}:{kubevirt_version}"),
+            bci_type=ImageType.APPLICATION,
+            available_versions=("tumbleweed",),
+            custom_entry_point="/bin/sh",
+        )
+        for kubevirt_version, service in product(
+            ("1.8", "1.9"),
+            _kubevirt_services,
+        )
+    ]
+    + [
+        create_BCI(
+            build_tag=(
+                f"{APP_CONTAINER_PREFIX}/{service}:{virt_template_version}"
+            ),
+            bci_type=ImageType.APPLICATION,
+            available_versions=(
+                "16.0",
+                "tumbleweed",
+            ),
+            custom_entry_point="/bin/sh",
+        )
+        for virt_template_version, service in product(
+            ("0.2",),
+            ("virt-template-apiserver", "virt-template-controller"),
+        )
+        if (virt_template_available := False)
+    ]
+)
 
-_cdi_version = "latest"
-if OS_VERSION in (
-    "16.0",
-    "16.1",
-):
-    _cdi_version = "1.65"
+
+_cdi_services = (
+    "apiserver",
+    "cloner",
+    "controller",
+    "importer",
+    "operator",
+    "uploadproxy",
+    "uploadserver",
+)
 
 KUBEVIRT_CDI_CONTAINERS = [
     create_BCI(
-        build_tag=(
-            f"suse/sles/{os_version}/cdi-{service}:{_cdi_version}"
-            if os_version.startswith("16")
-            else f"{APP_CONTAINER_PREFIX}/cdi-{service}:latest"
-        ),
+        build_tag=(f"suse/sles/16.0/cdi-{service}:{cdi_version}"),
         bci_type=ImageType.APPLICATION,
-        available_versions=[os_version],
+        available_versions=("16.0",),
         custom_entry_point="/bin/bash",
     )
-    for os_version, service in product(
-        ("16.0", "16.1", "tumbleweed"),
-        (
-            "apiserver",
-            "cloner",
-            "controller",
-            "importer",
-            "operator",
-            "uploadproxy",
-            "uploadserver",
-        ),
+    for cdi_version, service in product(("1.65", "1.66"), _cdi_services)
+] + [
+    create_BCI(
+        build_tag=(f"{APP_CONTAINER_PREFIX}/cdi-{service}:{cdi_version}"),
+        bci_type=ImageType.APPLICATION,
+        available_versions=("tumbleweed",),
+        custom_entry_point="/bin/bash",
     )
+    for cdi_version, service in product(("1.65", "1.66"), _cdi_services)
 ]
-
 
 SPR_CONTAINERS = [
     create_BCI(
