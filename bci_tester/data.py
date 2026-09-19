@@ -918,9 +918,49 @@ CONTAINER_389DS_CONTAINERS = [
     )
 ]
 
-PHP_8_CLI = create_BCI(build_tag="bci/php:8")
-PHP_8_APACHE = create_BCI(build_tag="bci/php-apache:8")
-PHP_8_FPM = create_BCI(build_tag="bci/php-fpm:8")
+
+PHP_CLI_CONTAINERS = [
+    create_BCI(build_tag="bci/php:8", available_versions=("15.7",)),
+    create_BCI(
+        build_tag="bci/php:8-base",
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+    ),
+]
+
+PHP_APACHE_CONTAINERS = [
+    create_BCI(build_tag="bci/php-apache:8", available_versions=("15.7",)),
+    create_BCI(
+        build_tag="bci/php-apache:8-base",
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+    ),
+]
+
+PHP_FPM_CONTAINERS = [
+    create_BCI(build_tag="bci/php-fpm:8", available_versions=("15.7",)),
+    create_BCI(
+        build_tag="bci/php-fpm:8-base",
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+    ),
+]
+
+PHP_MICRO_CLI_CONTAINERS = [
+    create_BCI(
+        build_tag="bci/php:8-micro",
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+    )
+]
+PHP_MICRO_APACHE_CONTAINERS = [
+    create_BCI(
+        build_tag="bci/php-apache:8-micro",
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+    )
+]
+PHP_MICRO_FPM_CONTAINERS = [
+    create_BCI(
+        build_tag="bci/php-fpm:8-micro",
+        available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+    )
+]
 
 MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
@@ -1480,9 +1520,6 @@ CONTAINERS_WITH_ZYPPER = (
         BASE_CONTAINER,
         INIT_CONTAINER,
         KERNEL_MODULE_CONTAINER,
-        PHP_8_APACHE,
-        PHP_8_CLI,
-        PHP_8_FPM,
         PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
         PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
         PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
@@ -1496,6 +1533,9 @@ CONTAINERS_WITH_ZYPPER = (
     + NODEJS_BASE_CONTAINERS
     + OPENJDK_CONTAINERS
     + OPENJDK_DEVEL_CONTAINERS
+    + PHP_CLI_CONTAINERS
+    + PHP_APACHE_CONTAINERS
+    + PHP_FPM_CONTAINERS
     + PCP_CONTAINERS
     + PYTHON_CONTAINERS
     + RUBY_CONTAINERS
@@ -1552,6 +1592,9 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,
     *NGINX_CONTAINERS,
     *NODEJS_MICRO_CONTAINERS,
+    *PHP_MICRO_CLI_CONTAINERS,
+    *PHP_MICRO_APACHE_CONTAINERS,
+    *PHP_MICRO_FPM_CONTAINERS,
     *PYTHON_MICRO_CONTAINERS,
     *RUBY_MICRO_CONTAINERS,
     *POSTFIX_CONTAINERS,
@@ -1621,9 +1664,12 @@ else:
             MICRO_FIPS_CONTAINER,
             MINIMAL_CONTAINER,
             NANO_CONTAINER,
-            PHP_8_APACHE,
-            PHP_8_CLI,
-            PHP_8_FPM,
+            *PHP_APACHE_CONTAINERS,
+            *PHP_CLI_CONTAINERS,
+            *PHP_FPM_CONTAINERS,
+            *PHP_MICRO_APACHE_CONTAINERS,
+            *PHP_MICRO_CLI_CONTAINERS,
+            *PHP_MICRO_FPM_CONTAINERS,
             PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
             PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
             PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,

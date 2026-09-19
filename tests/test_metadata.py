@@ -88,9 +88,12 @@ from bci_tester.data import PCP_CONTAINERS
 from bci_tester.data import PC_AWS_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
 from bci_tester.data import PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
 from bci_tester.data import PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER
-from bci_tester.data import PHP_8_APACHE
-from bci_tester.data import PHP_8_CLI
-from bci_tester.data import PHP_8_FPM
+from bci_tester.data import PHP_APACHE_CONTAINERS
+from bci_tester.data import PHP_CLI_CONTAINERS
+from bci_tester.data import PHP_FPM_CONTAINERS
+from bci_tester.data import PHP_MICRO_APACHE_CONTAINERS
+from bci_tester.data import PHP_MICRO_CLI_CONTAINERS
+from bci_tester.data import PHP_MICRO_FPM_CONTAINERS
 from bci_tester.data import POSTFIX_CONTAINERS
 from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
@@ -191,9 +194,18 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         ),
         (INIT_CONTAINER, "init", ImageType.OS),
         (NANO_CONTAINER, "nano", ImageType.OS),
-        (PHP_8_APACHE, "php-apache", ImageType.LANGUAGE_STACK),
-        (PHP_8_CLI, "php", ImageType.LANGUAGE_STACK),
-        (PHP_8_FPM, "php-fpm", ImageType.LANGUAGE_STACK),
+    ]
+    + [
+        (c, "php", ImageType.LANGUAGE_STACK)
+        for c in PHP_CLI_CONTAINERS + PHP_MICRO_CLI_CONTAINERS
+    ]
+    + [
+        (c, "php-apache", ImageType.LANGUAGE_STACK)
+        for c in PHP_APACHE_CONTAINERS + PHP_MICRO_APACHE_CONTAINERS
+    ]
+    + [
+        (c, "php-fpm", ImageType.LANGUAGE_STACK)
+        for c in PHP_FPM_CONTAINERS + PHP_MICRO_FPM_CONTAINERS
     ]
     + [(c, "amd-driver", ImageType.THIRD_PARTY) for c in AMD_CONTAINERS]
     + [(c, "nvidia-driver", ImageType.THIRD_PARTY) for c in NVIDIA_CONTAINERS]
