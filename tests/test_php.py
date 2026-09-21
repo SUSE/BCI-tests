@@ -18,28 +18,28 @@ from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 
 from bci_tester.data import OS_VERSION
-from bci_tester.data import PHP_8_APACHE
-from bci_tester.data import PHP_8_CLI
-from bci_tester.data import PHP_8_FPM
+from bci_tester.data import PHP_APACHE_CONTAINERS
+from bci_tester.data import PHP_CLI_CONTAINERS
+from bci_tester.data import PHP_FPM_CONTAINERS
 
-CONTAINER_IMAGES = [PHP_8_CLI, PHP_8_APACHE, PHP_8_FPM]
+CONTAINER_IMAGES = (
+    PHP_CLI_CONTAINERS + PHP_APACHE_CONTAINERS + PHP_FPM_CONTAINERS
+)
 
 PHP_FLAVOR_T = Literal["apache", "fpm", "cli"]
-CONTAINER_IMAGES_WITH_FLAVORS = [
-    pytest.param(*t, marks=t[0].marks)
-    for t in ((PHP_8_APACHE, "apache"), (PHP_8_FPM, "fpm"), (PHP_8_CLI, "cli"))
-]
 _PHP_MAJOR_VERSION = 8
 _MEDIAWIKI_VERSION = "1.43.8"
 _MEDIAWIKI_MAJOR_VERSION = ".".join(_MEDIAWIKI_VERSION.split(".")[:2])
 
-MEDIAWIKI_APACHE_CONTAINER = DerivedContainer(
-    base=container_and_marks_from_pytest_param(PHP_8_APACHE)[0],
-    forwarded_ports=[PortForwarding(container_port=80)],
-    image_format=ImageFormat.DOCKER,
-    containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
+MEDIAWIKI_APACHE_CONTAINERS = [
+    pytest.param(
+        DerivedContainer(
+            base=container_and_marks_from_pytest_param(c)[0],
+            forwarded_ports=[PortForwarding(container_port=80)],
+            image_format=ImageFormat.DOCKER,
+            containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
 ENV MEDIAWIKI_MAJOR_VERSION={_MEDIAWIKI_MAJOR_VERSION}"""
-    + """
+            + """
 RUN set -e; zypper -n in $PHPIZE_DEPS oniguruma-devel libicu-devel gcc-c++ php8-sqlite php8-gd gzip && \
     for ext in mbstring intl fileinfo iconv calendar ctype dom; do \
         docker-php-ext-configure $ext; \
@@ -62,14 +62,29 @@ RUN set -euo pipefail; \
 HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localhost
 EXPOSE 80
 """,
+        ),
+        marks=container_and_marks_from_pytest_param(c)[1] or [],
+    )
+    for c in PHP_APACHE_CONTAINERS
+]
+
+
+NGINX_FPM_PROXY = DerivedContainer(
+    base="registry.suse.com/suse/nginx",
+    containerfile="""COPY tests/files/nginx.conf /etc/nginx/
+COPY tests/files/fastcgi_params /etc/nginx/
+""",
 )
 
-
-MEDIAWIKI_FPM_CONTAINER = DerivedContainer(
-    base=container_and_marks_from_pytest_param(PHP_8_FPM)[0],
-    containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
+MEDIAWIKI_FPM_PODS = [
+    pytest.param(
+        Pod(
+            containers=[
+                DerivedContainer(
+                    base=container_and_marks_from_pytest_param(c)[0],
+                    containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
 ENV MEDIAWIKI_MAJOR_VERSION={_MEDIAWIKI_MAJOR_VERSION}"""
-    + r"""
+                    + r"""
 RUN set -eux; \
     zypper -n ref; \
     zypper -n up; \
@@ -130,19 +145,15 @@ RUN set -eux; \
 
 CMD ["php-fpm"]
 """,
-)
-
-NGINX_FPM_PROXY = DerivedContainer(
-    base="registry.opensuse.org/opensuse/nginx",
-    containerfile="""COPY tests/files/nginx.conf /etc/nginx/
-COPY tests/files/fastcgi_params /etc/nginx/
-""",
-)
-
-MEDIAWIKI_FPM_POD = Pod(
-    containers=[MEDIAWIKI_FPM_CONTAINER, NGINX_FPM_PROXY],
-    forwarded_ports=[PortForwarding(container_port=80)],
-)
+                ),
+                NGINX_FPM_PROXY,
+            ],
+            forwarded_ports=[PortForwarding(container_port=80)],
+        ),
+        marks=container_and_marks_from_pytest_param(c)[1] or [],
+    )
+    for c in PHP_FPM_CONTAINERS
+]
 
 
 def test_install_phpize_deps(auto_container_per_test: ContainerData):
@@ -150,12 +161,11 @@ def test_install_phpize_deps(auto_container_per_test: ContainerData):
     ``PHPIZE_DEPS`` and that afterwards :command:`phpize` works.
 
     """
-    auto_container_per_test.connection.run_expect(
-        [0],
+    auto_container_per_test.connection.check_output(
         "zypper -n in $PHPIZE_DEPS",
     )
-    auto_container_per_test.connection.run_expect([0], "touch config.m4")
-    auto_container_per_test.connection.run_expect([0], "phpize")
+    auto_container_per_test.connection.check_output("touch config.m4")
+    auto_container_per_test.connection.check_output("phpize")
 
 
 @pytest.mark.parametrize("extension", ["pcntl", "gd"])
@@ -168,11 +178,11 @@ def test_install_php_extension_via_script(
     former command.
 
     """
-    auto_container_per_test.connection.run_expect(
-        [0], f"docker-php-ext-configure {extension}"
+    auto_container_per_test.connection.check_output(
+        f"docker-php-ext-configure {extension}"
     )
-    auto_container_per_test.connection.run_expect(
-        [0], f"docker-php-ext-install {extension}"
+    auto_container_per_test.connection.check_output(
+        f"docker-php-ext-install {extension}"
     )
 
     assert extension in auto_container_per_test.connection.check_output(
@@ -200,8 +210,8 @@ def test_install_multiple_extensions_via_script(
     if OS_VERSION not in ("tumbleweed", "16.1"):
         extensions.append("opcache")
 
-    auto_container_per_test.connection.run_expect(
-        [0], f"docker-php-ext-install {' '.join(extensions)}"
+    auto_container_per_test.connection.check_output(
+        f"docker-php-ext-install {' '.join(extensions)}"
     )
     for ext in extensions:
         assert auto_container_per_test.connection.package(
@@ -222,8 +232,8 @@ def test_zypper_install_php_extensions(
         extension_name
         not in auto_container_per_test.connection.check_output("php -m")
     )
-    auto_container_per_test.connection.run_expect(
-        [0], f"zypper -n in php{_PHP_MAJOR_VERSION}-{extension_name}"
+    auto_container_per_test.connection.check_output(
+        f"zypper -n in php{_PHP_MAJOR_VERSION}-{extension_name}"
     )
     assert extension_name in auto_container_per_test.connection.check_output(
         "php -m"
@@ -232,7 +242,14 @@ def test_zypper_install_php_extensions(
 
 @pytest.mark.parametrize(
     "container_per_test,flavor",
-    CONTAINER_IMAGES_WITH_FLAVORS,
+    [
+        pytest.param(*t, marks=t[0].marks)
+        for t in (
+            *((c, "apache") for c in PHP_APACHE_CONTAINERS),
+            *((c, "fpm") for c in PHP_FPM_CONTAINERS),
+            *((c, "cli") for c in PHP_CLI_CONTAINERS),
+        )
+    ],
     indirect=["container_per_test"],
 )
 def test_environment_variables(
@@ -274,12 +291,12 @@ def test_environment_variables(
         if OS_VERSION in ("15.4", "15.5"):
             apache_envvars = get_env_var("APACHE_ENVVARS")
             assert container_per_test.connection.file(apache_envvars).is_file
-            assert container_per_test.connection.run_expect(
-                [0], f"source {apache_envvars}"
+            assert container_per_test.connection.check_output(
+                f"source {apache_envvars}"
             )
 
 
-@pytest.mark.parametrize("container_image", [PHP_8_CLI])
+@pytest.mark.parametrize("container_image", PHP_CLI_CONTAINERS)
 def test_cli_entry_point(
     container_image: DerivedContainer,
     container_runtime: OciRuntimeBase,
@@ -301,7 +318,7 @@ def test_cli_entry_point(
 
 @pytest.mark.parametrize(
     "container_per_test",
-    [MEDIAWIKI_APACHE_CONTAINER],
+    MEDIAWIKI_APACHE_CONTAINERS,
     indirect=["container_per_test"],
 )
 def test_mediawiki_php_apache(container_per_test: ContainerData) -> None:
@@ -322,7 +339,7 @@ def test_mediawiki_php_apache(container_per_test: ContainerData) -> None:
 
 
 @pytest.mark.parametrize(
-    "pod_per_test", [MEDIAWIKI_FPM_POD], indirect=["pod_per_test"]
+    "pod_per_test", MEDIAWIKI_FPM_PODS, indirect=["pod_per_test"]
 )
 def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
     """Application test of the php-fpm variant.
@@ -356,7 +373,7 @@ def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
     OS_VERSION not in ("tumbleweed"),
     reason="available only on Tumbleweed",
 )
-@pytest.mark.parametrize("container", [PHP_8_APACHE], indirect=True)
+@pytest.mark.parametrize("container", PHP_APACHE_CONTAINERS, indirect=True)
 def test_tmpfiles_d_created(container: ContainerData) -> None:
     """Check that our container image has all directories and files that
     would've been created by systemd-tmpfiles.
