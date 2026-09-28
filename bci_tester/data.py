@@ -1415,21 +1415,29 @@ KUBEVIRT_CONTAINERS = (
     ]
     + [
         create_BCI(
-            build_tag=(
-                f"{APP_CONTAINER_PREFIX}/{service}:{virt_template_version}"
-            ),
+            build_tag=(f"suse/sles/16.0/{service}:{virt_template_version}"),
             bci_type=ImageType.APPLICATION,
-            available_versions=(
-                "16.0",
-                "tumbleweed",
-            ),
+            available_versions=("16.0",),
             custom_entry_point="/bin/sh",
         )
         for virt_template_version, service in product(
             ("0.2",),
             ("virt-template-apiserver", "virt-template-controller"),
         )
-        if False  # virt_template not yet available
+    ]
+    + [
+        create_BCI(
+            build_tag=(
+                f"{APP_CONTAINER_PREFIX}/{service}:{virt_template_version}"
+            ),
+            bci_type=ImageType.APPLICATION,
+            available_versions=("tumbleweed",),
+            custom_entry_point="/bin/sh",
+        )
+        for virt_template_version, service in product(
+            ("0.2",),
+            ("virt-template-apiserver", "virt-template-controller"),
+        )
     ]
 )
 
