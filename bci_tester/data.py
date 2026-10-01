@@ -1058,9 +1058,7 @@ GIT_CONTAINER = create_BCI(
 )
 
 _helm_app_version = "latest"
-if OS_VERSION in ("16.0"):
-    _helm_app_version = "3"
-elif OS_VERSION in ("16.1",):
+if OS_VERSION in ("16.0", "16.1"):
     _helm_app_version = "4"
 
 HELM_CONTAINER = create_BCI(

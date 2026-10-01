@@ -152,7 +152,6 @@ markers = [
     'git_2.51',
     'git_2.53',
     'git_latest',
-    'helm_3',
     'helm_4',
     'helm_latest',
     'nginx_1.21',
