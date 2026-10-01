@@ -21,10 +21,14 @@ from bci_tester.data import OS_VERSION
 from bci_tester.data import PHP_APACHE_CONTAINERS
 from bci_tester.data import PHP_CLI_CONTAINERS
 from bci_tester.data import PHP_FPM_CONTAINERS
+from bci_tester.data import PHP_MICRO_APACHE_CONTAINERS
+from bci_tester.data import PHP_MICRO_CLI_CONTAINERS
+from bci_tester.data import PHP_MICRO_FPM_CONTAINERS
 
 CONTAINER_IMAGES = (
     PHP_CLI_CONTAINERS + PHP_APACHE_CONTAINERS + PHP_FPM_CONTAINERS
 )
+
 
 PHP_FLAVOR_T = Literal["apache", "fpm", "cli"]
 _PHP_MAJOR_VERSION = 8
@@ -245,9 +249,18 @@ def test_zypper_install_php_extensions(
     [
         pytest.param(*t, marks=t[0].marks)
         for t in (
-            *((c, "apache") for c in PHP_APACHE_CONTAINERS),
-            *((c, "fpm") for c in PHP_FPM_CONTAINERS),
-            *((c, "cli") for c in PHP_CLI_CONTAINERS),
+            *(
+                (c, "apache")
+                for c in PHP_APACHE_CONTAINERS + PHP_MICRO_APACHE_CONTAINERS
+            ),
+            *(
+                (c, "fpm")
+                for c in PHP_FPM_CONTAINERS + PHP_MICRO_FPM_CONTAINERS
+            ),
+            *(
+                (c, "cli")
+                for c in PHP_CLI_CONTAINERS + PHP_MICRO_CLI_CONTAINERS
+            ),
         )
     ],
     indirect=["container_per_test"],
@@ -268,14 +281,15 @@ def test_environment_variables(
     def get_env_var(env_var: str) -> str:
         return container_per_test.connection.check_output(f"echo ${env_var}")
 
-    php_pkg_version = container_per_test.connection.package(
-        f"php{_PHP_MAJOR_VERSION}"
-    ).version
-    assert php_pkg_version == get_env_var("PHP_VERSION")
+    php_version = container_per_test.connection.check_output(
+        "php -r 'echo PHP_VERSION;'"
+    )
+    assert php_version == get_env_var("PHP_VERSION")
 
-    assert container_per_test.connection.package(
-        "php-composer2"
-    ).version == get_env_var("COMPOSER_VERSION")
+    composer_version = container_per_test.connection.check_output(
+        "composer2 -V | head -n 1 | cut -d' ' -f3"
+    )
+    assert composer_version == get_env_var("COMPOSER_VERSION")
 
     php_ini_dir_path = get_env_var("PHP_INI_DIR")
     php_ini_dir = container_per_test.connection.file(php_ini_dir_path)
@@ -296,7 +310,9 @@ def test_environment_variables(
             )
 
 
-@pytest.mark.parametrize("container_image", PHP_CLI_CONTAINERS)
+@pytest.mark.parametrize(
+    "container_image", PHP_CLI_CONTAINERS + PHP_MICRO_CLI_CONTAINERS
+)
 def test_cli_entry_point(
     container_image: DerivedContainer,
     container_runtime: OciRuntimeBase,
@@ -373,7 +389,11 @@ def test_mediawiki_fpm_build(pod_per_test: PodData) -> None:
     OS_VERSION not in ("tumbleweed"),
     reason="available only on Tumbleweed",
 )
-@pytest.mark.parametrize("container", PHP_APACHE_CONTAINERS, indirect=True)
+@pytest.mark.parametrize(
+    "container",
+    PHP_APACHE_CONTAINERS + PHP_MICRO_APACHE_CONTAINERS,
+    indirect=True,
+)
 def test_tmpfiles_d_created(container: ContainerData) -> None:
     """Check that our container image has all directories and files that
     would've been created by systemd-tmpfiles.
