@@ -582,7 +582,7 @@ GOLANG_OPENSSL_CONTAINERS = [
     create_BCI(
         build_tag=f"{BCI_CONTAINER_PREFIX}/golang:{golang_version}",
         extra_marks=[pytest.mark.__getattr__(f"golang_{stability}")],
-        available_versions=[*_DEFAULT_NONBASE_SLE_VERSIONS, "16.1"],
+        available_versions=["15.7"],
     )
     for golang_version, stability in (
         ("oldstable-openssl", "oldstable"),
