@@ -717,6 +717,10 @@ NVIDIA_CONTAINERS = [
         else [],
     )
     for driver_branch, kernel_flavor, os_ver in (
+        ("615", "default", "16.0"),
+        ("615", "64kb", "16.0"),
+        ("615", "default", "15.7"),
+        ("615", "64kb", "15.7"),
         ("610", "default", "16.0"),
         ("610", "64kb", "16.0"),
         ("610", "default", "15.7"),

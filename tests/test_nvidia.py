@@ -58,12 +58,17 @@ def test_image_content(container_per_test: ContainerData):
             "/opt/open/nvidia-modeset.ko.zst",
             "/opt/open/nvidia-uvm.ko.zst",
             "/opt/open/nvidia.ko.zst",
-            "/opt/proprietary/nvidia-drm.ko.zst",
-            "/opt/proprietary/nvidia-modeset.ko.zst",
-            "/opt/proprietary/nvidia-peermem.ko.zst",
-            "/opt/proprietary/nvidia-uvm.ko.zst",
-            "/opt/proprietary/nvidia.ko.zst",
         ]
+
+        # since 615 proprietary drivers are deprecated and not available
+        if branch < 615:
+            files += [
+                "/opt/proprietary/nvidia-drm.ko.zst",
+                "/opt/proprietary/nvidia-modeset.ko.zst",
+                "/opt/proprietary/nvidia-peermem.ko.zst",
+                "/opt/proprietary/nvidia-uvm.ko.zst",
+                "/opt/proprietary/nvidia.ko.zst",
+            ]
     else:
         files += [
             "/opt/open/nvidia-drm.ko",
