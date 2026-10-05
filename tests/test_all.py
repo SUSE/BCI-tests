@@ -907,6 +907,11 @@ def test_uids_stable(auto_container) -> None:
             expected_map["pesign"] = [499, 499]
             expected_map["systemd-coredump"] = [497, 1000]
 
+        if OS_VERSION in ("tumbleweed",):
+            # starting with valkey 9 (Tumbleweed) the user is 999
+            # on SLE 15 and 16 with valkey 8 the user is 499
+            expected_map["valkey"] = [999, 999]
+
         # Handle the 'kiosk/xorg' special case
         if (
             (container.container.get_base().baseurl or "")
