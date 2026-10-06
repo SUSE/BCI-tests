@@ -17,6 +17,8 @@ from pytest_container.container import PortForwarding
 from pytest_container.pod import Pod
 from pytest_container.pod import PodData
 
+from bci_tester.fips import host_fips_enabled
+
 from bci_tester.data import OS_VERSION
 from bci_tester.data import PHP_APACHE_CONTAINERS
 from bci_tester.data import PHP_CLI_CONTAINERS
@@ -354,6 +356,10 @@ def test_mediawiki_php_apache(container_per_test: ContainerData) -> None:
     resp.raise_for_status()
 
 
+@pytest.mark.skipif(
+    host_fips_enabled(),
+    reason="mediawiki signature is created by DSA key, which is disabled in FIPS",
+)
 @pytest.mark.parametrize(
     "pod_per_test", MEDIAWIKI_FPM_PODS, indirect=["pod_per_test"]
 )
