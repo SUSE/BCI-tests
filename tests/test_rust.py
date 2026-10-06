@@ -7,6 +7,7 @@ import pytest
 from pytest_container import GitRepositoryBuild
 
 from bci_tester.data import RUST_CONTAINERS
+from bci_tester.fips import host_fips_enabled
 
 CONTAINER_IMAGES = RUST_CONTAINERS
 
@@ -41,6 +42,10 @@ def test_cargo_version(auto_container):
             GitRepositoryBuild(
                 repository_url="https://github.com/sfackler/rust-openssl",
                 build_command="zypper -n in libopenssl-devel && cargo build && cargo test",
+                marks=pytest.mark.skipif(
+                    host_fips_enabled(),
+                    reason="rust-openssl unit tests use unsupported algorithms in FIPS",
+                )
             ),
             GitRepositoryBuild(
                 repository_url="https://github.com/rust-random/rand",
