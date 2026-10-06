@@ -32,8 +32,12 @@ CONTAINER_IMAGES = (
 
 PHP_FLAVOR_T = Literal["apache", "fpm", "cli"]
 _PHP_MAJOR_VERSION = 8
-_MEDIAWIKI_VERSION = "1.43.8"
-_MEDIAWIKI_MAJOR_VERSION = ".".join(_MEDIAWIKI_VERSION.split(".")[:2])
+_MEDIAWIKI_VERSION = "1.43.11"
+_MEDIAWIKI_DOWNLOAD = f"""
+        curl -sfSL "https://releases.wikimedia.org/mediawiki/{".".join(_MEDIAWIKI_VERSION.split(".")[:2])}/mediawiki-{_MEDIAWIKI_VERSION}.tar.gz" -o mediawiki.tar.gz; \\
+        sha256sum -c /tmp/mediawiki-core.sha256 < mediawiki.tar.gz; \\
+        tar -x --strip-components=1 -f mediawiki.tar.gz; \\
+        rm -r mediawiki.tar.gz; """
 
 MEDIAWIKI_APACHE_CONTAINERS = [
     pytest.param(
@@ -41,9 +45,7 @@ MEDIAWIKI_APACHE_CONTAINERS = [
             base=container_and_marks_from_pytest_param(c)[0],
             forwarded_ports=[PortForwarding(container_port=80)],
             image_format=ImageFormat.DOCKER,
-            containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
-ENV MEDIAWIKI_MAJOR_VERSION={_MEDIAWIKI_MAJOR_VERSION}"""
-            + """
+            containerfile=f"""
 RUN set -e; zypper -n in $PHPIZE_DEPS oniguruma-devel libicu-devel gcc-c++ php8-sqlite php8-gd gzip && \
     for ext in mbstring intl fileinfo iconv calendar ctype dom; do \
         docker-php-ext-configure $ext; \
@@ -51,17 +53,15 @@ RUN set -e; zypper -n in $PHPIZE_DEPS oniguruma-devel libicu-devel gcc-c++ php8-
     done \
     && docker-php-source delete \
     && zypper -n rm oniguruma-devel libicu-devel gcc-c++ \
-    && zypper -n clean && rm -rf /var/log/{zypp*,suseconnect*}
+    && zypper -n clean -a && rm -rf /var/log/{{zypp*,suseconnect*}}
 
-RUN set -euo pipefail; \
-    zypper -n in tar; \
-    curl -sfOL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
-    tar -xf "mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
-    rm "mediawiki-${MEDIAWIKI_VERSION}.tar.gz"; \
-    pushd "mediawiki-${MEDIAWIKI_VERSION}/"; mv * ..; popd; rmdir "mediawiki-${MEDIAWIKI_VERSION}"; \
-    php maintenance/install.php --dbname mediawiki.db --dbtype sqlite --pass insecureAndAtLeast10CharsLong --scriptpath="" --server="http://localhost" test-wiki geeko; \
-    chown --recursive wwwrun data; \
-    zypper -n clean; rm -rf /var/log/{zypp*,suseconnect*}
+COPY tests/files/mediawiki-core.sha256 /tmp/mediawiki-core.sha256
+
+RUN set -euo pipefail; \\
+    {_MEDIAWIKI_DOWNLOAD} \\
+    php maintenance/install.php --dbname mediawiki.db --dbtype sqlite --pass insecureAndAtLeast10CharsLong --scriptpath="" --server="http://localhost" test-wiki geeko; \\
+    chown --recursive wwwrun data; \\
+    zypper -n clean -a; rm -rf /var/log/{{zypp*,suseconnect*}}
 
 HEALTHCHECK --interval=10s --timeout=1s --retries=10 CMD curl -sf http://localhost
 EXPOSE 80
@@ -86,9 +86,7 @@ MEDIAWIKI_FPM_PODS = [
             containers=[
                 DerivedContainer(
                     base=container_and_marks_from_pytest_param(c)[0],
-                    containerfile=f"""ENV MEDIAWIKI_VERSION={_MEDIAWIKI_VERSION}
-ENV MEDIAWIKI_MAJOR_VERSION={_MEDIAWIKI_MAJOR_VERSION}"""
-                    + r"""
+                    containerfile=r"""
 RUN set -eux; \
     zypper -n ref; \
     zypper -n up; \
@@ -127,25 +125,17 @@ RUN set -eux; \
         mkdir -p data; \
         chown -R wwwrun data
 
-# pre-fetched keys from https://www.mediawiki.org/keys/keys.txt
-COPY tests/files/mariadb-keys.asc /tmp/mariadb-keys.asc
+COPY tests/files/mediawiki-core.sha256 /tmp/mediawiki-core.sha256
 
 # MediaWiki setup
 RUN set -eux; \
-    zypper -n in dirmngr gzip; \
-        curl -sfSL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz" -o mediawiki.tar.gz; \
-        curl -sfSL "https://releases.wikimedia.org/mediawiki/${MEDIAWIKI_MAJOR_VERSION}/mediawiki-${MEDIAWIKI_VERSION}.tar.gz.sig" -o mediawiki.tar.gz.sig; \
-        export GNUPGHOME="$(mktemp -d)"; \
-        # import gpg keys from https://www.mediawiki.org/keys/keys.txt
-        gpg --import /tmp/mariadb-keys.asc; \
-        gpg --batch --verify mediawiki.tar.gz.sig mediawiki.tar.gz; \
-        tar -x --strip-components=1 -f mediawiki.tar.gz; \
-        gpgconf --kill all; \
-        rm -r "$GNUPGHOME" mediawiki.tar.gz.sig mediawiki.tar.gz; \
+    zypper -n in gzip; \
+"""
+                    + _MEDIAWIKI_DOWNLOAD
+                    + r""" \
         chown -R wwwrun extensions skins cache images data; \
         php maintenance/install.php --dbname mediawiki.db --dbtype sqlite --pass insecureAndAtLeast10CharsLong --scriptpath="" --server="http://localhost" test-wiki geeko && \
-        chown --recursive wwwrun data; \
-        zypper -n rm dirmngr gzip;
+        chown --recursive wwwrun data;
 
 CMD ["php-fpm"]
 """,
