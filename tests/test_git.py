@@ -26,6 +26,7 @@ _SSH_PORT = 22022
 
 _GIT_SERVER_CONTAINERFILE = (
     rf"""
+RUN zypper -n in patterns-base-fips
 RUN zypper -n in git-core openssh-server openssh-clients
 RUN ssh-keygen -A
 RUN useradd -U -m -p "*" git
