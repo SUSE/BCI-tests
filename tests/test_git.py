@@ -13,14 +13,15 @@ from bci_tester.data import GIT_CONTAINER
 CONTAINER_IMAGES = (GIT_CONTAINER,)
 
 _PRIV_KEY = """-----BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-QyNTUxOQAAACDJMR7NW+gNZGborupz8XoZEjuKRuKjLzVPAwfPcjrTzQAAAIi/QgI2v0IC
-NgAAAAtzc2gtZWQyNTUxOQAAACDJMR7NW+gNZGborupz8XoZEjuKRuKjLzVPAwfPcjrTzQ
-AAAEBACrN2+98i3BPX40CQxih8gRePIokGrmrobXVnNja+XckxHs1b6A1kZuiu6nPxehkS
-O4pG4qMvNU8DB89yOtPNAAAAA0JDSQEC
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS
+1zaGEyLW5pc3RwMjU2AAAACG5pc3RwMjU2AAAAQQTU+umsMRCwKLRGp4yfq244galD6ILd
+/tYS0ikJzsBXMYcM/onThYnKNNiTBOVH2xsFarDRPfM46X8sAvLBCZSIAAAAoPk2UJz5Nl
+CcAAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBNT66awxELAotEan
+jJ+rbjiBqUPogt3+1hLSKQnOwFcxhwz+idOFico02JME5UfbGwVqsNE98zjpfywC8sEJlI
+gAAAAgLO8ksIRPVDtOZQpjYOIrScS6SUYFYvqJv9S2VfbSNesAAAADQkNJAQIDBAU=
 -----END OPENSSH PRIVATE KEY-----"""
 
-_PUB_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMkxHs1b6A1kZuiu6nPxehkSO4pG4qMvNU8DB89yOtPN BCI"
+_PUB_KEY = "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBNT66awxELAotEanjJ+rbjiBqUPogt3+1hLSKQnOwFcxhwz+idOFico02JME5UfbGwVqsNE98zjpfywC8sEJlIg= BCI"
 
 _SSH_PORT = 22022
 
@@ -59,7 +60,7 @@ RUN chown -R git /etc/ssh
 
 EXPOSE {_SSH_PORT}
 
-CMD ["/usr/bin/su", "git", "-s", "/bin/bash", "-c", "/usr/sbin/sshd -De -h /etc/ssh/ssh_host_ed25519_key"]
+CMD ["/usr/bin/su", "git", "-s", "/bin/bash", "-c", "/usr/sbin/sshd -De -h /etc/ssh/ssh_host_ecdsa_key"]
 
 HEALTHCHECK --interval=5s --timeout=5s --retries=5"""
     + (" --start-period=1m" if LOCALHOST.system_info.arch == "ppc64le" else "")
@@ -120,9 +121,9 @@ def test_git_clone_ssh(pod_per_test: PodData) -> None:
     host = srv.inspect.network.ip_address or "127.0.0.1"
 
     cli.check_output("mkdir /root/.ssh")
-    cli.check_output(f'echo -e "{_PRIV_KEY}" > /root/.ssh/id_ed25519')
-    cli.check_output("chmod 0600 /root/.ssh/id_ed25519")
-    cli.check_output("eval `ssh-agent -s` && ssh-add /root/.ssh/id_ed25519")
+    cli.check_output(f'echo -e "{_PRIV_KEY}" > /root/.ssh/id_ecdsa')
+    cli.check_output("chmod 0600 /root/.ssh/id_ecdsa")
+    cli.check_output("eval `ssh-agent -s` && ssh-add /root/.ssh/id_ecdsa")
     cli.check_output(
         f"ssh-keyscan -vvv -p {_SSH_PORT} {host} >> /root/.ssh/known_hosts"
     )
