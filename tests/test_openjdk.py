@@ -17,6 +17,7 @@ from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 from bci_tester.data import OPENJDK_21_CONTAINER
 from bci_tester.data import OPENJDK_25_CONTAINER
+from bci_tester.data import OPENJDK_26_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
 
 CONTAINER_TEST_DIR = "/src/"
@@ -89,6 +90,9 @@ CONTAINER_IMAGES_CASSANDRA = [
         ),
         pytest.param(
             OPENJDK_25_CONTAINER, "25", marks=OPENJDK_25_CONTAINER.marks
+        ),
+        pytest.param(
+            OPENJDK_26_CONTAINER, "26", marks=OPENJDK_26_CONTAINER.marks
         ),
     ],
     indirect=["container"],

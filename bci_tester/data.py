@@ -637,6 +637,14 @@ OPENJDK_DEVEL_25_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:25",
     available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
+OPENJDK_26_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:26",
+    available_versions=["tumbleweed"],
+)
+OPENJDK_DEVEL_26_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-devel:26",
+    available_versions=["tumbleweed"],
+)
 
 
 OPENJDK_CONTAINERS = [
@@ -644,6 +652,7 @@ OPENJDK_CONTAINERS = [
     OPENJDK_17_CONTAINER,
     OPENJDK_21_CONTAINER,
     OPENJDK_25_CONTAINER,
+    OPENJDK_26_CONTAINER,
 ]
 
 OPENJDK_DEVEL_CONTAINERS = [
@@ -651,6 +660,7 @@ OPENJDK_DEVEL_CONTAINERS = [
     OPENJDK_DEVEL_17_CONTAINER,
     OPENJDK_DEVEL_21_CONTAINER,
     OPENJDK_DEVEL_25_CONTAINER,
+    OPENJDK_DEVEL_26_CONTAINER,
 ]
 
 NODEJS_BASE_CONTAINERS = [
@@ -661,6 +671,7 @@ NODEJS_BASE_CONTAINERS = [
     for node_version, available_versions in (
         (22, ("15.7", "16.0")),
         (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
+        (26, ["tumbleweed"]),
     )
 ]
 
@@ -671,6 +682,7 @@ NODEJS_MICRO_CONTAINERS = [
     )
     for node_version, available_versions in (
         (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
+        (26, ["tumbleweed"]),
     )
 ]
 
