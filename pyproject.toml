@@ -40,6 +40,8 @@ markers = [
     'apache-tomcat_10.1-openjdk17',
     'apache-tomcat_10.1-openjdk21',
     'apache-tomcat_10.1-openjdk25',
+    'apache-tomcat_11-openjdk21',
+    'apache-tomcat_11-openjdk25',
     'aws-toolchain-runtime-provider_latest',
     'az-toolchain-runtime-provider_latest',
     'google-toolchain-runtime-provider_latest',
