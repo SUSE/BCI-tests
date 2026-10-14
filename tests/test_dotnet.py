@@ -241,9 +241,13 @@ def test_microsoft_dotnet_repository(container_per_test):
     ms_repo = ms_repos[0]
 
     assert ms_repo.alias == MS_REPO_NAME
-    assert ms_repo.url == "https://packages.microsoft.com/sles/15/prod/"
     assert ms_repo.enabled
     assert ms_repo.gpgcheck
+
+    if OS_VERSION in ("15.7",):
+        assert ms_repo.url == "https://packages.microsoft.com/sles/15/prod/"
+    else:
+        assert ms_repo.url == "https://packages.microsoft.com/sles/16/prod/"
 
     assert len(get_pkg_list()) > 0
     for pkg_name in get_pkg_list("-i"):
