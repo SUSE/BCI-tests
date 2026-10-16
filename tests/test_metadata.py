@@ -525,7 +525,7 @@ def test_general_labels(
             assert labels["com.suse.eula"] == "sle-eula"
         else:
             assert labels["com.suse.eula"] == (
-                "sle-beta" if OS_VERSION in ("16.1",) else "sle-bci"
+                "sle-beta" if OS_VERSION in ("16.2",) else "sle-bci"
             )
             if container_name in ("nvidia-driver",):
                 assert "NVIDIA Driver" in labels[f"{prefix}.title"]

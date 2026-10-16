@@ -1688,7 +1688,7 @@ for ctr_without_shell in CONTAINERS_WITHOUT_SHELL:
 # 16.1 is not yet released, so no l3 support either
 if OS_VERSION in (
     "tumbleweed",
-    "16.1",
+    "16.2",
 ):
     L3_CONTAINERS = ()
 else:
