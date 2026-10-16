@@ -119,7 +119,6 @@ jobs:
       matrix:
         toxenv: ${{fromJson(needs.gentestmatrix.outputs.matrix)}}
         os_version:
-          - "16.0"
           - "16.1"
           - "tumbleweed"
         include:
@@ -243,6 +242,14 @@ jobs:
             os_version: 15.7
           - toxenv: spack
             os_version: 15.7
+          - toxenv: all
+            os_version: "16.0"
+          - toxenv: base
+            os_version: "16.0"
+          - toxenv: metadata
+            os_version: "16.0"
+          - toxenv: fips
+            os_version: "16.0"
           - toxenv: amd
             os_version: 15.7-third-party
           - toxenv: amd
