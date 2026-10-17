@@ -1310,7 +1310,7 @@ KIOSK_FIREFOX_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/firefox-esr:esr",
         bci_type=ImageType.APPLICATION,
-        available_versions=("15.7",),
+        available_versions=("15.7", "16.1"),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1319,7 +1319,7 @@ KIOSK_PULSEAUDIO_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/pulseaudio:17",
         bci_type=ImageType.APPLICATION,
-        available_versions=("15.7",),
+        available_versions=("15.7", "16.1"),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1328,7 +1328,7 @@ KIOSK_XORG_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/xorg:21",
         bci_type=ImageType.APPLICATION,
-        available_versions=("15.7",),
+        available_versions=("15.7", "16.1"),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1337,7 +1337,7 @@ KIOSK_XORG_CLIENT_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/xorg-client:21",
         bci_type=ImageType.APPLICATION,
-        available_versions=("15.7",),
+        available_versions=("15.7", "16.1"),
         custom_entry_point="/bin/sh",
     )
 ]
@@ -1346,7 +1346,7 @@ KIOSK_X11VNC_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/kiosk/tigervnc-x11vnc:1",
         bci_type=ImageType.APPLICATION,
-        available_versions=("15.7",),
+        available_versions=("15.7", "16.1"),
         custom_entry_point="/bin/sh",
     )
 ]
