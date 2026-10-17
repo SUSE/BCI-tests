@@ -62,6 +62,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "16.0-pc2025",
     "16.0-third-party",
     "16.1",
+    "16.2",
     "tumbleweed",
 )
 
@@ -77,14 +78,13 @@ ALLOWED_BCI_REPO_OS_VERSIONS = (
 )
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.0", "16.1")
+_DEFAULT_NONBASE_SLE_VERSIONS = ("15.7", "16.1")
 
 # Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.0", "16.1", "tumbleweed")
+_DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.1", "tumbleweed")
 
 # SLFO 16.0+ Test Language and Application containers by default for these versions
-_DEFAULT_NONBASE_SLFOPLUS_VERSIONS = ("16.0", "16.1", "tumbleweed")
-
+_DEFAULT_NONBASE_SLFOPLUS_VERSIONS = ("16.1", "tumbleweed")
 
 # Test base containers by default for these versions
 _DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "16.1", "tumbleweed")
@@ -471,7 +471,6 @@ def create_BCI(
 KIWI_CONTAINERS = [
     create_BCI(build_tag=f"bci/kiwi:{tag}", available_versions=(ver,))
     for ver, tag in (
-        ("16.0", "10.2"),
         ("16.1", "10.2"),
         ("tumbleweed", "latest"),
     )
@@ -669,7 +668,7 @@ NODEJS_BASE_CONTAINERS = [
         available_versions=available_versions,
     )
     for node_version, available_versions in (
-        (22, ("15.7", "16.0")),
+        (22, ("15.7",)),
         (24, _DEFAULT_NONBASE_SLFOPLUS_VERSIONS),
         (26, ["tumbleweed"]),
     )
@@ -762,8 +761,8 @@ PYTHON_BASE_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.13", ["tumbleweed", "16.0", "16.1"]),
-        ("3.14", ["tumbleweed", "16.1"]),
+        ("3.13", ("tumbleweed", "16.1", "16.2")),
+        ("3.14", ("tumbleweed", "16.1")),
     )
 ]
 
@@ -788,8 +787,8 @@ PYTHON_MICRO_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.13", ["tumbleweed", "16.0", "16.1"]),
-        ("3.14", ["tumbleweed", "16.1"]),
+        ("3.13", ("tumbleweed", "16.1", "16.2")),
+        ("3.14", ("tumbleweed", "16.1")),
     )
 ]
 
@@ -810,7 +809,7 @@ RUBY_BASE_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.4", ("16.0", "16.1")),
+        ("3.4", ("16.1", "16.2")),
         ("4.0", ("tumbleweed",)),
     )
 ]
@@ -821,7 +820,7 @@ RUBY_MICRO_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.4", ("16.0", "16.1")),
+        ("3.4", ("16.1", "16.2")),
         ("4.0", ("tumbleweed",)),
     )
 ]
@@ -932,7 +931,6 @@ CONTAINER_389DS_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=3389)],
     )
     for ver, os_ver in (
-        ("3.0", ("16.0",)),
         ("3.1", ("16.1",)),
         ("latest", ("tumbleweed",)),
     )
@@ -985,7 +983,7 @@ PHP_MICRO_FPM_CONTAINERS = [
 MARIADB_ROOT_PASSWORD = "'88tpw-n!t-s$$cr`t!"
 
 _MARIADB_VERSION_OS_MATRIX: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
-    ("11.8", ("15.7", "16.0")),
+    ("11.8", ("15.7",)),
     ("12.3", ("16.1",)),
     ("latest", ("tumbleweed",)),
 )
@@ -1052,7 +1050,7 @@ POSTGRESQL_CONTAINERS = [
 
 
 _distribution_version = "latest"
-if OS_VERSION in ("16.0", "16.1"):
+if OS_VERSION in ("16.1", "16.2"):
     _distribution_version = "3.1"
 
 DISTRIBUTION_CONTAINER = create_BCI(
@@ -1066,8 +1064,6 @@ DISTRIBUTION_CONTAINER = create_BCI(
 _git_app_version = "latest"
 if OS_VERSION in ("16.1",):
     _git_app_version = "2.53"
-elif OS_VERSION in ("16.0",):
-    _git_app_version = "2.51"
 
 GIT_CONTAINER = create_BCI(
     build_tag=f"{APP_CONTAINER_PREFIX}/git:{_git_app_version}",
@@ -1076,7 +1072,7 @@ GIT_CONTAINER = create_BCI(
 )
 
 _helm_app_version = "latest"
-if OS_VERSION in ("16.0", "16.1"):
+if OS_VERSION in ("16.1", "16.2"):
     _helm_app_version = "4"
 
 HELM_CONTAINER = create_BCI(
@@ -1105,7 +1101,7 @@ NGINX_CONTAINERS = [
     )
     for nginx_ver, os_versions in (
         ("latest", ("tumbleweed",)),
-        ("1.27", ("16.0", "16.1")),
+        ("1.27", ("16.1", "16.2")),
     )
 ]
 
@@ -1134,7 +1130,7 @@ KEA_CONTAINERS = [
     )
     for kea_ver, os_versions in (
         ("2.6", ("15.7",)),
-        ("3.0", ("16.0", "16.1")),
+        ("3.0", ("16.1",)),
         ("latest", ("tumbleweed",)),
     )
 ]
@@ -1235,8 +1231,8 @@ PROMETHEUS_CONTAINERS = [
         available_versions=versions,
     )
     for tag, versions in (
-        ("3", ("15.7",)),
-        ("3", ("16.0", "16.1", "tumbleweed")),
+        ("3", _DEFAULT_NONBASE_SLE_VERSIONS),
+        ("3", ("tumbleweed",)),
     )
 ]
 
@@ -1294,7 +1290,7 @@ VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in (
-        (("16.0", "16.1"), "8.0"),
+        (("16.1", "16.2"), "8.0"),
         (("tumbleweed",), "latest"),
     )
 ]
@@ -1685,7 +1681,7 @@ for ctr_without_shell in CONTAINERS_WITHOUT_SHELL:
 
 #: Containers with L3 support
 # Tumbleweed has no concept of l3 support
-# 16.1 is not yet released, so no l3 support either
+# 16.2 is not yet released, so no l3 support either
 if OS_VERSION in (
     "tumbleweed",
     "16.2",
