@@ -103,28 +103,28 @@ def test_nano_image_size(container, container_runtime):
             "x86_64": 8,
             "aarch64": 9,
             "ppc64le": 9,
-            "s390x": 7,
+            "s390x": 8,
         }
     elif OS_VERSION in ("16.1",):
         size: Dict[str, int] = {
             "x86_64": 7,
             "aarch64": 7,
             "ppc64le": 7,
-            "s390x": 7,
+            "s390x": 8,
         }
     elif OS_VERSION in ("16.0",):
         size: Dict[str, int] = {
             "x86_64": 7,
             "aarch64": 7,
             "ppc64le": 7,
-            "s390x": 7,
+            "s390x": 8,
         }
     else:
         size: Dict[str, int] = {
             "x86_64": 9,
             "aarch64": 9,
             "ppc64le": 9,
-            "s390x": 7,
+            "s390x": 8,
         }
     container_size = container_runtime.get_image_size(
         container.image_url_or_id
