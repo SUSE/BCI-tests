@@ -834,6 +834,10 @@ def test_acc_label(container: ContainerData):
 
 
 @SKIP_IF_TW_MARK
+@pytest.mark.skipif(
+    OS_VERSION == "16.1-third-party",
+    reason="16.1-third-party is not L3 yet",
+)
 @pytest.mark.parametrize("container", L3_CONTAINERS, indirect=True)
 def test_l3_label(container: ContainerData):
     """Check that containers under L3 support have the label

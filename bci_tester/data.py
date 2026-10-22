@@ -62,6 +62,7 @@ ALLOWED_NONBASE_OS_VERSIONS = (
     "16.0-pc2025",
     "16.0-third-party",
     "16.1",
+    "16.1-third-party",
     "16.2",
     "tumbleweed",
 )
@@ -730,6 +731,8 @@ NVIDIA_CONTAINERS = [
         else [],
     )
     for driver_branch, kernel_flavor, os_ver in (
+        ("615", "default", "16.1"),
+        ("615", "64kb", "16.1"),
         ("615", "default", "16.0"),
         ("615", "64kb", "16.0"),
         ("615", "default", "15.7"),

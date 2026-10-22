@@ -577,6 +577,9 @@ def test_no_compat_packages(container):
     """Ensure that no host-compatibility packages are installed in the containers"""
     # we cannot check for an existing package if rpm is not installed
     if container.connection.exists("rpm"):
+        # query the db, otherwise is_installed can fail due to:
+        #   Generating missing index(es)
+        container.connection.run_expect([0], "rpm -qa --quiet")
         assert not container.connection.package(
             "compat-usrmerge-tools"
         ).is_installed
