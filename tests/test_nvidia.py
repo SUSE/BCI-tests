@@ -20,6 +20,7 @@ for param in NVIDIA_CONTAINERS:
                 custom_entry_point="/bin/sh",
             ),
             marks=marks,
+            id=ctr.baseurl,
         )
     )
 
