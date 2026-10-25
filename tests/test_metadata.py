@@ -99,6 +99,7 @@ from bci_tester.data import POSTGRESQL_CONTAINERS
 from bci_tester.data import PROMETHEUS_CONTAINERS
 from bci_tester.data import PYTHON_CONTAINERS
 from bci_tester.data import PYTHON_MICRO_CONTAINERS
+from bci_tester.data import RABBITMQ_CONTAINER
 from bci_tester.data import RELEASED_LTSS_VERSIONS
 from bci_tester.data import RMT_CONTAINERS
 from bci_tester.data import RUBY_CONTAINERS
@@ -379,6 +380,7 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
         ),
     ]
     + [(STUNNEL_CONTAINER, "stunnel", ImageType.APPLICATION)]
+    + [(RABBITMQ_CONTAINER, "rabbitmq", ImageType.APPLICATION)]
     + [
         (kubectl_container, "kubectl", ImageType.APPLICATION)
         for kubectl_container in KUBECTL_CONTAINERS

@@ -6,19 +6,23 @@ from pytest_container import MultiStageBuild
 
 from bci_tester.data import KIOSK_XORG_CLIENT_CONTAINERS
 
+# Node.js: 24.21.0
+# Electron: 44.4.5
+
+
 CONTAINER_IMAGES = (KIOSK_XORG_CLIENT_CONTAINERS,)
 
 ELECTRON_APP_BUILD = """
 FROM $runner as target
 FROM $builder as builder
 WORKDIR /src
-RUN npm install --omit=dev electron@43.2.0
+RUN npm install --omit=dev electron@44.4.5
 RUN node_modules/.bin/install-electron
 
 FROM target
 COPY --from=builder /src/node_modules/electron/dist /usr/local/electron
 USER user
-RUN test "$$(/usr/local/electron/electron -v 2>/dev/null)" = "v43.2.0"
+RUN test "$$(/usr/local/electron/electron -v 2>/dev/null)" = "v44.4.5"
 """
 
 

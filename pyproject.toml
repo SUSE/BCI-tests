@@ -247,6 +247,7 @@ markers = [
     'python_3.14-base',
     'python_3.14-micro',
     'python_3.6',
+    'rabbitmq_4',
     'registry_2.8',
     'registry_3.1',
     'registry_latest',

@@ -1286,6 +1286,13 @@ STUNNEL_CONTAINER = create_BCI(
     available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
 )
 
+RABBITMQ_CONTAINER = create_BCI(
+    build_tag=f"{APP_CONTAINER_PREFIX}/rabbitmq:4",
+    bci_type=ImageType.APPLICATION,
+    custom_entry_point="/bin/sh",
+    available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+)
+
 VALKEY_CONTAINERS = [
     create_BCI(
         build_tag=f"{APP_CONTAINER_PREFIX}/valkey:{tag}",
@@ -1298,6 +1305,7 @@ VALKEY_CONTAINERS = [
         (("tumbleweed",), "latest"),
     )
 ]
+
 
 BIND_CONTAINERS = [
     create_BCI(
@@ -1645,6 +1653,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *PROMETHEUS_CONTAINERS,
     *SAMBA_CONTAINERS,
     STUNNEL_CONTAINER,
+    RABBITMQ_CONTAINER,
     *VALKEY_CONTAINERS,
     *SPR_CONTAINERS,
     *KUBEVIRT_CONTAINERS,
@@ -1714,6 +1723,7 @@ else:
             PC_GCP_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
             PC_AZ_TOOLCHAIN_RUNTIME_PROVIDER_CONTAINER,
             STUNNEL_CONTAINER,
+            RABBITMQ_CONTAINER,
         ]
         + BASE_FIPS_CONTAINERS
         + CONTAINER_389DS_CONTAINERS
