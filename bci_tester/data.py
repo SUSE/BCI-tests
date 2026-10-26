@@ -840,12 +840,12 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
 
 DOTNET_SDK_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:8.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_9_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:9.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_SDK_10_0_CONTAINER = create_BCI(
@@ -855,12 +855,12 @@ DOTNET_SDK_10_0_CONTAINER = create_BCI(
 )
 DOTNET_ASPNET_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:8.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_9_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:9.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
@@ -870,12 +870,12 @@ DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
 )
 DOTNET_RUNTIME_8_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:8.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_9_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:9.0",
-    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    available_versions=("15.7",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_10_0_CONTAINER = create_BCI(
@@ -1165,7 +1165,7 @@ GCC_CONTAINERS = [
     for gcc_version, os_versions in (
         (13, ("tumbleweed",)),
         (14, ("tumbleweed",)),
-        (15, ("16.0", "16.1", "tumbleweed")),
+        (15, ("16.1", "tumbleweed")),
         (16, ("16.1", "tumbleweed")),
     )
 ]
