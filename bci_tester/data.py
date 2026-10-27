@@ -211,14 +211,18 @@ else:
     obs_project: str = f"registry.opensuse.org/devel/bci/{DISTNAME}"
     if OS_VERSION == "16.0-pc2025":
         ibs_cr_project = "registry.suse.de/suse/slfo/products/publiccloud/toolchain/2025/totest"
-    elif OS_VERSION in ("15.7-third-party", "16.0-third-party"):
+    elif OS_VERSION in (
+        "15.7-third-party",
+        "16.0-third-party",
+        "16.1-third-party",
+    ):
         ibs_project = (
             f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}"
         )
         ibs_cr_project = (
-            f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/test"
-            if OS_VERSION == "16.0-third-party"
-            else f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/totest"
+            f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/totest"
+            if OS_VERSION == "15.7-third-party"
+            else f"registry.suse.de/product/suse-containers-thirdparty/{DISTNAME}/test"
         )
     elif OS_VERSION.startswith("16"):
         ibs_cr_project = (
