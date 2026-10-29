@@ -723,9 +723,13 @@ def test_disturl(
             "obs://build.suse.de/SUSE:SLFO:Products:PublicCloud:Toolchain:2025"
             in disturl
         )
-    elif OS_VERSION == "16.0-third-party" and TARGET in ("ibs", "ibs-cr"):
+    elif (
+        OS_VERSION.startswith("16.")
+        and OS_VERSION.endswith("-third-party")
+        and TARGET in ("ibs", "ibs-cr")
+    ):
         assert (
-            "obs://build.suse.de/Product:SUSE-Containers-ThirdParty:16.0"
+            f"obs://build.suse.de/Product:SUSE-Containers-ThirdParty:16.{OS_SP_VERSION}"
             in disturl
         )
     elif OS_VERSION.startswith("16."):
