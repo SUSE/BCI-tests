@@ -79,6 +79,7 @@ from bci_tester.data import NODEJS_MICRO_CONTAINERS
 from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
+from bci_tester.data import OPENJDK_MICRO_CONTAINERS
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
@@ -208,7 +209,10 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [(c, "amd-driver", ImageType.THIRD_PARTY) for c in AMD_CONTAINERS]
     + [(c, "nvidia-driver", ImageType.THIRD_PARTY) for c in NVIDIA_CONTAINERS]
     + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
-    + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
+    + [
+        (c, "openjdk", ImageType.LANGUAGE_STACK)
+        for c in OPENJDK_CONTAINERS + OPENJDK_MICRO_CONTAINERS
+    ]
     + [
         (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
         for c in OPENJDK_DEVEL_CONTAINERS
