@@ -10,6 +10,7 @@ from typing import Tuple
 
 import pytest
 from _pytest.mark import ParameterSet
+from pytest_container import DerivedContainer
 from pytest_container import GitRepositoryBuild
 from pytest_container import container_and_marks_from_pytest_param
 
@@ -23,6 +24,7 @@ from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_9_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_10_0_CONTAINER
 from bci_tester.data import OS_VERSION
+from bci_tester.fips import host_fips_enabled
 from bci_tester.util import get_repos_from_connection
 
 DOTNET_SDK_CONTAINERS = [
@@ -256,3 +258,65 @@ def test_microsoft_dotnet_repository(container_per_test):
             or pkg_name[:6] == "aspnet"
             or pkg_name[:27] == "netstandard-targeting-pack-"
         )
+
+
+DOTNET_FIPS_APP_CONTAINERS = [
+    pytest.param(
+        DerivedContainer(
+            base=container_and_marks_from_pytest_param(ctr)[0],
+            containerfile="""
+RUN mkdir /app
+COPY tests/files/dotnet-fips/Program.cs /app/Program.cs
+COPY tests/files/dotnet-fips/FipsTester.csproj /app/FipsTester.csproj
+COPY tests/files/dotnet-fips/openssl-fips-enforcing.cnf /app/openssl-fips-enforcing.cnf
+WORKDIR /app
+""",
+        ),
+        marks=ctr.marks,
+        id=ctr.id,
+    )
+    for ctr in DOTNET_SDK_CONTAINERS
+]
+
+
+@pytest.mark.parametrize(
+    "container_per_test",
+    DOTNET_FIPS_APP_CONTAINERS,
+    indirect=["container_per_test"],
+)
+def test_dotnet_fips_app(container_per_test):
+    """
+    Check if non-FIPS algorithms are blocked in a FIPS enforcing host.
+
+    If the host is not FIPS enforcing, set a custom configuration that enforces
+    FIPS on .NET applications.
+
+    On the .NET runtime, MD5 works in certain cases due to a non-FIPS
+    implementation if available. For more details check this commit:
+    https://github.com/dotnet/runtime/commit/7bc40a5a0a29411981e64733b803f7a16fedbd86
+
+    MD5 is simply ignored as long as the test run does not cause an error.
+    """
+    _, tag_version = container_per_test.container.base.url.split(":")
+
+    container_per_test.connection.run_expect(
+        [0],
+        f"dotnet publish -c Release -f net{tag_version} -p:TargetFrameworks=net{tag_version} -o release",
+    )
+
+    if host_fips_enabled():
+        # MD5 passes on a FIPS-enabled host using our default configuration.
+        cmd = "./release/FipsTester"
+    else:
+        # MD5 is blocked on this custom configuration.
+        cmd = (
+            "OPENSSL_CONF=/app/openssl-fips-enforcing.cnf ./release/FipsTester"
+        )
+
+    assert (
+        container_per_test.connection.check_output(cmd)
+        .strip()
+        .endswith(
+            "[PASS] FIPS mode is strictly enforced and functioning as expected."
+        )
+    )
