@@ -66,6 +66,7 @@ from bci_tester.data import KIWI_CONTAINERS
 from bci_tester.data import KUBECTL_CONTAINERS
 from bci_tester.data import KUBEVIRT_CDI_CONTAINERS
 from bci_tester.data import KUBEVIRT_CONTAINERS
+from bci_tester.data import L2_CONTAINERS
 from bci_tester.data import L3_CONTAINERS
 from bci_tester.data import LTSS_BASE_CONTAINERS
 from bci_tester.data import LTSS_BASE_FIPS_CONTAINERS
@@ -526,7 +527,7 @@ def test_general_labels(
         else:
             assert labels["com.suse.eula"] == (
                 "sle-beta" if OS_VERSION in ("16.2",) else "sle-bci"
-            )
+            ), f"unexpected eula {labels['com.suse.eula']}"
             if container_name in ("nvidia-driver",):
                 assert "NVIDIA Driver" in labels[f"{prefix}.title"]
             elif container_name in ("amd-driver",):
@@ -806,7 +807,11 @@ def test_disturl_can_be_checked_out(
     [
         cont
         for cont in ALL_CONTAINERS
-        if (cont not in L3_CONTAINERS and cont not in ACC_CONTAINERS)
+        if (
+            cont not in L3_CONTAINERS
+            and cont not in ACC_CONTAINERS
+            and cont not in L2_CONTAINERS
+        )
     ],
     indirect=True,
 )
@@ -833,6 +838,22 @@ def test_acc_label(container: ContainerData):
     Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
     """
     assert container.inspect.config.labels["com.suse.supportlevel"] == "acc", (
+        "acc images must be marked as acc"
+    )
+
+
+@SKIP_IF_TW_MARK
+@pytest.mark.parametrize(
+    "container",
+    list(L2_CONTAINERS),
+    indirect=True,
+)
+def test_l2_label(container: ContainerData):
+    """Check that containers that are in L2_CONTAINERS have
+    ``com.suse.supportlevel`` set to ``l2``.
+    Reference: https://confluence.suse.com/display/ENGCTNRSTORY/SLE+BCI+Image+Overview
+    """
+    assert container.inspect.config.labels["com.suse.supportlevel"] == "l2", (
         "acc images must be marked as acc"
     )
 
