@@ -46,6 +46,7 @@ RUST_OPENSSL_FIPS_SKIP = (
     [
         "cipher_ctx::test::full_block_updates_3des",
         "cipher_ctx::test::seal_open",
+        "cipher_ctx::test::test_des3_wrap",
         "cms::test::cms_encrypt_decrypt",
         "cms::test::cms_sign_verify_error",
         "derive::test::derive_undersized_buffer",
