@@ -734,12 +734,13 @@ NVIDIA_CONTAINERS = [
                 reason="64kb flavor is available only on aarch64",
             )
         ]
-        if kernel_flavor == "64kb"
+        if kernel_flavor in ["64kb", "nvidia64kb"]
         else [],
     )
     for driver_branch, kernel_flavor, os_ver in (
         ("615", "default", "16.1"),
         ("615", "64kb", "16.1"),
+        ("615", "nvidia64kb", "16.1"),
         ("615", "default", "16.0"),
         ("615", "64kb", "16.0"),
         ("615", "default", "15.7"),
