@@ -30,7 +30,7 @@ _GIT_SERVER_CONTAINERFILE = (
 RUN zypper -n in patterns-base-fips
 RUN zypper -n in git-core openssh-server openssh-clients
 RUN ssh-keygen -A
-RUN useradd -U -m -p "*" git
+RUN useradd -U -m -p "*" -s /bin/bash git
 
 RUN mkdir /home/git/.ssh && touch /home/git/.ssh/authorized_keys
 RUN chmod 700 /home/git/.ssh && chmod 600 /home/git/.ssh/authorized_keys
@@ -60,7 +60,9 @@ RUN chown -R git /etc/ssh
 
 EXPOSE {_SSH_PORT}
 
-CMD ["/usr/bin/su", "git", "-s", "/bin/bash", "-c", "/usr/sbin/sshd -De -h /etc/ssh/ssh_host_ecdsa_key"]
+USER git
+
+CMD ["/usr/sbin/sshd", "-De", "-h", "/etc/ssh/ssh_host_ecdsa_key"]
 
 HEALTHCHECK --interval=5s --timeout=5s --retries=5"""
     + (" --start-period=1m" if LOCALHOST.system_info.arch == "ppc64le" else "")
