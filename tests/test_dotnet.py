@@ -14,23 +14,19 @@ from pytest_container import DerivedContainer
 from pytest_container import GitRepositoryBuild
 from pytest_container import container_and_marks_from_pytest_param
 
-from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_9_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_10_0_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_9_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_11_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_10_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_9_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_11_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_10_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_11_0_CONTAINER
 from bci_tester.data import OS_VERSION
 from bci_tester.fips import host_fips_enabled
 from bci_tester.util import get_repos_from_connection
 
 DOTNET_SDK_CONTAINERS = [
-    DOTNET_SDK_8_0_CONTAINER,
-    DOTNET_SDK_9_0_CONTAINER,
     DOTNET_SDK_10_0_CONTAINER,
+    DOTNET_SDK_11_0_CONTAINER,
 ]
 
 #: Name and alias of the microsoft .Net repository
@@ -56,9 +52,8 @@ def _generate_ctr_ver_param(ctr_ver: Tuple[ParameterSet, str]) -> ParameterSet:
     map(
         _generate_ctr_ver_param,
         (
-            (DOTNET_SDK_8_0_CONTAINER, "8.0"),
-            (DOTNET_SDK_9_0_CONTAINER, "9.0"),
             (DOTNET_SDK_10_0_CONTAINER, "10.0"),
+            (DOTNET_SDK_11_0_CONTAINER, "11.0"),
         ),
     ),
     indirect=["container"],
@@ -81,9 +76,8 @@ def test_dotnet_sdk_version(container, sdk_version):
     map(
         _generate_ctr_ver_param,
         (
-            (DOTNET_ASPNET_8_0_CONTAINER, "8.0"),
-            (DOTNET_ASPNET_9_0_CONTAINER, "9.0"),
             (DOTNET_ASPNET_10_0_CONTAINER, "10.0"),
+            (DOTNET_ASPNET_11_0_CONTAINER, "11.0"),
         ),
     ),
     indirect=["container"],
@@ -106,9 +100,8 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
     map(
         _generate_ctr_ver_param,
         (
-            (DOTNET_RUNTIME_8_0_CONTAINER, "8.0"),
-            (DOTNET_RUNTIME_9_0_CONTAINER, "9.0"),
             (DOTNET_RUNTIME_10_0_CONTAINER, "10.0"),
+            (DOTNET_RUNTIME_11_0_CONTAINER, "11.0"),
         ),
     ),
     indirect=["container"],
@@ -148,7 +141,7 @@ def test_dotnet_hello_world(container_per_test):
 
 @pytest.mark.parametrize(
     "container_per_test",
-    [DOTNET_SDK_9_0_CONTAINER],
+    [DOTNET_SDK_10_0_CONTAINER],
     indirect=["container_per_test"],
 )
 @pytest.mark.parametrize(
@@ -156,7 +149,7 @@ def test_dotnet_hello_world(container_per_test):
     [
         GitRepositoryBuild(
             repository_url="https://github.com/nopSolutions/nopCommerce.git",
-            repository_tag="release-4.90.0",
+            repository_tag="release-5.00.1",
             build_command="dotnet build ./src/NopCommerce.sln",
         )
     ],
