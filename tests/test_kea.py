@@ -55,7 +55,7 @@ def test_kea_dhcp4(
     )
 
     dhcp_client_ctr = DerivedContainer(
-        base="registry.suse.com/bci/bci-base:latest",
+        base="registry.suse.com/bci/bci-base:15.7",
         containerfile="RUN zypper -n install dhcp-client jq",
         custom_entry_point="/bin/sh",
         extra_launch_args=[f"--network={network_name}", "--privileged"],
