@@ -8,8 +8,6 @@ from pytest_container import get_extra_build_args
 from pytest_container import get_extra_run_args
 from pytest_container.runtime import LOCALHOST
 
-from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
 from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_21_CONTAINER
@@ -70,44 +68,6 @@ FROM $runner
 WORKDIR /k3sup
 COPY --from=builder /k3sup/bin/k3sup .
 CMD ["/k3sup/k3sup"]
-"""
-
-#: modified version of upstream's `Dockerfile
-#: <https://github.com/phillipsj/adventureworks-k8s-sample/blob/main/Dockerfile>`_:
-#:
-#: - the ``entrypoint.sh`` is custom, so that the application terminates
-#: - the docker build is not run from the repos top level dir, but one directory
-#:   "above"
-DOTNET_K8S_SAMPLE_DOCKERFILE = r"""FROM $builder AS build
-WORKDIR /src
-
-COPY ./adventureworks-k8s-sample/AdventureWorks.sln AdventureWorks.sln
-COPY ./adventureworks-k8s-sample/AdventureWorks.App/*.csproj ./AdventureWorks.App/
-COPY ./adventureworks-k8s-sample/BlazorLeaflet/*.csproj ./BlazorLeaflet/
-RUN dotnet restore AdventureWorks.sln
-
-COPY ./adventureworks-k8s-sample/AdventureWorks.App/. ./AdventureWorks.App/
-COPY ./adventureworks-k8s-sample/BlazorLeaflet/. ./BlazorLeaflet/
-
-RUN dotnet publish -c release -o /app --no-restore
-
-FROM $runner
-WORKDIR /app
-COPY --from=build /app ./
-RUN zypper -n in curl
-RUN echo $$'#!/bin/bash -e \n\
-dotnet AdventureWorks.App.dll & \n\
-c=0 \n\
-until curl localhost:5000 >/dev/null ; do \n\
-  ((c++)) && ((c==20)) && ( \n\
-    curl localhost:5000|grep Adventure \n\
-    exit 1 \n\
-  ) \n\
-  sleep 1 \n\
-done \n\
-pkill dotnet \n\
-' > entrypoint.sh && chmod +x entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
 """
 
 OPENJDK_DEVEL_CONTAINER = (
@@ -192,36 +152,6 @@ OPENJDK_CONTAINER = (
                 reason="Currently broken on arch != x86_64, see https://github.com/alexellis/k3sup/pull/345",
             ),
         ),
-        pytest.param(
-            GitRepositoryBuild(
-                repository_url="https://github.com/phillipsj/adventureworks-k8s-sample.git"
-            ),
-            MultiStageBuild(
-                containers={
-                    "builder": DOTNET_SDK_8_0_CONTAINER,
-                    "runner": DOTNET_ASPNET_8_0_CONTAINER,
-                },
-                containerfile_template=DOTNET_K8S_SAMPLE_DOCKERFILE,
-            ),
-            0,
-            """Microsoft.Hosting.Lifetime[0]\n      Now listening on: http://localhost:5000
-\x1b[40m\x1b[32minfo\x1b[39m\x1b[22m\x1b[49m: Microsoft.Hosting.Lifetime[0]
-      Application started. Press Ctrl+C to shut down.
-\x1b[40m\x1b[32minfo\x1b[39m\x1b[22m\x1b[49m: Microsoft.Hosting.Lifetime[0]
-      Hosting environment: Production
-\x1b[40m\x1b[32minfo\x1b[39m\x1b[22m\x1b[49m: Microsoft.Hosting.Lifetime[0]
-      Content root path: /app
-""",
-            marks=[
-                pytest.mark.skipif(
-                    LOCALHOST.system_info.arch != "x86_64",
-                    reason="The dotnet containers are only available for x86_64",
-                ),
-                pytest.mark.skip(
-                    reason="This relies on .Net 5, which reached Eol, see: https://github.com/phillipsj/adventureworks-k8s-sample/issues/4"
-                ),
-            ],
-        ),
     ],
     indirect=["host_git_clone"],
 )
@@ -278,13 +208,6 @@ def test_dockerfile_build(
          - scratch
          - ``0``
          - ``Use "k3sup [command] --help" for more information about a command.``
-
-       * - `<https://github.com/phillipsj/adventureworks-k8s-sample.git>`_
-         - :py:const:`DOTNET_K8S_SAMPLE_DOCKERFILE`
-         - .Net 5.0
-         - ASP.Net 5.0
-         - ``0``
-         - `omitted`
     """
     tmp_path, _ = host_git_clone
 

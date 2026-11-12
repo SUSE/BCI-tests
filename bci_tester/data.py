@@ -846,29 +846,14 @@ _DOTNET_SKIP_ARCH_MARK = pytest.mark.skipif(
     reason="The .Net containers are only available on aarch64 and x86_64",
 )
 
-DOTNET_SDK_8_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-sdk:8.0",
-    available_versions=("15.7",),
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
-DOTNET_SDK_9_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-sdk:9.0",
-    available_versions=("15.7",),
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
 DOTNET_SDK_10_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:10.0",
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-DOTNET_ASPNET_8_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-aspnet:8.0",
-    available_versions=("15.7",),
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
-DOTNET_ASPNET_9_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-aspnet:9.0",
-    available_versions=("15.7",),
+DOTNET_SDK_11_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-sdk:11.0",
+    available_versions=("16.1", "16.2"),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
@@ -876,19 +861,19 @@ DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
-DOTNET_RUNTIME_8_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-runtime:8.0",
-    available_versions=("15.7",),
-    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
-)
-DOTNET_RUNTIME_9_0_CONTAINER = create_BCI(
-    build_tag="bci/dotnet-runtime:9.0",
-    available_versions=("15.7",),
+DOTNET_ASPNET_11_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-aspnet:11.0",
+    available_versions=("16.1", "16.2"),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_10_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:10.0",
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_RUNTIME_11_0_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-runtime:11.0",
+    available_versions=("16.1", "16.2"),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
@@ -1218,15 +1203,12 @@ TOMCAT_CONTAINERS = [
 ]
 
 DOTNET_CONTAINERS = [
-    DOTNET_SDK_8_0_CONTAINER,
-    DOTNET_SDK_9_0_CONTAINER,
     DOTNET_SDK_10_0_CONTAINER,
-    DOTNET_ASPNET_8_0_CONTAINER,
-    DOTNET_ASPNET_9_0_CONTAINER,
+    DOTNET_SDK_11_0_CONTAINER,
     DOTNET_ASPNET_10_0_CONTAINER,
-    DOTNET_RUNTIME_8_0_CONTAINER,
-    DOTNET_RUNTIME_9_0_CONTAINER,
+    DOTNET_ASPNET_11_0_CONTAINER,
     DOTNET_RUNTIME_10_0_CONTAINER,
+    DOTNET_RUNTIME_11_0_CONTAINER,
 ]
 
 SPACK_CONTAINERS = [

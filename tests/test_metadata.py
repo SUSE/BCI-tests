@@ -40,15 +40,12 @@ from bci_tester.data import BUSYBOX_CONTAINER
 from bci_tester.data import CONTAINER_389DS_CONTAINERS
 from bci_tester.data import COSIGN_CONTAINERS
 from bci_tester.data import DISTRIBUTION_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_8_0_CONTAINER
-from bci_tester.data import DOTNET_ASPNET_9_0_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_10_0_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_8_0_CONTAINER
-from bci_tester.data import DOTNET_RUNTIME_9_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_11_0_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_10_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_8_0_CONTAINER
-from bci_tester.data import DOTNET_SDK_9_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_11_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_10_0_CONTAINER
+from bci_tester.data import DOTNET_SDK_11_0_CONTAINER
 from bci_tester.data import GCC_CONTAINERS
 from bci_tester.data import GIT_CONTAINER
 from bci_tester.data import GOLANG_CONTAINERS
@@ -316,21 +313,14 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     ]
     + (
         [
-            (DOTNET_SDK_8_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
-            (DOTNET_SDK_9_0_CONTAINER, "dotnet.sdk", ImageType.LANGUAGE_STACK),
             (
                 DOTNET_SDK_10_0_CONTAINER,
                 "dotnet.sdk",
                 ImageType.LANGUAGE_STACK,
             ),
             (
-                DOTNET_ASPNET_8_0_CONTAINER,
-                "dotnet.aspnet",
-                ImageType.LANGUAGE_STACK,
-            ),
-            (
-                DOTNET_ASPNET_9_0_CONTAINER,
-                "dotnet.aspnet",
+                DOTNET_SDK_11_0_CONTAINER,
+                "dotnet.sdk",
                 ImageType.LANGUAGE_STACK,
             ),
             (
@@ -339,17 +329,17 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
                 ImageType.LANGUAGE_STACK,
             ),
             (
-                DOTNET_RUNTIME_8_0_CONTAINER,
-                "dotnet.runtime",
-                ImageType.LANGUAGE_STACK,
-            ),
-            (
-                DOTNET_RUNTIME_9_0_CONTAINER,
-                "dotnet.runtime",
+                DOTNET_ASPNET_11_0_CONTAINER,
+                "dotnet.aspnet",
                 ImageType.LANGUAGE_STACK,
             ),
             (
                 DOTNET_RUNTIME_10_0_CONTAINER,
+                "dotnet.runtime",
+                ImageType.LANGUAGE_STACK,
+            ),
+            (
+                DOTNET_RUNTIME_11_0_CONTAINER,
                 "dotnet.runtime",
                 ImageType.LANGUAGE_STACK,
             ),
