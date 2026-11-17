@@ -6,6 +6,10 @@ from pytest_container import MultiStageBuild
 
 from bci_tester.data import KIOSK_XORG_CLIENT_CONTAINERS
 
+# Node.js: 24.21.0
+# Electron: 44.4.5
+
+
 CONTAINER_IMAGES = (KIOSK_XORG_CLIENT_CONTAINERS,)
 
 ELECTRON_APP_BUILD = """
