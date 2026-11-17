@@ -47,6 +47,7 @@ ALLOWED_BASE_OS_VERSIONS = (
     "15.7",
     "16.0",
     "16.1",
+    "16.2",
     "tumbleweed",
 )
 
@@ -90,7 +91,7 @@ _DEFAULT_NONBASE_OS_VERSIONS = ("15.7", "16.1", "tumbleweed")
 _DEFAULT_NONBASE_SLFOPLUS_VERSIONS = ("16.1", "tumbleweed")
 
 # Test base containers by default for these versions
-_DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "16.1", "tumbleweed")
+_DEFAULT_BASE_OS_VERSIONS = ("15.7", "16.0", "16.1", "16.2", "tumbleweed")
 
 # List the released versions of SLE, used for supportability and EULA tests
 RELEASED_SLE_VERSIONS = (
@@ -105,6 +106,8 @@ RELEASED_SLE_VERSIONS = (
     "15.7-third-party",
     "16.0",
     "16.0-third-party",
+    "16.1",
+    "16.1-third-party",
 )
 
 # List the LTSS versions of SLE
@@ -155,7 +158,11 @@ else:
     APP_CONTAINER_PREFIX = "suse"
     SAC_CONTAINER_PREFIX = "containers"
     BCI_CONTAINER_PREFIX = "bci"
-    OS_CONTAINER_TAG = OS_VERSION
+    OS_CONTAINER_TAG = (
+        OS_VERSION
+        if OS_VERSION in RELEASED_SLE_VERSIONS
+        else f"{OS_VERSION}beta"
+    )
     OS_VERSION_ID = OS_VERSION.partition("-")[0]
 
     OS_MAJOR_VERSION, OS_SP_VERSION = (
