@@ -196,8 +196,6 @@ jobs:
             os_version: 15.7
           - toxenv: fips
             os_version: 15.7
-          - toxenv: gcc
-            os_version: 15.7
           - toxenv: go
             os_version: 15.7
           - toxenv: grafana
