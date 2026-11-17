@@ -248,6 +248,14 @@ jobs:
             os_version: "16.0"
           - toxenv: fips
             os_version: "16.0"
+          - toxenv: all
+            os_version: "16.2"
+          - toxenv: base
+            os_version: "16.2"
+          - toxenv: metadata
+            os_version: "16.2"
+          - toxenv: fips
+            os_version: "16.2"
           - toxenv: amd
             os_version: 15.7-third-party
           - toxenv: amd
