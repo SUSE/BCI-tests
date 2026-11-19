@@ -19,6 +19,7 @@ from bci_tester.data import OPENJDK_21_CONTAINER
 from bci_tester.data import OPENJDK_25_CONTAINER
 from bci_tester.data import OPENJDK_26_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
+from bci_tester.data import OPENJDK_MICRO_CONTAINERS
 
 CONTAINER_TEST_DIR = "/src/"
 HOST_TEST_DIR = "tests/trainers/java/"
@@ -49,7 +50,7 @@ for param in [OPENJDK_17_CONTAINER, OPENJDK_21_CONTAINER]:
         pytest.param(tester_ctr, marks=marks, id=param.id)
     )
 
-CONTAINER_IMAGES = OPENJDK_CONTAINERS
+CONTAINER_IMAGES = OPENJDK_CONTAINERS + OPENJDK_MICRO_CONTAINERS
 
 CONTAINER_IMAGES_EXTENDED = [
     pytest.param(
