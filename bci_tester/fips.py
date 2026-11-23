@@ -115,8 +115,10 @@ FIPS_GCRYPT_DIGESTS: Tuple[str, ...] = (
     "sha512_256",
 )
 
-# sha1 is non-FIPS in 15.6
-if OS_VERSION == "15.6":
+# sha1 is non-FIPS in libgcrypt on 15.6 (static service indicator) and from
+# libgcrypt 1.12 on (dynamic service indicator): SLE 16 and Tumbleweed.
+# 15.7 ships libgcrypt 1.11, which still approves sha1.
+if OS_VERSION in ("15.6", "tumbleweed") or OS_VERSION.startswith("16."):
     NONFIPS_GCRYPT_DIGESTS += ("sha1",)
 else:
     FIPS_GCRYPT_DIGESTS += ("sha1",)
