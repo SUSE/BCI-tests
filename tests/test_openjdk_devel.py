@@ -38,7 +38,7 @@ CONTAINER_IMAGES_EXTENDED = [
 CONTAINER_IMAGES_WITH_VERSION = [
     pytest.param(container, version, marks=container.marks)
     for container, version in zip(
-        CONTAINER_IMAGES, ("11", "17", "21", "25", "26")
+        CONTAINER_IMAGES, ("11", "17", "21", "25", "27")
     )
 ]
 
