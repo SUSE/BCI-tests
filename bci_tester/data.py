@@ -640,16 +640,28 @@ OPENJDK_25_CONTAINER = create_BCI(
     build_tag="bci/openjdk:25",
     available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
 )
+OPENJDK_25_MICRO_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:25-micro",
+    available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
+)
 OPENJDK_DEVEL_25_CONTAINER = create_BCI(
     build_tag="bci/openjdk-devel:25",
-    available_versions=_DEFAULT_NONBASE_OS_VERSIONS,
+    available_versions=["15.7"],
+)
+OPENJDK_JDK_25_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-jdk:25",
+    available_versions=_DEFAULT_NONBASE_SLFOPLUS_VERSIONS,
 )
 OPENJDK_27_CONTAINER = create_BCI(
     build_tag="bci/openjdk:27",
     available_versions=["tumbleweed"],
 )
-OPENJDK_DEVEL_27_CONTAINER = create_BCI(
-    build_tag="bci/openjdk-devel:27",
+OPENJDK_27_MICRO_CONTAINER = create_BCI(
+    build_tag="bci/openjdk:27-micro",
+    available_versions=["tumbleweed"],
+)
+OPENJDK_JDK_27_CONTAINER = create_BCI(
+    build_tag="bci/openjdk-jdk:27",
     available_versions=["tumbleweed"],
 )
 
@@ -662,12 +674,21 @@ OPENJDK_CONTAINERS = [
     OPENJDK_27_CONTAINER,
 ]
 
+OPENJDK_MICRO_CONTAINERS = [
+    OPENJDK_25_MICRO_CONTAINER,
+    OPENJDK_27_MICRO_CONTAINER,
+]
+
 OPENJDK_DEVEL_CONTAINERS = [
     OPENJDK_DEVEL_11_CONTAINER,
     OPENJDK_DEVEL_17_CONTAINER,
     OPENJDK_DEVEL_21_CONTAINER,
     OPENJDK_DEVEL_25_CONTAINER,
-    OPENJDK_DEVEL_27_CONTAINER,
+]
+
+OPENJDK_JDK_CONTAINERS = [
+    OPENJDK_JDK_25_CONTAINER,
+    OPENJDK_JDK_27_CONTAINER,
 ]
 
 NODEJS_BASE_CONTAINERS = [
@@ -1581,6 +1602,7 @@ CONTAINERS_WITH_ZYPPER = (
     + NODEJS_BASE_CONTAINERS
     + OPENJDK_CONTAINERS
     + OPENJDK_DEVEL_CONTAINERS
+    + OPENJDK_JDK_CONTAINERS
     + PHP_CLI_CONTAINERS
     + PHP_APACHE_CONTAINERS
     + PHP_FPM_CONTAINERS
@@ -1640,6 +1662,7 @@ CONTAINERS_WITHOUT_ZYPPER = [
     MINIMAL_CONTAINER,
     *NGINX_CONTAINERS,
     *NODEJS_MICRO_CONTAINERS,
+    *OPENJDK_MICRO_CONTAINERS,
     *PHP_MICRO_CLI_CONTAINERS,
     *PHP_MICRO_APACHE_CONTAINERS,
     *PHP_MICRO_FPM_CONTAINERS,
@@ -1745,6 +1768,8 @@ else:
         + NODEJS_MICRO_CONTAINERS
         + OPENJDK_CONTAINERS
         + OPENJDK_DEVEL_CONTAINERS
+        + OPENJDK_JDK_CONTAINERS
+        + OPENJDK_MICRO_CONTAINERS
         + PCP_CONTAINERS
         + PYTHON_CONTAINERS
         + PYTHON_MICRO_CONTAINERS

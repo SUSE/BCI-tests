@@ -79,6 +79,8 @@ from bci_tester.data import NODEJS_MICRO_CONTAINERS
 from bci_tester.data import NVIDIA_CONTAINERS
 from bci_tester.data import OPENJDK_CONTAINERS
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
+from bci_tester.data import OPENJDK_JDK_CONTAINERS
+from bci_tester.data import OPENJDK_MICRO_CONTAINERS
 from bci_tester.data import OS_SP_VERSION
 from bci_tester.data import OS_VERSION
 from bci_tester.data import OS_VERSION_ID
@@ -173,7 +175,7 @@ def _get_container_ref(
 #: List of all containers and their respective names which are used in the image
 #: labels ``com.suse.bci.$name``.
 IMAGES_AND_NAMES: List[ParameterSet] = [
-    pytest.param(cont, name, img_type, marks=cont.marks)
+    pytest.param(cont, name, img_type, marks=cont.marks, id=cont.id)
     for cont, name, img_type in [
         (BASE_CONTAINER, "base", ImageType.OS),
         (GIT_CONTAINER, "git", ImageType.APPLICATION),
@@ -209,10 +211,25 @@ IMAGES_AND_NAMES: List[ParameterSet] = [
     + [(c, "amd-driver", ImageType.THIRD_PARTY) for c in AMD_CONTAINERS]
     + [(c, "nvidia-driver", ImageType.THIRD_PARTY) for c in NVIDIA_CONTAINERS]
     + [(c, "nginx", ImageType.APPLICATION) for c in NGINX_CONTAINERS]
-    + [(c, "openjdk", ImageType.LANGUAGE_STACK) for c in OPENJDK_CONTAINERS]
     + [
-        (c, "openjdk.devel", ImageType.LANGUAGE_STACK)
+        (c, "openjdk", ImageType.LANGUAGE_STACK)
+        for c in OPENJDK_CONTAINERS + OPENJDK_MICRO_CONTAINERS
+    ]
+    + [
+        (
+            c,
+            "openjdk.devel",
+            ImageType.LANGUAGE_STACK,
+        )
         for c in OPENJDK_DEVEL_CONTAINERS
+    ]
+    + [
+        (
+            c,
+            "openjdk.jdk",
+            ImageType.LANGUAGE_STACK,
+        )
+        for c in OPENJDK_JDK_CONTAINERS
     ]
     + [
         (c, "firefox-esr", ImageType.APPLICATION)

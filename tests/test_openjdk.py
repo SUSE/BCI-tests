@@ -17,8 +17,11 @@ from bci_tester.data import OPENJDK_11_CONTAINER
 from bci_tester.data import OPENJDK_17_CONTAINER
 from bci_tester.data import OPENJDK_21_CONTAINER
 from bci_tester.data import OPENJDK_25_CONTAINER
+from bci_tester.data import OPENJDK_25_MICRO_CONTAINER
 from bci_tester.data import OPENJDK_27_CONTAINER
+from bci_tester.data import OPENJDK_27_MICRO_CONTAINER
 from bci_tester.data import OPENJDK_CONTAINERS
+from bci_tester.data import OPENJDK_MICRO_CONTAINERS
 
 CONTAINER_TEST_DIR = "/src/"
 HOST_TEST_DIR = "tests/trainers/java/"
@@ -49,7 +52,7 @@ for param in [OPENJDK_17_CONTAINER, OPENJDK_21_CONTAINER]:
         pytest.param(tester_ctr, marks=marks, id=param.id)
     )
 
-CONTAINER_IMAGES = OPENJDK_CONTAINERS
+CONTAINER_IMAGES = OPENJDK_CONTAINERS + OPENJDK_MICRO_CONTAINERS
 
 CONTAINER_IMAGES_EXTENDED = [
     pytest.param(
@@ -80,19 +83,46 @@ CONTAINER_IMAGES_CASSANDRA = [
     "container,java_version",
     [
         pytest.param(
-            OPENJDK_11_CONTAINER, "11", marks=OPENJDK_11_CONTAINER.marks
+            OPENJDK_11_CONTAINER,
+            "11",
+            marks=OPENJDK_11_CONTAINER.marks,
+            id=OPENJDK_11_CONTAINER.id,
         ),
         pytest.param(
-            OPENJDK_17_CONTAINER, "17", marks=OPENJDK_17_CONTAINER.marks
+            OPENJDK_17_CONTAINER,
+            "17",
+            marks=OPENJDK_17_CONTAINER.marks,
+            id=OPENJDK_17_CONTAINER.id,
         ),
         pytest.param(
-            OPENJDK_21_CONTAINER, "21", marks=OPENJDK_21_CONTAINER.marks
+            OPENJDK_21_CONTAINER,
+            "21",
+            marks=OPENJDK_21_CONTAINER.marks,
+            id=OPENJDK_21_CONTAINER.id,
         ),
         pytest.param(
-            OPENJDK_25_CONTAINER, "25", marks=OPENJDK_25_CONTAINER.marks
+            OPENJDK_25_CONTAINER,
+            "25",
+            marks=OPENJDK_25_CONTAINER.marks,
+            id=OPENJDK_25_CONTAINER.id,
         ),
         pytest.param(
-            OPENJDK_27_CONTAINER, "27", marks=OPENJDK_27_CONTAINER.marks
+            OPENJDK_25_MICRO_CONTAINER,
+            "25",
+            marks=OPENJDK_25_MICRO_CONTAINER.marks,
+            id=OPENJDK_25_MICRO_CONTAINER.id,
+        ),
+        pytest.param(
+            OPENJDK_27_CONTAINER,
+            "27",
+            marks=OPENJDK_27_CONTAINER.marks,
+            id=OPENJDK_27_CONTAINER.id,
+        ),
+        pytest.param(
+            OPENJDK_27_MICRO_CONTAINER,
+            "27",
+            marks=OPENJDK_27_MICRO_CONTAINER.marks,
+            id=OPENJDK_27_MICRO_CONTAINER.id,
         ),
     ],
     indirect=["container"],
