@@ -49,6 +49,15 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Failed to create hash context\n");
         goto cleanup;
     }
+    // libgcrypt 1.12 adds a dynamic service indicator. gcry_md_open() sets it
+    // for digests that are not approved, e.g. SHA-1, but the static indicator
+    // GCRYCTL_FIPS_SERVICE_INDICATOR_MD above still reports SHA-1 as approved.
+#ifdef gcry_get_fips_service_indicator
+    if (gcry_get_fips_service_indicator() != GPG_ERR_NO_ERROR) {
+        fprintf(stderr, "Algorithm %s is not FIPS compliant\n", argv[1]);
+        goto cleanup;
+    }
+#endif
 
     gcry_md_write(md_hd, (const void *)mess1, strlen(mess1));
     unsigned char hash1[64];
