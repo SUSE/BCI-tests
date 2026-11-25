@@ -15,9 +15,13 @@ from pytest_container import GitRepositoryBuild
 from pytest_container import container_and_marks_from_pytest_param
 
 from bci_tester.data import DOTNET_ASPNET_10_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_10_0_MICRO_CONTAINER
 from bci_tester.data import DOTNET_ASPNET_11_0_CONTAINER
+from bci_tester.data import DOTNET_ASPNET_11_0_MICRO_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_10_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_10_0_MICRO_CONTAINER
 from bci_tester.data import DOTNET_RUNTIME_11_0_CONTAINER
+from bci_tester.data import DOTNET_RUNTIME_11_0_MICRO_CONTAINER
 from bci_tester.data import DOTNET_SDK_10_0_CONTAINER
 from bci_tester.data import DOTNET_SDK_11_0_CONTAINER
 from bci_tester.data import OS_VERSION
@@ -44,7 +48,7 @@ def _generate_ctr_ver_param(ctr_ver: Tuple[ParameterSet, str]) -> ParameterSet:
 
     """
     ctr, marks = container_and_marks_from_pytest_param(ctr_ver[0])
-    return pytest.param(ctr, ctr_ver[1], marks=marks or ())
+    return pytest.param(ctr, ctr_ver[1], marks=marks or (), id=ctr.baseurl)
 
 
 @pytest.mark.parametrize(
@@ -77,7 +81,9 @@ def test_dotnet_sdk_version(container, sdk_version):
         _generate_ctr_ver_param,
         (
             (DOTNET_ASPNET_10_0_CONTAINER, "10.0"),
+            (DOTNET_ASPNET_10_0_MICRO_CONTAINER, "10.0"),
             (DOTNET_ASPNET_11_0_CONTAINER, "11.0"),
+            (DOTNET_ASPNET_11_0_MICRO_CONTAINER, "11.0"),
         ),
     ),
     indirect=["container"],
@@ -101,7 +107,9 @@ def test_dotnet_aspnet_runtime_versions(container, runtime_version):
         _generate_ctr_ver_param,
         (
             (DOTNET_RUNTIME_10_0_CONTAINER, "10.0"),
+            (DOTNET_RUNTIME_10_0_MICRO_CONTAINER, "10.0"),
             (DOTNET_RUNTIME_11_0_CONTAINER, "11.0"),
+            (DOTNET_RUNTIME_11_0_MICRO_CONTAINER, "11.0"),
         ),
     ),
     indirect=["container"],

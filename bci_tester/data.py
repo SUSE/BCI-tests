@@ -868,8 +868,18 @@ DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
+DOTNET_ASPNET_10_0_MICRO_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-aspnet:10.0-micro",
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
 DOTNET_ASPNET_11_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:11.0",
+    available_versions=("16.1", "16.2"),
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_ASPNET_11_0_MICRO_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-aspnet:11.0-micro",
     available_versions=("16.1", "16.2"),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
@@ -878,8 +888,18 @@ DOTNET_RUNTIME_10_0_CONTAINER = create_BCI(
     available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
+DOTNET_RUNTIME_10_0_MICRO_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-runtime:10.0-micro",
+    available_versions=_DEFAULT_NONBASE_SLE_VERSIONS,
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
 DOTNET_RUNTIME_11_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:11.0",
+    available_versions=("16.1", "16.2"),
+    extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
+)
+DOTNET_RUNTIME_11_0_MICRO_CONTAINER = create_BCI(
+    build_tag="bci/dotnet-runtime:11.0-micro",
     available_versions=("16.1", "16.2"),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
@@ -1216,6 +1236,13 @@ DOTNET_CONTAINERS = [
     DOTNET_ASPNET_11_0_CONTAINER,
     DOTNET_RUNTIME_10_0_CONTAINER,
     DOTNET_RUNTIME_11_0_CONTAINER,
+]
+
+DOTNET_MICRO_CONTAINERS = [
+    DOTNET_ASPNET_10_0_MICRO_CONTAINER,
+    DOTNET_ASPNET_11_0_MICRO_CONTAINER,
+    DOTNET_RUNTIME_10_0_MICRO_CONTAINER,
+    DOTNET_RUNTIME_11_0_MICRO_CONTAINER,
 ]
 
 SPACK_CONTAINERS = [
@@ -1661,7 +1688,12 @@ CONTAINERS_WITHOUT_ZYPPER = [
     *AMD_CONTAINERS,
     *NVIDIA_CONTAINERS,
     *RMT_CONTAINERS,
-]
+] + (
+    DOTNET_MICRO_CONTAINERS
+    if LOCALHOST.system_info.arch in ("aarch64", "x86_64")
+    else []
+)
+
 
 CONTAINERS_WITHOUT_SHELL = [NANO_CONTAINER, *COSIGN_CONTAINERS]
 
@@ -1760,7 +1792,7 @@ else:
 
 ACC_CONTAINERS = POSTGRESQL_CONTAINERS
 
-L2_CONTAINERS = DOTNET_CONTAINERS
+L2_CONTAINERS = DOTNET_CONTAINERS + DOTNET_MICRO_CONTAINERS
 
 #: Containers pulled from registry.suse.de
 ALL_CONTAINERS = (
