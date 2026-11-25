@@ -17,6 +17,9 @@ CONTAINER_TEST_DIR = "/tmp/"
 HOST_TEST_DIR = "tests/trainers/java/"
 
 CONTAINER_IMAGES = OPENJDK_DEVEL_CONTAINERS
+OPENJDK_DEVEL_CONTAINER_VERSIONS = ("11", "17", "21", "25", "27")
+
+assert len(OPENJDK_DEVEL_CONTAINERS) == len(OPENJDK_DEVEL_CONTAINER_VERSIONS)
 
 DOCKERF_EXTENDED = f"""
 WORKDIR {CONTAINER_TEST_DIR}
@@ -38,7 +41,7 @@ CONTAINER_IMAGES_EXTENDED = [
 CONTAINER_IMAGES_WITH_VERSION = [
     pytest.param(container, version, marks=container.marks)
     for container, version in zip(
-        CONTAINER_IMAGES, ("11", "17", "21", "25", "27")
+        CONTAINER_IMAGES, OPENJDK_DEVEL_CONTAINER_VERSIONS
     )
 ]
 
