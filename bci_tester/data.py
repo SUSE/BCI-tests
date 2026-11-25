@@ -786,7 +786,13 @@ PYTHON_BASE_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.13", ("tumbleweed", "16.1", "16.2")),
+        (
+            "3.13",
+            (
+                "tumbleweed",
+                "16.1",
+            ),
+        ),
         ("3.14", ("tumbleweed", "16.1")),
     )
 ]
@@ -812,7 +818,13 @@ PYTHON_MICRO_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.13", ("tumbleweed", "16.1", "16.2")),
+        (
+            "3.13",
+            (
+                "tumbleweed",
+                "16.1",
+            ),
+        ),
         ("3.14", ("tumbleweed", "16.1")),
     )
 ]
@@ -834,7 +846,7 @@ RUBY_BASE_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.4", ("16.1", "16.2")),
+        ("3.4", ("16.1",)),
         ("4.0", ("tumbleweed",)),
     )
 ]
@@ -845,7 +857,7 @@ RUBY_MICRO_CONTAINERS = [
         available_versions=versions,
     )
     for ver, versions in (
-        ("3.4", ("16.1", "16.2")),
+        ("3.4", ("16.1",)),
         ("4.0", ("tumbleweed",)),
     )
 ]
@@ -867,7 +879,7 @@ DOTNET_SDK_10_0_CONTAINER = create_BCI(
 )
 DOTNET_SDK_11_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-sdk:11.0",
-    available_versions=("16.1", "16.2"),
+    available_versions=("16.1",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
@@ -877,7 +889,7 @@ DOTNET_ASPNET_10_0_CONTAINER = create_BCI(
 )
 DOTNET_ASPNET_11_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-aspnet:11.0",
-    available_versions=("16.1", "16.2"),
+    available_versions=("16.1",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 DOTNET_RUNTIME_10_0_CONTAINER = create_BCI(
@@ -887,7 +899,7 @@ DOTNET_RUNTIME_10_0_CONTAINER = create_BCI(
 )
 DOTNET_RUNTIME_11_0_CONTAINER = create_BCI(
     build_tag="bci/dotnet-runtime:11.0",
-    available_versions=("16.1", "16.2"),
+    available_versions=("16.1",),
     extra_marks=(_DOTNET_SKIP_ARCH_MARK,),
 )
 
@@ -1060,7 +1072,7 @@ POSTGRESQL_CONTAINERS = [
 
 
 _distribution_version = "latest"
-if OS_VERSION in ("16.1", "16.2"):
+if OS_VERSION in ("16.1",):
     _distribution_version = "3.1"
 
 DISTRIBUTION_CONTAINER = create_BCI(
@@ -1082,7 +1094,7 @@ GIT_CONTAINER = create_BCI(
 )
 
 _helm_app_version = "latest"
-if OS_VERSION in ("16.1", "16.2"):
+if OS_VERSION in ("16.1",):
     _helm_app_version = "4"
 
 HELM_CONTAINER = create_BCI(
@@ -1114,7 +1126,7 @@ NGINX_CONTAINERS = [
     )
     for nginx_ver, os_versions in (
         ("latest", ("tumbleweed",)),
-        ("1.27", ("16.1", "16.2")),
+        ("1.27", ("16.1",)),
     )
 ]
 
@@ -1307,7 +1319,7 @@ VALKEY_CONTAINERS = [
         forwarded_ports=[PortForwarding(container_port=6379)],
     )
     for versions, tag in (
-        (("16.1", "16.2"), "8.0"),
+        (("16.1",), "8.0"),
         (("tumbleweed",), "latest"),
     )
 ]
