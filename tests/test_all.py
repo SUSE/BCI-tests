@@ -960,3 +960,21 @@ def test_uids_stable(auto_container) -> None:
         assert gid == expected_gid, (
             f"Expected user {name} to have gid {expected_gid} but got {gid}"
         )
+
+
+def test_no_leftover_files(auto_container):
+    """Ensure that there are no leftover backup files in /var/tmp and other locations."""
+
+    auto_container.connection.check_output("ls -1 /var/tmp").strip() == ""
+    assert not auto_container.connection.file("/etc/shadow-").exists, (
+        "backup file of /etc/shadow found"
+    )
+
+
+@pytest.mark.parametrize("container", CONTAINERS_WITHOUT_ZYPPER, indirect=True)
+def test_no_zypper_leftover_files(
+    container: ContainerData,
+) -> None:
+    """Ensure that there are no leftover files that only zypper needs."""
+
+    assert not container.connection.file("/var/lib/zypp/AutoInstalled").exists
