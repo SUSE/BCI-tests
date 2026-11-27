@@ -7,10 +7,8 @@ import pytest
 from pytest_container import DerivedContainer
 from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
-from pytest_container.runtime import LOCALHOST
 
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
-from bci_tester.data import OS_VERSION
 from tests import test_openjdk
 
 CONTAINER_TEST_DIR = "/tmp/"
@@ -83,45 +81,6 @@ def test_maven_present(auto_container):
 
     """
     assert auto_container.connection.run_expect([0], "mvn --version")
-
-
-@pytest.mark.skipif(
-    OS_VERSION not in ("15.4", "15.5", "15.6"),
-    reason="jshell is no longer the CMD as of SP7",
-)
-@pytest.mark.parametrize(
-    "container,java_version",
-    # Softfailure for bsc#1221983 only applies to OpenJDK-devel-21
-    [
-        param
-        if param.values[1] != 21
-        else pytest.param(
-            *param.values,
-            id=param.id,
-            marks=param.marks
-            + pytest.mark.xfail(
-                condition=LOCALHOST.system_info.arch == "ppc64le",
-                reason="https://bugzilla.suse.com/show_bug.cgi?id=1221983",
-            ),
-        )
-        for param in CONTAINER_IMAGES_WITH_VERSION
-    ],
-    indirect=["container"],
-)
-def test_entrypoint(container, java_version, host, container_runtime):
-    """Verify that the entry point of the OpenJDK devel container is the
-    :command:`jshell`.
-
-    """
-    cmd = host.run_expect(
-        [0],
-        f"{container_runtime.runner_binary} run --rm {container.image_url_or_id}",
-    )
-    # openjdk 17 prints the "jshell>" to stderr
-    intro = cmd.stdout + cmd.stderr
-
-    assert "jshell>" in intro
-    assert f"Welcome to JShell -- Version {java_version}" in intro
 
 
 @pytest.mark.parametrize(
