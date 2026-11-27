@@ -9,12 +9,23 @@ from pytest_container import container_and_marks_from_pytest_param
 from pytest_container.container import ContainerData
 
 from bci_tester.data import OPENJDK_DEVEL_CONTAINERS
+from bci_tester.data import OPENJDK_JDK_CONTAINERS
 from tests import test_openjdk
 
 CONTAINER_TEST_DIR = "/tmp/"
 HOST_TEST_DIR = "tests/trainers/java/"
 
-CONTAINER_IMAGES = OPENJDK_DEVEL_CONTAINERS
+CONTAINER_IMAGES = OPENJDK_DEVEL_CONTAINERS + OPENJDK_JDK_CONTAINERS
+
+OPENJDK_DEVEL_CONTAINER_VERSIONS = ("11", "17", "21", "25")
+OPENJDK_JDK_CONTAINER_VERSIONS = ("25", "27")
+
+assert len(OPENJDK_DEVEL_CONTAINERS) == len(OPENJDK_DEVEL_CONTAINER_VERSIONS)
+assert len(OPENJDK_JDK_CONTAINERS) == len(OPENJDK_JDK_CONTAINER_VERSIONS)
+
+CONTAINER_IMAGE_VERSIONS = (
+    OPENJDK_DEVEL_CONTAINER_VERSIONS + OPENJDK_JDK_CONTAINER_VERSIONS
+)
 
 DOCKERF_EXTENDED = f"""
 WORKDIR {CONTAINER_TEST_DIR}
@@ -35,9 +46,7 @@ CONTAINER_IMAGES_EXTENDED = [
 
 CONTAINER_IMAGES_WITH_VERSION = [
     pytest.param(container, version, marks=container.marks)
-    for container, version in zip(
-        CONTAINER_IMAGES, ("11", "17", "21", "25", "27")
-    )
+    for container, version in zip(CONTAINER_IMAGES, CONTAINER_IMAGE_VERSIONS)
 ]
 
 
